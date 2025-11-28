@@ -1,4 +1,13 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from ru!"
+	"app_title": "Untron Bridge",
+	"wallet_connected_as": "Подключено как",
+	"wallet_connect_wallet": "Подключить кошелек",
+	"wallet_disconnect": "Отключить",
+	"wallet_status_label": "Статус:",
+	"wallet_copy_address": "Скопировать адрес",
+	"wallet_copied": "Скопировано!",
+	"wallet_connect_options_title": "Подключиться через кошелек",
+	"wallet_connect_options_desc": "Откройте Untron в любом из этих кошельков. Или в любом кошельке со встроенным браузером.",
+	"wallet_copy_link": "Скопировать ссылку на эту страницу"
 }
