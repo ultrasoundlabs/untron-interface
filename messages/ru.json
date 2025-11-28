@@ -10,7 +10,7 @@
 	"wallet_connect_options_title": "Подключиться через кошелек",
 	"wallet_connect_options_desc": "Откройте Untron в любом из этих кошельков. Или в любом кошельке со встроенным браузером.",
 	"wallet_copy_link": "Скопировать ссылку на эту страницу",
-	"home_greeting": "Добрый день, давайте обменяем!",
+	"home_greeting": "Добрый день! Что поменяем сегодня?",
 	"home_greeting_morning": "Доброе утро, давайте обменяем!",
 	"home_greeting_evening": "Добрый вечер, давайте обменяем!",
 	"swap_you_send": "Вы отправляете",
@@ -88,5 +88,6 @@
 	"swap_error_invalid_amount": "Сумма недопустима для этого обмена.",
 	"order_error_not_found_description": "Мы не нашли этот заказ. Проверьте ссылку или начните новый обмен.",
 	"order_error_generic_title": "Что-то пошло не так",
-	"order_error_generic_description": "Не удалось загрузить заказ. Обновите страницу или начните новый обмен."
+	"order_error_generic_description": "Не удалось загрузить заказ. Обновите страницу или начните новый обмен.",
+	"swap_use_my_wallet": "Мой кошелек"
 }

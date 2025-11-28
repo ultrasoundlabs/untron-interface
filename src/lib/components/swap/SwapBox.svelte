@@ -319,9 +319,15 @@
 				isLocked={swapStore.recipientLocked}
 				isTronAddress={swapStore.isToTron}
 				error={recipientError ?? undefined}
+				connectedWallet={!swapStore.isToTron ? $connection.address : undefined}
 				onAddressChange={(addr) => swapStore.setRecipient(addr)}
 				onLock={() => swapStore.lockRecipient()}
 				onClear={() => swapStore.clearRecipient()}
+				onUseConnectedWallet={() => {
+					if ($connection.address) {
+						swapStore.setRecipientToWallet($connection.address);
+					}
+				}}
 			/>
 		</div>
 

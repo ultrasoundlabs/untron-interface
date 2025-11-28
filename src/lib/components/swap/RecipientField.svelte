@@ -14,12 +14,16 @@
 		isTronAddress: boolean;
 		/** Validation error message */
 		error?: string;
+		/** Connected wallet address for "My Wallet" button */
+		connectedWallet?: string | null;
 		/** Callback when address changes */
 		onAddressChange?: (address: string) => void;
 		/** Callback when address is locked (on valid entry) */
 		onLock?: () => void;
 		/** Callback when locked address is cleared */
 		onClear?: () => void;
+		/** Callback when "My Wallet" button is clicked */
+		onUseConnectedWallet?: () => void;
 	}
 
 	let {
@@ -28,9 +32,11 @@
 		placeholder,
 		isTronAddress,
 		error,
+		connectedWallet,
 		onAddressChange,
 		onLock,
-		onClear
+		onClear,
+		onUseConnectedWallet
 	}: Props = $props();
 
 	let inputElement: HTMLInputElement | undefined = $state();
@@ -52,7 +58,9 @@
 		isFocused = false;
 	}
 
-	function handleClear() {
+	function handleClear(event: MouseEvent) {
+		event.preventDefault();
+		event.stopPropagation();
 		onClear?.();
 		// Focus input after clearing
 		setTimeout(() => inputElement?.focus(), 50);
@@ -129,18 +137,39 @@
 			</div>
 		{:else}
 			<!-- Input Mode -->
-			<input
-				bind:this={inputElement}
-				type="text"
-				value={address}
-				placeholder={placeholder ?? defaultPlaceholder}
-				oninput={handleInput}
-				onkeydown={handleKeyDown}
-				onfocus={() => (isFocused = true)}
-				onblur={handleBlur}
-				class="w-full rounded-xl bg-transparent px-4 py-3 font-mono text-sm text-zinc-900 placeholder-zinc-400 outline-none dark:text-white dark:placeholder-zinc-500"
-				in:fade={{ duration: 100 }}
-			/>
+			<div class="relative w-full">
+				<input
+					bind:this={inputElement}
+					type="text"
+					value={address}
+					placeholder={placeholder ?? defaultPlaceholder}
+					oninput={handleInput}
+					onkeydown={handleKeyDown}
+					onfocus={() => (isFocused = true)}
+					onblur={handleBlur}
+					class="w-full rounded-xl bg-transparent py-3 pr-28 pl-4 font-mono text-sm text-zinc-900 placeholder-zinc-400 outline-none dark:text-white dark:placeholder-zinc-500"
+					in:fade={{ duration: 100 }}
+				/>
+				{#if connectedWallet && (!address || address !== connectedWallet) && onUseConnectedWallet}
+					<div class="absolute top-1/2 right-2 -translate-y-1/2" in:fade={{ duration: 150 }}>
+						<button
+							type="button"
+							onclick={onUseConnectedWallet}
+							class="flex items-center gap-1.5 rounded-lg bg-emerald-100 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+						>
+							<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+								/>
+							</svg>
+							{m.swap_use_my_wallet()}
+						</button>
+					</div>
+				{/if}
+			</div>
 		{/if}
 	</div>
 

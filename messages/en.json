@@ -88,5 +88,6 @@
 	"swap_error_invalid_amount": "Amount is invalid for this swap.",
 	"order_error_not_found_description": "We couldn't find that order. Double-check the link or start a new swap.",
 	"order_error_generic_title": "Something went wrong",
-	"order_error_generic_description": "We couldn't load your order. Please refresh or start a new swap."
+	"order_error_generic_description": "We couldn't load your order. Please refresh or start a new swap.",
+	"swap_use_my_wallet": "My Wallet"
 }

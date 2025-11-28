@@ -97,6 +97,10 @@ export function createSwapStore() {
 
 	let createdOrder = $state<Order | null>(null);
 
+	// Whether we should avoid auto-prefilling the recipient from the connected wallet
+	// (e.g. after the user manually cleared the prefilled bubble)
+	let walletRecipientAutofillDisabled = $state<boolean>(false);
+
 	// Debounce timer for quote fetching
 	let quoteDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -245,6 +249,7 @@ export function createSwapStore() {
 		amountAtomic = '';
 		recipientAddress = '';
 		recipientLocked = false;
+		walletRecipientAutofillDisabled = false;
 		walletBalanceAtomic = null;
 		quote = null;
 		capacity = null;
@@ -291,6 +296,7 @@ export function createSwapStore() {
 		amountAtomic = '';
 		recipientAddress = '';
 		recipientLocked = false;
+		walletRecipientAutofillDisabled = false;
 		walletBalanceAtomic = null;
 		quote = null;
 		capacity = null;
@@ -367,14 +373,28 @@ export function createSwapStore() {
 		recipientAddress = '';
 		recipientLocked = false;
 		quote = null;
+		// User explicitly cleared the recipient bubble; don't immediately auto-prefill it again
+		walletRecipientAutofillDisabled = true;
 	}
 
 	function prefillRecipientFromWallet(walletAddress: string) {
 		// Only prefill for Tron→EVM direction
-		if (isFromTron && !recipientLocked) {
+		if (isFromTron && !recipientLocked && !recipientAddress && !walletRecipientAutofillDisabled) {
 			recipientAddress = walletAddress;
 			recipientLocked = true;
 		}
+	}
+
+	/**
+	 * Explicitly set the recipient to the connected wallet from a user action
+	 * (e.g. clicking "My Wallet"). This should work even if auto-prefill was
+	 * previously disabled.
+	 */
+	function setRecipientToWallet(walletAddress: string) {
+		submitErrorCode = null;
+		recipientAddress = walletAddress;
+		recipientLocked = true;
+		walletRecipientAutofillDisabled = false;
 	}
 
 	function clearRecipientOnWalletDisconnect() {
@@ -382,6 +402,7 @@ export function createSwapStore() {
 		if (isFromTron && recipientLocked) {
 			recipientAddress = '';
 			recipientLocked = false;
+			walletRecipientAutofillDisabled = false;
 		}
 	}
 
@@ -497,6 +518,7 @@ export function createSwapStore() {
 		amountAtomic = '';
 		recipientAddress = '';
 		recipientLocked = false;
+		walletRecipientAutofillDisabled = false;
 		walletBalanceAtomic = null;
 		quote = null;
 		capacity = null;
@@ -603,6 +625,7 @@ export function createSwapStore() {
 		setRecipient,
 		lockRecipient,
 		clearRecipient,
+		setRecipientToWallet,
 		setWalletBalanceAtomic,
 		prefillRecipientFromWallet,
 		clearRecipientOnWalletDisconnect,
