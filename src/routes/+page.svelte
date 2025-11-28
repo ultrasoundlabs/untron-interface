@@ -2,6 +2,7 @@
 	import { fly } from 'svelte/transition';
 	import { m } from '$lib/paraglide/messages.js';
 	import SwapBox from '$lib/components/swap/SwapBox.svelte';
+	import FAQ from '$lib/components/FAQ.svelte';
 
 	// Get time-appropriate greeting
 	function getGreeting(): string {
@@ -29,8 +30,6 @@
 	<!-- Swap Box -->
 	<SwapBox />
 
-	<!-- FAQ Section (placeholder for future) -->
-	<div class="mt-16 w-full max-w-2xl px-4 pb-16">
-		<!-- FAQ content will go here -->
-	</div>
+	<!-- FAQ Section -->
+	<FAQ />
 </div>

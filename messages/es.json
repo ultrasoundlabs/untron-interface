@@ -104,5 +104,21 @@
 	"footer_contacts_title": "Contacto",
 	"footer_all_rights_reserved": "Todos los derechos reservados.",
 	"footer_tagline": "Hecho para humanos que solo quieren que Tron USDT funcione en cadenas realmente buenas.",
-	"footer_copyright": "© {year} Ultrasound Labs LLC."
+	"footer_copyright": "© {year} Ultrasound Labs LLC.",
+	"faq_title": "Preguntas frecuentes",
+	"faq_subtitle": "Respuestas rápidas sobre USDT, Tron, Ethereum y cómo encaja Untron en todo esto.",
+	"faq_usdt_question": "¿Qué es USDT?",
+	"faq_usdt_answer": "USDT es una \"stablecoin\": una cripto especial cuyo precio siempre está respaldado por 1 USD por cada moneda. Esto te permite usar dólares estadounidenses en cualquier lugar de internet, sin las restricciones ni las complicaciones de los sistemas financieros tradicionales.",
+	"faq_tron_question": "¿Qué es Tron?",
+	"faq_tron_answer": "Tron (también conocido como \"TRC-20\") es una blockchain que se usa principalmente para pagos con USDT. Es rápida y está aceptada en casi todos los lugares donde aceptan USDT, pero puede ser cara y a veces incómoda de usar. Las comisiones pueden llegar a $5–10 por una sola transferencia.",
+	"faq_ethereum_question": "¿Qué es Ethereum?",
+	"faq_ethereum_answer": "Ethereum es el ecosistema de blockchains más seguro y descentralizado para pagos con USDT y mucho más. Sus cadenas, como Base y Arbitrum, son mucho más rápidas y baratas (a veces incluso gratis, como en Untron) que Tron, pero todavía no están tan extendidas.",
+	"faq_untron_question": "¿Qué es Untron?",
+	"faq_untron_answer": "Untron es una plataforma dedicada a hacer que usar USDT sea barato y sencillo conectando blockchains de nueva generación como Base y Arbitrum con el enorme ecosistema de pagos de Tron. Con Untron puedes enviar y recibir USDT en Tron y más allá sin tener que comprar TRX o ETH, e incluso sin tener un monedero de Tron: tu monedero de Ethereum es suficiente.",
+	"faq_from_tron_question": "¿Cómo envío USDT desde Tron?",
+	"faq_from_tron_answer": "Para enviar USDT desde Tron a cadenas de Ethereum solo tienes que introducir la cantidad que quieres enviar, elegir la cadena de destino y la dirección del destinatario, y hacer clic en el botón \"Untron\". Untron funciona tanto con billeteras como Trust Wallet como con exchanges como Binance, y es muy rápido y barato.",
+	"faq_into_tron_question": "¿Y hacia Tron?",
+	"faq_into_tron_answer": "Eso es aún más sencillo: selecciona \"Hacia Tron\", elige tu moneda y Untron la convierte al instante en USDT de Tron con el menor gas posible, sin necesidad de ETH ni TRX. Disfruta de hasta un 70 % menos de comisiones que enviando directamente en Tron.",
+	"faq_help_question": "¿Cómo puedo ayudar?",
+	"faq_help_answer": "Untron es un proyecto completamente de código abierto y su código está disponible en GitHub. Si no eres desarrollador, puedes ayudarnos difundiendo Untron. También puedes contactarnos en Telegram o en contact@untron.finance."
 }
