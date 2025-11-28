@@ -30,6 +30,24 @@
 	<!-- Swap Box -->
 	<SwapBox />
 
+	<!-- Scroll hint arrow between Swap and FAQ -->
+	<div class="mt-8 flex items-center justify-center" in:fly={{ y: 10, duration: 220 }}>
+		<div
+			class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-zinc-500 shadow-sm shadow-zinc-200/60 transition-transform duration-200 dark:bg-zinc-900 dark:text-zinc-300 dark:shadow-black/30"
+			aria-hidden="true"
+		>
+			<svg
+				class="animate-bounce-slow h-5 w-5"
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 9l6 6 6-6" />
+			</svg>
+		</div>
+	</div>
+
 	<!-- FAQ Section -->
 	<FAQ />
 </div>
