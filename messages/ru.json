@@ -89,5 +89,18 @@
 	"order_error_not_found_description": "Мы не нашли этот заказ. Проверьте ссылку или начните новый обмен.",
 	"order_error_generic_title": "Что-то пошло не так",
 	"order_error_generic_description": "Не удалось загрузить заказ. Обновите страницу или начните новый обмен.",
-	"swap_use_my_wallet": "Мой кошелек"
+	"swap_use_my_wallet": "Мой кошелек",
+	"footer_project_title": "Проект",
+	"footer_socials_title": "Соцсети",
+	"footer_blog": "Блог",
+	"footer_about_us": "О нас",
+	"footer_terms_of_service": "Условия использования",
+	"footer_brand_assets": "Бренд-активы",
+	"footer_x_twitter": "X / Twitter",
+	"footer_telegram": "Telegram",
+	"footer_github": "GitHub",
+	"footer_contacts_title": "Контакты",
+	"footer_all_rights_reserved": "Все права защищены.",
+	"footer_tagline": "Сделано для людей, которые хотят, чтобы их Tron USDT работал в нормальных сетях.",
+	"footer_copyright": "© {year} Ultrasound Labs LLC."
 }

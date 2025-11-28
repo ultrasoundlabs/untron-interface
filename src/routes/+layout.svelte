@@ -1,5 +1,6 @@
 <script lang="ts">
 	import './layout.css';
+	import Footer from '$lib/components/Footer.svelte';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 
@@ -16,3 +17,5 @@
 <main class="mx-auto max-w-5xl px-4">
 	{@render children()}
 </main>
+
+<Footer />

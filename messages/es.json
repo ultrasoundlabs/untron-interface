@@ -91,5 +91,18 @@
 	"order_error_generic_description": "No pudimos cargar tu orden. Actualiza o inicia un nuevo intercambio.",
 	"swap_use_my_wallet": "Mi Billetera",
 	"order_copy_value": "Copiar valor",
-	"order_value_copied": "¡Copiado!"
+	"order_value_copied": "¡Copiado!",
+	"footer_project_title": "Proyecto",
+	"footer_socials_title": "Redes",
+	"footer_blog": "Blog",
+	"footer_about_us": "Sobre nosotros",
+	"footer_terms_of_service": "Términos del servicio",
+	"footer_brand_assets": "Recursos de marca",
+	"footer_x_twitter": "X / Twitter",
+	"footer_telegram": "Telegram",
+	"footer_github": "GitHub",
+	"footer_contacts_title": "Contacto",
+	"footer_all_rights_reserved": "Todos los derechos reservados.",
+	"footer_tagline": "Hecho para humanos que solo quieren que Tron USDT funcione en cadenas realmente buenas.",
+	"footer_copyright": "© {year} Ultrasound Labs LLC."
 }

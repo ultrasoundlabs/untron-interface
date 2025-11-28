@@ -91,5 +91,18 @@
 	"order_error_generic_description": "We couldn't load your order. Please refresh or start a new swap.",
 	"swap_use_my_wallet": "My Wallet",
 	"order_copy_value": "Copy value",
-	"order_value_copied": "Copied!"
+	"order_value_copied": "Copied!",
+	"footer_project_title": "Project",
+	"footer_socials_title": "Socials",
+	"footer_blog": "Blog",
+	"footer_about_us": "About us",
+	"footer_terms_of_service": "Terms of service",
+	"footer_brand_assets": "Brand assets",
+	"footer_x_twitter": "X / Twitter",
+	"footer_telegram": "Telegram",
+	"footer_github": "GitHub",
+	"footer_contacts_title": "Contacts",
+	"footer_all_rights_reserved": "All rights reserved.",
+	"footer_tagline": "Built for humans who just want Tron USDT to work on actually good chains.",
+	"footer_copyright": "© {year} Ultrasound Labs LLC."
 }
