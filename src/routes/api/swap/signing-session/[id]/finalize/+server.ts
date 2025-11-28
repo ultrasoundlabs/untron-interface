@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { finalizeMockSession, SwapServiceError } from '$lib/server/mockSwap';
+import { finalizeSigningSession } from '$lib/server/domain/signingSessions';
+import { SwapDomainError } from '$lib/server/errors';
 
 export const POST: RequestHandler = async ({ params }) => {
 	const sessionId = params.id;
@@ -9,10 +10,10 @@ export const POST: RequestHandler = async ({ params }) => {
 	}
 
 	try {
-		const order = finalizeMockSession(sessionId);
+		const order = await finalizeSigningSession(sessionId);
 		return json({ order });
 	} catch (err) {
-		if (err instanceof SwapServiceError) {
+		if (err instanceof SwapDomainError) {
 			return json({ message: err.message, code: err.code }, { status: err.statusCode ?? 500 });
 		}
 		return json(

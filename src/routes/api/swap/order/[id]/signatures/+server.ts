@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { submitMockSignatures, SwapServiceError } from '$lib/server/mockSwap';
+import { submitOrderSignatures } from '$lib/server/domain/orders';
+import { SwapDomainError } from '$lib/server/errors';
 import {
 	submitSignaturesSchema,
 	type SubmitSignaturesPayload
@@ -37,10 +38,10 @@ export const POST: RequestHandler = async ({ params, request }) => {
 	}
 
 	try {
-		const order = submitMockSignatures(id, parsedBody.signatures);
+		const order = submitOrderSignatures(id, parsedBody.signatures);
 		return json({ order });
 	} catch (err) {
-		if (err instanceof SwapServiceError) {
+		if (err instanceof SwapDomainError) {
 			return json({ message: err.message, code: err.code }, { status: err.statusCode ?? 500 });
 		}
 		return json({ message: 'Failed to submit signatures', code: 'UNKNOWN_ERROR' }, { status: 500 });

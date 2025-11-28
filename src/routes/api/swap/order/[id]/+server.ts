@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { getMockOrder, SwapServiceError } from '$lib/server/mockSwap';
+import { getOrderById } from '$lib/server/domain/orders';
+import { SwapDomainError } from '$lib/server/errors';
 
 export const GET: RequestHandler = async ({ params }) => {
 	const { id } = params;
@@ -9,10 +10,10 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 
 	try {
-		const order = getMockOrder(id);
+		const order = getOrderById(id);
 		return json({ order });
 	} catch (err) {
-		if (err instanceof SwapServiceError) {
+		if (err instanceof SwapDomainError) {
 			return json({ message: err.message, code: err.code }, { status: err.statusCode ?? 500 });
 		}
 		return json({ message: 'Failed to fetch order', code: 'UNKNOWN_ERROR' }, { status: 500 });
