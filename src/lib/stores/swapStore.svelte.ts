@@ -354,7 +354,18 @@ export function createSwapStore() {
 	function setRecipient(address: string) {
 		submitErrorCode = null;
 		recipientAddress = address;
-		recipientLocked = false;
+		// Run lightweight local validation on every change so the UI can
+		// immediately reflect whether the address looks valid, without the
+		// user needing to press Enter.
+		if (!recipientAddress) {
+			recipientLocked = false;
+		} else if (isFromTron) {
+			// Tron → EVM flow expects an EVM address
+			recipientLocked = isValidEvmAddress(recipientAddress);
+		} else {
+			// EVM → Tron flow expects a Tron address
+			recipientLocked = isValidTronAddress(recipientAddress);
+		}
 	}
 
 	function lockRecipient() {
