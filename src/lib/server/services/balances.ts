@@ -6,23 +6,30 @@ import { createPublicClient, http, erc20Abi } from 'viem';
 import type { TokenChainBalance } from '$lib/types/swap';
 import { SUPPORTED_CHAINS, getTokensForChainAndDirection } from '$lib/config/swapConfig';
 import { formatAtomicToDecimal } from '$lib/math/amounts';
-import { chainsConfig } from '$lib/config/chains';
+import { chainsConfig, type SupportedChainId } from '$lib/config/chains';
+import { getChainRpcUrl } from '$lib/server/config/chainRpc';
 
 // Create public clients for each chain (cached)
-const clients: Map<number, ReturnType<typeof createPublicClient>> = new Map();
+const clients: Map<SupportedChainId, ReturnType<typeof createPublicClient>> = new Map();
 
-function getClient(chainId: number) {
+function getClient(chainId: SupportedChainId) {
 	if (!clients.has(chainId)) {
 		const chainDefinition = chainsConfig[chainId];
 		if (!chainDefinition) return null;
 
-		clients.set(
-			chainId,
-			createPublicClient({
-				chain: chainDefinition.viemChain,
-				transport: http()
-			})
-		);
+		try {
+			const rpcUrl = getChainRpcUrl(chainId);
+			clients.set(
+				chainId,
+				createPublicClient({
+					chain: chainDefinition.viemChain,
+					transport: http(rpcUrl)
+				})
+			);
+		} catch (error) {
+			console.error(`Missing RPC for chain ${chainId}:`, error);
+			return null;
+		}
 	}
 	return clients.get(chainId)!;
 }
@@ -32,7 +39,7 @@ function getClient(chainId: number) {
  */
 export async function fetchTokenBalance(
 	address: `0x${string}`,
-	chainId: number,
+	chainId: SupportedChainId,
 	tokenAddress: `0x${string}`
 ): Promise<bigint> {
 	const client = getClient(chainId);
@@ -59,14 +66,13 @@ export async function fetchTokenBalance(
 export async function fetchAllBalances(userAddress: `0x${string}`): Promise<TokenChainBalance[]> {
 	const balancePromises: Promise<TokenChainBalance | null>[] = [];
 
-	// For each supported chain
 	for (const chain of SUPPORTED_CHAINS) {
-		// Get tokens available for EVM→Tron on this chain
-		const tokens = getTokensForChainAndDirection(chain.chainId, 'EVM_TO_TRON');
+		const chainId = chain.chainId as SupportedChainId;
+		const tokens = getTokensForChainAndDirection(chainId, 'EVM_TO_TRON');
 
 		for (const token of tokens) {
 			balancePromises.push(
-				fetchTokenBalance(userAddress, chain.chainId, token.address)
+				fetchTokenBalance(userAddress, chainId, token.address)
 					.then(
 						(balance): TokenChainBalance => ({
 							chain,
@@ -82,7 +88,6 @@ export async function fetchAllBalances(userAddress: `0x${string}`): Promise<Toke
 
 	const results = await Promise.all(balancePromises);
 
-	// Filter out nulls and zero balances, then sort by balance descending
 	return results
 		.filter((r): r is TokenChainBalance => r !== null && r.balance !== '0')
 		.sort((a, b) => {
@@ -94,9 +99,6 @@ export async function fetchAllBalances(userAddress: `0x${string}`): Promise<Toke
 		});
 }
 
-/**
- * Format a balance for display
- */
 function formatBalance(balance: bigint, decimals: number): string {
 	return formatAtomicToDecimal(balance, decimals, {
 		maxFractionDigits: 6,
@@ -104,12 +106,9 @@ function formatBalance(balance: bigint, decimals: number): string {
 	});
 }
 
-/**
- * Get the user's balance for a specific token/chain pair
- */
 export async function getBalance(
 	userAddress: `0x${string}`,
-	chainId: number,
+	chainId: SupportedChainId,
 	tokenAddress: `0x${string}`
 ): Promise<{ balance: string; formattedBalance: string }> {
 	const balance = await fetchTokenBalance(userAddress, chainId, tokenAddress);

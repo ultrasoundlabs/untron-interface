@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { fetchAllBalances } from '$lib/services/balances';
+import { fetchAllBalances } from '$lib/server/services/balances';
 
 interface BalancesRequestPayload {
 	address: string;

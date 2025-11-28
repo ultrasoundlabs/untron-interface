@@ -80,7 +80,7 @@ export const TOKEN_METADATA: Record<EvmStablecoin, TokenMetadata> = {
 	}
 };
 
-export const chainsConfig: Record<number, ChainDefinition> = {
+const CHAINS_CONFIG = {
 	1: {
 		chainId: 1,
 		name: 'Ethereum',
@@ -396,4 +396,16 @@ export const chainsConfig: Record<number, ChainDefinition> = {
 			USDC: '0x79A02482A880bCe3F13E09da970dC34dB4cD24D1'
 		}
 	}
-};
+} as const satisfies Record<number, ChainDefinition>;
+
+type ChainConfigMap = typeof CHAINS_CONFIG;
+type ChainKeyToNumber<K> = K extends `${infer N extends number}` ? N : K extends number ? K : never;
+export type SupportedChainId = ChainKeyToNumber<keyof ChainConfigMap>;
+
+export const chainsConfig: Record<SupportedChainId, ChainDefinition> = CHAINS_CONFIG as Record<
+	SupportedChainId,
+	ChainDefinition
+>;
+export const supportedChainIds = Object.keys(CHAINS_CONFIG).map((id) =>
+	Number(id)
+) as SupportedChainId[];
