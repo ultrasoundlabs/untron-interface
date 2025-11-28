@@ -9,6 +9,7 @@ import type {
 	Order,
 	CreateOrderRequest,
 	CreateOrderResponse,
+	CreateSigningSessionRequest,
 	CreateSigningSessionResponse,
 	SubmitSigningSessionSignaturesResponse,
 	FinalizeSigningSessionResponse,
@@ -90,7 +91,7 @@ export async function createOrder(request: CreateOrderRequest): Promise<CreateOr
 }
 
 export async function createSigningSession(
-	request: CreateOrderRequest
+	request: CreateSigningSessionRequest
 ): Promise<CreateSigningSessionResponse> {
 	return postJson<CreateSigningSessionResponse>('/api/swap/signing-session', request);
 }

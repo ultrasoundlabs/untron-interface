@@ -45,13 +45,23 @@ export const createOrderSchema = quoteRequestSchema.pick({
 	recipientAddress: true
 });
 
-export const createSigningSessionSchema = createOrderSchema.refine(
-	(data) => data.direction === 'EVM_TO_TRON',
-	{
+export const createSigningSessionSchema = createOrderSchema
+	.extend({
+		evmSignerAddress: z.string().min(1, 'Signer address is required')
+	})
+	.superRefine((data, ctx) => {
+		if (!isValidEvmAddress(data.evmSignerAddress)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				path: ['evmSignerAddress'],
+				message: 'Signer address must be a valid EVM address (0x...)'
+			});
+		}
+	})
+	.refine((data) => data.direction === 'EVM_TO_TRON', {
 		path: ['direction'],
 		message: 'Signing sessions are only supported for EVM→Tron swaps'
-	}
-);
+	});
 
 export const submitSignaturesSchema = z.object({
 	signatures: z

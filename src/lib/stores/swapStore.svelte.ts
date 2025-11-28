@@ -22,6 +22,8 @@ import {
 	getTokenOnChain,
 	isTokenAvailableForDirection
 } from '$lib/config/swapConfig';
+import { signTypedData } from '@wagmi/core';
+import { config as wagmiConfig } from '$lib/wagmi/config';
 import * as swapService from '$lib/services/swapService';
 import {
 	parseDecimalToAtomic,
@@ -487,7 +489,7 @@ export function createSwapStore() {
 		}
 	}
 
-	async function createOrder(): Promise<Order | null> {
+	async function createOrder(walletAddress?: `0x${string}`): Promise<Order | null> {
 		if (!canSubmit) return null;
 
 		isCreatingOrder = true;
@@ -496,7 +498,10 @@ export function createSwapStore() {
 		try {
 			let order: Order;
 			if (isToTron) {
-				order = await createEvmToTronOrderViaSigning();
+				if (!walletAddress) {
+					throw new Error('Missing wallet address for EVM→Tron signing');
+				}
+				order = await createEvmToTronOrderViaSigning(walletAddress);
 			} else {
 				const result = await swapService.createOrder({
 					direction,
@@ -523,13 +528,14 @@ export function createSwapStore() {
 		}
 	}
 
-	async function createEvmToTronOrderViaSigning(): Promise<Order> {
+	async function createEvmToTronOrderViaSigning(walletAddress: `0x${string}`): Promise<Order> {
 		const sessionResponse = await swapService.createSigningSession({
 			direction,
 			evmChainId: evmChain.chainId,
 			evmToken: evmToken.symbol as EvmStablecoin,
 			amount: amountAtomic,
-			recipientAddress
+			recipientAddress,
+			evmSignerAddress: walletAddress
 		});
 
 		let session = sessionResponse.session;
@@ -543,8 +549,13 @@ export function createSwapStore() {
 		for (let i = session.signaturesReceived; i < payloads.length; i++) {
 			const payload = payloads[i];
 
-			// In a real implementation, this would call wagmi's signTypedData
-			const signature = generateMockSignature();
+			const signature = await signTypedData(wagmiConfig, {
+				account: walletAddress,
+				domain: payload.domain as Record<string, unknown>,
+				types: payload.types as Record<string, Array<{ name: string; type: string }>>,
+				primaryType: payload.primaryType as keyof typeof payload.types,
+				message: payload.message as Record<string, unknown>
+			});
 
 			const submitResult = await swapService.submitSigningSessionSignatures(session.id, [
 				{
@@ -704,11 +715,4 @@ export function setSwapStoreContext(store: SwapStore) {
 
 export function getSwapStoreContext(): SwapStore {
 	return getContext<SwapStore>(SWAP_STORE_KEY);
-}
-
-function generateMockSignature(): string {
-	if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-		return `0x${crypto.randomUUID().replace(/-/g, '')}`;
-	}
-	return `0x${Math.random().toString(16).slice(2)}${Date.now().toString(16)}`;
 }

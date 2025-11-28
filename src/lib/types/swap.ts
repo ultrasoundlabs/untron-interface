@@ -283,6 +283,8 @@ export interface SigningSession {
 	id: string;
 	/** Direction is always EVM→Tron for signing sessions */
 	direction: 'EVM_TO_TRON';
+	/** Address that must sign the payloads */
+	evmSignerAddress: `0x${string}`;
 	/** Selected EVM chain ID */
 	evmChainId: number;
 	/** Selected EVM token symbol */
@@ -297,6 +299,8 @@ export interface SigningSession {
 	eip712Payloads: Eip712Payload[];
 	/** Number of signatures received so far */
 	signaturesReceived: number;
+	/** IDs of payloads that have valid signatures */
+	signedPayloadIds: string[];
 	/** Creation timestamp (Unix ms) */
 	createdAt: number;
 	/** Last update timestamp (Unix ms) */
@@ -305,7 +309,9 @@ export interface SigningSession {
 	finalizedOrderId?: string;
 }
 
-export type CreateSigningSessionRequest = CreateOrderRequest;
+export interface CreateSigningSessionRequest extends CreateOrderRequest {
+	evmSignerAddress: `0x${string}`;
+}
 
 export interface CreateSigningSessionResponse {
 	session: SigningSession;

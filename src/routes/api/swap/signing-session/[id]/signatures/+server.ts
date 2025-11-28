@@ -37,7 +37,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 	}
 
 	try {
-		const session = submitMockSessionSignatures(sessionId, parsedBody.signatures);
+		const session = await submitMockSessionSignatures(sessionId, parsedBody.signatures);
 		return json({ session });
 	} catch (err) {
 		if (err instanceof SwapServiceError) {

@@ -2,6 +2,7 @@ import { TRON_USDT, getChainById, getTokenOnChain } from '$lib/config/swapConfig
 import type {
 	CapacityInfo,
 	CreateOrderRequest,
+	CreateSigningSessionRequest,
 	Eip712Payload,
 	Order,
 	OrderTimelineEvent,
@@ -10,6 +11,7 @@ import type {
 	SwapQuote
 } from '$lib/types/swap';
 import type { SwapServiceErrorCode } from '$lib/types/errors';
+import { verifyTypedData } from 'viem';
 
 export class SwapServiceError extends Error {
 	constructor(
@@ -223,8 +225,12 @@ export function createMockOrder(request: CreateOrderRequest): Order {
 	return baseOrder;
 }
 
-function createMockPayloads(request: CreateOrderRequest) {
+function createMockPayloads(
+	request: CreateOrderRequest,
+	options?: { ownerAddress?: `0x${string}` }
+) {
 	const deadline = Math.floor((Date.now() + 30 * 60 * 1000) / 1000).toString();
+	const ownerAddress = options?.ownerAddress ?? '0x0000000000000000000000000000000000000000';
 	const payloads: Eip712Payload[] = [
 		{
 			id: 'approval',
@@ -245,7 +251,7 @@ function createMockPayloads(request: CreateOrderRequest) {
 			},
 			primaryType: 'Permit',
 			message: {
-				owner: '0x0000000000000000000000000000000000000000',
+				owner: ownerAddress,
 				spender: '0x0000000000000000000000000000000000000001',
 				value: request.amount,
 				nonce: '0',
@@ -272,7 +278,7 @@ function getSigningSession(sessionId: string): SigningSession {
 	return session;
 }
 
-export function createMockSigningSession(request: CreateOrderRequest): SigningSession {
+export function createMockSigningSession(request: CreateSigningSessionRequest): SigningSession {
 	if (request.direction !== 'EVM_TO_TRON') {
 		throw new SwapServiceError(
 			'Signing sessions are only supported for EVM→Tron swaps',
@@ -284,11 +290,12 @@ export function createMockSigningSession(request: CreateOrderRequest): SigningSe
 	const { chain, token, quote } = prepareOrderContext(request);
 	const now = Date.now();
 	const sessionId = `session_${now}_${Math.random().toString(36).slice(2, 10)}`;
-	const payloads = createMockPayloads(request);
+	const payloads = createMockPayloads(request, { ownerAddress: request.evmSignerAddress });
 
 	const session: SigningSession = {
 		id: sessionId,
 		direction: 'EVM_TO_TRON',
+		evmSignerAddress: request.evmSignerAddress,
 		evmChainId: chain.chainId,
 		evmToken: token.symbol,
 		amount: request.amount,
@@ -296,6 +303,7 @@ export function createMockSigningSession(request: CreateOrderRequest): SigningSe
 		quote,
 		eip712Payloads: payloads,
 		signaturesReceived: 0,
+		signedPayloadIds: [],
 		createdAt: now,
 		updatedAt: now
 	};
@@ -304,19 +312,44 @@ export function createMockSigningSession(request: CreateOrderRequest): SigningSe
 	return session;
 }
 
-export function submitMockSessionSignatures(
+export async function submitMockSessionSignatures(
 	sessionId: string,
 	signatures: Array<{ payloadId: string; signature: string }>
-): SigningSession {
+): Promise<SigningSession> {
 	const session = getSigningSession(sessionId);
-	if (!session.eip712Payloads.length) {
+	if (!session.eip712Payloads.length || signatures.length === 0) {
 		return session;
 	}
 
-	session.signaturesReceived = Math.min(
-		session.signaturesReceived + signatures.length,
-		session.eip712Payloads.length
-	);
+	const signedIds = new Set(session.signedPayloadIds ?? []);
+
+	for (const entry of signatures) {
+		const payload = session.eip712Payloads.find((item) => item.id === entry.payloadId);
+		if (!payload) {
+			throw new SwapServiceError(`Payload ${entry.payloadId} not found`, 'INVALID_REQUEST', 400);
+		}
+		if (signedIds.has(entry.payloadId)) {
+			continue;
+		}
+
+		const isValid = await verifyTypedData({
+			address: session.evmSignerAddress,
+			domain: payload.domain,
+			types: payload.types as Record<string, { name: string; type: string }[]>,
+			primaryType: payload.primaryType as keyof typeof payload.types,
+			message: payload.message,
+			signature: entry.signature as `0x${string}`
+		});
+
+		if (!isValid) {
+			throw new SwapServiceError('Invalid signature', 'INVALID_SIGNATURE', 400);
+		}
+
+		signedIds.add(entry.payloadId);
+	}
+
+	session.signaturesReceived = Math.min(signedIds.size, session.eip712Payloads.length);
+	session.signedPayloadIds = Array.from(signedIds);
 	session.updatedAt = Date.now();
 	signingSessions.set(sessionId, session);
 	return session;
