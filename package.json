@@ -54,6 +54,7 @@
 	"dependencies": {
 		"@wagmi/connectors": "^7.0.2",
 		"@wagmi/core": "^3.0.0",
-		"viem": "2.x"
+		"viem": "2.x",
+		"zod": "^4.1.13"
 	}
 }

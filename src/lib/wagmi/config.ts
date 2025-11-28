@@ -1,19 +1,20 @@
 import { createConfig, http } from '@wagmi/core';
-import { mainnet, sepolia } from '@wagmi/core/chains';
 import { injected } from '@wagmi/connectors';
+import { chainsConfig } from '$lib/config/chains';
+
+const wagmiChainsArray = Object.values(chainsConfig).map((chain) => chain.wagmiChain);
+if (wagmiChainsArray.length === 0) {
+	throw new Error('No wagmi chains configured');
+}
+const wagmiChains = wagmiChainsArray as [
+	(typeof wagmiChainsArray)[number],
+	...typeof wagmiChainsArray
+];
+const transports = Object.fromEntries(wagmiChains.map((chain) => [chain.id, http()]));
 
 export const config = createConfig({
-	// Chains your app supports
-	chains: [mainnet, sepolia],
-
-	// Which wallet connectors you want (MetaMask / injected in this case)
+	chains: wagmiChains,
 	connectors: [injected()],
-
-	// RPC transports per chain
-	transports: {
-		[mainnet.id]: http(), // prod: pass your own RPC URL here
-		[sepolia.id]: http()
-	},
-
+	transports,
 	ssr: false
 });

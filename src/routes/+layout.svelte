@@ -1,13 +1,14 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
 	import Navbar from '$lib/components/Navbar.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { children } = $props();
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<title>{m.app_title()}</title>
+	<link rel="icon" href="/logos/untron/icon.svg" />
 </svelte:head>
 
 <Navbar />

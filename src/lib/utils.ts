@@ -12,7 +12,11 @@ export type WithoutChildren<T> = T extends { children?: any } ? Omit<T, 'childre
 export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
 
-export function truncateAddress(address: string): string {
+export function truncateAddress(
+	address: string,
+	prefixLength: number = 6,
+	suffixLength: number = 4
+): string {
 	if (!address) return '';
-	return `${address.slice(0, 6)}...${address.slice(-4)}`;
+	return `${address.slice(0, prefixLength)}...${address.slice(-suffixLength)}`;
 }
