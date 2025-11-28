@@ -25,6 +25,7 @@
 
 	// User balances for EVM→Tron flow
 	let userBalances = $state<TokenChainBalance[]>([]);
+	let userPickedPairManually = $state(false);
 
 	// Keep swap store informed about the current wallet balance for the selected source token
 	$effect(() => {
@@ -51,9 +52,38 @@
 			swapStore.prefillRecipientFromWallet($connection.address);
 			// Fetch balances when wallet connects
 			loadBalances();
+			userPickedPairManually = false;
 		} else {
 			swapStore.clearRecipientOnWalletDisconnect();
 			userBalances = [];
+			userPickedPairManually = false;
+		}
+	});
+
+	// Auto-select the (chain, token) pair with the highest balance for EVM→Tron
+	$effect(() => {
+		if (
+			!swapStore.isToTron ||
+			!$connection.isConnected ||
+			userPickedPairManually ||
+			userBalances.length === 0
+		) {
+			return;
+		}
+
+		const [firstBalance] = userBalances;
+		if (!firstBalance) return;
+
+		const bestBalance = userBalances.reduce((top, candidate) =>
+			BigInt(candidate.balance) > BigInt(top.balance) ? candidate : top
+		);
+
+		const alreadySelected =
+			swapStore.evmChain.chainId === bestBalance.chain.chainId &&
+			swapStore.evmToken.symbol === bestBalance.token.symbol;
+
+		if (!alreadySelected) {
+			swapStore.setEvmChainAndToken(bestBalance.chain.chainId, bestBalance.token.symbol);
 		}
 	});
 
@@ -246,6 +276,7 @@
 	}
 
 	function handleTokenSelect(chainId: number, tokenSymbol: string) {
+		userPickedPairManually = true;
 		swapStore.setEvmChainAndToken(chainId, tokenSymbol as EvmStablecoin);
 		showTokenDialog = false;
 	}
@@ -254,8 +285,10 @@
 	function getPlaceholder(): string {
 		const max = swapStore.maxAvailableAmount;
 		if (!max || max === '0') return '0.00';
+		const maxFractionDigits = sourceToken.decimals === 0 ? 0 : Math.min(6, sourceToken.decimals);
 		return `Max: ${formatAtomicToDecimal(max, sourceToken.decimals, {
-			maxFractionDigits: 0,
+			maxFractionDigits,
+			trimTrailingZeros: true,
 			useGrouping: true
 		})}`;
 	}

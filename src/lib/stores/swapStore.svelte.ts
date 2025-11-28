@@ -106,6 +106,13 @@ export function createSwapStore() {
 	// Debounce timer for quote fetching
 	let quoteDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
+	function cancelQuoteDebounce() {
+		if (quoteDebounceTimer) {
+			clearTimeout(quoteDebounceTimer);
+			quoteDebounceTimer = null;
+		}
+	}
+
 	// Request IDs for guarding against stale async responses
 	let quoteRequestId = 0;
 	let capacityRequestId = 0;
@@ -259,10 +266,7 @@ export function createSwapStore() {
 		capacityError = null;
 		createdOrder = null;
 
-		if (quoteDebounceTimer) {
-			clearTimeout(quoteDebounceTimer);
-			quoteDebounceTimer = null;
-		}
+		cancelQuoteDebounce();
 
 		// Refresh capacity for the new direction/pair
 		refreshCapacity();
@@ -306,21 +310,27 @@ export function createSwapStore() {
 		capacityError = null;
 		createdOrder = null;
 
-		if (quoteDebounceTimer) {
-			clearTimeout(quoteDebounceTimer);
-			quoteDebounceTimer = null;
-		}
+		cancelQuoteDebounce();
 
 		// Refresh capacity for new pair
 		refreshCapacity();
 	}
 
-	function scheduleQuoteFetch() {
-		if (quoteDebounceTimer) {
-			clearTimeout(quoteDebounceTimer);
-		}
+	function isRecipientValidForCurrentDirection(address: string): boolean {
+		if (!address) return false;
+		return isFromTron ? isValidEvmAddress(address) : isValidTronAddress(address);
+	}
 
-		if (amountAtomic && recipientAddress) {
+	function hasQuotePrerequisites(): boolean {
+		return (
+			!!amountAtomic && !!recipientAddress && isRecipientValidForCurrentDirection(recipientAddress)
+		);
+	}
+
+	function scheduleQuoteFetch() {
+		cancelQuoteDebounce();
+
+		if (hasQuotePrerequisites()) {
 			quoteDebounceTimer = setTimeout(() => {
 				fetchQuote();
 			}, 500);
@@ -356,17 +366,27 @@ export function createSwapStore() {
 	function setRecipient(address: string) {
 		submitErrorCode = null;
 		recipientAddress = address;
-		// Run lightweight local validation on every change so the UI can
-		// immediately reflect whether the address looks valid, without the
-		// user needing to press Enter.
+
+		const recipientIsValid = isRecipientValidForCurrentDirection(recipientAddress);
+
 		if (!recipientAddress) {
 			recipientLocked = false;
-		} else if (isFromTron) {
-			// Tron → EVM flow expects an EVM address
-			recipientLocked = isValidEvmAddress(recipientAddress);
+			cancelQuoteDebounce();
+			quote = null;
+			quoteError = null;
+			return;
+		}
+
+		recipientLocked = recipientIsValid;
+
+		if (recipientIsValid) {
+			if (amountAtomic) {
+				scheduleQuoteFetch();
+			}
 		} else {
-			// EVM → Tron flow expects a Tron address
-			recipientLocked = isValidTronAddress(recipientAddress);
+			cancelQuoteDebounce();
+			quote = null;
+			quoteError = null;
 		}
 	}
 
@@ -385,6 +405,7 @@ export function createSwapStore() {
 		submitErrorCode = null;
 		recipientAddress = '';
 		recipientLocked = false;
+		cancelQuoteDebounce();
 		quote = null;
 		// User explicitly cleared the recipient bubble; don't immediately auto-prefill it again
 		walletRecipientAutofillDisabled = true;
@@ -393,7 +414,7 @@ export function createSwapStore() {
 	function prefillRecipientFromWallet(walletAddress: string) {
 		// Only prefill for Tron→EVM direction
 		if (isFromTron && !recipientLocked && !recipientAddress && !walletRecipientAutofillDisabled) {
-			recipientAddress = walletAddress;
+			setRecipient(walletAddress);
 			recipientLocked = true;
 		}
 	}
@@ -404,10 +425,8 @@ export function createSwapStore() {
 	 * previously disabled.
 	 */
 	function setRecipientToWallet(walletAddress: string) {
-		submitErrorCode = null;
-		recipientAddress = walletAddress;
-		recipientLocked = true;
 		walletRecipientAutofillDisabled = false;
+		setRecipient(walletAddress);
 	}
 
 	function clearRecipientOnWalletDisconnect() {
@@ -592,10 +611,7 @@ export function createSwapStore() {
 		capacityError = null;
 		createdOrder = null;
 
-		if (quoteDebounceTimer) {
-			clearTimeout(quoteDebounceTimer);
-			quoteDebounceTimer = null;
-		}
+		cancelQuoteDebounce();
 	}
 
 	// Initial capacity fetch
