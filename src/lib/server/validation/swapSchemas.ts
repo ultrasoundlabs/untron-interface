@@ -45,6 +45,14 @@ export const createOrderSchema = quoteRequestSchema.pick({
 	recipientAddress: true
 });
 
+export const createSigningSessionSchema = createOrderSchema.refine(
+	(data) => data.direction === 'EVM_TO_TRON',
+	{
+		path: ['direction'],
+		message: 'Signing sessions are only supported for EVM→Tron swaps'
+	}
+);
+
 export const submitSignaturesSchema = z.object({
 	signatures: z
 		.array(
@@ -63,4 +71,5 @@ export type CapacityRequestPayload = z.infer<typeof capacityRequestSchema>;
  */
 export type QuoteRequestPayload = z.infer<typeof quoteRequestSchema>;
 export type CreateOrderRequestPayload = z.infer<typeof createOrderSchema>;
+export type CreateSigningSessionRequestPayload = z.infer<typeof createSigningSessionSchema>;
 export type SubmitSignaturesPayload = z.infer<typeof submitSignaturesSchema>;

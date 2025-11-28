@@ -276,6 +276,55 @@ export interface Order {
 }
 
 /**
+ * Pre-order signing session for EVM→Tron swaps
+ */
+export interface SigningSession {
+	/** Unique session ID */
+	id: string;
+	/** Direction is always EVM→Tron for signing sessions */
+	direction: 'EVM_TO_TRON';
+	/** Selected EVM chain ID */
+	evmChainId: number;
+	/** Selected EVM token symbol */
+	evmToken: EvmStablecoin;
+	/** Amount in source token's smallest unit */
+	amount: string;
+	/** Destination Tron recipient address */
+	recipientAddress: string;
+	/** Quote captured at session creation */
+	quote: SwapQuote;
+	/** Payloads that must be signed */
+	eip712Payloads: Eip712Payload[];
+	/** Number of signatures received so far */
+	signaturesReceived: number;
+	/** Creation timestamp (Unix ms) */
+	createdAt: number;
+	/** Last update timestamp (Unix ms) */
+	updatedAt: number;
+	/** When finalized, stores the resulting order ID */
+	finalizedOrderId?: string;
+}
+
+export type CreateSigningSessionRequest = CreateOrderRequest;
+
+export interface CreateSigningSessionResponse {
+	session: SigningSession;
+}
+
+export interface SubmitSigningSessionSignaturesRequest {
+	sessionId: string;
+	signatures: Array<{ payloadId: string; signature: string }>;
+}
+
+export interface SubmitSigningSessionSignaturesResponse {
+	session: SigningSession;
+}
+
+export interface FinalizeSigningSessionResponse {
+	order: Order;
+}
+
+/**
  * Order creation request
  */
 export interface CreateOrderRequest {

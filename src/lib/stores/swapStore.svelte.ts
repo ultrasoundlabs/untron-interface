@@ -494,15 +494,22 @@ export function createSwapStore() {
 		submitErrorCode = null;
 
 		try {
-			const result = await swapService.createOrder({
-				direction,
-				evmChainId: evmChain.chainId,
-				evmToken: evmToken.symbol as EvmStablecoin,
-				amount: amountAtomic,
-				recipientAddress
-			});
-			createdOrder = result.order;
-			return result.order;
+			let order: Order;
+			if (isToTron) {
+				order = await createEvmToTronOrderViaSigning();
+			} else {
+				const result = await swapService.createOrder({
+					direction,
+					evmChainId: evmChain.chainId,
+					evmToken: evmToken.symbol as EvmStablecoin,
+					amount: amountAtomic,
+					recipientAddress
+				});
+				order = result.order;
+			}
+
+			createdOrder = order;
+			return order;
 		} catch (err) {
 			if (err instanceof swapService.SwapServiceError) {
 				submitErrorCode = err.code;
@@ -514,6 +521,43 @@ export function createSwapStore() {
 		} finally {
 			isCreatingOrder = false;
 		}
+	}
+
+	async function createEvmToTronOrderViaSigning(): Promise<Order> {
+		const sessionResponse = await swapService.createSigningSession({
+			direction,
+			evmChainId: evmChain.chainId,
+			evmToken: evmToken.symbol as EvmStablecoin,
+			amount: amountAtomic,
+			recipientAddress
+		});
+
+		let session = sessionResponse.session;
+		const payloads = session.eip712Payloads ?? [];
+
+		if (payloads.length === 0 || session.signaturesReceived >= payloads.length) {
+			const finalized = await swapService.finalizeSigningSession(session.id);
+			return finalized.order;
+		}
+
+		for (let i = session.signaturesReceived; i < payloads.length; i++) {
+			const payload = payloads[i];
+
+			// In a real implementation, this would call wagmi's signTypedData
+			const signature = generateMockSignature();
+
+			const submitResult = await swapService.submitSigningSessionSignatures(session.id, [
+				{
+					payloadId: payload.id,
+					signature
+				}
+			]);
+
+			session = submitResult.session;
+		}
+
+		const finalizeResult = await swapService.finalizeSigningSession(session.id);
+		return finalizeResult.order;
 	}
 
 	function clearCreatedOrder() {
@@ -660,4 +704,11 @@ export function setSwapStoreContext(store: SwapStore) {
 
 export function getSwapStoreContext(): SwapStore {
 	return getContext<SwapStore>(SWAP_STORE_KEY);
+}
+
+function generateMockSignature(): string {
+	if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+		return `0x${crypto.randomUUID().replace(/-/g, '')}`;
+	}
+	return `0x${Math.random().toString(16).slice(2)}${Date.now().toString(16)}`;
 }

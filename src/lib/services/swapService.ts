@@ -9,6 +9,9 @@ import type {
 	Order,
 	CreateOrderRequest,
 	CreateOrderResponse,
+	CreateSigningSessionResponse,
+	SubmitSigningSessionSignaturesResponse,
+	FinalizeSigningSessionResponse,
 	EvmStablecoin
 } from '$lib/types/swap';
 import type { SwapServiceErrorCode } from '$lib/types/errors';
@@ -84,6 +87,33 @@ export async function fetchQuote(params: {
 
 export async function createOrder(request: CreateOrderRequest): Promise<CreateOrderResponse> {
 	return postJson<CreateOrderResponse>('/api/swap/order', request);
+}
+
+export async function createSigningSession(
+	request: CreateOrderRequest
+): Promise<CreateSigningSessionResponse> {
+	return postJson<CreateSigningSessionResponse>('/api/swap/signing-session', request);
+}
+
+export async function submitSigningSessionSignatures(
+	sessionId: string,
+	signatures: Array<{ payloadId: string; signature: string }>
+): Promise<SubmitSigningSessionSignaturesResponse> {
+	return postJson<SubmitSigningSessionSignaturesResponse>(
+		`/api/swap/signing-session/${sessionId}/signatures`,
+		{
+			signatures
+		}
+	);
+}
+
+export async function finalizeSigningSession(
+	sessionId: string
+): Promise<FinalizeSigningSessionResponse> {
+	return postJson<FinalizeSigningSessionResponse>(
+		`/api/swap/signing-session/${sessionId}/finalize`,
+		{}
+	);
 }
 
 export async function getOrder(orderId: string): Promise<Order> {

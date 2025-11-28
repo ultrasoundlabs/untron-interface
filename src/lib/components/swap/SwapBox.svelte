@@ -191,6 +191,10 @@
 				return m.swap_amount_too_low();
 			case 'AMOUNT_TOO_HIGH':
 				return m.swap_amount_too_high();
+			case 'SIGNING_SESSION_UNSUPPORTED':
+			case 'SESSION_NOT_FOUND':
+			case 'SIGNING_SESSION_INCOMPLETE':
+				return m.swap_error_generic();
 			default:
 				return m.swap_error_generic();
 		}
@@ -201,7 +205,9 @@
 	// Button state
 	const buttonLabel = $derived.by(() => {
 		if (!$connection.isConnected) return m.wallet_connect_wallet();
-		if (swapStore.isCreatingOrder) return m.swap_creating_order();
+		if (swapStore.isCreatingOrder) {
+			return swapStore.isToTron ? m.order_signing() : m.swap_creating_order();
+		}
 		if (!swapStore.amount) return m.swap_enter_amount();
 		if (!swapStore.recipientAddress) return m.swap_enter_recipient();
 		if (!swapStore.isValid) return m.swap_invalid_input();

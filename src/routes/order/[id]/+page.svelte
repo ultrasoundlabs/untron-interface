@@ -160,7 +160,7 @@
 					<OrderSuccess {order} onNewSwap={handleNewSwap} />
 				{:else if order.direction === 'TRON_TO_EVM' && order.tronDeposit}
 					<TronDepositView {order} />
-				{:else if order.direction === 'EVM_TO_TRON' && order.eip712Payloads}
+				{:else if order.direction === 'EVM_TO_TRON' && order.status === 'awaiting_signatures' && order.eip712Payloads}
 					<EvmSigningView {order} />
 				{:else}
 					<!-- Generic processing view -->

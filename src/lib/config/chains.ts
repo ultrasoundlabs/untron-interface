@@ -139,6 +139,34 @@ export const chainsConfig: Record<number, ChainDefinition> = {
 			USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
 		}
 	},
+	8453: {
+		chainId: 8453,
+		name: 'Base',
+		shortName: 'Base',
+		logoUrl: '/logos/chains/base.svg',
+		isTestnet: false,
+		nativeCurrency: 'ETH',
+		explorerUrl: 'https://basescan.org',
+		viemChain: createViemChain({
+			id: 8453,
+			name: 'Base',
+			nativeCurrencySymbol: 'ETH',
+			nativeCurrencyName: 'Ether',
+			explorerName: 'Basescan',
+			explorerUrl: 'https://basescan.org'
+		}),
+		wagmiChain: createViemChain({
+			id: 8453,
+			name: 'Base',
+			nativeCurrencySymbol: 'ETH',
+			nativeCurrencyName: 'Ether',
+			explorerName: 'Basescan',
+			explorerUrl: 'https://basescan.org'
+		}) as WagmiChain,
+		tokens: {
+			USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+		}
+	},
 	10: {
 		chainId: 10,
 		name: 'OP Mainnet',

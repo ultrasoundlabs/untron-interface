@@ -5,6 +5,7 @@ import type {
 	Eip712Payload,
 	Order,
 	OrderTimelineEvent,
+	SigningSession,
 	SwapDirection,
 	SwapQuote
 } from '$lib/types/swap';
@@ -22,6 +23,7 @@ export class SwapServiceError extends Error {
 }
 
 const orders = new Map<string, Order>();
+const signingSessions = new Map<string, SigningSession>();
 
 function convertBetweenDecimals(amount: bigint, fromDecimals: number, toDecimals: number): bigint {
 	if (fromDecimals === toDecimals) return amount;
@@ -125,7 +127,7 @@ export function generateMockQuote(
 	};
 }
 
-export function createMockOrder(request: CreateOrderRequest): Order {
+function prepareOrderContext(request: CreateOrderRequest) {
 	const chain = getChainById(request.evmChainId);
 	if (!chain) {
 		throw new SwapServiceError('Unsupported chain', 'UNSUPPORTED_CHAIN', 400);
@@ -151,11 +153,17 @@ export function createMockOrder(request: CreateOrderRequest): Order {
 		throw new SwapServiceError('Amount exceeds maximum', 'AMOUNT_TOO_HIGH', 400);
 	}
 
-	const now = Date.now();
-	const orderId = `order_${now}_${Math.random().toString(36).slice(2, 10)}`;
 	const sourceDecimals = request.direction === 'TRON_TO_EVM' ? TRON_USDT.decimals : token.decimals;
 	const destDecimals = request.direction === 'TRON_TO_EVM' ? token.decimals : TRON_USDT.decimals;
 	const quote = generateMockQuote(request.direction, request.amount, sourceDecimals, destDecimals);
+
+	return { chain, token, quote };
+}
+
+export function createMockOrder(request: CreateOrderRequest): Order {
+	const { chain, token, quote } = prepareOrderContext(request);
+	const now = Date.now();
+	const orderId = `order_${now}_${Math.random().toString(36).slice(2, 10)}`;
 
 	const tronSide = {
 		type: 'tron' as const,
@@ -254,6 +262,132 @@ export function getMockOrder(orderId: string): Order {
 		throw new SwapServiceError(`Order ${orderId} not found`, 'ORDER_NOT_FOUND', 404);
 	}
 	return stored;
+}
+
+function getSigningSession(sessionId: string): SigningSession {
+	const session = signingSessions.get(sessionId);
+	if (!session) {
+		throw new SwapServiceError(`Session ${sessionId} not found`, 'SESSION_NOT_FOUND', 404);
+	}
+	return session;
+}
+
+export function createMockSigningSession(request: CreateOrderRequest): SigningSession {
+	if (request.direction !== 'EVM_TO_TRON') {
+		throw new SwapServiceError(
+			'Signing sessions are only supported for EVM→Tron swaps',
+			'SIGNING_SESSION_UNSUPPORTED',
+			400
+		);
+	}
+
+	const { chain, token, quote } = prepareOrderContext(request);
+	const now = Date.now();
+	const sessionId = `session_${now}_${Math.random().toString(36).slice(2, 10)}`;
+	const payloads = createMockPayloads(request);
+
+	const session: SigningSession = {
+		id: sessionId,
+		direction: 'EVM_TO_TRON',
+		evmChainId: chain.chainId,
+		evmToken: token.symbol,
+		amount: request.amount,
+		recipientAddress: request.recipientAddress,
+		quote,
+		eip712Payloads: payloads,
+		signaturesReceived: 0,
+		createdAt: now,
+		updatedAt: now
+	};
+
+	signingSessions.set(sessionId, session);
+	return session;
+}
+
+export function submitMockSessionSignatures(
+	sessionId: string,
+	signatures: Array<{ payloadId: string; signature: string }>
+): SigningSession {
+	const session = getSigningSession(sessionId);
+	if (!session.eip712Payloads.length) {
+		return session;
+	}
+
+	session.signaturesReceived = Math.min(
+		session.signaturesReceived + signatures.length,
+		session.eip712Payloads.length
+	);
+	session.updatedAt = Date.now();
+	signingSessions.set(sessionId, session);
+	return session;
+}
+
+export function finalizeMockSession(sessionId: string): Order {
+	const session = getSigningSession(sessionId);
+	if (session.signaturesReceived < session.eip712Payloads.length) {
+		throw new SwapServiceError(
+			'Signing session is not fully signed yet',
+			'SIGNING_SESSION_INCOMPLETE',
+			400
+		);
+	}
+
+	if (session.finalizedOrderId) {
+		return getMockOrder(session.finalizedOrderId);
+	}
+
+	const chain = getChainById(session.evmChainId);
+	if (!chain) {
+		throw new SwapServiceError('Unsupported chain', 'UNSUPPORTED_CHAIN', 400);
+	}
+
+	const token = getTokenOnChain(session.evmChainId, session.evmToken);
+	if (!token) {
+		throw new SwapServiceError('Unsupported token for this chain', 'UNSUPPORTED_TOKEN', 400);
+	}
+
+	const now = Date.now();
+	const orderId = `order_${now}_${Math.random().toString(36).slice(2, 10)}`;
+	const order: Order = {
+		id: orderId,
+		direction: 'EVM_TO_TRON',
+		status: 'signatures_submitted',
+		source: {
+			type: 'evm',
+			chain,
+			token,
+			amount: session.amount
+		},
+		destination: {
+			type: 'tron',
+			token: TRON_USDT,
+			amount: session.quote.outputAmount
+		},
+		recipientAddress: session.recipientAddress,
+		quote: session.quote,
+		eip712Payloads: session.eip712Payloads,
+		signaturesReceived: session.signaturesReceived,
+		timeline: [
+			{
+				type: 'created',
+				timestamp: now
+			},
+			{
+				type: 'signatures_submitted',
+				timestamp: now
+			}
+		],
+		createdAt: now,
+		updatedAt: now
+	};
+
+	orders.set(orderId, order);
+	session.finalizedOrderId = orderId;
+	session.updatedAt = now;
+	signingSessions.set(sessionId, session);
+	scheduleAutoCompletion(orderId);
+
+	return order;
 }
 
 export function submitMockSignatures(
