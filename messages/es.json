@@ -89,5 +89,7 @@
 	"order_error_not_found_description": "No pudimos encontrar esa orden. Verifica el enlace o inicia un nuevo intercambio.",
 	"order_error_generic_title": "Algo salió mal",
 	"order_error_generic_description": "No pudimos cargar tu orden. Actualiza o inicia un nuevo intercambio.",
-	"swap_use_my_wallet": "Mi Billetera"
+	"swap_use_my_wallet": "Mi Billetera",
+	"order_copy_value": "Copiar valor",
+	"order_value_copied": "¡Copiado!"
 }

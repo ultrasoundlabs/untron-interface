@@ -16,5 +16,6 @@ bun run dev
 ```
 bun run format
 bun run lint
+bun run check
 bun run build
 ```

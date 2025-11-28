@@ -1,6 +1,11 @@
 import { isValidEvmAddress, isValidTronAddress } from '$lib/validation/addresses';
 import { z } from 'zod';
 
+const evmHexAddressSchema = z
+	.string()
+	.regex(/^0x[a-fA-F0-9]{40}$/, 'Signer address must be a valid EVM address (0x...)')
+	.transform((value) => value as `0x${string}`);
+
 export const swapDirectionSchema = z.enum(['TRON_TO_EVM', 'EVM_TO_TRON']);
 export const evmStablecoinSchema = z.enum(['USDT', 'USDC']);
 
@@ -47,7 +52,7 @@ export const createOrderSchema = quoteRequestSchema.pick({
 
 export const createSigningSessionSchema = createOrderSchema
 	.extend({
-		evmSignerAddress: z.string().min(1, 'Signer address is required')
+		evmSignerAddress: evmHexAddressSchema
 	})
 	.superRefine((data, ctx) => {
 		if (!isValidEvmAddress(data.evmSignerAddress)) {

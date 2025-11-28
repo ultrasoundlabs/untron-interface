@@ -24,6 +24,22 @@
 		return `${hash.slice(0, 8)}...${hash.slice(-6)}`;
 	}
 
+	let copiedField = $state<'none' | 'received' | 'fees' | 'recipient' | 'time'>('none');
+
+	async function copyToClipboard(value: string, field: 'received' | 'fees' | 'recipient' | 'time') {
+		try {
+			await navigator.clipboard.writeText(value);
+			copiedField = field;
+			setTimeout(() => {
+				if (copiedField === field) {
+					copiedField = 'none';
+				}
+			}, 2000);
+		} catch {
+			// Silently ignore clipboard errors – user can still select text manually
+		}
+	}
+
 	const destAmount = $derived(
 		formatAmount(order.destination.amount, order.destination.token.decimals)
 	);
@@ -56,39 +72,192 @@
 	<div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
 		<div class="space-y-3">
 			<!-- Received -->
-			<div class="flex items-center justify-between">
+			<div class="flex items-center justify-between gap-2">
 				<span class="text-sm text-zinc-500 dark:text-zinc-400">{m.order_received()}</span>
-				<span class="font-medium text-zinc-900 dark:text-white">
-					{destAmount}
-					{order.destination.token.symbol}
-				</span>
+				<div class="flex items-center gap-1">
+					<span class="font-medium text-zinc-900 dark:text-white">
+						{destAmount}
+						{order.destination.token.symbol}
+					</span>
+					<button
+						type="button"
+						onclick={() =>
+							copyToClipboard(`${destAmount}${order.destination.token.symbol}`, 'received')}
+						class="shrink-0 rounded-lg border border-zinc-200 p-1.5 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+						aria-label={m.order_received()}
+					>
+						{#if copiedField === 'received'}
+							<svg
+								class="h-4 w-4 text-emerald-500"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						{:else}
+							<svg
+								class="h-4 w-4 text-zinc-500"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+								/>
+							</svg>
+						{/if}
+					</button>
+				</div>
 			</div>
 
 			<!-- Fees -->
-			<div class="flex items-center justify-between">
+			<div class="flex items-center justify-between gap-2">
 				<span class="text-sm text-zinc-500 dark:text-zinc-400">{m.order_total_fees()}</span>
-				<span class="text-sm text-zinc-700 dark:text-zinc-300">
-					{feeAmount}
-					{order.destination.token.symbol}
-				</span>
+				<div class="flex items-center gap-1">
+					<span class="text-sm text-zinc-700 dark:text-zinc-300">
+						{feeAmount}
+						{order.destination.token.symbol}
+					</span>
+					<button
+						type="button"
+						onclick={() => copyToClipboard(`${feeAmount}${order.destination.token.symbol}`, 'fees')}
+						class="shrink-0 rounded-lg border border-zinc-200 p-1.5 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+						aria-label={m.order_total_fees()}
+					>
+						{#if copiedField === 'fees'}
+							<svg
+								class="h-4 w-4 text-emerald-500"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						{:else}
+							<svg
+								class="h-4 w-4 text-zinc-500"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+								/>
+							</svg>
+						{/if}
+					</button>
+				</div>
 			</div>
 
 			<!-- Recipient -->
-			<div class="flex items-center justify-between">
+			<div class="flex items-center justify-between gap-2">
 				<span class="text-sm text-zinc-500 dark:text-zinc-400">{m.order_sent_to()}</span>
-				<code
-					class="rounded bg-zinc-100 px-2 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-				>
-					{truncateHash(order.recipientAddress)}
-				</code>
+				<div class="flex items-center gap-1">
+					<code
+						class="rounded bg-zinc-100 px-2 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+					>
+						{truncateHash(order.recipientAddress)}
+					</code>
+					<button
+						type="button"
+						onclick={() => copyToClipboard(order.recipientAddress, 'recipient')}
+						class="shrink-0 rounded-lg border border-zinc-200 p-1.5 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+						aria-label={m.order_sent_to()}
+					>
+						{#if copiedField === 'recipient'}
+							<svg
+								class="h-4 w-4 text-emerald-500"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						{:else}
+							<svg
+								class="h-4 w-4 text-zinc-500"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+								/>
+							</svg>
+						{/if}
+					</button>
+				</div>
 			</div>
 
 			<!-- Time -->
-			<div class="flex items-center justify-between">
+			<div class="flex items-center justify-between gap-2">
 				<span class="text-sm text-zinc-500 dark:text-zinc-400">{m.order_completed_at()}</span>
-				<span class="text-sm text-zinc-700 dark:text-zinc-300">
-					{new Date(order.updatedAt).toLocaleTimeString()}
-				</span>
+				<div class="flex items-center gap-1">
+					<span class="text-sm text-zinc-700 dark:text-zinc-300">
+						{new Date(order.updatedAt).toLocaleTimeString()}
+					</span>
+					<button
+						type="button"
+						onclick={() => copyToClipboard(new Date(order.updatedAt).toLocaleTimeString(), 'time')}
+						class="shrink-0 rounded-lg border border-zinc-200 p-1.5 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+						aria-label={m.order_completed_at()}
+					>
+						{#if copiedField === 'time'}
+							<svg
+								class="h-4 w-4 text-emerald-500"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						{:else}
+							<svg
+								class="h-4 w-4 text-zinc-500"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+								/>
+							</svg>
+						{/if}
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>

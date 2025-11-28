@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import QRCode from '@castlenine/svelte-qrcode';
 	import { m } from '$lib/paraglide/messages.js';
 	import type { Order } from '$lib/types/swap';
 	import { formatAtomicToDecimal } from '$lib/math/amounts';
@@ -91,14 +92,14 @@
 				{m.order_deposit_address()}
 			</div>
 
-			<!-- QR Code placeholder -->
-			<div
-				class="mx-auto mb-4 flex h-40 w-40 items-center justify-center rounded-xl bg-white p-2 dark:bg-zinc-800"
-			>
+			<!-- QR Code -->
+			<div class="mx-auto mb-4 w-fit rounded-xl bg-white p-3 dark:bg-zinc-800">
 				<div
-					class="flex h-full w-full items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-700"
+					class="flex items-center justify-center rounded-lg bg-zinc-50 px-2 py-2 dark:bg-zinc-900"
+					role="img"
+					aria-label={m.order_deposit_address()}
 				>
-					<span class="text-xs text-zinc-400">QR Code</span>
+					<QRCode data={order.tronDeposit.depositAddress} size={160} errorCorrectionLevel="M" />
 				</div>
 			</div>
 
