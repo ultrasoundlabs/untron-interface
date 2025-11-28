@@ -176,7 +176,7 @@
 				<div class="text-xs text-zinc-500 dark:text-zinc-400">
 					{order.source.token.symbol}
 					{#if order.source.type === 'evm'}
-						<span class="text-zinc-400 dark:text-zinc-500">on {order.source.chain.shortName}</span>
+						<span class="text-zinc-400 dark:text-zinc-500">on {order.source.chain.name}</span>
 					{:else}
 						<span class="text-zinc-400 dark:text-zinc-500">on Tron</span>
 					{/if}
@@ -215,9 +215,7 @@
 				<div class="text-xs text-zinc-500 dark:text-zinc-400">
 					{order.destination.token.symbol}
 					{#if order.destination.type === 'evm'}
-						<span class="text-zinc-400 dark:text-zinc-500"
-							>on {order.destination.chain.shortName}</span
-						>
+						<span class="text-zinc-400 dark:text-zinc-500">on {order.destination.chain.name}</span>
 					{:else}
 						<span class="text-zinc-400 dark:text-zinc-500">on Tron</span>
 					{/if}

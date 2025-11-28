@@ -165,7 +165,7 @@
 										>
 											<img
 												src={item.chain.logoUrl}
-												alt={item.chain.shortName}
+												alt={item.chain.name}
 												class="h-full w-full object-cover"
 												onerror={(e) => {
 													(e.target as HTMLImageElement).style.display = 'none';

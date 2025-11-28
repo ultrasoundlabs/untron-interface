@@ -10,7 +10,11 @@ import type {
 	EvmStablecoin,
 	SwapDirection
 } from '$lib/types/swap';
-import { chainsConfig, TOKEN_METADATA as BASE_TOKEN_METADATA } from './chains';
+import {
+	TOKEN_METADATA as BASE_TOKEN_METADATA,
+	getSupportedChains,
+	supportedChainIds
+} from './chains';
 
 // ============================================================================
 // Tron Configuration
@@ -28,14 +32,14 @@ export const TRON_USDT: TronToken = {
 // EVM Chains Configuration
 // ============================================================================
 
-const SUPPORTED_CHAIN_LIST: SupportedChain[] = Object.values(chainsConfig).map(
-	({ chainId, name, shortName, logoUrl, isTestnet, nativeCurrency, explorerUrl }) => ({
+const CHAIN_DEFINITIONS = getSupportedChains();
+
+const SUPPORTED_CHAIN_LIST: SupportedChain[] = CHAIN_DEFINITIONS.map(
+	({ chainId, name, logoUrl, isTestnet, explorerUrl }) => ({
 		chainId,
 		name,
-		shortName,
 		logoUrl,
 		isTestnet,
-		nativeCurrency,
 		explorerUrl
 	})
 );
@@ -55,7 +59,7 @@ export const SUPPORTED_CHAINS: SupportedChain[] = SUPPORTED_CHAIN_LIST;
 export const TOKEN_ADDRESSES: Record<
 	number,
 	Partial<Record<EvmStablecoin, `0x${string}`>>
-> = Object.fromEntries(Object.values(chainsConfig).map(({ chainId, tokens }) => [chainId, tokens]));
+> = Object.fromEntries(CHAIN_DEFINITIONS.map(({ chainId, tokens }) => [chainId, tokens]));
 
 /**
  * Token metadata (same across all chains)
@@ -85,11 +89,11 @@ export interface DirectionConfig {
 export const DIRECTION_CONFIG: Record<SwapDirection, DirectionConfig> = {
 	TRON_TO_EVM: {
 		allowedTokens: ['USDT', 'USDC'],
-		allowedChainIds: Object.keys(chainsConfig).map((id) => Number(id))
+		allowedChainIds: [...supportedChainIds]
 	},
 	EVM_TO_TRON: {
 		allowedTokens: ['USDT', 'USDC'],
-		allowedChainIds: Object.keys(chainsConfig).map((id) => Number(id))
+		allowedChainIds: [...supportedChainIds]
 	}
 };
 

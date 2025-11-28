@@ -139,7 +139,7 @@
 				</span>
 				{#if chain}
 					<span class="text-xs text-zinc-500 dark:text-zinc-400">
-						{chain.shortName}
+						{chain.name}
 					</span>
 				{:else if isTron}
 					<span class="text-xs text-zinc-500 dark:text-zinc-400">Tron</span>

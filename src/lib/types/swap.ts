@@ -29,14 +29,10 @@ export interface SupportedChain {
 	chainId: number;
 	/** Human-readable chain name */
 	name: string;
-	/** Short name for compact display */
-	shortName: string;
 	/** Path to chain logo */
 	logoUrl: string;
 	/** Whether this chain is a testnet */
 	isTestnet: boolean;
-	/** Native currency symbol (for display) */
-	nativeCurrency: string;
 	/** Block explorer URL */
 	explorerUrl: string;
 }

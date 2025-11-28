@@ -6,7 +6,7 @@ import { createPublicClient, http, erc20Abi } from 'viem';
 import type { TokenChainBalance } from '$lib/types/swap';
 import { SUPPORTED_CHAINS, getTokensForChainAndDirection } from '$lib/config/swapConfig';
 import { formatAtomicToDecimal } from '$lib/math/amounts';
-import { chainsConfig, type SupportedChainId } from '$lib/config/chains';
+import { getChainDefinition, type SupportedChainId } from '$lib/config/chains';
 import { getChainRpcUrl } from '$lib/server/config/chainRpc';
 
 // Create public clients for each chain (cached)
@@ -14,7 +14,7 @@ const clients: Map<SupportedChainId, ReturnType<typeof createPublicClient>> = ne
 
 function getClient(chainId: SupportedChainId) {
 	if (!clients.has(chainId)) {
-		const chainDefinition = chainsConfig[chainId];
+		const chainDefinition = getChainDefinition(chainId);
 		if (!chainDefinition) return null;
 
 		try {
