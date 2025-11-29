@@ -24,15 +24,15 @@ export function getOrderRecord(orderId: string): Order | undefined {
 }
 
 /**
- * Dev/demo helper that simulates the on-chain leg for flows that don't yet
- * call the real relayer (currently EVM→Tron). Tron→EVM now completes via
- * processConfirmedTronDeposit once the Tron watcher fires.
+ * Legacy dev helper that simulates the on-chain leg for flows that don't yet
+ * call the real relayer. Tron→EVM now uses the actual relayer, so this is kept
+ * only for future demos/tests where we still need fake async completion.
  */
 export function scheduleOrderAutoCompletion(orderId: string): void {
 	setTimeout(() => {
 		const order = orders.get(orderId);
 		if (!order) return;
-		if (!['awaiting_payment', 'signatures_submitted'].includes(order.status)) return;
+		if (order.status !== 'awaiting_payment') return;
 
 		const now = Date.now();
 		order.status = 'relaying';

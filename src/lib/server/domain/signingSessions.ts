@@ -1,12 +1,18 @@
+import { randomBytes } from 'crypto';
+
+import type { SupportedChainId } from '$lib/config/chains';
 import { getChainById, getTokenOnChain } from '$lib/config/swapConfig';
 import type {
 	CreateSigningSessionRequest,
 	Eip712Payload,
+	EvmStablecoin,
 	Order,
 	SigningSession
 } from '$lib/types/swap';
 import { verifyTypedData } from 'viem';
+import { getProtocolRelayTarget, RelayError } from '$lib/server/services/evmRelayer';
 import { getQuote } from './quotes';
+import { TRANSFER_WITH_AUTHORIZATION_PAYLOAD_ID } from './constants';
 import { createOrderFromSigningSession, getOrderById } from './orders';
 import { SwapDomainError } from '../errors';
 import {
@@ -17,37 +23,55 @@ import {
 
 type SignaturePayload = { payloadId: string; signature: string };
 
-function createMockPayloads(
+const ERC3009_AUTH_VALIDITY_SECONDS = 30 * 60; // 30 minutes
+const ERC3009_TRANSFER_TYPE = [
+	{ name: 'from', type: 'address' },
+	{ name: 'to', type: 'address' },
+	{ name: 'value', type: 'uint256' },
+	{ name: 'validAfter', type: 'uint256' },
+	{ name: 'validBefore', type: 'uint256' },
+	{ name: 'nonce', type: 'bytes32' }
+] as const;
+
+const ERC3009_TOKEN_CONFIG: Partial<Record<EvmStablecoin, { version: string }>> = {
+	USDC: { version: '2' },
+	USDT: { version: '1' }
+};
+
+function createTransferAuthorizationPayloads(
 	request: CreateSigningSessionRequest,
-	options?: { ownerAddress?: `0x${string}` }
+	options: {
+		tokenAddress: `0x${string}`;
+		tokenName: string;
+		tokenVersion: string;
+		relayAccountAddress: `0x${string}`;
+	}
 ): Eip712Payload[] {
-	const deadline = Math.floor((Date.now() + 30 * 60 * 1000) / 1000).toString();
-	const ownerAddress = options?.ownerAddress ?? '0x0000000000000000000000000000000000000000';
+	const nowSeconds = Math.floor(Date.now() / 1000);
+	const validAfter = nowSeconds;
+	const validBefore = nowSeconds + ERC3009_AUTH_VALIDITY_SECONDS;
+	const nonce = `0x${randomBytes(32).toString('hex')}` as `0x${string}`;
+
 	return [
 		{
-			id: 'approval',
+			id: TRANSFER_WITH_AUTHORIZATION_PAYLOAD_ID,
 			domain: {
-				name: 'Untron',
-				version: '1',
+				name: options.tokenName,
+				version: options.tokenVersion,
 				chainId: request.evmChainId,
-				verifyingContract: '0x0000000000000000000000000000000000000001'
+				verifyingContract: options.tokenAddress
 			},
 			types: {
-				Permit: [
-					{ name: 'owner', type: 'address' },
-					{ name: 'spender', type: 'address' },
-					{ name: 'value', type: 'uint256' },
-					{ name: 'nonce', type: 'uint256' },
-					{ name: 'deadline', type: 'uint256' }
-				]
+				TransferWithAuthorization: [...ERC3009_TRANSFER_TYPE]
 			},
-			primaryType: 'Permit',
+			primaryType: 'TransferWithAuthorization',
 			message: {
-				owner: ownerAddress,
-				spender: '0x0000000000000000000000000000000000000001',
+				from: request.evmSignerAddress,
+				to: options.relayAccountAddress,
 				value: request.amount,
-				nonce: '0',
-				deadline
+				validAfter: validAfter.toString(),
+				validBefore: validBefore.toString(),
+				nonce
 			}
 		}
 	];
@@ -60,6 +84,17 @@ function requireEvmToTron(request: CreateSigningSessionRequest) {
 			'SIGNING_SESSION_UNSUPPORTED'
 		);
 	}
+}
+
+function requireErc3009Token(symbol: EvmStablecoin) {
+	const config = ERC3009_TOKEN_CONFIG[symbol];
+	if (!config) {
+		throw new SwapDomainError(
+			`Token ${symbol} does not support ERC-3009 authorizations yet`,
+			'UNSUPPORTED_TOKEN'
+		);
+	}
+	return config;
 }
 
 export async function createSigningSession(
@@ -76,12 +111,40 @@ export async function createSigningSession(
 	if (!token) {
 		throw new SwapDomainError('Unsupported token for this chain', 'UNSUPPORTED_TOKEN');
 	}
+	const erc3009Token = requireErc3009Token(token.symbol as EvmStablecoin);
+
+	const chainId = chain.chainId as SupportedChainId;
+
+	let relayAccountAddress: `0x${string}`;
+	try {
+		const relayTarget = await getProtocolRelayTarget(chainId);
+		relayAccountAddress = relayTarget.address;
+	} catch (err) {
+		if (err instanceof RelayError) {
+			if (err.code === 'UNSUPPORTED_CHAIN') {
+				throw new SwapDomainError(err.message, 'UNSUPPORTED_CHAIN');
+			}
+			throw new SwapDomainError(
+				'Protocol relayer is not configured for this chain',
+				'UNKNOWN_ERROR',
+				500
+			);
+		}
+		throw err;
+	}
 
 	const quote = await getQuote({
 		direction: request.direction,
 		evmChainId: request.evmChainId,
 		evmToken: request.evmToken,
 		amount: request.amount
+	});
+
+	const eip712Payloads = createTransferAuthorizationPayloads(request, {
+		tokenAddress: token.address,
+		tokenName: token.name,
+		tokenVersion: erc3009Token.version,
+		relayAccountAddress
 	});
 
 	const now = Date.now();
@@ -94,9 +157,10 @@ export async function createSigningSession(
 		amount: request.amount,
 		recipientAddress: request.recipientAddress,
 		quote,
-		eip712Payloads: createMockPayloads(request, { ownerAddress: request.evmSignerAddress }),
+		eip712Payloads,
 		signaturesReceived: 0,
 		signedPayloadIds: [],
+		payloadSignatures: {},
 		createdAt: now,
 		updatedAt: now
 	};
@@ -147,6 +211,7 @@ export async function submitSigningSessionSignatures(
 		}
 
 		signedIds.add(entry.payloadId);
+		session.payloadSignatures[entry.payloadId] = entry.signature as `0x${string}`;
 	}
 
 	session.signaturesReceived = Math.min(signedIds.size, session.eip712Payloads.length);

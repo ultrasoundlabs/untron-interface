@@ -256,6 +256,8 @@ export interface Order {
 	tronDeposit?: TronDepositInfo;
 	/** For EVM→Tron: payloads to sign */
 	eip712Payloads?: Eip712Payload[];
+	/** For EVM→Tron: signatures collected for each payload */
+	payloadSignatures?: Record<string, `0x${string}`>;
 	/** Number of signatures received (for EVM→Tron) */
 	signaturesReceived?: number;
 	/** Timeline of events */
@@ -297,6 +299,8 @@ export interface SigningSession {
 	signaturesReceived: number;
 	/** IDs of payloads that have valid signatures */
 	signedPayloadIds: string[];
+	/** Raw signatures keyed by payload ID */
+	payloadSignatures: Record<string, `0x${string}`>;
 	/** Creation timestamp (Unix ms) */
 	createdAt: number;
 	/** Last update timestamp (Unix ms) */

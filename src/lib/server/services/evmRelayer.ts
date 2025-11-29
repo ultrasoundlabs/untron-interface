@@ -19,7 +19,8 @@ import {
 	getRelayConfig,
 	getBundlerRpcUrl,
 	getRelayerEoaPrivateKey,
-	type ChainRelayConfig
+	type ChainRelayConfig,
+	type RelayMode
 } from '$lib/server/config/relayer';
 
 // =============================================================================
@@ -120,6 +121,82 @@ function markAaUnhealthy(chainId: SupportedChainId): void {
 }
 
 // =============================================================================
+// Relay Account Helpers
+// =============================================================================
+
+const safeAddressCache = new Map<SupportedChainId, `0x${string}`>();
+let cachedOwnerAccount: ReturnType<typeof privateKeyToAccount> | null = null;
+type SafeSmartAccountClient = Parameters<typeof toSafeSmartAccount>[0]['client'];
+
+function getRelayerOwnerAccount(): ReturnType<typeof privateKeyToAccount> {
+	if (!cachedOwnerAccount) {
+		const privateKey = getRelayerEoaPrivateKey();
+		cachedOwnerAccount = privateKeyToAccount(privateKey);
+	}
+	return cachedOwnerAccount;
+}
+
+async function buildSafeSmartAccount(
+	publicClient: SafeSmartAccountClient,
+	relayConfig: ChainRelayConfig,
+	ownerAccount: ReturnType<typeof privateKeyToAccount>
+) {
+	return toSafeSmartAccount({
+		client: publicClient,
+		owners: [ownerAccount],
+		version: relayConfig.aa?.safeVersion ?? '1.4.1',
+		entryPoint: relayConfig.aa?.entryPoint
+			? { address: relayConfig.aa.entryPoint, version: '0.7' }
+			: undefined,
+		saltNonce: 0n
+	});
+}
+
+export async function getProtocolRelayTarget(
+	chainId: SupportedChainId
+): Promise<{ mode: RelayMode; address: `0x${string}` }> {
+	const chainDef = getChainDefinition(chainId);
+	if (!chainDef) {
+		throw new RelayError(`Unsupported chain: ${chainId}`, 'UNSUPPORTED_CHAIN');
+	}
+
+	const relayConfig = getRelayConfig(chainId);
+
+	if (relayConfig.mode === 'eoa') {
+		let ownerAccount: ReturnType<typeof privateKeyToAccount>;
+		try {
+			ownerAccount = getRelayerOwnerAccount();
+		} catch (err) {
+			throw new RelayError('EOA relayer private key not configured', 'EOA_NOT_CONFIGURED', err);
+		}
+		return { mode: 'eoa', address: ownerAccount.address };
+	}
+
+	const cachedAddress = safeAddressCache.get(chainId);
+	if (cachedAddress) {
+		return { mode: 'aa', address: cachedAddress };
+	}
+
+	const rpcUrl = getChainRpcUrl(chainId);
+	const publicClient = createPublicClient({
+		chain: chainDef.viemChain,
+		transport: http(rpcUrl)
+	});
+
+	let ownerAccount: ReturnType<typeof privateKeyToAccount>;
+	try {
+		ownerAccount = getRelayerOwnerAccount();
+	} catch (err) {
+		throw new RelayError('AA signer private key not configured', 'EOA_NOT_CONFIGURED', err);
+	}
+
+	const safeAccount = await buildSafeSmartAccount(publicClient, relayConfig, ownerAccount);
+	safeAddressCache.set(chainId, safeAccount.address);
+
+	return { mode: 'aa', address: safeAccount.address };
+}
+
+// =============================================================================
 // EOA Relayer Implementation
 // =============================================================================
 
@@ -130,14 +207,12 @@ function markAaUnhealthy(chainId: SupportedChainId): void {
 async function relayViaEoa(req: RelayRequest, viemChain: Chain): Promise<RelayResult> {
 	const rpcUrl = getChainRpcUrl(req.chainId);
 
-	let privateKey: `0x${string}`;
+	let account: ReturnType<typeof privateKeyToAccount>;
 	try {
-		privateKey = getRelayerEoaPrivateKey();
+		account = getRelayerOwnerAccount();
 	} catch (err) {
 		throw new RelayError('EOA relayer private key not configured', 'EOA_NOT_CONFIGURED', err);
 	}
-
-	const account = privateKeyToAccount(privateKey);
 
 	const publicClient = createPublicClient({
 		chain: viemChain,
@@ -261,14 +336,12 @@ async function relayViaAa(
 	// Get the signer - for now we use the same EOA key as the Safe owner.
 	// That means one protocol-owned Safe per chain (saltNonce 0) and the relayer
 	// EOA compromise = Safe compromise, so keep that key locked down.
-	let privateKey: `0x${string}`;
+	let owner: ReturnType<typeof privateKeyToAccount>;
 	try {
-		privateKey = getRelayerEoaPrivateKey();
+		owner = getRelayerOwnerAccount();
 	} catch (err) {
 		throw new AaInfraError('AA signer private key not configured', err);
 	}
-
-	const owner = privateKeyToAccount(privateKey);
 
 	const publicClient = createPublicClient({
 		chain: viemChain,
@@ -305,15 +378,7 @@ async function relayViaAa(
 		});
 
 		// Build the Safe smart account using the new permissionless API
-		const safeAccount = await toSafeSmartAccount({
-			client: publicClient,
-			owners: [owner],
-			version: relayConfig.aa?.safeVersion ?? '1.4.1',
-			entryPoint: relayConfig.aa?.entryPoint
-				? { address: relayConfig.aa.entryPoint, version: '0.7' }
-				: undefined,
-			saltNonce: 0n // Protocol-owned account, deterministic address
-		});
+		const safeAccount = await buildSafeSmartAccount(publicClient, relayConfig, owner);
 
 		// Create the smart account client with bundler transport
 		const smartAccountClient = createSmartAccountClient({

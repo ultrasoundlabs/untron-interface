@@ -22,7 +22,7 @@ import {
 	getTokenOnChain,
 	isTokenAvailableForDirection
 } from '$lib/config/swapConfig';
-import { signTypedData } from '@wagmi/core';
+import { getChainId, signTypedData, switchChain } from '@wagmi/core';
 import { config as wagmiConfig } from '$lib/wagmi/config';
 import * as swapService from '$lib/services/swapService';
 import {
@@ -547,7 +547,28 @@ export function createSwapStore() {
 		}
 	}
 
+	async function ensureWalletChainForSigning(targetChainId: number): Promise<void> {
+		try {
+			const currentChainId = await getChainId(wagmiConfig);
+			if (currentChainId === targetChainId) {
+				return;
+			}
+		} catch {
+			// If we can't read the current chain (e.g. no connector yet), fall through
+			// to switchChain which will surface a proper error if it can't proceed.
+		}
+
+		// Prompt the user (via their wallet) to switch to the chain we're about to
+		// request an EIP-712 signature for. This avoids \"Chain Id mismatch\" errors
+		// from providers that validate the domain.chainId against the active network.
+		await switchChain(wagmiConfig, { chainId: targetChainId });
+	}
+
 	async function createEvmToTronOrderViaSigning(walletAddress: `0x${string}`): Promise<Order> {
+		// Make sure the connected wallet is on the same chain as the EIP-712 domain
+		// we'll be asking it to sign for.
+		await ensureWalletChainForSigning(evmChain.chainId);
+
 		const sessionResponse = await swapService.createSigningSession({
 			direction,
 			evmChainId: evmChain.chainId,
