@@ -6,6 +6,7 @@ import type {
 	OrderTimelineEvent,
 	SigningSession
 } from '$lib/types/swap';
+import { encodeFunctionData, erc20Abi } from 'viem';
 import { getQuote } from './quotes';
 import { SwapDomainError } from '../errors';
 import {
@@ -14,6 +15,137 @@ import {
 	saveOrderRecord,
 	scheduleOrderAutoCompletion
 } from '../adapters/mockPersistence';
+import type { SupportedChainId } from '$lib/config/chains';
+import {
+	relayEvmTxs,
+	type RelayCall,
+	RelayError,
+	AaInfraError
+} from '$lib/server/services/evmRelayer';
+
+// =============================================================================
+// EVM Relayer Integration
+// =============================================================================
+//
+// `processConfirmedTronDeposit` is invoked once the Tron watcher confirms that
+// the user sent the required USDT. It transitions the order from
+// `awaiting_payment` → `relaying` → `completed`/`failed` by building a relay
+// request that transfers the destination ERC-20 token to the user's EVM wallet.
+//
+// TRON→EVM now relies on the shared `relayEvmTxs` service, so AA/EOA selection,
+// bundler fallback, and AA health tracking are handled centrally.
+// =============================================================================
+
+type EvmDestinationSide = Extract<Order['destination'], { type: 'evm' }>;
+type TronToEvmOrder = Order & {
+	direction: 'TRON_TO_EVM';
+	destination: EvmDestinationSide;
+};
+
+function assertTronToEvmOrder(order: Order): asserts order is TronToEvmOrder {
+	if (order.direction !== 'TRON_TO_EVM' || order.destination.type !== 'evm') {
+		throw new SwapDomainError('Order is not a Tron→EVM transfer', 'INVALID_REQUEST', 409);
+	}
+}
+
+function ensureEvmRecipient(address: string): `0x${string}` {
+	if (!address || !address.startsWith('0x') || address.length !== 42) {
+		throw new SwapDomainError('Invalid EVM recipient address', 'INVALID_REQUEST');
+	}
+	return address as `0x${string}`;
+}
+
+function encodePayoutCalldata(order: TronToEvmOrder): `0x${string}` {
+	const amount = BigInt(order.destination.amount);
+	if (amount <= 0n) {
+		throw new SwapDomainError('Payout amount must be greater than zero', 'INVALID_REQUEST');
+	}
+
+	return encodeFunctionData({
+		abi: erc20Abi,
+		functionName: 'transfer',
+		args: [ensureEvmRecipient(order.recipientAddress), amount]
+	});
+}
+
+function buildRelayCalls(order: TronToEvmOrder): RelayCall[] {
+	const call: RelayCall = {
+		to: order.destination.token.address,
+		data: encodePayoutCalldata(order),
+		value: 0n
+	};
+
+	// Single-call for now, but we could push more calls here in future
+	return [call];
+}
+
+function describeRelayFailure(err: unknown): string {
+	if (err instanceof RelayError) {
+		return `RelayError(${err.code}): ${err.message}`;
+	}
+	if (err instanceof AaInfraError) {
+		return `AA infrastructure error: ${err.message}`;
+	}
+	if (err instanceof Error) {
+		return err.message;
+	}
+	return 'Unknown relay failure';
+}
+
+export async function processConfirmedTronDeposit(orderId: string): Promise<Order> {
+	const order = getOrderById(orderId);
+	assertTronToEvmOrder(order);
+
+	if (order.status !== 'awaiting_payment') {
+		throw new SwapDomainError(
+			`Order ${orderId} is not awaiting Tron payment (current status: ${order.status})`,
+			'INVALID_REQUEST',
+			409
+		);
+	}
+
+	const relayReadyAt = Date.now();
+	order.status = 'relaying';
+	order.timeline.push({ type: 'relaying', timestamp: relayReadyAt });
+	order.updatedAt = relayReadyAt;
+	saveOrderRecord(order);
+
+	const relayCalls = buildRelayCalls(order);
+
+	try {
+		const relayResult = await relayEvmTxs({
+			chainId: order.destination.chain.chainId as SupportedChainId,
+			fromUserId: undefined,
+			calls: relayCalls
+		});
+		const completedAt = Date.now();
+		order.status = 'completed';
+		order.finalTxHashes = {
+			...order.finalTxHashes,
+			destination: relayResult.txHash
+		};
+		order.timeline.push({
+			type: 'completed',
+			timestamp: completedAt,
+			txHash: relayResult.txHash,
+			details: `Relayed via ${relayResult.relayedVia}`
+		});
+		order.updatedAt = completedAt;
+		saveOrderRecord(order);
+		return order;
+	} catch (error) {
+		const failedAt = Date.now();
+		order.status = 'failed';
+		order.timeline.push({
+			type: 'failed',
+			timestamp: failedAt,
+			details: describeRelayFailure(error)
+		});
+		order.updatedAt = failedAt;
+		saveOrderRecord(order);
+		throw error;
+	}
+}
 
 type SignaturePayload = { payloadId: string; signature: string };
 
@@ -95,7 +227,7 @@ export async function createOrder(request: CreateOrderRequest): Promise<Order> {
 			type: 'awaiting_payment',
 			timestamp: order.createdAt
 		});
-		scheduleOrderAutoCompletion(order.id);
+		// Real completion happens when the Tron watcher calls processConfirmedTronDeposit.
 	} else {
 		order.status = 'awaiting_signatures';
 		order.eip712Payloads = []; // populated via signing sessions flow

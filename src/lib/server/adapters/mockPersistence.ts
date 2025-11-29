@@ -23,6 +23,11 @@ export function getOrderRecord(orderId: string): Order | undefined {
 	return orders.get(orderId);
 }
 
+/**
+ * Dev/demo helper that simulates the on-chain leg for flows that don't yet
+ * call the real relayer (currently EVM→Tron). Tron→EVM now completes via
+ * processConfirmedTronDeposit once the Tron watcher fires.
+ */
 export function scheduleOrderAutoCompletion(orderId: string): void {
 	setTimeout(() => {
 		const order = orders.get(orderId);
