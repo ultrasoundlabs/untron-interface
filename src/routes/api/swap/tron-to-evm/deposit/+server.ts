@@ -1,12 +1,13 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { createSigningSession } from '$lib/server/domain/signingSessions';
-import { SwapDomainError } from '$lib/server/errors';
-import {
-	createSigningSessionSchema,
-	type CreateSigningSessionRequestPayload
-} from '$lib/server/validation/swapSchemas';
 import type { ZodError } from 'zod';
+
+import { SwapDomainError } from '$lib/server/errors';
+import { createTronDepositTicket, encodeTronToEvmOrder } from '$lib/server/domain/tronToEvm';
+import {
+	tronToEvmDepositSchema,
+	type TronToEvmDepositPayload
+} from '$lib/server/validation/swapSchemas';
 
 function invalidRequestResponse(error?: ZodError) {
 	return json(
@@ -20,27 +21,28 @@ function invalidRequestResponse(error?: ZodError) {
 }
 
 export const POST: RequestHandler = async ({ request }) => {
-	let parsedBody: CreateSigningSessionRequestPayload;
+	let payload: TronToEvmDepositPayload;
 	try {
 		const body = await request.json();
-		const parsed = createSigningSessionSchema.safeParse(body);
+		const parsed = tronToEvmDepositSchema.safeParse(body);
 		if (!parsed.success) {
 			return invalidRequestResponse(parsed.error);
 		}
-		parsedBody = parsed.data;
+		payload = parsed.data;
 	} catch {
 		return invalidRequestResponse();
 	}
 
 	try {
-		const session = await createSigningSession(parsedBody);
-		return json({ session });
+		const ticket = await createTronDepositTicket(payload);
+		const orderId = encodeTronToEvmOrder(ticket);
+		return json({ orderId, ticket });
 	} catch (err) {
 		if (err instanceof SwapDomainError) {
-			return json({ message: err.message, code: err.code }, { status: err.statusCode ?? 500 });
+			return json({ message: err.message, code: err.code }, { status: err.statusCode ?? 400 });
 		}
 		return json(
-			{ message: 'Failed to create signing session', code: 'UNKNOWN_ERROR' },
+			{ message: 'Failed to create deposit ticket', code: 'UNKNOWN_ERROR' },
 			{ status: 500 }
 		);
 	}

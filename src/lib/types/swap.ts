@@ -170,188 +170,138 @@ export interface CapacityInfo {
 }
 
 // ============================================================================
-// Order Types
+// Orderless Swap Result Types
 // ============================================================================
 
-/**
- * Order status enum
- */
-export type OrderStatusType =
-	| 'created'
-	| 'awaiting_payment' // Tron→EVM: waiting for Tron deposit
-	| 'awaiting_signatures' // EVM→Tron: waiting for user to sign EIP-712 payloads
-	| 'signatures_submitted' // EVM→Tron: signatures submitted, processing
-	| 'relaying' // Transaction being relayed
-	| 'completed'
-	| 'failed'
-	| 'expired'
-	| 'cancelled';
-
-/**
- * An EIP-712 payload that needs to be signed (for EVM→Tron flow)
- */
 export interface Eip712Payload {
-	/** Unique ID for this payload */
 	id: string;
-	/** Domain data for EIP-712 */
 	domain: {
 		name: string;
 		version: string;
 		chainId: number;
 		verifyingContract: `0x${string}`;
 	};
-	/** Types for EIP-712 */
 	types: Record<string, Array<{ name: string; type: string }>>;
-	/** Primary type name */
 	primaryType: string;
-	/** Message to sign */
 	message: Record<string, unknown>;
 }
 
-/**
- * Timeline event for order progress tracking
- */
-export interface OrderTimelineEvent {
-	/** Event type */
-	type: OrderStatusType | 'signature_received';
-	/** When this event occurred (Unix ms) */
-	timestamp: number;
-	/** Optional transaction hash if applicable */
-	txHash?: string;
-	/** Optional additional details */
-	details?: string;
-}
-
-/**
- * Tron deposit info for Tron→EVM orders
- */
-export interface TronDepositInfo {
-	/** Tron address to send USDT to */
-	depositAddress: string;
-	/** Exact amount to send (in sun) */
-	expectedAmount: string;
-	/** Deadline for deposit (Unix ms) */
-	expiresAt: number;
-}
-
-/**
- * Order data structure
- */
-export interface Order {
-	/** Unique order ID */
-	id: string;
-	/** Swap direction */
-	direction: SwapDirection;
-	/** Current status */
-	status: OrderStatusType;
-	/** Source side details */
-	source: SwapSide;
-	/** Destination side details */
-	destination: SwapSide;
-	/** Recipient address (EVM address for Tron→EVM, Tron address for EVM→Tron) */
-	recipientAddress: string;
-	/** Quote used for this order */
-	quote: SwapQuote;
-	/** For Tron→EVM: deposit info */
-	tronDeposit?: TronDepositInfo;
-	/** For EVM→Tron: payloads to sign */
-	eip712Payloads?: Eip712Payload[];
-	/** For EVM→Tron: signatures collected for each payload */
-	payloadSignatures?: Record<string, `0x${string}`>;
-	/** Number of signatures received (for EVM→Tron) */
-	signaturesReceived?: number;
-	/** Timeline of events */
-	timeline: OrderTimelineEvent[];
-	/** Order creation timestamp (Unix ms) */
-	createdAt: number;
-	/** Last update timestamp (Unix ms) */
-	updatedAt: number;
-	/** Final transaction hashes when completed */
-	finalTxHashes?: {
-		source?: string;
-		destination?: string;
-	};
-}
-
-/**
- * Pre-order signing session for EVM→Tron swaps
- */
-export interface SigningSession {
-	/** Unique session ID */
-	id: string;
-	/** Direction is always EVM→Tron for signing sessions */
-	direction: 'EVM_TO_TRON';
-	/** Address that must sign the payloads */
-	evmSignerAddress: `0x${string}`;
-	/** Selected EVM chain ID */
+export interface TronDepositTicket {
+	direction: 'TRON_TO_EVM';
 	evmChainId: number;
-	/** Selected EVM token symbol */
 	evmToken: EvmStablecoin;
-	/** Amount in source token's smallest unit */
 	amount: string;
-	/** Destination Tron recipient address */
 	recipientAddress: string;
-	/** Quote captured at session creation */
+	depositAddress: string;
+	expectedAmount: string;
+	expiresAt: number;
 	quote: SwapQuote;
-	/** Payloads that must be signed */
-	eip712Payloads: Eip712Payload[];
-	/** Number of signatures received so far */
-	signaturesReceived: number;
-	/** IDs of payloads that have valid signatures */
-	signedPayloadIds: string[];
+}
+
+export interface TronDepositResponse {
+	orderId: string;
+	ticket: TronDepositTicket;
+}
+
+export interface TronToEvmOrderView extends TronDepositTicket {
+	kind: 'tronDeposit';
+	id: string;
+}
+
+// ============================================================================
+// Stateless EVM→Tron Flow Types
+// ============================================================================
+
+/**
+ * Request payload for preparing single-use EIP-712 payloads on the server.
+ * Direction is fixed to EVM→Tron for this flow.
+ */
+export interface EvmToTronPrepareRequest {
+	direction: 'EVM_TO_TRON';
+	evmChainId: number;
+	evmToken: EvmStablecoin;
+	amount: string;
+	recipientAddress: string;
+	evmSignerAddress: `0x${string}`;
+}
+
+/**
+ * Response payload returned by the stateless prepare endpoint.
+ */
+export interface EvmToTronPrepareResponse {
+	/** Deterministic payloads that the client must present for signing */
+	payloads: Eip712Payload[];
+	/** Address of the protocol relay account (Safe/EOA) that receives ERC-3009 funds */
+	relayAccountAddress: `0x${string}`;
+	/** Quote snapshot used when building the payloads */
+	quote: SwapQuote;
+	/** Unix ms timestamp when the payloads were generated */
+	preparedAt: number;
+}
+
+/**
+ * Request payload for executing an EVM→Tron swap with signed authorizations.
+ */
+export interface EvmToTronExecuteRequest extends EvmToTronPrepareRequest {
+	/** Payloads that were presented to the user for signing */
+	payloads: Eip712Payload[];
 	/** Raw signatures keyed by payload ID */
 	payloadSignatures: Record<string, `0x${string}`>;
-	/** Creation timestamp (Unix ms) */
-	createdAt: number;
-	/** Last update timestamp (Unix ms) */
-	updatedAt: number;
-	/** When finalized, stores the resulting order ID */
-	finalizedOrderId?: string;
 }
 
-export interface CreateSigningSessionRequest extends CreateOrderRequest {
-	evmSignerAddress: `0x${string}`;
+/**
+ * Lightweight execution summary returned after relay submission.
+ */
+export interface SwapExecutionSummary {
+	orderId: string;
+	direction: 'EVM_TO_TRON';
+	evmChainId: number;
+	evmToken: EvmStablecoin;
+	amount: string;
+	recipientAddress: string;
+	evmTxHash: `0x${string}`;
+	relayMethod: 'aa' | 'eoa';
+	status: 'relaying' | 'completed' | 'failed';
+	tronTxHash?: string;
 }
 
-export interface CreateSigningSessionResponse {
-	session: SigningSession;
+/**
+ * Stateless response for the EVM→Tron execute endpoint.
+ */
+export interface EvmToTronExecuteResponse {
+	execution: SwapExecutionSummary;
 }
 
-export interface SubmitSigningSessionSignaturesRequest {
-	sessionId: string;
-	signatures: Array<{ payloadId: string; signature: string }>;
+/**
+ * Normalized view returned by GET /api/swap/order/:id in a stateless world.
+ */
+export interface EvmRelayOrderView {
+	kind: 'evmRelay';
+	id: string;
+	direction: 'EVM_TO_TRON';
+	status: 'relaying' | 'completed' | 'failed';
+	evmTxHash?: `0x${string}`;
+	tronTxHash?: string;
+	metadata?: Record<string, unknown>;
 }
 
-export interface SubmitSigningSessionSignaturesResponse {
-	session: SigningSession;
-}
-
-export interface FinalizeSigningSessionResponse {
-	order: Order;
+/**
+ * Internal helper to encode/decode stateless order IDs.
+ */
+export interface EvmRelayOrderIdParts {
+	evmChainId: number;
+	evmTxHash: `0x${string}`;
 }
 
 /**
  * Order creation request
  */
-export interface CreateOrderRequest {
-	direction: SwapDirection;
-	/** For Tron→EVM: the EVM chain and token */
+export interface TronToEvmDepositRequest {
+	direction: 'TRON_TO_EVM';
 	evmChainId: number;
 	evmToken: EvmStablecoin;
-	/**
-	 * Amount in source token's smallest unit (atomic integer string).
-	 * Client-side code is responsible for converting human decimals to this format.
-	 */
 	amount: string;
-	/** Recipient address */
 	recipientAddress: string;
-}
-
-/**
- * Order creation response
- */
-export interface CreateOrderResponse {
-	order: Order;
 }
 
 // ============================================================================

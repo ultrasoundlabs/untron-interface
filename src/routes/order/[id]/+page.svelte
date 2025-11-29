@@ -6,17 +6,15 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { m } from '$lib/paraglide/messages.js';
 	import * as swapService from '$lib/services/swapService';
-	import type { Order, OrderStatusType } from '$lib/types/swap';
-	import OrderStatusDisplay from './OrderStatusDisplay.svelte';
+	import type { EvmRelayOrderView, TronToEvmOrderView } from '$lib/types/swap';
+	import { getChainById } from '$lib/config/swapConfig';
 	import TronDepositView from './TronDepositView.svelte';
-	import EvmSigningView from './EvmSigningView.svelte';
-	import OrderSuccess from './OrderSuccess.svelte';
 
 	// Get order ID from route
 	const orderId = $derived($page.params.id ?? '');
 
 	// Order state
-	let order = $state<Order | null>(null);
+	let order = $state<TronToEvmOrderView | EvmRelayOrderView | null>(null);
 	let isLoading = $state(true);
 	let errorTitle = $state<string | null>(null);
 	let errorMessage = $state<string | null>(null);
@@ -34,7 +32,7 @@
 
 		// Start polling for status updates
 		pollInterval = setInterval(async () => {
-			if (order && !isTerminalStatus(order.status)) {
+			if (shouldPoll(order)) {
 				await loadOrder();
 			}
 		}, 3000);
@@ -65,8 +63,38 @@
 		}
 	}
 
-	function isTerminalStatus(status: OrderStatusType): boolean {
-		return ['completed', 'failed', 'expired', 'cancelled'].includes(status);
+	function isTronOrder(
+		value: TronToEvmOrderView | EvmRelayOrderView | null
+	): value is TronToEvmOrderView {
+		return !!value && value.kind === 'tronDeposit';
+	}
+
+	function isEvmRelayOrder(
+		value: TronToEvmOrderView | EvmRelayOrderView | null
+	): value is EvmRelayOrderView {
+		return !!value && value.kind === 'evmRelay';
+	}
+
+	function shouldPoll(current: TronToEvmOrderView | EvmRelayOrderView | null): boolean {
+		if (!current) return false;
+		if (isEvmRelayOrder(current)) {
+			return current.status === 'relaying';
+		}
+		return false;
+	}
+
+	function getExplorerUrl(value: EvmRelayOrderView): string | null {
+		const chainId = (value.metadata?.evmChainId as number | undefined) ?? undefined;
+		if (!chainId || !value.evmTxHash) return null;
+		const chain = getChainById(chainId);
+		if (!chain?.explorerUrl) return null;
+		return `${chain.explorerUrl}/tx/${value.evmTxHash}`;
+	}
+
+	function getChainName(value: EvmRelayOrderView): string | null {
+		const chainId = (value.metadata?.evmChainId as number | undefined) ?? undefined;
+		if (!chainId) return null;
+		return getChainById(chainId)?.name ?? null;
 	}
 
 	function handleClose() {
@@ -152,24 +180,58 @@
 			<div
 				class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-xl shadow-zinc-200/50 dark:border-zinc-700 dark:bg-zinc-900 dark:shadow-black/20"
 			>
-				<!-- Status Header -->
-				<OrderStatusDisplay {order} />
-
-				<!-- Direction-specific content -->
-				{#if order.status === 'completed'}
-					<OrderSuccess {order} onNewSwap={handleNewSwap} />
-				{:else if order.direction === 'TRON_TO_EVM' && order.tronDeposit}
+				{#if isTronOrder(order)}
 					<TronDepositView {order} />
-				{:else if order.direction === 'EVM_TO_TRON' && order.status === 'awaiting_signatures' && order.eip712Payloads}
-					<EvmSigningView {order} />
-				{:else}
-					<!-- Generic processing view -->
-					<div class="mt-6 flex flex-col items-center gap-4 py-8">
+				{:else if isEvmRelayOrder(order)}
+					<div class="text-center">
 						<div
-							class="h-12 w-12 animate-spin rounded-full border-4 border-zinc-200 border-t-emerald-500 dark:border-zinc-700 dark:border-t-emerald-400"
-						></div>
-						<p class="text-center text-zinc-500 dark:text-zinc-400">
-							{m.order_processing()}
+							class="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-blue-600 dark:bg-blue-900/30"
+						>
+							<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
+							</svg>
+							<span class="text-sm font-medium">{m.order_status_relaying()}</span>
+						</div>
+						<p class="text-sm text-zinc-500 dark:text-zinc-400">
+							{#if getChainName(order)}
+								We submitted your transfer on {getChainName(order)}. Keep this tab open while we
+								process the Tron payout.
+							{:else}
+								We submitted your transfer. Keep this tab open while we process the Tron payout.
+							{/if}
+						</p>
+						{#if order.evmTxHash}
+							<p class="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+								{#if getExplorerUrl(order)}
+									<a
+										href={getExplorerUrl(order) ?? '#'}
+										target="_blank"
+										rel="noreferrer"
+										class="font-mono text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400"
+									>
+										{order.evmTxHash}
+									</a>
+								{:else}
+									<span class="font-mono">{order.evmTxHash}</span>
+								{/if}
+							</p>
+						{/if}
+					</div>
+					<div class="mt-6 space-y-4 py-6 text-center">
+						<p class="text-sm text-zinc-500 dark:text-zinc-400">
+							Your Tron USDT payout will start as soon as the EVM transfer is finalized.
 						</p>
 					</div>
 				{/if}

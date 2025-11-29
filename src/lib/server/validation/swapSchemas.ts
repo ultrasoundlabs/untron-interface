@@ -15,69 +15,119 @@ export const capacityRequestSchema = z.object({
 	evmToken: evmStablecoinSchema
 });
 
+function validateRecipient(
+	data: { direction: 'TRON_TO_EVM' | 'EVM_TO_TRON'; recipientAddress: string },
+	ctx: z.RefinementCtx
+) {
+	const { direction, recipientAddress } = data;
+
+	if (direction === 'TRON_TO_EVM') {
+		if (!isValidEvmAddress(recipientAddress)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				path: ['recipientAddress'],
+				message: 'Recipient must be a valid EVM address (0x...)'
+			});
+		}
+	} else if (direction === 'EVM_TO_TRON') {
+		if (!isValidTronAddress(recipientAddress)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				path: ['recipientAddress'],
+				message: 'Recipient must be a valid Tron address (starts with T)'
+			});
+		}
+	}
+}
+
 export const quoteRequestSchema = capacityRequestSchema
 	.extend({
 		amount: z.string().regex(/^\d+$/, 'Amount must be a numeric string'),
 		recipientAddress: z.string().min(1, 'Recipient address is required')
 	})
-	.superRefine((data, ctx) => {
-		const { direction, recipientAddress } = data;
+	.superRefine(validateRecipient);
 
-		if (direction === 'TRON_TO_EVM') {
-			if (!isValidEvmAddress(recipientAddress)) {
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					path: ['recipientAddress'],
-					message: 'Recipient must be a valid EVM address (0x...)'
-				});
-			}
-		} else if (direction === 'EVM_TO_TRON') {
-			if (!isValidTronAddress(recipientAddress)) {
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					path: ['recipientAddress'],
-					message: 'Recipient must be a valid Tron address (starts with T)'
-				});
-			}
-		}
-	});
-
-export const createOrderSchema = quoteRequestSchema.pick({
-	direction: true,
-	evmChainId: true,
-	evmToken: true,
-	amount: true,
-	recipientAddress: true
+const evmSignerSchema = evmHexAddressSchema.superRefine((value, ctx) => {
+	if (!isValidEvmAddress(value)) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: 'Signer address must be a valid EVM address (0x...)'
+		});
+	}
 });
 
-export const createSigningSessionSchema = createOrderSchema
-	.extend({
-		evmSignerAddress: evmHexAddressSchema
-	})
-	.superRefine((data, ctx) => {
-		if (!isValidEvmAddress(data.evmSignerAddress)) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ['evmSignerAddress'],
-				message: 'Signer address must be a valid EVM address (0x...)'
-			});
-		}
-	})
-	.refine((data) => data.direction === 'EVM_TO_TRON', {
-		path: ['direction'],
-		message: 'Signing sessions are only supported for EVM→Tron swaps'
+const eip712TypeSchema = z.object({
+	name: z.string().min(1),
+	type: z.string().min(1)
+});
+
+export const eip712PayloadSchema = z.object({
+	id: z.string().min(1),
+	domain: z.object({
+		name: z.string().min(1),
+		version: z.string().min(1),
+		chainId: z.number().int().positive(),
+		verifyingContract: evmHexAddressSchema
+	}),
+	types: z.record(z.string(), z.array(eip712TypeSchema)),
+	primaryType: z.string().min(1),
+	message: z.record(z.string(), z.any())
+});
+
+const payloadSignaturesSchema = z
+	.record(
+		z.string().min(1),
+		z
+			.string()
+			.regex(/^0x[a-fA-F0-9]+$/, 'Signature must be a 0x-prefixed hex string')
+			.transform((value) => value as `0x${string}`)
+	)
+	.refine((record) => Object.keys(record).length > 0, {
+		message: 'At least one signature is required'
 	});
 
-export const submitSignaturesSchema = z.object({
-	signatures: z
-		.array(
-			z.object({
-				payloadId: z.string().min(1),
-				signature: z.string().min(1)
-			})
-		)
-		.min(1)
+const evmToTronBaseSchema = z.object({
+	direction: z.literal('EVM_TO_TRON'),
+	evmChainId: z.number().int().positive(),
+	evmToken: evmStablecoinSchema,
+	amount: z.string().regex(/^\d+$/, 'Amount must be a numeric string'),
+	recipientAddress: z.string().min(1, 'Recipient address is required'),
+	evmSignerAddress: evmSignerSchema
 });
+
+export const evmToTronPrepareSchema = evmToTronBaseSchema
+	.superRefine(validateRecipient)
+	.refine((data) => data.amount !== '0', {
+		path: ['amount'],
+		message: 'Amount must be greater than zero'
+	});
+
+export const evmToTronExecuteSchema = z
+	.object({
+		direction: z.literal('EVM_TO_TRON'),
+		evmChainId: z.number().int().positive(),
+		evmToken: evmStablecoinSchema,
+		amount: z.string().regex(/^\d+$/, 'Amount must be a numeric string'),
+		recipientAddress: z.string().min(1, 'Recipient address is required'),
+		evmSignerAddress: evmSignerSchema,
+		payloads: z.array(eip712PayloadSchema).min(1),
+		payloadSignatures: payloadSignaturesSchema
+	})
+	.superRefine(validateRecipient)
+	.refine((data) => data.amount !== '0', {
+		path: ['amount'],
+		message: 'Amount must be greater than zero'
+	});
+
+export const tronToEvmDepositSchema = z
+	.object({
+		direction: z.literal('TRON_TO_EVM'),
+		evmChainId: z.number().int().positive(),
+		evmToken: evmStablecoinSchema,
+		amount: z.string().regex(/^\d+$/, 'Amount must be a numeric string'),
+		recipientAddress: z.string().min(1, 'Recipient address is required')
+	})
+	.superRefine(validateRecipient);
 
 export type CapacityRequestPayload = z.infer<typeof capacityRequestSchema>;
 /**
@@ -85,6 +135,6 @@ export type CapacityRequestPayload = z.infer<typeof capacityRequestSchema>;
  * as a numeric string in the source token's smallest unit.
  */
 export type QuoteRequestPayload = z.infer<typeof quoteRequestSchema>;
-export type CreateOrderRequestPayload = z.infer<typeof createOrderSchema>;
-export type CreateSigningSessionRequestPayload = z.infer<typeof createSigningSessionSchema>;
-export type SubmitSignaturesPayload = z.infer<typeof submitSignaturesSchema>;
+export type EvmToTronPreparePayload = z.infer<typeof evmToTronPrepareSchema>;
+export type EvmToTronExecutePayload = z.infer<typeof evmToTronExecuteSchema>;
+export type TronToEvmDepositPayload = z.infer<typeof tronToEvmDepositSchema>;

@@ -5,14 +5,14 @@
 
 import { getContext, setContext } from 'svelte';
 import type {
-	SwapDirection,
-	SwapQuote,
 	CapacityInfo,
+	EvmStablecoin,
 	SupportedChain,
 	SupportedToken,
-	EvmStablecoin,
-	SwapValidationError,
-	Order
+	SwapDirection,
+	SwapExecutionSummary,
+	SwapQuote,
+	SwapValidationError
 } from '$lib/types/swap';
 import type { SwapServiceErrorCode } from '$lib/types/errors';
 import {
@@ -61,9 +61,6 @@ export interface SwapState {
 	quoteError: string | null;
 	capacityError: string | null;
 	validationErrors: SwapValidationError[];
-
-	// Created order (for navigation)
-	createdOrder: Order | null;
 }
 
 const SWAP_STORE_KEY = Symbol('swap-store');
@@ -96,8 +93,6 @@ export function createSwapStore() {
 
 	let quoteError = $state<string | null>(null);
 	let capacityError = $state<string | null>(null);
-
-	let createdOrder = $state<Order | null>(null);
 
 	// Whether we should avoid auto-prefilling the recipient from the connected wallet
 	// (e.g. after the user manually cleared the prefilled bubble)
@@ -264,8 +259,6 @@ export function createSwapStore() {
 		capacity = null;
 		quoteError = null;
 		capacityError = null;
-		createdOrder = null;
-
 		cancelQuoteDebounce();
 
 		// Refresh capacity for the new direction/pair
@@ -308,8 +301,6 @@ export function createSwapStore() {
 		capacity = null;
 		quoteError = null;
 		capacityError = null;
-		createdOrder = null;
-
 		cancelQuoteDebounce();
 
 		// Refresh capacity for new pair
@@ -508,32 +499,29 @@ export function createSwapStore() {
 		}
 	}
 
-	async function createOrder(walletAddress?: `0x${string}`): Promise<Order | null> {
+	async function createOrder(walletAddress?: `0x${string}`): Promise<string | null> {
 		if (!canSubmit) return null;
 
 		isCreatingOrder = true;
 		submitErrorCode = null;
 
 		try {
-			let order: Order;
 			if (isToTron) {
 				if (!walletAddress) {
 					throw new Error('Missing wallet address for EVM→Tron signing');
 				}
-				order = await createEvmToTronOrderViaSigning(walletAddress);
+				const execution = await executeEvmToTronSwap(walletAddress);
+				return execution.orderId;
 			} else {
-				const result = await swapService.createOrder({
-					direction,
+				const response = await swapService.requestTronDeposit({
+					direction: 'TRON_TO_EVM',
 					evmChainId: evmChain.chainId,
 					evmToken: evmToken.symbol as EvmStablecoin,
 					amount: amountAtomic,
 					recipientAddress
 				});
-				order = result.order;
+				return response.orderId;
 			}
-
-			createdOrder = order;
-			return order;
 		} catch (err) {
 			if (err instanceof swapService.SwapServiceError) {
 				submitErrorCode = err.code;
@@ -564,13 +552,13 @@ export function createSwapStore() {
 		await switchChain(wagmiConfig, { chainId: targetChainId });
 	}
 
-	async function createEvmToTronOrderViaSigning(walletAddress: `0x${string}`): Promise<Order> {
-		// Make sure the connected wallet is on the same chain as the EIP-712 domain
-		// we'll be asking it to sign for.
+	async function executeEvmToTronSwap(walletAddress: `0x${string}`): Promise<SwapExecutionSummary> {
 		await ensureWalletChainForSigning(evmChain.chainId);
 
-		const sessionResponse = await swapService.createSigningSession({
-			direction,
+		const evmToTronDirection = 'EVM_TO_TRON' as const;
+
+		const prepareResponse = await swapService.prepareEvmToTronSwap({
+			direction: evmToTronDirection,
 			evmChainId: evmChain.chainId,
 			evmToken: evmToken.symbol as EvmStablecoin,
 			amount: amountAtomic,
@@ -578,17 +566,9 @@ export function createSwapStore() {
 			evmSignerAddress: walletAddress
 		});
 
-		let session = sessionResponse.session;
-		const payloads = session.eip712Payloads ?? [];
+		const payloadSignatures: Record<string, `0x${string}`> = {};
 
-		if (payloads.length === 0 || session.signaturesReceived >= payloads.length) {
-			const finalized = await swapService.finalizeSigningSession(session.id);
-			return finalized.order;
-		}
-
-		for (let i = session.signaturesReceived; i < payloads.length; i++) {
-			const payload = payloads[i];
-
+		for (const payload of prepareResponse.payloads) {
 			const signature = await signTypedData(wagmiConfig, {
 				account: walletAddress,
 				domain: payload.domain as Record<string, unknown>,
@@ -596,23 +576,21 @@ export function createSwapStore() {
 				primaryType: payload.primaryType as keyof typeof payload.types,
 				message: payload.message as Record<string, unknown>
 			});
-
-			const submitResult = await swapService.submitSigningSessionSignatures(session.id, [
-				{
-					payloadId: payload.id,
-					signature
-				}
-			]);
-
-			session = submitResult.session;
+			payloadSignatures[payload.id] = signature as `0x${string}`;
 		}
 
-		const finalizeResult = await swapService.finalizeSigningSession(session.id);
-		return finalizeResult.order;
-	}
+		const executeResponse = await swapService.executeEvmToTronSwap({
+			direction: evmToTronDirection,
+			evmChainId: evmChain.chainId,
+			evmToken: evmToken.symbol as EvmStablecoin,
+			amount: amountAtomic,
+			recipientAddress,
+			evmSignerAddress: walletAddress,
+			payloads: prepareResponse.payloads,
+			payloadSignatures
+		});
 
-	function clearCreatedOrder() {
-		createdOrder = null;
+		return executeResponse.execution;
 	}
 
 	function reset() {
@@ -630,8 +608,6 @@ export function createSwapStore() {
 		capacity = null;
 		quoteError = null;
 		capacityError = null;
-		createdOrder = null;
-
 		cancelQuoteDebounce();
 	}
 
@@ -683,9 +659,6 @@ export function createSwapStore() {
 		get capacityError() {
 			return capacityError;
 		},
-		get createdOrder() {
-			return createdOrder;
-		},
 
 		// Derived getters
 		get isFromTron() {
@@ -735,7 +708,6 @@ export function createSwapStore() {
 		fetchQuote,
 		refreshCapacity,
 		createOrder,
-		clearCreatedOrder,
 		reset
 	};
 }

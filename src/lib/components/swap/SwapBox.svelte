@@ -260,10 +260,9 @@
 		}
 
 		const walletAddress = $connection.address as `0x${string}` | undefined;
-		const order = await swapStore.createOrder(walletAddress);
-		if (order) {
-			// Navigate to order page
-			goto(`/order/${order.id}`);
+		const orderId = await swapStore.createOrder(walletAddress);
+		if (orderId) {
+			goto(`/order/${orderId}`);
 		}
 	}
 
