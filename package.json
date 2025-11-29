@@ -58,9 +58,11 @@
 		"vitest-browser-svelte": "^2.0.1"
 	},
 	"dependencies": {
+		"@upstash/redis": "^1.35.7",
 		"@wagmi/connectors": "^7.0.2",
 		"@wagmi/core": "^3.0.0",
 		"viem": "^2.40.0",
+		"workflow": "^4.0.1-beta.22",
 		"zod": "^4.1.13"
 	}
 }

@@ -17,6 +17,9 @@ import {
 } from '$lib/server/validation/swapSchemas';
 import { getProtocolRelayTarget, RelayError } from '$lib/server/services/evmRelayer';
 import { relayEvmTxs } from '$lib/server/services/evmRelayer';
+import { start } from 'workflow/api';
+import { evmToTronSettlement } from '../../../../../../workflows/evm-to-tron';
+import type { SwapExecutionSummary } from '$lib/types/swap';
 
 function invalidRequestResponse(error?: ZodError) {
 	return json(
@@ -81,20 +84,30 @@ export const POST: RequestHandler = async ({ request }) => {
 			evmTxHash: relayResult.txHash
 		});
 
-		return json({
-			execution: {
-				orderId,
-				direction: payload.direction,
-				evmChainId: chain.chainId,
-				evmToken: token.symbol,
-				amount: payload.amount,
-				recipientAddress: payload.recipientAddress,
-				evmTxHash: relayResult.txHash,
-				relayMethod: relayResult.relayedVia,
-				status: 'relaying'
-			},
+		const execution: SwapExecutionSummary = {
+			orderId,
+			direction: payload.direction,
+			evmChainId: chain.chainId,
+			evmToken: token.symbol,
+			amount: payload.amount,
+			recipientAddress: payload.recipientAddress,
+			evmTxHash: relayResult.txHash,
+			relayMethod: relayResult.relayedVia,
+			status: 'relaying'
+		};
+
+		const responsePayload = {
+			execution,
 			quote
-		});
+		};
+
+		try {
+			await start(evmToTronSettlement, [execution]);
+		} catch (workflowError) {
+			console.error('Failed to enqueue EVM->Tron workflow', workflowError);
+		}
+
+		return json(responsePayload);
 	} catch (err) {
 		if (err instanceof SwapDomainError) {
 			return json({ message: err.message, code: err.code }, { status: err.statusCode ?? 400 });

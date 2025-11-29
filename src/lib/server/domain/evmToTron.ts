@@ -14,6 +14,7 @@ import { verifyTypedData } from 'viem';
 import { TRANSFER_WITH_AUTHORIZATION_PAYLOAD_ID } from './constants';
 import type { RelayCall } from '$lib/server/services/evmRelayer';
 import { SwapDomainError } from '$lib/server/errors';
+import { getSettlement } from '$lib/server/domain/evmToTronSettlement';
 
 export const ERC3009_AUTH_VALIDITY_SECONDS = 30 * 60; // 30 minutes
 
@@ -284,14 +285,33 @@ export function decodeEvmRelayOrderId(orderId: string): EvmRelayOrderIdParts {
 export async function projectEvmRelayOrderView(
 	parts: EvmRelayOrderIdParts
 ): Promise<EvmRelayOrderView> {
+	const orderId = encodeEvmRelayOrderId(parts);
+	const settlement = await getSettlement(orderId);
+
+	if (!settlement) {
+		return {
+			kind: 'evmRelay',
+			id: orderId,
+			direction: 'EVM_TO_TRON',
+			status: 'relaying',
+			evmTxHash: parts.evmTxHash,
+			metadata: {
+				evmChainId: parts.evmChainId
+			}
+		};
+	}
+
 	return {
 		kind: 'evmRelay',
-		id: encodeEvmRelayOrderId(parts),
+		id: orderId,
 		direction: 'EVM_TO_TRON',
-		status: 'relaying',
-		evmTxHash: parts.evmTxHash,
+		status: settlement.status,
+		evmTxHash: settlement.evmTxHash ?? parts.evmTxHash,
+		tronTxHash: settlement.tronTxHash,
 		metadata: {
-			evmChainId: parts.evmChainId
+			evmChainId: parts.evmChainId,
+			relayMethod: settlement.relayMethod,
+			errorReason: settlement.errorReason
 		}
 	};
 }

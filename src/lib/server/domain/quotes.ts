@@ -18,6 +18,10 @@ function convertBetweenDecimals(amount: bigint, fromDecimals: number, toDecimals
 	return fromDecimals < toDecimals ? amount * factor : amount / factor;
 }
 
+const TRON_TO_EVM_NETWORK_FEE_SUN = 0n; // 0 USDT for from-Tron swaps
+const EVM_TO_TRON_NETWORK_FEE_SUN = 2_000_000n; // flat 2 USDT for to-Tron swaps
+const PROTOCOL_FEE_BPS = 10n; // 0.1% for from-Tron swaps
+
 function computeFees(
 	direction: SwapDirection,
 	input: bigint,
@@ -29,12 +33,13 @@ function computeFees(
 	networkFeeDest: bigint;
 	totalFeeDest: bigint;
 } {
-	const protocolFeeSource = (input * 50n) / 10000n; // 0.5%
-	const networkFeeBase = direction === 'TRON_TO_EVM' ? 500000n : 100000n; // 6 decimals
+	const protocolFeeSource = direction === 'EVM_TO_TRON' ? 0n : (input * PROTOCOL_FEE_BPS) / 10000n;
+
 	const networkFeeSource =
-		direction === 'TRON_TO_EVM'
-			? networkFeeBase
-			: convertBetweenDecimals(networkFeeBase, 6, sourceDecimals);
+		direction === 'EVM_TO_TRON'
+			? convertBetweenDecimals(EVM_TO_TRON_NETWORK_FEE_SUN, TRON_USDT.decimals, sourceDecimals)
+			: TRON_TO_EVM_NETWORK_FEE_SUN;
+
 	const totalFeeSource = protocolFeeSource + networkFeeSource;
 	const outputSource = input > totalFeeSource ? input - totalFeeSource : 0n;
 
