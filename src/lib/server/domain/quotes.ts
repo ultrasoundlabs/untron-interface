@@ -21,6 +21,7 @@ function convertBetweenDecimals(amount: bigint, fromDecimals: number, toDecimals
 const TRON_TO_EVM_NETWORK_FEE_SUN = 0n; // 0 USDT for from-Tron swaps
 const EVM_TO_TRON_NETWORK_FEE_SUN = 2_000_000n; // flat 2 USDT for to-Tron swaps
 const PROTOCOL_FEE_BPS = 10n; // 0.1% for from-Tron swaps
+const EFFECTIVE_RATE_PRECISION = 6;
 
 function computeFees(
 	direction: SwapDirection,
@@ -49,6 +50,34 @@ function computeFees(
 		networkFeeDest: convertBetweenDecimals(networkFeeSource, sourceDecimals, destDecimals),
 		totalFeeDest: convertBetweenDecimals(totalFeeSource, sourceDecimals, destDecimals)
 	};
+}
+
+function formatEffectiveRate(
+	outputDest: bigint,
+	inputSource: bigint,
+	sourceDecimals: number,
+	destDecimals: number
+): string {
+	if (inputSource <= 0n) return '0';
+
+	const sourceFactor = 10n ** BigInt(sourceDecimals);
+	const destFactor = 10n ** BigInt(destDecimals);
+	const scale = 10n ** BigInt(EFFECTIVE_RATE_PRECISION);
+
+	const scaledRatio = (outputDest * sourceFactor * scale) / (inputSource * destFactor);
+	const whole = scaledRatio / scale;
+	const fractional = scaledRatio % scale;
+
+	if (fractional === 0n) {
+		return whole.toString();
+	}
+
+	const fractionalStr = fractional
+		.toString()
+		.padStart(EFFECTIVE_RATE_PRECISION, '0')
+		.replace(/0+$/, '');
+
+	return fractionalStr ? `${whole}.${fractionalStr}` : whole.toString();
 }
 
 export async function getQuote(params: QuoteParams): Promise<SwapQuote> {
@@ -81,19 +110,21 @@ export async function getQuote(params: QuoteParams): Promise<SwapQuote> {
 		sourceDecimals,
 		destDecimals
 	);
+	const protocolFeeBps = params.direction === 'EVM_TO_TRON' ? 0 : Number(PROTOCOL_FEE_BPS);
+	const effectiveRate = formatEffectiveRate(outputDest, input, sourceDecimals, destDecimals);
 
 	return {
 		direction: params.direction,
 		inputAmount: params.amount,
 		outputAmount: outputDest.toString(),
-		effectiveRate: '0.995',
+		effectiveRate,
 		fees: {
-			protocolFeeBps: 50,
+			protocolFeeBps,
 			protocolFeeAmount: protocolFeeDest.toString(),
 			networkFeeAmount: networkFeeDest.toString(),
 			totalFeeAmount: totalFeeDest.toString()
 		},
-		estimatedTimeSeconds: params.direction === 'TRON_TO_EVM' ? 180 : 60,
+		estimatedTimeSeconds: params.direction === 'TRON_TO_EVM' ? 60 : 3,
 		hint: input > 10000_000000n ? 'Large swaps may take a bit longer to process' : undefined,
 		expiresAt: Date.now() + 30000
 	};
