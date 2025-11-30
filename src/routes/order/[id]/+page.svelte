@@ -91,6 +91,12 @@
 		return `${chain.explorerUrl}/tx/${value.evmTxHash}`;
 	}
 
+	function getTronExplorerUrl(value: EvmRelayOrderView): string | null {
+		if (!value.tronTxHash) return null;
+		// TODO: make Tron explorer base URL configurable if needed
+		return `https://tronscan.org/#/transaction/${value.tronTxHash}`;
+	}
+
 	function getChainName(value: EvmRelayOrderView): string | null {
 		const chainId = (value.metadata?.evmChainId as number | undefined) ?? undefined;
 		if (!chainId) return null;
@@ -183,57 +189,144 @@
 				{#if isTronOrder(order)}
 					<TronDepositView {order} />
 				{:else if isEvmRelayOrder(order)}
-					<div class="text-center">
-						<div
-							class="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-blue-600 dark:bg-blue-900/30"
-						>
-							<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-								<circle
-									class="opacity-25"
-									cx="12"
-									cy="12"
-									r="10"
-									stroke="currentColor"
-									stroke-width="4"
-								></circle>
-								<path
-									class="opacity-75"
-									fill="currentColor"
-									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-								></path>
-							</svg>
-							<span class="text-sm font-medium">{m.order_status_relaying()}</span>
-						</div>
-						<p class="text-sm text-zinc-500 dark:text-zinc-400">
-							{#if getChainName(order)}
-								We submitted your transfer on {getChainName(order)}. Keep this tab open while we
-								process the Tron payout.
-							{:else}
-								We submitted your transfer. Keep this tab open while we process the Tron payout.
-							{/if}
-						</p>
-						{#if order.evmTxHash}
-							<p class="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-								{#if getExplorerUrl(order)}
-									<a
-										href={getExplorerUrl(order) ?? '#'}
-										target="_blank"
-										rel="noreferrer"
-										class="font-mono text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400"
-									>
-										{order.evmTxHash}
-									</a>
+					{#if order.status === 'relaying'}
+						<div class="text-center">
+							<div
+								class="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-blue-600 dark:bg-blue-900/30"
+							>
+								<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									></circle>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+								<span class="text-sm font-medium">{m.order_status_relaying()}</span>
+							</div>
+							<p class="text-sm text-zinc-500 dark:text-zinc-400">
+								{#if getChainName(order)}
+									We submitted your transfer on {getChainName(order)}. Keep this tab open while we
+									process the Tron payout.
 								{:else}
-									<span class="font-mono">{order.evmTxHash}</span>
+									We submitted your transfer. Keep this tab open while we process the Tron payout.
 								{/if}
 							</p>
-						{/if}
-					</div>
-					<div class="mt-6 space-y-4 py-6 text-center">
-						<p class="text-sm text-zinc-500 dark:text-zinc-400">
-							Your Tron USDT payout will start as soon as the EVM transfer is finalized.
-						</p>
-					</div>
+							{#if order.evmTxHash}
+								<p class="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+									{#if getExplorerUrl(order)}
+										<a
+											href={getExplorerUrl(order) ?? '#'}
+											target="_blank"
+											rel="noreferrer"
+											class="font-mono text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400"
+										>
+											{order.evmTxHash}
+										</a>
+									{:else}
+										<span class="font-mono">{order.evmTxHash}</span>
+									{/if}
+								</p>
+							{/if}
+						</div>
+						<div class="mt-6 space-y-4 py-6 text-center">
+							<p class="text-sm text-zinc-500 dark:text-zinc-400">
+								Your Tron USDT payout will start as soon as the EVM transfer is finalized.
+							</p>
+						</div>
+					{:else if order.status === 'completed'}
+						<div class="text-center">
+							<div
+								class="mb-4 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+							>
+								<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M5 13l4 4L19 7"
+									/>
+								</svg>
+								<span class="text-sm font-medium">{m.order_status_completed()}</span>
+							</div>
+							<h2 class="mb-2 text-lg font-semibold text-zinc-900 dark:text-white">
+								{m.order_success_title()}
+							</h2>
+							<p class="text-sm text-zinc-500 dark:text-zinc-400">
+								{m.order_success_description()}
+							</p>
+
+							<div class="mt-6 space-y-3 text-left text-xs text-zinc-500 dark:text-zinc-400">
+								{#if order.evmTxHash}
+									<div>
+										<div class="mb-1 font-semibold tracking-wide uppercase">
+											{m.order_source_tx()}
+										</div>
+										{#if getExplorerUrl(order)}
+											<a
+												href={getExplorerUrl(order) ?? '#'}
+												target="_blank"
+												rel="noreferrer"
+												class="font-mono break-all text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400"
+											>
+												{order.evmTxHash}
+											</a>
+										{:else}
+											<span class="font-mono break-all">{order.evmTxHash}</span>
+										{/if}
+									</div>
+								{/if}
+
+								{#if order.tronTxHash}
+									<div class="pt-2">
+										<div class="mb-1 font-semibold tracking-wide uppercase">
+											{m.order_dest_tx()}
+										</div>
+										{#if getTronExplorerUrl(order)}
+											<a
+												href={getTronExplorerUrl(order) ?? '#'}
+												target="_blank"
+												rel="noreferrer"
+												class="font-mono break-all text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400"
+											>
+												{order.tronTxHash}
+											</a>
+										{:else}
+											<span class="font-mono break-all">{order.tronTxHash}</span>
+										{/if}
+									</div>
+								{/if}
+							</div>
+						</div>
+					{:else if order.status === 'failed'}
+						<div class="text-center">
+							<div
+								class="mb-4 inline-flex items-center gap-2 rounded-full bg-red-100 px-4 py-2 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+							>
+								<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
+								</svg>
+								<span class="text-sm font-medium">{m.order_status_failed()}</span>
+							</div>
+							<p class="text-sm text-zinc-500 dark:text-zinc-400">
+								{order.metadata?.errorReason
+									? String(order.metadata.errorReason)
+									: m.order_error_generic_description()}
+							</p>
+						</div>
+					{/if}
 				{/if}
 			</div>
 

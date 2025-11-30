@@ -4,7 +4,18 @@ This is a Web3 dapp frontend for using Untron protocols. Untron is a cross-chain
 
 ## Stack
 
-We use bun as the package manager/CLI, SvelteKit (Svelte v5) as the web framework, shadcn-svelte (and only it!) for UI, vitest for testing, Paraglide for i18n, viem for blockchain interactions, and Wagmi Core for all wallet<>web stuff and whatever you usually need wagmi for. For everything that must be on the server we use SvelteKit's server functions, though the dapp itself is CSR, and we must keep as much logic on the client as feasible, only keeping on server what can't securely be on frontend (e.g. gasless relaying, business logic).
+We use:
+
+- bun as the package manager/CLI
+- SvelteKit (Svelte v5) as the web framework
+- shadcn-svelte (and never anything else!) for UI
+- vitest for testing
+- Paraglide for i18n
+- viem for EVM blockchain interactions
+- Wagmi Core for all wallet<>web stuff and whatever you usually need wagmi for
+- tronweb for Tron blockchain interactions (only on server side!!!).
+
+For everything that must be on the server we use SvelteKit's server functions, though the dapp itself is CSR, and we must keep as much logic on the client as feasible, only keeping on server what can't securely be on frontend (e.g. gasless relaying, business logic).
 
 ### Bun
 
@@ -169,3 +180,25 @@ E. Don’t hurt performance
 ## Specifics of Untron protocols
 
 TODO: write
+
+### Tron relayers & APITRX energy rentals
+
+- `TRON_RELAYER_PRIVATE_KEYS` (comma-separated hex, no whitespace) seeds the pool of custodial relayers. Each key is normalized and exposed through `tronRelayer.ts` for both balance checks and TRC-20 signing.
+- `TRON_RPC_URL` must point to a full node that supports `wallet/triggersmartcontract` and `wallet/gettransactioninfo`. All TronWeb clients (read-only + signer) share this endpoint.
+- Energy rentals run through [APITRX](https://apitrx.com/en/pages/energy). Configure:
+  - `APITRX_API_KEY` (required): issued by the @XXTrxBot Telegram bot.
+  - `APITRX_BASE_URL` (optional, default `https://web.apitrx.com`).
+  - `APITRX_DEFAULT_DURATION_HOURS`, `APITRX_ENERGY_BUFFER`, `APITRX_DEFAULT_ENERGY_VALUE` allow tuning the size/duration of automatic rentals. Defaults favor 1-hour, 65k+ energy top ups with a 5k buffer.
+- Tron payout tuning knobs (all optional):
+  - `TRON_PAYOUT_MIN_ENERGY` – minimum on-account energy before we trigger a rental (defaults to 130k to cover worst-case USDT transfers).
+  - `TRON_PAYOUT_ENERGY_BUFFER` & `TRON_PAYOUT_ENERGY_DURATION_HOURS` – extra headroom and rental length.
+  - `TRON_PAYOUT_FEE_LIMIT` – `feeLimit` passed to `contract.transfer(...).send()`, defaulting to 30_000_000 sun (30 TRX).
+  - `TRON_PAYOUT_SHOULD_POLL_RESPONSE` – set to `true` if you want TronWeb to poll block inclusion synchronously; we default to fire-and-forget because the workflow has its own confirmation step.
+  - `TRON_CONFIRMATION_*` (see `steps/evm-to-tron.ts`) control how often we poll Tron for receipts: `TRON_CONFIRMATION_ATTEMPTS`, `TRON_CONFIRMATION_INITIAL_DELAY_MS`, `TRON_CONFIRMATION_BACKOFF`, `TRON_CONFIRMATION_MAX_DELAY_MS`, `TRON_CONFIRMATION_TIMEOUT_MS`.
+
+When a payout fires, we:
+
+1. Query the relayer’s on-chain energy with `tronWeb.trx.getAccountResources`.
+2. If it falls below `TRON_PAYOUT_MIN_ENERGY`, call the APITRX `/prespeed` + `/getenergy` flow via `tronEnergy.ts`, renting enough headroom.
+3. Broadcast the USDT transfer (TRC-20) via the relayer’s signer-scoped TronWeb client.
+4. Poll `wallet/gettransactioninfo` until the receipt reports `SUCCESS`, using the retry knobs above. Any failure releases the relayer reservation so another EOA can take over.

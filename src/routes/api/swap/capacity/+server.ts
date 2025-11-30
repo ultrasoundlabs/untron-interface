@@ -37,8 +37,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json(capacity);
 	} catch (err) {
 		if (err instanceof SwapDomainError) {
+			console.error('[api/swap/capacity] SwapDomainError', err);
 			return json({ message: err.message, code: err.code }, { status: err.statusCode ?? 500 });
 		}
+
+		console.error('[api/swap/capacity] Unexpected error', err);
 		return json({ message: 'Failed to fetch capacity', code: 'UNKNOWN_ERROR' }, { status: 500 });
 	}
 };

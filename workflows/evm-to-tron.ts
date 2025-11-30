@@ -1,5 +1,6 @@
 import type { SwapExecutionSummary } from '../src/lib/types/swap';
 import {
+	ensureTronRelayerEnergy,
 	markSettlementCompleted,
 	markSettlementFailed,
 	recordInitialExecution,
@@ -34,6 +35,7 @@ export async function evmToTronSettlement(execution: SwapExecutionSummary) {
 	try {
 		await waitForEvmRelayConfirmation(execution);
 		const relayer = await selectTronRelayer(execution);
+		await ensureTronRelayerEnergy(execution, relayer);
 		const tronTxHash = await sendTronPayout(execution, relayer);
 		await waitForTronConfirmation(tronTxHash);
 		await markSettlementCompleted(execution.orderId, tronTxHash);

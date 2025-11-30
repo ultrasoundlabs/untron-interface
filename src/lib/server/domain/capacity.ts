@@ -57,7 +57,16 @@ function getStaticCapacity(direction: SwapDirection, sourceDecimals: number): Ca
 }
 
 async function getEvmToTronCapacity(sourceDecimals: number): Promise<CapacityInfo | null> {
-	const balances = await getTronRelayerBalances();
+	let balances;
+	try {
+		balances = await getTronRelayerBalances();
+	} catch (error) {
+		console.error(
+			'[capacity] Failed to fetch Tron relayer balances, falling back to static',
+			error
+		);
+		return null;
+	}
 	if (balances.length === 0) {
 		return null;
 	}

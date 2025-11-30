@@ -35,8 +35,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json(quote);
 	} catch (err) {
 		if (err instanceof SwapDomainError) {
+			console.error('[api/swap/quote] SwapDomainError', err);
 			return json({ message: err.message, code: err.code }, { status: err.statusCode ?? 500 });
 		}
+
+		console.error('[api/swap/quote] Unexpected error', err);
 		return json({ message: 'Failed to fetch quote', code: 'UNKNOWN_ERROR' }, { status: 500 });
 	}
 };

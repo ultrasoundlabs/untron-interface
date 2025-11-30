@@ -1,5 +1,5 @@
 import { TRON_USDT, getTokenOnChain } from '$lib/config/swapConfig';
-import type { SwapDirection, SwapQuote } from '$lib/types/swap';
+import type { EvmStablecoin, SwapDirection, SwapQuote } from '$lib/types/swap';
 import type { CapacityParams } from './capacity';
 import { getCapacity } from './capacity';
 import { SwapDomainError } from '../errors';
@@ -19,7 +19,7 @@ function convertBetweenDecimals(amount: bigint, fromDecimals: number, toDecimals
 }
 
 const TRON_TO_EVM_NETWORK_FEE_SUN = 0n; // 0 USDT for from-Tron swaps
-const EVM_TO_TRON_NETWORK_FEE_SUN = 2_000_000n; // flat 2 USDT for to-Tron swaps
+export const EVM_TO_TRON_NETWORK_FEE_SUN = 2_000_000n; // flat 2 USDT for to-Tron swaps
 const PROTOCOL_FEE_BPS = 10n; // 0.1% for from-Tron swaps
 const EFFECTIVE_RATE_PRECISION = 6;
 
@@ -128,4 +128,34 @@ export async function getQuote(params: QuoteParams): Promise<SwapQuote> {
 		hint: input > 10000_000000n ? 'Large swaps may take a bit longer to process' : undefined,
 		expiresAt: Date.now() + 30000
 	};
+}
+
+/**
+ * Project the expected Tron-side payout (after fees) for an EVM→Tron swap.
+ *
+ * This mirrors the EVM_TO_TRON branch of fee computation used in getQuote,
+ * but is exposed as a small helper for settlement workflows that only need
+ * the final Tron amount and must stay perfectly in sync with quoting logic.
+ */
+export function projectEvmToTronPayoutAmount(
+	evmChainId: number,
+	evmToken: EvmStablecoin,
+	amount: string
+): bigint {
+	const token = getTokenOnChain(evmChainId, evmToken);
+	if (!token) {
+		throw new SwapDomainError('Unsupported token for this chain', 'UNSUPPORTED_TOKEN');
+	}
+
+	const input = BigInt(amount);
+	if (input <= 0n) {
+		throw new SwapDomainError('Amount must be greater than zero', 'INVALID_AMOUNT');
+	}
+
+	const sourceDecimals = token.decimals;
+	const destDecimals = TRON_USDT.decimals;
+
+	const { outputDest } = computeFees('EVM_TO_TRON', input, sourceDecimals, destDecimals);
+
+	return outputDest;
 }

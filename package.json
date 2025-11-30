@@ -61,6 +61,7 @@
 		"@upstash/redis": "^1.35.7",
 		"@wagmi/connectors": "^7.0.2",
 		"@wagmi/core": "^3.0.0",
+		"tronweb": "^6.1.0",
 		"viem": "^2.40.0",
 		"workflow": "^4.0.1-beta.22",
 		"zod": "^4.1.13"
