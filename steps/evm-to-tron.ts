@@ -60,6 +60,12 @@ function getChainConfig(chainId: number): { rpcUrl: string; supportedId: Support
 	return { rpcUrl, supportedId: chain.chainId as SupportedChainId };
 }
 
+interface SerializableTronRelayerBalance {
+	address: string;
+	label?: string;
+	balanceSun: string;
+}
+
 const REQUIRED_EVM_CONFIRMATIONS = 2;
 const EVM_RECEIPT_RETRY_OPTIONS: RetryOptions = {
 	attempts: 5,
@@ -73,26 +79,22 @@ const RELAYER_LOCK_RETRY_DELAY_MS = 250;
 
 function getStepLogger(
 	execution: SwapExecutionSummary,
-	logger: SettlementWorkflowLogger | undefined,
 	step: string,
 	extra?: Record<string, unknown>
 ): SettlementWorkflowLogger {
-	const baseLogger =
-		logger ??
-		createSettlementWorkflowLogger({
-			orderId: execution.orderId,
-			evmTxHash: execution.evmTxHash
-		});
-
-	return extra ? baseLogger.child({ step, ...extra }) : baseLogger.child({ step });
+	return createSettlementWorkflowLogger({
+		orderId: execution.orderId,
+		evmTxHash: execution.evmTxHash,
+		step,
+		...(extra ?? {})
+	});
 }
 
 export async function recordInitialExecution(
-	execution: SwapExecutionSummary,
-	logger?: SettlementWorkflowLogger
+	execution: SwapExecutionSummary
 ): Promise<EvmToTronSettlementRecord> {
 	'use step';
-	const log = getStepLogger(execution, logger, 'record-initial-execution');
+	const log = getStepLogger(execution, 'record-initial-execution');
 	const settlement = await ensureSettlementFromExecution(execution);
 
 	if (settlement.createdAt === settlement.updatedAt) {
@@ -104,12 +106,9 @@ export async function recordInitialExecution(
 	return settlement;
 }
 
-export async function waitForEvmRelayConfirmation(
-	execution: SwapExecutionSummary,
-	logger?: SettlementWorkflowLogger
-): Promise<void> {
+export async function waitForEvmRelayConfirmation(execution: SwapExecutionSummary): Promise<void> {
 	'use step';
-	const log = getStepLogger(execution, logger, 'wait-evm-relay-confirmation');
+	const log = getStepLogger(execution, 'wait-evm-relay-confirmation');
 	if (!execution.evmTxHash) {
 		const error = new FatalError('Missing relay transaction hash for settlement');
 		log.error('Missing relay transaction hash', describeWorkflowError(error));
@@ -176,11 +175,10 @@ export async function waitForEvmRelayConfirmation(
 }
 
 export async function selectTronRelayer(
-	execution: SwapExecutionSummary,
-	logger?: SettlementWorkflowLogger
-): Promise<TronRelayerBalance> {
+	execution: SwapExecutionSummary
+): Promise<SerializableTronRelayerBalance> {
 	'use step';
-	const log = getStepLogger(execution, logger, 'select-tron-relayer');
+	const log = getStepLogger(execution, 'select-tron-relayer');
 	const requiredSun = getRequiredSun(execution);
 	log.info('Fetching Tron relayer balances', { requiredSun: requiredSun.toString() });
 
@@ -206,7 +204,11 @@ export async function selectTronRelayer(
 			relayerLabel: reservedRelayer.label
 		});
 
-		return reservedRelayer;
+		return {
+			address: reservedRelayer.address,
+			label: reservedRelayer.label,
+			balanceSun: reservedRelayer.balanceSun.toString()
+		};
 	}
 
 	for (let attempt = 1; attempt <= RELAYER_LOCK_MAX_ATTEMPTS; attempt++) {
@@ -266,7 +268,11 @@ export async function selectTronRelayer(
 				attempt
 			});
 
-			return selectedMeta.original;
+			return {
+				address: selectedMeta.original.address,
+				label: selectedMeta.original.label,
+				balanceSun: selectedMeta.original.balanceSun.toString()
+			};
 		} finally {
 			await releaseRelayerMutex(selected.address, lockToken);
 		}
@@ -279,11 +285,10 @@ export async function selectTronRelayer(
 
 export async function sendTronPayout(
 	execution: SwapExecutionSummary,
-	relayer: TronRelayerBalance,
-	logger?: SettlementWorkflowLogger
+	relayer: SerializableTronRelayerBalance
 ): Promise<string> {
 	'use step';
-	const log = getStepLogger(execution, logger, 'send-tron-payout', {
+	const log = getStepLogger(execution, 'send-tron-payout', {
 		relayerAddress: relayer.address
 	});
 	log.info('Creating Tron payout placeholder transaction', {
@@ -311,33 +316,22 @@ export async function sendTronPayout(
 	}
 }
 
-export async function waitForTronConfirmation(
-	tronTxHash: string,
-	logger?: SettlementWorkflowLogger
-): Promise<void> {
+export async function waitForTronConfirmation(tronTxHash: string): Promise<void> {
 	'use step';
-	const log =
-		logger ??
-		createSettlementWorkflowLogger({
-			step: 'wait-tron-confirmation',
-			tronTxHash
-		});
+	const log = createSettlementWorkflowLogger({
+		step: 'wait-tron-confirmation',
+		tronTxHash
+	});
 	log.info('Waiting for Tron confirmation (placeholder implementation)', { tronTxHash });
 	log.debug('Tron confirmation polling not yet implemented');
 }
 
-export async function markSettlementCompleted(
-	orderId: string,
-	tronTxHash: string,
-	logger?: SettlementWorkflowLogger
-): Promise<void> {
+export async function markSettlementCompleted(orderId: string, tronTxHash: string): Promise<void> {
 	'use step';
-	const log =
-		logger ??
-		createSettlementWorkflowLogger({
-			orderId,
-			step: 'mark-settlement-completed'
-		});
+	const log = createSettlementWorkflowLogger({
+		orderId,
+		step: 'mark-settlement-completed'
+	});
 	await releaseRelayerReservation(orderId);
 	const now = Date.now();
 	await transitionSettlementStatus(orderId, {
@@ -349,18 +343,12 @@ export async function markSettlementCompleted(
 	log.info('Marked settlement as completed', { tronTxHash });
 }
 
-export async function markSettlementFailed(
-	orderId: string,
-	reason: string,
-	logger?: SettlementWorkflowLogger
-): Promise<void> {
+export async function markSettlementFailed(orderId: string, reason: string): Promise<void> {
 	'use step';
-	const log =
-		logger ??
-		createSettlementWorkflowLogger({
-			orderId,
-			step: 'mark-settlement-failed'
-		});
+	const log = createSettlementWorkflowLogger({
+		orderId,
+		step: 'mark-settlement-failed'
+	});
 	await releaseRelayerReservation(orderId);
 	const now = Date.now();
 	await transitionSettlementStatus(orderId, {

@@ -22,10 +22,7 @@ export async function evmToTronSettlement(execution: SwapExecutionSummary) {
 		evmChainId: execution.evmChainId
 	});
 
-	const settlementRecord = await recordInitialExecution(
-		execution,
-		logger.child({ step: 'record-initial-execution' })
-	);
+	const settlementRecord = await recordInitialExecution(execution);
 
 	if (settlementRecord.status !== 'relaying') {
 		logger.info('Settlement already in terminal state, skipping workflow run', {
@@ -35,36 +32,18 @@ export async function evmToTronSettlement(execution: SwapExecutionSummary) {
 	}
 
 	try {
-		await waitForEvmRelayConfirmation(
-			execution,
-			logger.child({ step: 'wait-evm-relay-confirmation' })
-		);
-		const relayer = await selectTronRelayer(
-			execution,
-			logger.child({ step: 'select-tron-relayer' })
-		);
-		const tronTxHash = await sendTronPayout(
-			execution,
-			relayer,
-			logger.child({ step: 'send-tron-payout', relayerAddress: relayer.address })
-		);
-		await waitForTronConfirmation(
-			tronTxHash,
-			logger.child({ step: 'wait-tron-confirmation', tronTxHash })
-		);
-		await markSettlementCompleted(
-			execution.orderId,
-			tronTxHash,
-			logger.child({ step: 'mark-settlement-completed', tronTxHash })
-		);
+		await waitForEvmRelayConfirmation(execution);
+		const relayer = await selectTronRelayer(execution);
+		const tronTxHash = await sendTronPayout(execution, relayer);
+		await waitForTronConfirmation(tronTxHash);
+		await markSettlementCompleted(execution.orderId, tronTxHash);
 		logger.info('EVM→Tron settlement workflow completed', { tronTxHash });
 		return { orderId: execution.orderId, tronTxHash };
 	} catch (error) {
 		logger.error('EVM→Tron settlement workflow failed', describeWorkflowError(error));
 		await markSettlementFailed(
 			execution.orderId,
-			error instanceof Error ? error.message : 'Unknown error',
-			logger.child({ step: 'mark-settlement-failed' })
+			error instanceof Error ? error.message : 'Unknown error'
 		);
 		throw error;
 	}
