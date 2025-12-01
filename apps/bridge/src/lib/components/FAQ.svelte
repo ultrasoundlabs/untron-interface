@@ -94,7 +94,7 @@
 	<div class="space-y-4">
 		{#each faqs as item (item.id)}
 			<div
-				class="overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 shadow-sm shadow-zinc-200/50 backdrop-blur-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/80 dark:shadow-black/30"
+				class="overflow-hidden rounded-2xl bg-[#f2f2f2] transition-all duration-200 dark:bg-[#f2f2f2]"
 				in:fade={{ duration: transitionDuration }}
 			>
 				<button
@@ -109,7 +109,7 @@
 							<span aria-hidden="true">{item.emoji}</span>
 						</div>
 						<div>
-							<p class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+							<p class="text-[18px] font-medium text-zinc-900 dark:text-zinc-50">
 								{item.question()}
 							</p>
 						</div>
@@ -137,9 +137,9 @@
 
 				{#if getIsOpen(item.id)}
 					<div
-						class="px-4 pt-0 pb-4 text-sm text-zinc-700 md:px-5 md:pb-5 dark:text-zinc-300"
+						class="px-4 pt-0 pb-4 text-[16px] text-zinc-700 md:px-5 md:pb-5 dark:text-zinc-300"
 						in:slide={{ duration: transitionDuration }}
-						out:fade={{ duration: transitionDuration }}
+						out:slide={{ duration: transitionDuration }}
 					>
 						<p>{item.answer()}</p>
 					</div>
