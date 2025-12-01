@@ -63,7 +63,7 @@
 		{#snippet child({ props })}
 			<button
 				{...props}
-				class="flex items-center gap-2 rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-base text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/5 dark:hover:text-white"
+				class="flex items-center gap-2 rounded-xl border-none bg-transparent px-3 py-2 text-base text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-none dark:text-white/70 dark:hover:bg-white/5 dark:hover:text-white"
 			>
 				<span class="text-xl leading-none">{languageCodes[currentLocale]}</span>
 				<!-- Chevron -->

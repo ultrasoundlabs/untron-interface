@@ -50,7 +50,7 @@
 			{#snippet child({ props })}
 				<button
 					{...props}
-					class="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2 font-mono text-base text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-white/10 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+					class="flex items-center gap-2 rounded-xl border-none bg-zinc-50 px-4 py-2 font-mono text-base text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-none dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
 				>
 					<!-- Green dot indicator -->
 					<span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
@@ -106,9 +106,9 @@
 {:else}
 	<Button
 		onclick={handleConnect}
-		variant="secondary"
 		size="lg"
-		class="rounded-xl border border-zinc-200 dark:border-white/10"
+		variant="secondary"
+		class="rounded-xl border-none bg-black text-white shadow-none hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90"
 	>
 		{m.wallet_connect_wallet()}
 	</Button>

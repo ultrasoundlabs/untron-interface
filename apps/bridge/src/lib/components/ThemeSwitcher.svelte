@@ -32,7 +32,7 @@
 
 <button
 	onclick={toggleTheme}
-	class="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 bg-transparent text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/5 dark:hover:text-white"
+	class="flex h-10 w-10 items-center justify-center rounded-xl border-none bg-transparent text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-none dark:bg-transparent dark:text-white/70 dark:hover:bg-white/5 dark:hover:text-white"
 	aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
 >
 	{#if isDark}
