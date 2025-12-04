@@ -1,0 +1,43 @@
+---
+import Header from '../components/Header.astro';
+import { getAbsoluteLocaleUrl } from 'astro:i18n';
+import { locales } from '../i18n/locales.js';
+
+interface Props {
+  t: Record<string, string>;
+}
+
+const { t } = Astro.props as Props;
+
+// Build list of { code, url } for hreflang
+const hreflangs = locales.map((locale) => ({
+  code: locale.code,
+  url: getAbsoluteLocaleUrl(locale.code),
+}));
+---
+
+<!doctype html>
+<html lang={Astro.currentLocale ?? 'en'}>
+  <head>
+    <meta charset="utf-8" />
+    <title>{t.metaTitle}</title>
+    <meta name="description" content={t.metaDescription} />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={Astro.url.href} />
+
+    <!-- Open Graph / social preview -->
+    <meta property="og:title" content={t.ogTitle} />
+    <meta property="og:description" content={t.ogDescription} />
+    <meta property="og:image" content="https://untron.finance/og-image.png" />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {hreflangs.map((entry) => <link rel="alternate" hreflang={entry.code} href={entry.url} />)}
+    {hreflangs.length > 0 && <link rel="alternate" hreflang="x-default" href={hreflangs[0].url} />}
+  </head>
+  <body>
+    <Header t={t} />
+    <slot />
+  </body>
+</html>

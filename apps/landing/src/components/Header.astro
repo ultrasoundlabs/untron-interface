@@ -1,0 +1,63 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { locales } from '../i18n/locales.js';
+
+interface Props {
+  t: Record<string, string>;
+}
+
+const { t } = Astro.props as Props;
+const languages = locales;
+---
+
+<header>
+  <nav aria-label="Main navigation">
+    <a href={getRelativeLocaleUrl(Astro.currentLocale ?? 'en', '')}>{t.navBrand}</a>
+
+    <ul>
+      <li>
+        <a href="#integrate">{t.navIntegrate}</a>
+      </li>
+      <li>
+        <a href="#fees">{t.navFees}</a>
+      </li>
+      <li>
+        <a href="#chains">{t.navChains}</a>
+      </li>
+      <li>
+        <a href="#security">{t.navSecurity}</a>
+      </li>
+      <li>
+        <a href="#faq">{t.navFaq}</a>
+      </li>
+      <li>
+        <a href="https://blog.untron.finance">{t.navBlog}</a>
+      </li>
+    </ul>
+
+    <div>
+      {
+        languages.length > 1 && (
+          <details>
+            <summary>🌐 {t.languageSwitcherLabel}</summary>
+            <ul>
+              {languages.map((lang) => (
+                <li>
+                  <a
+                    href={getRelativeLocaleUrl(lang.code)}
+                    aria-current={Astro.currentLocale === lang.code ? 'page' : undefined}
+                  >
+                    {lang.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )
+      }
+      <a href="https://app.untron.finance" aria-label={t.navGoToApp}>
+        {t.navGoToApp}
+      </a>
+    </div>
+  </nav>
+</header>

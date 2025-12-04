@@ -1,0 +1,198 @@
+---
+interface Props {
+  t: Record<string, string>;
+}
+
+const { t } = Astro.props as Props;
+---
+
+<main>
+  <!-- Hero -->
+  <section aria-labelledby="hero-title">
+    <p>{t.heroEyebrow}</p>
+    <h1 id="hero-title">{t.heroTitle}</h1>
+    <p>{t.heroParagraph1}</p>
+    <p>
+      <strong>{t.heroParagraph2}</strong>
+    </p>
+    <a href="https://app.untron.finance">{t.heroCta}</a>
+  </section>
+  <!-- For stablecoin users -->
+  <section aria-labelledby="for-users">
+    <h2 id="for-users">{t.forUsersHeading}</h2>
+    <p>{t.forUsersParagraph1}</p>
+    <p>{t.forUsersParagraph2}</p>
+    <p>{t.forUsersParagraph3}</p>
+    <a href="https://app.untron.finance">{t.forUsersCta}</a>
+  </section>
+
+  <!-- For businesses -->
+  <section aria-labelledby="for-businesses">
+    <h2 id="for-businesses">{t.forBusinessesHeading}</h2>
+    <p set:html={t.forBusinessesParagraph1} />
+    <p>{t.forBusinessesParagraph2}</p>
+    <div>
+      <a href="https://app.untron.finance">{t.forBusinessesCtaBridgeNow}</a>
+      <a href="#fees">{t.forBusinessesCtaComparison}</a>
+      <a href="mailto:hello@untron.finance">{t.forBusinessesCtaTalkToUs}</a>
+    </div>
+  </section>
+
+  <!-- For developers -->
+  <section id="integrate" aria-labelledby="for-developers">
+    <h2 id="for-developers">{t.forDevelopersHeading}</h2>
+    <p>{t.forDevelopersParagraph1}</p>
+    <p>{t.forDevelopersParagraph2}</p>
+    <div>
+      <a href="https://docs.untron.finance">{t.forDevelopersCtaDocs}</a>
+      <a href="https://t.me/alexhooketh">{t.forDevelopersCtaTalkToUs}</a>
+    </div>
+  </section>
+
+  <!-- Fees & pricing -->
+  <section id="fees" aria-labelledby="fees-heading">
+    <h2 id="fees-heading">{t.feesHeading}</h2>
+    <p>{t.feesIntro}</p>
+
+    <h3>{t.feesTronToEvmHeading}</h3>
+    <p>{t.feesTronToEvmNote}</p>
+    <table>
+      <thead>
+        <tr>
+          <th>{t.feesTableService}</th>
+          <th>{t.feesTableReceived}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{t.feesRowUntronTronToEvm}</td>
+          <td>{t.feesRowUntronTronToEvmValue}</td>
+        </tr>
+        <tr>
+          <td>{t.feesRowFixedFloat}</td>
+          <td>{t.feesRowFixedFloatValue}</td>
+        </tr>
+        <tr>
+          <td>{t.feesRowChangeNow}</td>
+          <td>{t.feesRowChangeNowValue}</td>
+        </tr>
+        <tr>
+          <td>{t.feesRowSymbiosis}</td>
+          <td>{t.feesRowSymbiosisValue}</td>
+        </tr>
+        <tr>
+          <td>{t.feesRowBridgers}</td>
+          <td>{t.feesRowBridgersValue}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>{t.feesFootnote1}</p>
+    <p>
+      <strong>{t.feesFootnote2}</strong>
+    </p>
+
+    <h3>{t.feesEvmToTronHeading}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>{t.feesTableService}</th>
+          <th>{t.feesTableReceived}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{t.feesRowUntronEvmToTron}</td>
+          <td>{t.feesRowUntronEvmToTronValue}</td>
+        </tr>
+        <tr>
+          <td>{t.feesRowFixedFloat}</td>
+          <td>{t.feesRowFixedFloatValue}</td>
+        </tr>
+        <tr>
+          <td>{t.feesRowChangeNow}</td>
+          <td>{t.feesRowChangeNowValue}</td>
+        </tr>
+        <tr>
+          <td>{t.feesRowSymbiosis}</td>
+          <td>{t.feesRowSymbiosisEvmToTronValue}</td>
+        </tr>
+        <tr>
+          <td>{t.feesRowBridgers}</td>
+          <td>{t.feesRowBridgersEvmToTronValue}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>{t.feesFootnote3}</p>
+  </section>
+
+  <!-- Supported chains -->
+  <section id="chains" aria-labelledby="chains-heading">
+    <h2 id="chains-heading">{t.chainsHeading}</h2>
+
+    <h3>{t.chainsStablecoinsHeading}</h3>
+    <ul>
+      <li>{t.chainsStablecoinUsdt}</li>
+      <li>{t.chainsStablecoinUsdc}</li>
+    </ul>
+
+    <h3>{t.chainsNetworksHeading}</h3>
+    <ul>
+      <li>{t.chainsNetworkEthereum}</li>
+      <li>{t.chainsNetworkArbitrum}</li>
+      <li>{t.chainsNetworkOptimism}</li>
+      <li>{t.chainsNetworkBase}</li>
+      <li>{t.chainsNetworkBnb}</li>
+      <li>{t.chainsNetworkMore}</li>
+    </ul>
+
+    <p>{t.chainsParagraph}</p>
+  </section>
+
+  <!-- Security -->
+  <section id="security" aria-labelledby="security-heading">
+    <h2 id="security-heading">{t.securityHeading}</h2>
+    <p>{t.securityParagraph1}</p>
+    <p>{t.securityParagraph2}</p>
+    <a href="/security">{t.securityCtaTechnical}</a>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" aria-labelledby="faq-heading">
+    <h2 id="faq-heading">{t.faqHeading}</h2>
+
+    <h3>{t.faqIsNonCustodialQuestion}</h3>
+    <p>{t.faqIsNonCustodialAnswer}</p>
+
+    <h3>{t.faqGasQuestion}</h3>
+    <p>{t.faqGasAnswer}</p>
+
+    <!-- etc, add more later -->
+  </section>
+
+  <!-- Blog -->
+  <section aria-labelledby="blog-heading">
+    <h2 id="blog-heading">{t.blogHeading}</h2>
+    <ul>
+      <li>
+        <a href="https://blog.untron.finance/article-1">{t.blogArticle1}</a>
+      </li>
+      <li>
+        <a href="https://blog.untron.finance/article-2">{t.blogArticle2}</a>
+      </li>
+      <li>
+        <a href="https://blog.untron.finance/article-3">{t.blogArticle3}</a>
+      </li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <p>{t.footerCopyright}</p>
+  <nav aria-label="Footer navigation">
+    <a href="/terms">{t.footerLinkTerms}</a>
+    <a href="/privacy">{t.footerLinkPrivacy}</a>
+    <a href="https://docs.untron.finance">{t.footerLinkDocs}</a>
+    <a href="https://discord.gg/...">{t.footerLinkDiscord}</a>
+    <a href="https://x.com/...">{t.footerLinkX}</a>
+  </nav>
+</footer>
