@@ -32,7 +32,7 @@ export const landing = {
   forUsersParagraph1:
     'Untron is a web-based platform you can use from any exchange or wallet to send stablecoins between Tron (TRC-20) and dozens of popular EVM chains. It’s gasless for end users — you don’t need ETH, TRX, or BNB to use it — and it’s incredibly cheap.',
   forUsersParagraph2:
-    'For example, swapping USDT to a Tron address often costs around $2, typically about twice as cheap as sending USDT directly on Tron. Exact fees may vary; always check the app for current pricing.',
+    'For example, swapping USDT to a Tron address is exactly $2 (just gas fees) without any additional fees — about twice as cheap as sending USDT directly on Tron.',
   forUsersParagraph3:
     'In short, Untron connects cheap and convenient EVM chains to Tron’s vast payments ecosystem, letting you benefit from both.',
   forUsersCta: 'Try Untron',
@@ -41,7 +41,7 @@ export const landing = {
   forBusinessesHeading:
     'For businesses: rebalance stablecoin liquidity between Tron and EVM at scale',
   forBusinessesParagraph1:
-    'From payment merchants and rails to Argentinian cuevas and OTC desks, Untron is the way to rebalance stablecoin liquidity across chains worldwide. Move millions of dollars in minutes between Tron and EVM chains, without relying on centralized exchanges.',
+    'From payment merchants and rails to OTC desks and Argentinian cuevas, Untron is the way to rebalance stablecoin liquidity across chains worldwide. Move millions of dollars in minutes between Tron and EVM chains, without relying on centralized exchanges.',
   forBusinessesParagraph2:
     'Fully audited contracts and a trust-minimized design ensure that funds can be bridged with no arbitrary limits or restrictions.',
   forBusinessesCtaBridgeNow: 'Bridge now',
@@ -79,15 +79,15 @@ export const landing = {
   feesFootnote1:
     '* Most decentralized bridges like Symbiosis and Bridgers require a smart contract call on Tron, which costs around $5 in TRX gas fees. FixedFloat and ChangeNOW are centralized exchanges and do not require that call.',
   feesFootnote2:
-    'Untron is the only decentralized bridge that doesn’t require Tron smart contract calls, can be used from any exchange or wallet, and is cheaper than both centralized and decentralized alternatives on typical routes.',
+    'Untron is the only decentralized bridge that doesn’t require Tron smart contract calls, can be used from any exchange or wallet, and is cheaper than both centralized and decentralized alternatives.',
 
   feesEvmToTronHeading: 'Swapping $100 from an EVM chain to Tron',
   feesRowUntronEvmToTron: 'Untron',
-  feesRowUntronEvmToTronValue: '$98.00 (effectively fee-free into Tron)*',
+  feesRowUntronEvmToTronValue: '$98.00 (fee-free into Tron)*',
   feesRowSymbiosisEvmToTronValue: '$90.00 (0.30% + gas fees)',
   feesRowBridgersEvmToTronValue: '$90.00 (0.30% + gas fees)',
   feesFootnote3:
-    '* Untron does not charge bridging fees for swapping into Tron USDT and optimizes gas usage on Tron, often making it roughly twice as cheap as a normal Tron USDT transfer — practical even for daily transfers.',
+    '* Untron does not charge bridging fees for swapping into Tron USDT and optimizes gas usage on Tron, making it twice as cheap as a normal Tron USDT transfer — practical even for daily transfers to Tron users.',
 
   // Supported assets / chains
   chainsHeading: 'Supported stablecoins and EVM chains',
@@ -109,7 +109,7 @@ export const landing = {
   securityParagraph1:
     'Untron is a non-custodial Tron ↔ EVM stablecoin bridge. Our protocols read the Tron blockchain in real time as the source of truth, so funds only leave your possession if the Tron blockchain has processed the transaction you requested.',
   securityParagraph2:
-    'Our smart contracts have been audited and formally verified by Ultrasound Labs and are built around a ZK-based Tron light client. This makes Untron one of the most trust-minimized bridging solutions for Tron and EVM ecosystems.',
+    'Our smart contracts have been audited and formally verified by Ultrasound Labs and are built around a ZK-based Tron light client. This makes Untron the gold standard of trust-minimized bridging solutions not just in Tron, but the entire bridging ecosystem.',
   securityCtaTechnical: 'Read more (technical)',
 
   // FAQ
@@ -120,6 +120,15 @@ export const landing = {
   faqGasQuestion: 'Do I need TRX or ETH gas to use Untron?',
   faqGasAnswer:
     'End-user experience is gasless. Untron abstracts gas costs on supported routes so you can bridge stablecoins without pre-funding TRX or ETH.',
+  faqIsKycRequiredQuestion: 'Is KYC required to use Untron?',
+  faqIsKycRequiredAnswer:
+    'No. Untron is a non-custodial bridge and does not require KYC. You can bridge stablecoins without any identity verification.',
+  faqAvailableCountriesQuestion: 'Which countries is Untron available in?',
+  faqAvailableCountriesAnswer:
+    'Untron’s decentralized protocols have no idea what country you’re in. Our official interface (website) for using Untron does not impose additional restrictions, so you should be able to use it from anywhere in the world.',
+  faqWhatAmountsAreSafeQuestion: 'What amounts are safe to bridge?',
+  faqWhatAmountsAreSafeAnswer:
+    'Untron is designed to be safe for all amounts. Additionally, our interface automatically limits the maximum amount, so it’s impossible to enter an amount that would exceed the platform’s capacity.',
 
   // Blog
   blogHeading: 'From the Untron blog',
