@@ -9,6 +9,10 @@
     "preview": "cd apps/bridge && bun run preview",
     "lint": "cd apps/bridge && bun run lint",
     "check": "cd apps/bridge && bun run check",
-    "test": "cd apps/bridge && bun run test"
+    "test": "cd apps/bridge && bun run test",
+
+    "dev:landing": "cd apps/landing && bun dev",
+    "build:landing": "cd apps/landing && bun run build",
+    "preview:landing": "cd apps/landing && bun run preview"
   }
 }
