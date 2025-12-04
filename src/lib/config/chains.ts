@@ -11,6 +11,8 @@ interface ChainDefinition {
 	viemChain: ViemChain;
 	wagmiChain: WagmiChain;
 	tokens: Partial<Record<EvmStablecoin, `0x${string}`>>;
+	/** Per-token thresholds (in atomic units) above which rebalancing to Arbitrum USDT triggers */
+	rebalanceThresholds: Partial<Record<EvmStablecoin, bigint>>;
 }
 
 interface ChainDescriptor {
@@ -28,6 +30,8 @@ interface ChainDescriptor {
 	};
 	isTestnet?: boolean;
 	tokens: Partial<Record<EvmStablecoin, `0x${string}`>>;
+	/** Per-token thresholds (in atomic units) above which rebalancing to Arbitrum USDT triggers */
+	rebalanceThresholds?: Partial<Record<EvmStablecoin, bigint>>;
 }
 
 function createViemChain(params: {
@@ -95,6 +99,14 @@ export const TOKEN_METADATA: Record<EvmStablecoin, TokenMetadata> = {
 	}
 };
 
+const STABLECOIN_DECIMALS = 6n;
+const STABLECOIN_SCALE = 10n ** STABLECOIN_DECIMALS;
+
+/** Convert human-readable whole-unit stablecoin amounts into atomic units */
+function stablecoinAtomic(wholeUnits: bigint): bigint {
+	return wholeUnits * STABLECOIN_SCALE;
+}
+
 const CHAIN_DESCRIPTORS = [
 	{
 		id: 1,
@@ -111,6 +123,10 @@ const CHAIN_DESCRIPTORS = [
 		tokens: {
 			USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
 			USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+		},
+		rebalanceThresholds: {
+			USDT: stablecoinAtomic(150_000n),
+			USDC: stablecoinAtomic(150_000n)
 		}
 	},
 	{
@@ -128,6 +144,10 @@ const CHAIN_DESCRIPTORS = [
 		tokens: {
 			USDT: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
 			USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
+		},
+		rebalanceThresholds: {
+			USDT: stablecoinAtomic(80_000n),
+			USDC: stablecoinAtomic(80_000n)
 		}
 	},
 	{
@@ -144,6 +164,9 @@ const CHAIN_DESCRIPTORS = [
 		},
 		tokens: {
 			USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+		},
+		rebalanceThresholds: {
+			USDC: stablecoinAtomic(60_000n)
 		}
 	},
 	{
@@ -161,6 +184,10 @@ const CHAIN_DESCRIPTORS = [
 		tokens: {
 			USDC: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
 			USDT: '0x01bFF41798a0BcF287b996046Ca68b395DbC1071'
+		},
+		rebalanceThresholds: {
+			USDC: stablecoinAtomic(40_000n),
+			USDT: stablecoinAtomic(40_000n)
 		}
 	},
 	{
@@ -178,6 +205,10 @@ const CHAIN_DESCRIPTORS = [
 		tokens: {
 			USDT: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
 			USDC: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'
+		},
+		rebalanceThresholds: {
+			USDT: stablecoinAtomic(50_000n),
+			USDC: stablecoinAtomic(50_000n)
 		}
 	},
 	{
@@ -194,7 +225,8 @@ const CHAIN_DESCRIPTORS = [
 		},
 		tokens: {
 			USDT: '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb'
-		}
+		},
+		rebalanceThresholds: {}
 	},
 	{
 		id: 5000,
@@ -210,7 +242,8 @@ const CHAIN_DESCRIPTORS = [
 		},
 		tokens: {
 			USDT: '0x779Ded0c9e1022225f8E0630b35a9b54bE713736'
-		}
+		},
+		rebalanceThresholds: {}
 	},
 	{
 		id: 143,
@@ -227,7 +260,8 @@ const CHAIN_DESCRIPTORS = [
 		tokens: {
 			USDC: '0x754704Bc059F8C67012fEd69BC8A327a5aafb603',
 			USDT: '0xe7cd86e13AC4309349F30B3435a9d337750fC82D'
-		}
+		},
+		rebalanceThresholds: {}
 	},
 	{
 		id: 130,
@@ -244,7 +278,8 @@ const CHAIN_DESCRIPTORS = [
 		tokens: {
 			USDC: '0x078D782b760474a361dDA0AF3839290b0EF57AD6',
 			USDT: '0x9151434b16b9763660705744891fA906F660EcC5'
-		}
+		},
+		rebalanceThresholds: {}
 	},
 	{
 		id: 42220,
@@ -261,7 +296,8 @@ const CHAIN_DESCRIPTORS = [
 		tokens: {
 			USDC: '0xcebA9300f2b948710d2653dD7B07f33A8B32118C',
 			USDT: '0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e'
-		}
+		},
+		rebalanceThresholds: {}
 	},
 	{
 		id: 480,
@@ -277,7 +313,8 @@ const CHAIN_DESCRIPTORS = [
 		},
 		tokens: {
 			USDC: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1'
-		}
+		},
+		rebalanceThresholds: {}
 	}
 ] as const satisfies readonly ChainDescriptor[];
 
@@ -301,7 +338,8 @@ function buildChainDefinition(descriptor: ChainDescriptor): ChainDefinition {
 		explorerUrl: descriptor.explorer.url,
 		viemChain,
 		wagmiChain: viemChain as WagmiChain,
-		tokens: descriptor.tokens
+		tokens: descriptor.tokens,
+		rebalanceThresholds: descriptor.rebalanceThresholds ?? {}
 	};
 }
 

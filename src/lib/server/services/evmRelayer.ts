@@ -196,6 +196,64 @@ export async function getProtocolRelayTarget(
 	return { mode: 'aa', address: safeAccount.address };
 }
 
+/**
+ * Result of getRelayerAddresses – contains both EOA and (optionally) Safe addresses.
+ */
+export interface RelayerAddresses {
+	/** The EOA address that owns the relayer (always present when key is configured) */
+	eoa: `0x${string}`;
+	/** The Safe smart account address (only present on AA-enabled chains) */
+	safe?: `0x${string}`;
+}
+
+/**
+ * Get the relayer's EOA and Safe addresses for a given chain.
+ *
+ * For chains configured with `mode: 'aa'`, this derives the Safe address
+ * (caching it for future calls). For `mode: 'eoa'` chains, `safe` will be undefined.
+ *
+ * @param chainId - The supported chain ID
+ * @returns Object containing the EOA address and optionally the Safe address
+ * @throws {RelayError} When the chain is unsupported or keys are not configured
+ */
+export async function getRelayerAddresses(chainId: SupportedChainId): Promise<RelayerAddresses> {
+	const chainDef = getChainDefinition(chainId);
+	if (!chainDef) {
+		throw new RelayError(`Unsupported chain: ${chainId}`, 'UNSUPPORTED_CHAIN');
+	}
+
+	let ownerAccount: ReturnType<typeof privateKeyToAccount>;
+	try {
+		ownerAccount = getRelayerOwnerAccount();
+	} catch (err) {
+		throw new RelayError('Relayer private key not configured', 'EOA_NOT_CONFIGURED', err);
+	}
+
+	const relayConfig = getRelayConfig(chainId);
+
+	// For EOA-only chains, return just the EOA address
+	if (relayConfig.mode === 'eoa') {
+		return { eoa: ownerAccount.address };
+	}
+
+	// For AA chains, derive the Safe address
+	const cachedSafe = safeAddressCache.get(chainId);
+	if (cachedSafe) {
+		return { eoa: ownerAccount.address, safe: cachedSafe };
+	}
+
+	const rpcUrl = getChainRpcUrl(chainId);
+	const publicClient = createPublicClient({
+		chain: chainDef.viemChain,
+		transport: http(rpcUrl)
+	});
+
+	const safeAccount = await buildSafeSmartAccount(publicClient, relayConfig, ownerAccount);
+	safeAddressCache.set(chainId, safeAccount.address);
+
+	return { eoa: ownerAccount.address, safe: safeAccount.address };
+}
+
 // =============================================================================
 // EOA Relayer Implementation
 // =============================================================================
