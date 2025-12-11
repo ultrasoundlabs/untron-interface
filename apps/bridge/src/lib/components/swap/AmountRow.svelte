@@ -83,11 +83,31 @@
 	}
 
 	const displayAmount = $derived(amount);
+
+	let networkIconFailed = $state(false);
+
+	const networkLogoUrl = $derived(() => {
+		if (chain) return chain.logoUrl;
+		if (isTron) return '/logos/chains/tron.svg';
+		return undefined;
+	});
+
+	const networkLabel = $derived(() => {
+		if (chain) return chain.name;
+		if (isTron) return 'Tron';
+		return 'Network';
+	});
+
+	$effect(() => {
+		// Reset badge error state when network changes
+		networkLogoUrl;
+		networkIconFailed = false;
+	});
 </script>
 
 <div
 	class={`group relative rounded-4xl p-6 transition-colors ${
-		isSource ? 'bg-white dark:bg-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800/50'
+		isSource ? 'bg-white dark:bg-zinc-900' : 'bg-white dark:bg-zinc-900/90'
 	}`}
 >
 	<!-- Label -->
@@ -98,8 +118,12 @@
 		{#if isSource && onMaxClick}
 			<Button
 				size="sm"
-				class="rounded-full bg-zinc-900 px-4 text-sm font-semibold text-white transition-colors duration-150 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-				onclick={onMaxClick}
+				variant="ghost"
+				class="h-auto bg-zinc-100 px-2 py-1.5 text-[11px] font-semibold leading-none text-primary hover:bg-zinc-200 hover:text-primary dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
+				onclick={(event) => {
+					event.stopPropagation();
+					onMaxClick?.();
+				}}
 			>
 				{m.swap_max()}
 			</Button>
@@ -138,59 +162,84 @@
 			{/if}
 		</div>
 
-		<!-- Token Selector -->
-		<button
-			type="button"
-			onclick={() => onTokenSelect?.()}
-			disabled={selectorDisabled || isTron}
-			class="flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 transition-all duration-150
-				{isTron ? 'cursor-default bg-transparent shadow-none dark:bg-transparent' : 'bg-white shadow-sm dark:bg-zinc-700'}
-				{!isTron && !selectorDisabled ? 'cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-600' : ''}
+		<div class="relative shrink-0">
+			<!-- Token Selector -->
+			<button
+				type="button"
+				onclick={() => onTokenSelect?.()}
+				disabled={selectorDisabled || isTron}
+				class="relative flex items-start gap-2 rounded-xl px-3 py-2 transition-all duration-150
+					{isTron ? 'cursor-default bg-transparent shadow-none dark:bg-transparent' : 'bg-white shadow-sm dark:bg-zinc-700'}
+					{!isTron && !selectorDisabled ? 'cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-600' : ''}
 				{selectorDisabled && !isTron ? 'cursor-default' : ''}"
-		>
-			<!-- Token Logo -->
-			<div class="relative h-7 w-7 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-600">
-				<img
-					src={token.logoUrl}
-					alt={token.symbol}
-					class="h-full w-full object-cover"
-					onerror={(e) => {
-						(e.target as HTMLImageElement).style.display = 'none';
-					}}
-				/>
-			</div>
+			>
+				<!-- Token Logo -->
+				<div class="relative h-7 w-7">
+					<div class="h-full w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-600">
+						<img
+							src={token.logoUrl}
+							alt={token.symbol}
+							class="h-full w-full object-cover"
+							onerror={(e) => {
+								(e.target as HTMLImageElement).style.display = 'none';
+							}}
+						/>
+					</div>
+					{#if networkLogoUrl}
+						<div
+							class="absolute -right-1 -bottom-1 h-5 w-5 overflow-hidden rounded-full border-2 border-white bg-zinc-50 shadow-sm dark:border-zinc-800 dark:bg-zinc-700"
+						>
+							{#if !networkIconFailed}
+								<img
+									src={networkLogoUrl}
+									alt={networkLabel}
+									class="h-full w-full object-cover"
+									onerror={() => {
+										networkIconFailed = true;
+									}}
+								/>
+							{:else}
+								<div class="flex h-full w-full items-center justify-center bg-red-500 text-[10px] font-semibold text-white">
+									{networkLabel?.[0] ?? 'N'}
+								</div>
+							{/if}
+						</div>
+					{/if}
+				</div>
 
-			<!-- Token & Chain Info -->
-			<div class="flex flex-col items-start">
-				<span class="text-sm font-semibold text-zinc-900 dark:text-white">
-					{token.symbol}
-				</span>
-				{#if chain}
-					<span class="text-xs text-zinc-500 dark:text-zinc-400">
-						{chain.name}
+				<!-- Token & Chain Info -->
+				<div class="flex flex-col items-start leading-tight">
+					<span class="text-sm font-semibold text-zinc-900 dark:text-white">
+						{token.symbol}
 					</span>
-				{:else if isTron}
-					<span class="text-xs text-zinc-500 dark:text-zinc-400">Tron</span>
-				{/if}
-			</div>
+					{#if chain}
+						<span class="text-xs text-zinc-500 dark:text-zinc-400">
+							{chain.name}
+						</span>
+					{:else if isTron}
+						<span class="text-xs text-zinc-500 dark:text-zinc-400">Tron</span>
+					{/if}
+				</div>
 
-			<!-- Dropdown Arrow (only for EVM) -->
-			{#if !isTron && !selectorDisabled}
-				<svg
-					class="ml-1 h-4 w-4 text-zinc-400 transition-transform group-hover:translate-y-0.5"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-					in:scale={{ duration: 150, start: 0.8 }}
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 9l-7 7-7-7"
-					/>
-				</svg>
-			{/if}
-		</button>
+				<!-- Dropdown Arrow (only for EVM) -->
+				{#if !isTron && !selectorDisabled}
+					<svg
+						class="ml-1 h-4 w-4 text-zinc-400 transition-transform group-hover:translate-y-0.5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						in:scale={{ duration: 150, start: 0.8 }}
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				{/if}
+			</button>
+
+		</div>
 	</div>
 </div>
