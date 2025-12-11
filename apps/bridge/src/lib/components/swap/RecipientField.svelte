@@ -70,6 +70,24 @@
 		setTimeout(() => inputElement?.focus(), 50);
 	}
 
+	async function handlePasteClick(event: MouseEvent) {
+		event.preventDefault();
+		if (typeof navigator === 'undefined' || !navigator.clipboard?.readText) return;
+
+		try {
+			const text = (await navigator.clipboard.readText())?.trim();
+			if (!text) return;
+			onAddressChange?.(text);
+			requestAnimationFrame(() => {
+				inputElement?.focus();
+				const len = text.length;
+				inputElement?.setSelectionRange(len, len);
+			});
+		} catch (err) {
+			console.error('Clipboard paste failed', err);
+		}
+	}
+
 	const defaultPlaceholder = $derived(
 		isTronAddress ? m.swap_enter_tron_address() : m.swap_enter_evm_address()
 	);
@@ -81,15 +99,14 @@
 	</span>
 
 	<div
-		class="relative rounded-xl border-2 bg-white transition-all duration-150 dark:bg-zinc-800"
-		class:border-zinc-200={!isFocused && !error}
-		class:dark:border-zinc-700={!isFocused && !error}
-		class:border-emerald-500={isFocused && !error}
-		class:dark:border-emerald-400={isFocused && !error}
-		class:border-red-400={error}
-		class:dark:border-red-500={error}
+		class="relative rounded-xl bg-white transition-all duration-150 dark:bg-zinc-800"
+		class:ring-2={isFocused || error}
+		class:ring-emerald-500={isFocused && !error}
+		class:dark:ring-emerald-400={isFocused && !error}
+		class:ring-red-400={error}
+		class:dark:ring-red-500={error}
 	>
-		{#if isLocked && address}
+		{#if isLocked && address && !isFocused}
 			<!-- Locked Address Bubble -->
 			<div
 				class="flex items-center gap-2 p-3"
@@ -151,28 +168,37 @@
 					onkeydown={handleKeyDown}
 					onfocus={() => (isFocused = true)}
 					onblur={handleBlur}
-					class="w-full rounded-xl bg-transparent py-3 pr-28 pl-4 text-sm text-zinc-900 placeholder-zinc-400 outline-none dark:text-white dark:placeholder-zinc-500"
+					class="w-full rounded-xl bg-transparent py-4 pr-40 pl-4 text-sm text-zinc-900 placeholder-zinc-400 outline-none dark:text-white dark:placeholder-zinc-500"
 					in:fade={{ duration: 100 }}
 				/>
-				{#if connectedWallet && (!address || address !== connectedWallet) && onUseConnectedWallet}
-					<div class="absolute top-1/2 right-2 -translate-y-1/2" in:fade={{ duration: 150 }}>
+				<div class="absolute top-1/2 right-2 -translate-y-1/2" in:fade={{ duration: 150 }}>
+					<div class="flex items-center gap-2">
 						<button
 							type="button"
-							onclick={onUseConnectedWallet}
-							class="flex items-center gap-1.5 rounded-lg bg-emerald-100 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+							onclick={handlePasteClick}
+							class="h-auto rounded-lg bg-black px-2 py-1.5 text-[11px] font-semibold leading-none text-white transition-colors hover:bg-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-900"
 						>
-							<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-								/>
-							</svg>
-							{m.swap_use_my_wallet()}
+							Paste
 						</button>
+						{#if connectedWallet && (!address || address !== connectedWallet) && onUseConnectedWallet}
+							<button
+								type="button"
+								onclick={onUseConnectedWallet}
+								class="flex items-center gap-1.5 rounded-lg bg-emerald-100 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+							>
+								<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+									/>
+								</svg>
+								{m.swap_use_my_wallet()}
+							</button>
+						{/if}
 					</div>
-				{/if}
+				</div>
 			</div>
 		{/if}
 	</div>

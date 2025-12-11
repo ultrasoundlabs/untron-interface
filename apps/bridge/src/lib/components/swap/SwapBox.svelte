@@ -402,7 +402,7 @@
 			<Button
 				onclick={handleSwap}
 				disabled={isButtonDisabled}
-				class="w-full rounded-xl py-6 text-lg font-semibold transition-all duration-150"
+				class="w-full h-12 rounded-xl text-base font-semibold transition-all duration-150"
 				size="lg"
 			>
 				{#if swapStore.isCreatingOrder}
