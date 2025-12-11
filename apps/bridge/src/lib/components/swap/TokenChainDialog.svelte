@@ -6,6 +6,7 @@
 	import { TOKEN_METADATA, getChainsForToken } from '$lib/config/swapConfig';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { formatAtomicToDecimal } from '$lib/math/amounts';
+	import TokenNetworkIcon from './TokenNetworkIcon.svelte';
 
 	interface Props {
 		open: boolean;
@@ -139,40 +140,19 @@
 									currentChainId === item.chain.chainId && currentToken === item.token.symbol}
 								<button
 									type="button"
-									onclick={() => handleBalanceClick(item)}
-									class="flex w-full items-center gap-3 rounded-xl border-2 p-3 transition-all duration-150 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20
-										{isSelected
-										? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
-										: 'border-zinc-200 dark:border-zinc-700'}"
-								>
-									<!-- Token icon -->
-									<div class="relative">
-										<div
-											class="h-10 w-10 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700"
-										>
-											<img
-												src={item.token.logoUrl}
-												alt={item.token.symbol}
-												class="h-full w-full object-cover"
-												onerror={(e) => {
-													(e.target as HTMLImageElement).style.display = 'none';
-												}}
-											/>
-										</div>
-										<!-- Chain badge -->
-										<div
-											class="absolute -right-1 -bottom-1 h-5 w-5 overflow-hidden rounded-full border-2 border-white bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-700"
-										>
-											<img
-												src={item.chain.logoUrl}
-												alt={item.chain.name}
-												class="h-full w-full object-cover"
-												onerror={(e) => {
-													(e.target as HTMLImageElement).style.display = 'none';
-												}}
-											/>
-										</div>
-									</div>
+								onclick={() => handleBalanceClick(item)}
+								class="flex w-full items-center gap-3 rounded-xl border-2 p-3 transition-all duration-150 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20
+									{isSelected
+									? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
+									: 'border-zinc-200 dark:border-zinc-700'}"
+							>
+								<!-- Token icon -->
+								<TokenNetworkIcon
+									className="shrink-0"
+									size={40}
+									tokenLogoUrl={item.token.logoUrl}
+									tokenSymbol={item.token.symbol}
+								/>
 
 									<!-- Token & Chain info -->
 									<div class="flex flex-1 flex-col items-start">
@@ -264,16 +244,12 @@
 									? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
 									: 'border-zinc-200 dark:border-zinc-700'}"
 							>
-								<div class="h-10 w-10 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700">
-									<img
-										src={meta.logoUrl}
-										alt={symbol}
-										class="h-full w-full object-cover"
-										onerror={(e) => {
-											(e.target as HTMLImageElement).style.display = 'none';
-										}}
-									/>
-								</div>
+								<TokenNetworkIcon
+									className="shrink-0"
+									size={40}
+									tokenLogoUrl={meta.logoUrl}
+									tokenSymbol={symbol}
+								/>
 								<span class="text-sm font-semibold text-zinc-900 dark:text-white">
 									{symbol}
 								</span>
@@ -303,13 +279,12 @@
 
 					<!-- Selected token indicator -->
 					<div class="mb-4 flex items-center gap-2 rounded-lg bg-zinc-100 p-3 dark:bg-zinc-800">
-						<div class="h-6 w-6 overflow-hidden rounded-full">
-							<img
-								src={TOKEN_METADATA[selectedToken!].logoUrl}
-								alt={selectedToken}
-								class="h-full w-full object-cover"
-							/>
-						</div>
+						<TokenNetworkIcon
+							className="shrink-0"
+							size={24}
+							tokenLogoUrl={TOKEN_METADATA[selectedToken!].logoUrl}
+							tokenSymbol={selectedToken ?? ''}
+						/>
 						<span class="font-medium text-zinc-900 dark:text-white">{selectedToken}</span>
 					</div>
 
@@ -326,16 +301,12 @@
 									? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
 									: 'border-zinc-200 dark:border-zinc-700'}"
 							>
-								<div class="h-8 w-8 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-700">
-									<img
-										src={chain.logoUrl}
-										alt={chain.name}
-										class="h-full w-full object-cover"
-										onerror={(e) => {
-											(e.target as HTMLImageElement).style.display = 'none';
-										}}
-									/>
-								</div>
+								<TokenNetworkIcon
+									className="shrink-0"
+									size={32}
+									tokenLogoUrl={chain.logoUrl}
+									tokenSymbol={chain.name}
+								/>
 								<div class="flex flex-col items-start">
 									<span class="font-medium text-zinc-900 dark:text-white">{chain.name}</span>
 									{#if chain.isTestnet}

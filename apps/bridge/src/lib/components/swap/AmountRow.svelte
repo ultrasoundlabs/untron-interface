@@ -2,6 +2,7 @@
 	import { fade, scale } from 'svelte/transition';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { m } from '$lib/paraglide/messages.js';
+	import TokenNetworkIcon from './TokenNetworkIcon.svelte';
 	import type { SupportedChain, SupportedToken, TronToken } from '$lib/types/swap';
 
 	interface Props {
@@ -83,26 +84,6 @@
 	}
 
 	const displayAmount = $derived(amount);
-
-	let networkIconFailed = $state(false);
-
-	const networkLogoUrl = $derived(() => {
-		if (chain) return chain.logoUrl;
-		if (isTron) return '/logos/chains/tron.svg';
-		return undefined;
-	});
-
-	const networkLabel = $derived(() => {
-		if (chain) return chain.name;
-		if (isTron) return 'Tron';
-		return 'Network';
-	});
-
-	$effect(() => {
-		// Reset badge error state when network changes
-		networkLogoUrl;
-		networkIconFailed = false;
-	});
 </script>
 
 <div
@@ -174,38 +155,12 @@
 				{selectorDisabled && !isTron ? 'cursor-default' : ''}"
 			>
 				<!-- Token Logo -->
-				<div class="relative h-7 w-7">
-					<div class="h-full w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-600">
-						<img
-							src={token.logoUrl}
-							alt={token.symbol}
-							class="h-full w-full object-cover"
-							onerror={(e) => {
-								(e.target as HTMLImageElement).style.display = 'none';
-							}}
-						/>
-					</div>
-					{#if networkLogoUrl}
-						<div
-							class="absolute -right-1 -bottom-1 h-5 w-5 overflow-hidden rounded-full border-2 border-white bg-zinc-50 shadow-sm dark:border-zinc-800 dark:bg-zinc-700"
-						>
-							{#if !networkIconFailed}
-								<img
-									src={networkLogoUrl}
-									alt={networkLabel}
-									class="h-full w-full object-cover"
-									onerror={() => {
-										networkIconFailed = true;
-									}}
-								/>
-							{:else}
-								<div class="flex h-full w-full items-center justify-center bg-red-500 text-[10px] font-semibold text-white">
-									{networkLabel?.[0] ?? 'N'}
-								</div>
-							{/if}
-						</div>
-					{/if}
-				</div>
+				<TokenNetworkIcon
+					className="shrink-0"
+					size={28}
+					tokenLogoUrl={token.logoUrl}
+					tokenSymbol={token.symbol}
+				/>
 
 				<!-- Token & Chain Info -->
 				<div class="flex flex-col items-start leading-tight">
