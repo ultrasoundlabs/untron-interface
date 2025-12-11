@@ -319,7 +319,7 @@
 		{/if}
 
 		<!-- Flip Button -->
-		<div class="relative z-10 -my-2 flex justify-center">
+		<div class="relative z-10 -my-4 flex justify-center">
 			<button
 				type="button"
 				onclick={handleFlip}
