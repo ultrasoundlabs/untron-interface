@@ -149,10 +149,9 @@
 				type="button"
 				onclick={() => onTokenSelect?.()}
 				disabled={selectorDisabled || isTron}
-				class="relative flex items-start gap-2 rounded-xl px-3 py-2 transition-all duration-150
-					{isTron ? 'cursor-default bg-transparent shadow-none dark:bg-transparent' : 'bg-white shadow-sm dark:bg-zinc-700'}
-					{!isTron && !selectorDisabled ? 'cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-600' : ''}
-				{selectorDisabled && !isTron ? 'cursor-default' : ''}"
+				class="relative flex items-center gap-2 rounded-xl px-3 py-2 transition-colors duration-150
+					{!isTron && !selectorDisabled ? 'bg-zinc-100 cursor-pointer hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700' : 'bg-transparent dark:bg-transparent cursor-default'}
+					{selectorDisabled ? 'opacity-80' : ''}"
 			>
 				<!-- Token Logo -->
 				<TokenNetworkIcon
