@@ -151,7 +151,7 @@
 				disabled={selectorDisabled || isTron}
 				class="relative flex items-center gap-2 rounded-xl px-3 py-2 transition-colors duration-150
 					{!isTron && !selectorDisabled ? 'bg-zinc-100 cursor-pointer hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700' : 'bg-transparent dark:bg-transparent cursor-default'}
-					{selectorDisabled ? 'opacity-80' : ''}"
+					{selectorDisabled && !isTron ? 'opacity-80' : ''}"
 			>
 				<!-- Token Logo -->
 				<TokenNetworkIcon
