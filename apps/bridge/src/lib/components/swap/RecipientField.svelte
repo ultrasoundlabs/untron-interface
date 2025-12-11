@@ -24,6 +24,8 @@
 		onClear?: () => void;
 		/** Callback when "My Wallet" button is clicked */
 		onUseConnectedWallet?: () => void;
+		/** Callback when the input loses focus */
+		onBlur?: () => void;
 	}
 
 	let {
@@ -36,7 +38,8 @@
 		onAddressChange,
 		onLock,
 		onClear,
-		onUseConnectedWallet
+		onUseConnectedWallet,
+		onBlur
 	}: Props = $props();
 
 	let inputElement: HTMLInputElement | undefined = $state();
@@ -56,6 +59,7 @@
 
 	function handleBlur() {
 		isFocused = false;
+		onBlur?.();
 	}
 
 	function handleClear(event: MouseEvent) {
@@ -111,7 +115,7 @@
 					</svg>
 
 					<!-- Address -->
-					<span class="font-mono text-sm text-emerald-800 dark:text-emerald-200" title={address}>
+					<span class="text-sm text-emerald-800 dark:text-emerald-200" title={address}>
 						{truncateAddress(address, isTronAddress ? 8 : 6, isTronAddress ? 6 : 4)}
 					</span>
 
@@ -147,7 +151,7 @@
 					onkeydown={handleKeyDown}
 					onfocus={() => (isFocused = true)}
 					onblur={handleBlur}
-					class="w-full rounded-xl bg-transparent py-3 pr-28 pl-4 font-mono text-sm text-zinc-900 placeholder-zinc-400 outline-none dark:text-white dark:placeholder-zinc-500"
+					class="w-full rounded-xl bg-transparent py-3 pr-28 pl-4 text-sm text-zinc-900 placeholder-zinc-400 outline-none dark:text-white dark:placeholder-zinc-500"
 					in:fade={{ duration: 100 }}
 				/>
 				{#if connectedWallet && (!address || address !== connectedWallet) && onUseConnectedWallet}

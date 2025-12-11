@@ -22,6 +22,7 @@
 
 	// Dialog state
 	let showTokenDialog = $state(false);
+	let recipientTouched = $state(false);
 
 	// User balances for EVM→Tron flow
 	let userBalances = $state<TokenChainBalance[]>([]);
@@ -57,6 +58,7 @@
 			swapStore.clearRecipientOnWalletDisconnect();
 			userBalances = [];
 			userPickedPairManually = false;
+			recipientTouched = false;
 		}
 	});
 
@@ -207,6 +209,10 @@
 		mapValidationErrorToMessage(swapStore.validationErrors.find((e) => e.field === 'recipient'))
 	);
 
+	const recipientErrorToShow = $derived(
+		recipientError && (recipientTouched || !!swapStore.recipientAddress) ? recipientError : null
+	);
+
 	function mapSubmitErrorCodeToMessage(code: SwapServiceErrorCode | null): string | null {
 		if (!code) return null;
 
@@ -259,6 +265,8 @@
 			return;
 		}
 
+		recipientTouched = true;
+
 		const walletAddress = $connection.address as `0x${string}` | undefined;
 		const orderId = await swapStore.createOrder(walletAddress);
 		if (orderId) {
@@ -268,6 +276,7 @@
 
 	function handleFlip() {
 		swapStore.flipSides();
+		recipientTouched = false;
 	}
 
 	function openTokenDialog() {
@@ -277,26 +286,20 @@
 	function handleTokenSelect(chainId: number, tokenSymbol: string) {
 		userPickedPairManually = true;
 		swapStore.setEvmChainAndToken(chainId, tokenSymbol as EvmStablecoin);
+		recipientTouched = false;
 		showTokenDialog = false;
 	}
 
-	// Format placeholder based on capacity
+	// Placeholder for the amount input
 	function getPlaceholder(): string {
-		const max = swapStore.maxAvailableAmount;
-		if (!max || max === '0') return '0.00';
-		const maxFractionDigits = sourceToken.decimals === 0 ? 0 : Math.min(6, sourceToken.decimals);
-		return `Max: ${formatAtomicToDecimal(max, sourceToken.decimals, {
-			maxFractionDigits,
-			trimTrailingZeros: true,
-			useGrouping: true
-		})}`;
+		return '0.00';
 	}
 </script>
 
 <div class="mx-auto w-full max-w-md" in:fly={{ y: 20, duration: 300, delay: 100 }}>
 	<!-- Swap Card -->
 	<div
-		class="rounded-3xl border border-zinc-200 bg-white p-4 shadow-xl shadow-zinc-200/50 dark:border-zinc-700 dark:bg-zinc-900 dark:shadow-black/20"
+		class="rounded-3xl p-4"
 	>
 		<!-- Source Row -->
 		<AmountRow
@@ -357,15 +360,28 @@
 				address={swapStore.recipientAddress}
 				isLocked={swapStore.recipientLocked}
 				isTronAddress={swapStore.isToTron}
-				error={recipientError ?? undefined}
+				error={recipientErrorToShow ?? undefined}
 				connectedWallet={!swapStore.isToTron ? $connection.address : undefined}
-				onAddressChange={(addr) => swapStore.setRecipient(addr)}
-				onLock={() => swapStore.lockRecipient()}
-				onClear={() => swapStore.clearRecipient()}
+				onAddressChange={(addr) => {
+					recipientTouched = true;
+					swapStore.setRecipient(addr);
+				}}
+				onLock={() => {
+					recipientTouched = true;
+					swapStore.lockRecipient();
+				}}
+				onClear={() => {
+					recipientTouched = true;
+					swapStore.clearRecipient();
+				}}
 				onUseConnectedWallet={() => {
+					recipientTouched = true;
 					if ($connection.address) {
 						swapStore.setRecipientToWallet($connection.address);
 					}
+				}}
+				onBlur={() => {
+					recipientTouched = true;
 				}}
 			/>
 		</div>

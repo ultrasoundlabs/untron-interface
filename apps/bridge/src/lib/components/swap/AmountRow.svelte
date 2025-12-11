@@ -43,13 +43,42 @@
 		onTokenSelect
 	}: Props = $props();
 
+	function sanitizeAmount(rawValue: string) {
+		const numericOnly = rawValue.replace(/[^0-9.]/g, '');
+		const parts = numericOnly.split('.');
+		return parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : numericOnly;
+	}
+
+	function handleBeforeInput(event: InputEvent) {
+		const target = event.target as HTMLInputElement | null;
+		if (!target) return;
+
+		const data = event.data ?? '';
+
+		// Allow deletions and caret movement
+		if (!data) return;
+
+		const selectionStart = target.selectionStart ?? target.value.length;
+		const selectionEnd = target.selectionEnd ?? target.value.length;
+		const proposed = `${target.value.slice(0, selectionStart)}${data}${target.value.slice(selectionEnd)}`;
+		const sanitized = sanitizeAmount(proposed);
+
+		if (sanitized !== proposed) {
+			event.preventDefault();
+			target.value = sanitized;
+			onAmountChange?.(sanitized);
+		}
+	}
+
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;
-		// Only allow numbers and decimals
-		const value = target.value.replace(/[^0-9.]/g, '');
-		// Prevent multiple decimals
-		const parts = value.split('.');
-		const sanitized = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : value;
+
+		const sanitized = sanitizeAmount(target.value);
+
+		if (sanitized !== target.value) {
+			target.value = sanitized;
+		}
+
 		onAmountChange?.(sanitized);
 	}
 
@@ -57,21 +86,19 @@
 </script>
 
 <div
-	class="group relative rounded-2xl bg-zinc-100 p-4 transition-colors dark:bg-zinc-800/50"
-	class:ring-2={isSource}
-	class:ring-zinc-300={isSource}
-	class:dark:ring-zinc-600={isSource}
+	class={`group relative rounded-4xl p-6 transition-colors ${
+		isSource ? 'bg-white dark:bg-zinc-900' : 'bg-zinc-100 dark:bg-zinc-800/50'
+	}`}
 >
 	<!-- Label -->
-	<div class="mb-2 flex items-center justify-between">
-		<span class="text-sm text-zinc-500 dark:text-zinc-400">
+	<div class="mb-1 flex items-center justify-between">
+		<span class="text-m text-black dark:text-zinc-400">
 			{isSource ? m.swap_you_send() : m.swap_you_receive()}
 		</span>
 		{#if isSource && onMaxClick}
 			<Button
-				variant="ghost"
 				size="sm"
-				class="h-6 px-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+				class="rounded-full bg-zinc-900 px-4 text-sm font-semibold text-white transition-colors duration-150 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
 				onclick={onMaxClick}
 			>
 				{m.swap_max()}
@@ -88,6 +115,7 @@
 					inputmode="decimal"
 					value={displayAmount}
 					{placeholder}
+					onbeforeinput={handleBeforeInput}
 					oninput={handleInput}
 					class="w-full bg-transparent text-3xl font-semibold text-zinc-900 placeholder-zinc-400 outline-none dark:text-white dark:placeholder-zinc-500"
 				/>
@@ -116,7 +144,7 @@
 			onclick={() => onTokenSelect?.()}
 			disabled={selectorDisabled || isTron}
 			class="flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 transition-all duration-150
-				{isTron ? 'cursor-default bg-zinc-200 dark:bg-zinc-700/50' : 'bg-white shadow-sm dark:bg-zinc-700'}
+				{isTron ? 'cursor-default bg-transparent shadow-none dark:bg-transparent' : 'bg-white shadow-sm dark:bg-zinc-700'}
 				{!isTron && !selectorDisabled ? 'cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-600' : ''}
 				{selectorDisabled && !isTron ? 'cursor-default' : ''}"
 		>
