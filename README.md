@@ -6,6 +6,7 @@ This is the **public** repository for Untron's frontend interfaces, including th
 
 - Landing Page: [untron.finance](https://untron.finance)
 - Bridge: [bridge.untron.finance](https://bridge.untron.finance)
+- Untron V3 Dashboard: [v3.untron.finance](https://v3.untron.finance)
 
 ## Install & Apps
 
@@ -19,6 +20,7 @@ For instructions per application or package, see the README published for each a
 
 - [Landing Page](apps/landing/README.md)
 - [Bridge](apps/bridge/README.md)
+- [Untron V3 Dashboard](apps/v3/README.md)
 
 ## Socials / Contact
 

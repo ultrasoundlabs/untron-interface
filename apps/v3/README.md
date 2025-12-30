@@ -1,6 +1,6 @@
 # Untron V3 Frontend
 
-Static SvelteKit app (SPA-style) for the next iteration of the Untron interface.
+Static SvelteKit app (SPA-style) for the next iteration of the Untron protocol.
 
 ## Commands
 
