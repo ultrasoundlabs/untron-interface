@@ -13,7 +13,7 @@ export class UntronApiError extends Error {
 }
 
 function getApiBaseUrl(): string {
-	const envUrl = env.PUBLIC_UNTRON_API_URL;
+	const envUrl = env.PUBLIC_UNTRON_API_URL ?? "https://tyo-api.untron.finance/v3";
 	if (envUrl && envUrl.trim().length > 0) return envUrl.replace(/\/$/, '');
 	return 'http://localhost:42069';
 }
