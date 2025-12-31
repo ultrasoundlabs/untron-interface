@@ -202,6 +202,19 @@ export type CreateLeaseBody = {
 	beneficiary: `0x${string}`;
 };
 
+export type RealtorsResponse = {
+	ok: true;
+	chainId: number;
+	contractAddress: `0x${string}`;
+	relayerAddress: `0x${string}`;
+	realtor: SqlRow | null;
+};
+
+export async function getRealtors(): Promise<RealtorsResponse> {
+	const url = `${getApiBaseUrl()}/realtors`;
+	return await fetchJson<RealtorsResponse>(url);
+}
+
 export type CreateLeaseResponse = {
 	ok: true;
 	chainId: number;

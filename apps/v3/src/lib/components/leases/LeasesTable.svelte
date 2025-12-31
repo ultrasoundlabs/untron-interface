@@ -5,6 +5,7 @@
 	import type { SqlRow } from '$lib/untron/types';
 	import {
 		formatAddress,
+		getTokenAlias,
 		getIsActive,
 		getLeaseId,
 		getLessee,
@@ -13,7 +14,9 @@
 		getTargetChainId,
 		getTargetToken
 	} from '$lib/untron/format';
+	import { getChainMeta } from '$lib/untron/routes';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
+	import CopyableValue from '$lib/components/common/CopyableValue.svelte';
 
 	type Props = {
 		rows: SqlRow[];
@@ -37,18 +40,62 @@
 	<Table.Body>
 		{#each rows as row (getLeaseId(row) ?? JSON.stringify(row))}
 			<Table.Row>
-				<Table.Cell class="font-mono">{getLeaseId(row) ?? '—'}</Table.Cell>
-				<Table.Cell class="font-mono">{getReceiverTron(row) ?? '—'}</Table.Cell>
-				<Table.Cell class="font-mono"
-					>{getLessee(row) ? formatAddress(getLessee(row)!) : '—'}</Table.Cell
-				>
 				<Table.Cell class="font-mono">
-					{getBeneficiary(row) ? formatAddress(getBeneficiary(row)!) : '—'}
+					{getLeaseId(row) ?? '—'}
 				</Table.Cell>
 				<Table.Cell class="font-mono">
-					{getTargetChainId(row) ?? '—'} / {getTargetToken(row)
-						? formatAddress(getTargetToken(row)!)
-						: '—'}
+					<CopyableValue
+						value={getReceiverTron(row)}
+						display={getReceiverTron(row) ?? '—'}
+						copyValue={getReceiverTron(row)}
+						label="Copy receiver (Tron)"
+					/>
+				</Table.Cell>
+				<Table.Cell class="font-mono">
+					{@const lessee = getLessee(row)}
+					<CopyableValue
+						value={lessee}
+						display={lessee ? formatAddress(lessee) : '—'}
+						copyValue={lessee}
+						label="Copy lessee"
+					/>
+				</Table.Cell>
+				<Table.Cell class="font-mono">
+					{@const b = getBeneficiary(row)}
+					<CopyableValue
+						value={b}
+						display={b ? formatAddress(b) : '—'}
+						copyValue={b}
+						label="Copy beneficiary"
+					/>
+				</Table.Cell>
+				<Table.Cell class="space-y-0.5">
+					{#if getTargetChainId(row)}
+						{@const chainId = getTargetChainId(row)!}
+						{@const meta = getChainMeta(chainId)}
+						<div class="font-mono">
+							{meta?.name ?? chainId} ({chainId})
+						</div>
+					{:else}
+						<div class="font-mono">—</div>
+					{/if}
+					{#if getTargetToken(row)}
+						{@const token = getTargetToken(row)!}
+						{@const alias = getTokenAlias(token)}
+						<div class="font-mono text-xs text-muted-foreground">
+							<div class="text-foreground">{alias ?? formatAddress(token)}</div>
+							{#if alias}
+								<span class="mt-0.5 block">
+									<CopyableValue
+										value={token}
+										display={formatAddress(token, 8, 6)}
+										copyValue={token}
+										label="Copy target token address"
+									/>
+								</span>
+							{/if}
+						</div>
+					{/if}
 				</Table.Cell>
 				<Table.Cell>
 					{#if getIsActive(row) === true}

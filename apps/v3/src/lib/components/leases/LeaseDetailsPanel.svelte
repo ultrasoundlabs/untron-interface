@@ -5,7 +5,9 @@
 	import AddressWithCopy from '$lib/components/address/AddressWithCopy.svelte';
 	import type { SqlRow } from '$lib/untron/types';
 	import {
+		formatAddress,
 		formatFeesPpmAndFlat,
+		formatHexShort,
 		formatNumberish,
 		getBeneficiary,
 		getFlatFee,
@@ -17,10 +19,14 @@
 		getNukeableAfter,
 		getReceiverTron,
 		getTargetChainId,
-		getTargetToken
+		getTargetToken,
+		getTokenAlias
 	} from '$lib/untron/format';
+	import { getChainMeta } from '$lib/untron/routes';
 	import FileJsonIcon from '@lucide/svelte/icons/file-json';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import CopyableValue from '$lib/components/common/CopyableValue.svelte';
+	import CopyButton from '$lib/components/common/CopyButton.svelte';
 
 	type Props = {
 		lease: SqlRow;
@@ -70,16 +76,37 @@
 				<div class="font-mono">{getLeaseId(lease) ?? '—'}</div>
 
 				<div class="text-muted-foreground">Receiver salt</div>
-				<div class="font-mono">{getReceiverSalt(lease) ?? '—'}</div>
+				<div class="font-mono">{formatHexShort(getReceiverSalt(lease)) ?? '—'}</div>
 
 				<div class="text-muted-foreground">Nukeable after</div>
-				<div class="font-mono">{formatNumberish(getNukeableAfter(lease))}</div>
+				<div class="font-mono">
+					<CopyableValue
+						value={getNukeableAfter(lease)}
+						display={formatNumberish(getNukeableAfter(lease))}
+						copyValue={formatNumberish(getNukeableAfter(lease))}
+						label="Copy nukeable after"
+					/>
+				</div>
 
 				<div class="text-muted-foreground">Created at</div>
-				<div class="font-mono">{formatNumberish(getCreatedAt(lease))}</div>
+				<div class="font-mono">
+					<CopyableValue
+						value={getCreatedAt(lease)}
+						display={formatNumberish(getCreatedAt(lease))}
+						copyValue={formatNumberish(getCreatedAt(lease))}
+						label="Copy created at"
+					/>
+				</div>
 
 				<div class="text-muted-foreground">Updated at</div>
-				<div class="font-mono">{formatNumberish(getUpdatedAt(lease))}</div>
+				<div class="font-mono">
+					<CopyableValue
+						value={getUpdatedAt(lease)}
+						display={formatNumberish(getUpdatedAt(lease))}
+						copyValue={formatNumberish(getUpdatedAt(lease))}
+						label="Copy updated at"
+					/>
+				</div>
 
 				<div class="text-muted-foreground">Active</div>
 				<div class="font-mono">
@@ -93,7 +120,12 @@
 
 				<div class="text-muted-foreground">Fees</div>
 				<div class="font-mono">
-					{formatFeesPpmAndFlat(getLeaseFeePpm(lease), getFlatFee(lease))}
+					<CopyableValue
+						value={getLeaseFeePpm(lease)}
+						display={formatFeesPpmAndFlat(getLeaseFeePpm(lease), getFlatFee(lease))}
+						copyValue={getLeaseFeePpm(lease) ?? ''}
+						label="Copy lease fee ppm"
+					/>
 				</div>
 			</div>
 
@@ -101,7 +133,26 @@
 			<AddressWithCopy label="Lessee (EVM)" value={getLessee(lease)} />
 			<AddressWithCopy label="Beneficiary (EVM)" value={getBeneficiary(lease)} />
 			<AddressWithCopy label="Target token (EVM)" value={getTargetToken(lease)} />
-			<AddressWithCopy label="Target chain id" value={getTargetChainId(lease)} />
+			<div class="space-y-1">
+				<div class="text-xs font-medium text-muted-foreground">Target</div>
+				<div class="font-mono text-xs">
+					{#if getTargetChainId(lease)}
+						{@const chainId = getTargetChainId(lease)!}
+						{@const meta = getChainMeta(chainId)}
+						{meta?.name ?? chainId} ({chainId})
+					{:else}
+						—
+					{/if}
+					<span class="mx-2 text-muted-foreground">·</span>
+					{#if getTargetToken(lease)}
+						{@const token = getTargetToken(lease)!}
+						{@const alias = getTokenAlias(token)}
+						{alias ?? formatAddress(token)}
+					{:else}
+						—
+					{/if}
+				</div>
+			</div>
 		</div>
 	</Card.Content>
 </Card.Root>
@@ -112,6 +163,9 @@
 			<Dialog.Title>Lease row</Dialog.Title>
 			<Dialog.Description>`untron_v3_lease_full` (raw)</Dialog.Description>
 		</Dialog.Header>
+		<div class="flex justify-end">
+			<CopyButton value={rawJson} label="Copy raw JSON" />
+		</div>
 		<Textarea value={rawJson} readonly class="min-h-[360px] font-mono text-xs" />
 		<Dialog.Footer>
 			<Button variant="outline" onclick={() => (rawOpen = false)}>Close</Button>

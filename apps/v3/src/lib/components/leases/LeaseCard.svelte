@@ -18,9 +18,12 @@
 		getNukeableAfter,
 		getReceiverTron,
 		getTargetChainId,
-		getTargetToken
+		getTargetToken,
+		getTokenAlias
 	} from '$lib/untron/format';
+	import { getChainMeta } from '$lib/untron/routes';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
+	import CopyableValue from '$lib/components/common/CopyableValue.svelte';
 
 	type Props = {
 		lease: SqlRow;
@@ -48,7 +51,15 @@
 				<Card.Title class="text-base font-semibold">
 					Lease {leaseId ?? '—'}
 				</Card.Title>
-				<Card.Description class="font-mono">{receiverTron ?? 'Receiver unknown'}</Card.Description>
+				<Card.Description>
+					<CopyableValue
+						value={receiverTron}
+						display={receiverTron ?? 'Receiver unknown'}
+						copyValue={receiverTron}
+						label="Copy receiver (Tron)"
+						class="font-mono"
+					/>
+				</Card.Description>
 			</div>
 			<div class="flex flex-wrap items-center justify-end gap-1.5">
 				{#if isActive === true}
@@ -80,23 +91,78 @@
 			<div class="grid gap-3">
 				<div class="grid grid-cols-2 gap-2 text-sm">
 					<div class="text-muted-foreground">Lessee</div>
-					<div class="font-mono">{lessee ? formatAddress(lessee) : '—'}</div>
+					<div class="font-mono">
+						<CopyableValue
+							value={lessee}
+							display={lessee ? formatAddress(lessee) : '—'}
+							copyValue={lessee}
+							label="Copy lessee"
+						/>
+					</div>
 
 					<div class="text-muted-foreground">Beneficiary</div>
-					<div class="font-mono">{beneficiary ? formatAddress(beneficiary) : '—'}</div>
+					<div class="font-mono">
+						<CopyableValue
+							value={beneficiary}
+							display={beneficiary ? formatAddress(beneficiary) : '—'}
+							copyValue={beneficiary}
+							label="Copy beneficiary"
+						/>
+					</div>
 
 					<div class="text-muted-foreground">Target</div>
-					<div class="font-mono">
-						{targetChainId ?? '—'} / {targetToken ? formatAddress(targetToken) : '—'}
+					<div class="space-y-0.5">
+						<div class="font-mono">
+							{#if targetChainId}
+								{@const meta = getChainMeta(targetChainId)}
+								<span>{meta?.name ?? targetChainId} ({targetChainId})</span>
+							{:else}
+								—
+							{/if}
+							<span class="mx-2 text-muted-foreground">·</span>
+							{#if targetToken}
+								{@const alias = getTokenAlias(targetToken)}
+								<span>{alias ?? formatAddress(targetToken)}</span>
+							{:else}
+								—
+							{/if}
+						</div>
+						{#if targetToken}
+							{@const alias = getTokenAlias(targetToken)}
+							{#if alias}
+								<div class="font-mono text-xs text-muted-foreground">
+									<CopyableValue
+										value={targetToken}
+										display={formatAddress(targetToken)}
+										copyValue={targetToken}
+										label="Copy target token address"
+									/>
+								</div>
+							{/if}
+						{/if}
 					</div>
 
 					<div class="text-muted-foreground">Fees</div>
 					<div class="font-mono">
-						{formatFeesPpmAndFlat(leaseFeePpm, flatFee)}
+						<CopyableValue
+							value={leaseFeePpm}
+							display={formatFeesPpmAndFlat(leaseFeePpm, flatFee)}
+							copyValue={leaseFeePpm ?? ''}
+							label="Copy lease fee ppm"
+						/>
 					</div>
 
 					<div class="text-muted-foreground">Nukeable after</div>
-					<div class="font-mono">{formatNumberish(nukeableAfter)}</div>
+					<div class="font-mono">
+						<CopyableValue
+							value={nukeableAfter}
+							display={formatNumberish(nukeableAfter)}
+							copyValue={typeof nukeableAfter === 'string'
+								? nukeableAfter
+								: formatNumberish(nukeableAfter)}
+							label="Copy nukeable after"
+						/>
+					</div>
 				</div>
 
 				<div class="flex items-center justify-end">

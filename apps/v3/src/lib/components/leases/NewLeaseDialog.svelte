@@ -3,6 +3,7 @@
 	import {
 		createLease,
 		getProtocol,
+		getRealtors,
 		type CreateLeaseBody,
 		type ProtocolResponse
 	} from '$lib/untron/api';
@@ -12,7 +13,16 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import * as Select from '$lib/components/ui/select';
 	import PlusIcon from '@lucide/svelte/icons/plus';
+	import { formatAddress, formatFeesPpmAndFlat, getTokenAlias } from '$lib/untron/format';
+	import {
+		getChainLabel,
+		getChainMeta,
+		getTargetChainOptions,
+		getTargetTokenOptions
+	} from '$lib/untron/routes';
+	import CopyButton from '$lib/components/common/CopyButton.svelte';
 
 	type Props = {
 		open?: boolean;
@@ -27,6 +37,7 @@
 	let pending = $state(false);
 	let errorMessage = $state<string | null>(null);
 	let resultJson = $state<string | null>(null);
+	let fixedFeeSource = $state<'realtor' | 'protocol_floor' | 'default'>('default');
 
 	let receiverSalt = $state('');
 	let nukeableAfter = $state('');
@@ -35,6 +46,18 @@
 	let targetChainId = $state('');
 	let targetToken = $state('');
 	let beneficiary = $state('');
+
+	function protocolFloorPpm(p: ProtocolResponse): string | null {
+		const v = (p.hub.protocol as Record<string, unknown> | undefined)?.protocol_floor_ppm;
+		return typeof v === 'string' ? v : null;
+	}
+
+	function parseFeeFromRealtor(row: unknown): string | null {
+		if (typeof row !== 'object' || row === null) return null;
+		const r = row as Record<string, unknown>;
+		const v = r.effective_min_fee_ppm ?? r.min_fee_ppm;
+		return typeof v === 'string' ? v : null;
+	}
 
 	function setDefaultsFromProtocol(p: ProtocolResponse) {
 		targetChainId ||= String(p.hub.chainId);
@@ -58,12 +81,69 @@
 			setDefaultsFromProtocol(protocol);
 			setDefaultsFromWallet();
 			setDefaultNukeableAfter();
+
+			// Fees are not user-configurable; pick the backend relayer's effective minimum fee when available.
+			try {
+				const realtors = await getRealtors();
+				const ppm = parseFeeFromRealtor(realtors.realtor);
+				if (ppm) {
+					leaseFeePpm = ppm;
+					flatFee = '0';
+					fixedFeeSource = 'realtor';
+				} else {
+					const floor = protocolFloorPpm(protocol);
+					if (floor) {
+						leaseFeePpm = floor;
+						flatFee = '0';
+						fixedFeeSource = 'protocol_floor';
+					}
+				}
+			} catch {
+				const floor = protocolFloorPpm(protocol);
+				if (floor) {
+					leaseFeePpm = floor;
+					flatFee = '0';
+					fixedFeeSource = 'protocol_floor';
+				}
+			}
+
+			const chains = getTargetChainOptions(protocol);
+			if (!targetChainId) targetChainId = chains[0] ?? String(protocol.hub.chainId);
+			const tokens = getTargetTokenOptions(protocol, targetChainId);
+			if (!targetToken) targetToken = tokens[0] ?? '';
 		})();
+	});
+
+	$effect(() => {
+		if (!open || !protocol) return;
+		const tokens = getTargetTokenOptions(protocol, targetChainId);
+		if (tokens.length === 0) {
+			targetToken = '';
+			return;
+		}
+		const current = targetToken;
+		const matched = current
+			? (tokens.find((t) => t.toLowerCase() === current.toLowerCase()) ?? null)
+			: null;
+		if (!matched) {
+			targetToken = tokens[0];
+			return;
+		}
+		// Normalize casing to match an actual option value.
+		targetToken = matched;
 	});
 
 	async function submit() {
 		if (!lessee) {
 			errorMessage = 'Connect a wallet to use it as the lessee.';
+			return;
+		}
+		if (!protocol) {
+			errorMessage = 'Protocol config is not loaded yet.';
+			return;
+		}
+		if (!targetChainId || !targetToken) {
+			errorMessage = 'Select a target chain and token.';
 			return;
 		}
 
@@ -110,83 +190,150 @@
 		<div class="grid gap-4">
 			<div class="grid gap-2">
 				<Label for="lessee">Lessee</Label>
-				<Input id="lessee" value={lessee ?? ''} disabled />
+				<div class="flex items-center gap-2">
+					<Input id="lessee" value={lessee ?? ''} disabled />
+					<CopyButton value={lessee ?? null} label="Copy lessee" />
+				</div>
 			</div>
 
 			<div class="grid gap-2">
 				<Label for="beneficiary">Beneficiary</Label>
-				<Input
-					id="beneficiary"
-					placeholder="0x…"
-					bind:value={beneficiary}
-					disabled={disabled || pending}
-				/>
+				<div class="flex items-center gap-2">
+					<Input
+						id="beneficiary"
+						placeholder="0x…"
+						bind:value={beneficiary}
+						disabled={disabled || pending}
+					/>
+					<CopyButton value={beneficiary} label="Copy beneficiary" disabled={disabled || pending} />
+				</div>
 			</div>
 
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
 					<Label for="targetChainId">Target chain id</Label>
-					<Input
-						id="targetChainId"
-						inputmode="numeric"
-						placeholder="137"
-						bind:value={targetChainId}
-						disabled={disabled || pending}
-					/>
+					<div class="flex items-center gap-2">
+						<Select.Root type="single" bind:value={targetChainId} disabled={disabled || pending}>
+							<Select.Trigger class="w-full" aria-label="Target chain id">
+								{#if targetChainId}
+									{@const meta = getChainMeta(targetChainId)}
+									<span data-slot="select-value" class="flex w-full items-center gap-2">
+										<span class="flex-1 truncate">{meta?.name ?? targetChainId}</span>
+										<span class="font-mono text-xs text-muted-foreground">{targetChainId}</span>
+									</span>
+								{:else}
+									<span data-slot="select-value" class="text-muted-foreground">Select chain…</span>
+								{/if}
+							</Select.Trigger>
+							<Select.Content>
+								{#each protocol ? getTargetChainOptions(protocol) : [] as chainId (chainId)}
+									{@const meta = getChainMeta(chainId)}
+									<Select.Item value={chainId} label={getChainLabel(chainId)}>
+										{#snippet children()}
+											<span class="inline-flex w-full items-center gap-2">
+												<span class="flex-1 truncate">{meta?.name ?? chainId}</span>
+												<span class="font-mono text-xs text-muted-foreground">{chainId}</span>
+											</span>
+										{/snippet}
+									</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					</div>
 				</div>
 				<div class="grid gap-2">
 					<Label for="targetToken">Target token</Label>
-					<Input
-						id="targetToken"
-						placeholder="0x…"
-						bind:value={targetToken}
-						disabled={disabled || pending}
-					/>
+					<div class="flex items-center gap-2">
+						<Select.Root
+							type="single"
+							bind:value={targetToken}
+							disabled={disabled || pending || !targetChainId}
+						>
+							<Select.Trigger class="w-full" aria-label="Target token">
+								{#if targetToken}
+									{@const alias = getTokenAlias(targetToken)}
+									<span data-slot="select-value" class="flex w-full items-center gap-2">
+										<span class="flex-1 truncate">{alias ?? formatAddress(targetToken, 10, 6)}</span
+										>
+										{#if alias}
+											<span class="font-mono text-xs text-muted-foreground">
+												{formatAddress(targetToken, 8, 6)}
+											</span>
+										{/if}
+									</span>
+								{:else}
+									<span data-slot="select-value" class="text-muted-foreground">Select token…</span>
+								{/if}
+							</Select.Trigger>
+							<Select.Content>
+								{#each protocol ? getTargetTokenOptions(protocol, targetChainId) : [] as token (token)}
+									{@const alias = getTokenAlias(token)}
+									<Select.Item
+										value={token}
+										label={alias
+											? `${alias} (${formatAddress(token, 10, 6)})`
+											: formatAddress(token, 10, 6)}
+									>
+										{#snippet children()}
+											<span class="inline-flex w-full items-center gap-2">
+												<span class="flex-1 truncate">{alias ?? formatAddress(token, 10, 6)}</span>
+												<span class="font-mono text-xs text-muted-foreground">
+													{formatAddress(token, 8, 6)}
+												</span>
+											</span>
+										{/snippet}
+									</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					</div>
 				</div>
 			</div>
 
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
-					<Label for="leaseFeePpm">Lease fee (ppm)</Label>
-					<Input
-						id="leaseFeePpm"
-						inputmode="numeric"
-						placeholder="1000"
-						bind:value={leaseFeePpm}
-						disabled={disabled || pending}
-					/>
-				</div>
-				<div class="grid gap-2">
-					<Label for="flatFee">Flat fee</Label>
-					<Input
-						id="flatFee"
-						inputmode="numeric"
-						placeholder="0"
-						bind:value={flatFee}
-						disabled={disabled || pending}
-					/>
+					<Label>Fees (fixed)</Label>
+					<Input value={formatFeesPpmAndFlat(leaseFeePpm, flatFee)} disabled />
+					<div class="text-xs text-muted-foreground">
+						{#if fixedFeeSource === 'realtor'}
+							Uses backend relayer effective minimum fee.
+						{:else if fixedFeeSource === 'protocol_floor'}
+							Uses protocol floor fee.
+						{:else}
+							Uses default fee.
+						{/if}
+					</div>
 				</div>
 			</div>
 
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
 					<Label for="nukeableAfter">Nukeable after (unix seconds)</Label>
-					<Input
-						id="nukeableAfter"
-						inputmode="numeric"
-						placeholder="1735689600"
-						bind:value={nukeableAfter}
-						disabled={disabled || pending}
-					/>
+					<div class="flex items-center gap-2">
+						<Input
+							id="nukeableAfter"
+							inputmode="numeric"
+							placeholder="1735689600"
+							bind:value={nukeableAfter}
+							disabled={disabled || pending}
+						/>
+						<CopyButton
+							value={nukeableAfter}
+							label="Copy nukeable after"
+							disabled={disabled || pending}
+						/>
+					</div>
 				</div>
 				<div class="grid gap-2">
 					<Label for="receiverSalt">Receiver salt (optional)</Label>
-					<Input
-						id="receiverSalt"
-						placeholder="0x… (32 bytes)"
-						bind:value={receiverSalt}
-						disabled={disabled || pending}
-					/>
+					<div class="flex items-center gap-2">
+						<Input
+							id="receiverSalt"
+							placeholder="0x… (32 bytes)"
+							bind:value={receiverSalt}
+							disabled={disabled || pending}
+						/>
+					</div>
 				</div>
 			</div>
 
@@ -199,7 +346,10 @@
 
 			{#if resultJson}
 				<div class="grid gap-2">
-					<Label>Result</Label>
+					<div class="flex items-center justify-between">
+						<Label>Result</Label>
+						<CopyButton value={resultJson} label="Copy result JSON" />
+					</div>
 					<Textarea value={resultJson} readonly class="min-h-[120px] font-mono text-xs" />
 				</div>
 			{/if}

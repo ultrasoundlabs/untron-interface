@@ -6,6 +6,13 @@ export function formatAddress(address: string, head = 6, tail = 4): string {
 	return `${address.slice(0, head)}…${address.slice(-tail)}`;
 }
 
+export function formatHexShort(value: unknown, head = 10, tail = 8): string {
+	if (typeof value !== 'string') return '—';
+	if (!value.startsWith('0x')) return value;
+	if (value.length <= head + tail + 3) return value;
+	return `${value.slice(0, head)}…${value.slice(-tail)}`;
+}
+
 export function formatNumberish(value: unknown): string {
 	if (value === null || value === undefined) return '—';
 	if (typeof value === 'number') return String(value);
@@ -47,6 +54,92 @@ export function formatFeesPpmAndFlat(ppm: unknown, flatFee: unknown): string {
 	const flat = parseBigIntish(flatFee);
 	if (flat === null || flat === 0n) return percent;
 	return `${percent} {flat: ${flat.toString(10)}}`;
+}
+
+const TOKEN_ALIASES: Record<string, string> = {
+	'0x3c499c542cef5e3811e1192ce70d8cc03d5c3359': 'USDC',
+	'0xc2132d05d31c914a87c6611c10748aeb04b58e8f': 'USDT'
+};
+
+export function getTokenAlias(address: string): string | null {
+	const key = address.toLowerCase();
+	return TOKEN_ALIASES[key] ?? null;
+}
+
+function formatAtomic(amountAtomic: bigint, decimals: number): string {
+	const negative = amountAtomic < 0n;
+	const abs = negative ? -amountAtomic : amountAtomic;
+	const base = 10n ** BigInt(decimals);
+	const whole = abs / base;
+	const frac = abs % base;
+	const fracStr = frac.toString(10).padStart(decimals, '0').replace(/0+$/, '');
+	const num = fracStr.length ? `${whole.toString(10)}.${fracStr}` : whole.toString(10);
+	return negative ? `-${num}` : num;
+}
+
+export function formatUsdtAtomic6(value: unknown): string | null {
+	try {
+		if (typeof value === 'string' && value.length > 0) return formatAtomic(BigInt(value), 6);
+		if (typeof value === 'number' && Number.isFinite(value)) return formatAtomic(BigInt(value), 6);
+		if (typeof value === 'bigint') return formatAtomic(value, 6);
+		return null;
+	} catch {
+		return null;
+	}
+}
+
+export function formatUnixSeconds(value: unknown): string | null {
+	try {
+		const s = typeof value === 'string' ? value : typeof value === 'number' ? String(value) : null;
+		if (!s) return null;
+		const n = Number(s);
+		if (!Number.isFinite(n)) return null;
+		return new Date(n * 1000).toISOString().replace('T', ' ').replace('Z', 'Z');
+	} catch {
+		return null;
+	}
+}
+
+export type FeeFromNetResult = { feeAtomic: bigint; grossAtomic: bigint; exact: boolean };
+
+export function estimateFeeFromNetAndPpm(
+	netAtomic: unknown,
+	feePpm: unknown
+): FeeFromNetResult | null {
+	try {
+		if (feePpm === null || feePpm === undefined) return null;
+		const ppm = typeof feePpm === 'bigint' ? feePpm : BigInt(String(feePpm));
+		const net = typeof netAtomic === 'bigint' ? netAtomic : BigInt(String(netAtomic));
+		if (ppm <= 0n) return { feeAtomic: 0n, grossAtomic: net, exact: true };
+		const scale = 1_000_000n;
+		if (ppm >= scale) return null;
+
+		const den = scale - ppm;
+		const grossEstimate = (net * scale + den - 1n) / den; // ceil
+
+		let g = grossEstimate;
+		let steps = 0;
+		while (steps++ < 2000) {
+			const fee = (g * ppm) / scale;
+			const net2 = g - fee;
+			if (net2 === net) return { feeAtomic: fee, grossAtomic: g, exact: true };
+			if (net2 > net) {
+				g -= 1n;
+				continue;
+			}
+			// net2 < net: we've gone too low, so bump back up.
+			g += 1n;
+			const feeUp = (g * ppm) / scale;
+			const netUp = g - feeUp;
+			if (netUp === net) return { feeAtomic: feeUp, grossAtomic: g, exact: true };
+			return { feeAtomic: feeUp, grossAtomic: g, exact: false };
+		}
+
+		const fee = (grossEstimate * ppm) / scale;
+		return { feeAtomic: fee, grossAtomic: grossEstimate, exact: false };
+	} catch {
+		return null;
+	}
 }
 
 export function isTronAddress(value: unknown): value is string {

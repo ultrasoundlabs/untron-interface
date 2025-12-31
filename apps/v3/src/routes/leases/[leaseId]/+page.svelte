@@ -12,7 +12,7 @@
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { getClaimsByLeaseId, getLeaseById } from '$lib/untron/api';
 	import type { SqlRow } from '$lib/untron/types';
-	import { getLessee } from '$lib/untron/format';
+	import { getLessee, getLeaseFeePpm } from '$lib/untron/format';
 	import UpdatePayoutConfigDialog from '$lib/components/leases/UpdatePayoutConfigDialog.svelte';
 
 	let lease = $state<SqlRow | null>(null);
@@ -111,7 +111,7 @@
 				{:else if claims.length === 0}
 					<div class="text-sm text-muted-foreground">No claims for this lease.</div>
 				{:else}
-					<ClaimsTable rows={claims} />
+					<ClaimsTable rows={claims} leaseFeePpm={lease ? getLeaseFeePpm(lease) : null} />
 				{/if}
 			</Card.Content>
 		</Card.Root>

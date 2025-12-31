@@ -16,9 +16,23 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import * as Select from '$lib/components/ui/select';
 	import PenLineIcon from '@lucide/svelte/icons/pen-line';
 	import SendIcon from '@lucide/svelte/icons/send';
-	import { getBeneficiary, getTargetChainId, getTargetToken } from '$lib/untron/format';
+	import {
+		formatAddress,
+		getBeneficiary,
+		getTargetChainId,
+		getTargetToken,
+		getTokenAlias
+	} from '$lib/untron/format';
+	import {
+		getChainLabel,
+		getChainMeta,
+		getTargetChainOptions,
+		getTargetTokenOptions
+	} from '$lib/untron/routes';
+	import CopyButton from '$lib/components/common/CopyButton.svelte';
 
 	type Props = {
 		open?: boolean;
@@ -50,6 +64,12 @@
 	let nonce = $state<string>('');
 	let deadline = $state('');
 	let signature = $state('');
+
+	const chainOptions = $derived.by(() => (protocol ? getTargetChainOptions(protocol) : []));
+
+	const tokenOptions = $derived.by(() =>
+		protocol && targetChainId ? getTargetTokenOptions(protocol, targetChainId) : []
+	);
 
 	function stringifyWithBigInt(value: unknown): string {
 		return JSON.stringify(value, (_k, v) => (typeof v === 'bigint' ? v.toString(10) : v), 2);
@@ -92,10 +112,39 @@
 		})();
 	});
 
+	$effect(() => {
+		if (!open || !protocol) return;
+		if (!targetChainId) {
+			targetChainId = getTargetChainOptions(protocol)[0] ?? String(protocol.hub.chainId);
+		}
+	});
+
+	$effect(() => {
+		if (!open || !protocol) return;
+		const tokens = getTargetTokenOptions(protocol, targetChainId);
+		if (tokens.length === 0) {
+			targetToken = '';
+			return;
+		}
+		const current = targetToken;
+		const matched = current
+			? (tokens.find((t) => t.toLowerCase() === current.toLowerCase()) ?? null)
+			: null;
+		if (!matched) {
+			targetToken = tokens[0];
+			return;
+		}
+		targetToken = matched;
+	});
+
 	async function sign() {
 		if (!protocol) return;
 		if (!account) {
 			errorMessage = 'Connect a wallet to sign.';
+			return;
+		}
+		if (!targetChainId || !targetToken) {
+			errorMessage = 'Select a target chain and token.';
 			return;
 		}
 
@@ -125,6 +174,10 @@
 	async function submit() {
 		if (!signature.trim().length) {
 			errorMessage = 'Missing signature.';
+			return;
+		}
+		if (!targetChainId || !targetToken) {
+			errorMessage = 'Select a target chain and token.';
 			return;
 		}
 
@@ -191,46 +244,122 @@
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
 					<Label for="targetChainId">Target chain id</Label>
-					<Input
-						id="targetChainId"
-						inputmode="numeric"
+					<Select.Root
+						type="single"
 						bind:value={targetChainId}
 						disabled={disabled || pendingSign || pendingSubmit}
-					/>
+					>
+						<Select.Trigger class="w-full" aria-label="Target chain id">
+							{#if targetChainId}
+								{@const meta = getChainMeta(targetChainId)}
+								<span data-slot="select-value" class="flex w-full items-center gap-2">
+									<span class="flex-1 truncate">{meta?.name ?? targetChainId}</span>
+									<span class="font-mono text-xs text-muted-foreground">{targetChainId}</span>
+								</span>
+							{:else}
+								<span data-slot="select-value" class="text-muted-foreground">Select chain…</span>
+							{/if}
+						</Select.Trigger>
+						<Select.Content>
+							{#each chainOptions as chainId (chainId)}
+								{@const meta = getChainMeta(chainId)}
+								<Select.Item value={chainId} label={getChainLabel(chainId)}>
+									{#snippet children()}
+										<span class="inline-flex w-full items-center gap-2">
+											<span class="flex-1 truncate">{meta?.name ?? chainId}</span>
+											<span class="font-mono text-xs text-muted-foreground">{chainId}</span>
+										</span>
+									{/snippet}
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
 				</div>
 				<div class="grid gap-2">
 					<Label for="deadline">Deadline (unix seconds)</Label>
-					<Input
-						id="deadline"
-						inputmode="numeric"
-						bind:value={deadline}
-						disabled={disabled || pendingSign || pendingSubmit}
-					/>
+					<div class="flex items-center gap-2">
+						<Input
+							id="deadline"
+							inputmode="numeric"
+							bind:value={deadline}
+							disabled={disabled || pendingSign || pendingSubmit}
+						/>
+						<CopyButton
+							value={deadline || null}
+							label="Copy deadline"
+							disabled={disabled || pendingSign || pendingSubmit}
+						/>
+					</div>
 				</div>
 			</div>
 
 			<div class="grid gap-2">
 				<Label for="targetToken">Target token</Label>
-				<Input
-					id="targetToken"
-					placeholder="0x…"
+				<Select.Root
+					type="single"
 					bind:value={targetToken}
-					disabled={disabled || pendingSign || pendingSubmit}
-				/>
+					disabled={disabled || pendingSign || pendingSubmit || !targetChainId}
+				>
+					<Select.Trigger class="w-full" aria-label="Target token">
+						{#if targetToken}
+							{@const alias = getTokenAlias(targetToken)}
+							<span data-slot="select-value" class="flex w-full items-center gap-2">
+								<span class="flex-1 truncate">{alias ?? formatAddress(targetToken, 10, 6)}</span>
+								{#if alias}
+									<span class="font-mono text-xs text-muted-foreground">
+										{formatAddress(targetToken, 8, 6)}
+									</span>
+								{/if}
+							</span>
+						{:else}
+							<span data-slot="select-value" class="text-muted-foreground">Select token…</span>
+						{/if}
+					</Select.Trigger>
+					<Select.Content>
+						{#each tokenOptions as token (token)}
+							{@const alias = getTokenAlias(token)}
+							<Select.Item
+								value={token}
+								label={alias
+									? `${alias} (${formatAddress(token, 10, 6)})`
+									: formatAddress(token, 10, 6)}
+							>
+								{#snippet children()}
+									<span class="inline-flex w-full items-center gap-2">
+										<span class="flex-1 truncate">{alias ?? formatAddress(token, 10, 6)}</span>
+										<span class="font-mono text-xs text-muted-foreground">
+											{formatAddress(token, 8, 6)}
+										</span>
+									</span>
+								{/snippet}
+							</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
 			</div>
 
 			<div class="grid gap-2">
 				<Label for="beneficiary">Beneficiary</Label>
-				<Input
-					id="beneficiary"
-					placeholder="0x…"
-					bind:value={beneficiary}
-					disabled={disabled || pendingSign || pendingSubmit}
-				/>
+				<div class="flex items-center gap-2">
+					<Input
+						id="beneficiary"
+						placeholder="0x…"
+						bind:value={beneficiary}
+						disabled={disabled || pendingSign || pendingSubmit}
+					/>
+					<CopyButton
+						value={beneficiary || null}
+						label="Copy beneficiary"
+						disabled={disabled || pendingSign || pendingSubmit}
+					/>
+				</div>
 			</div>
 
 			<div class="grid gap-2">
-				<Label for="signature">Signature</Label>
+				<div class="flex items-center justify-between">
+					<Label for="signature">Signature</Label>
+					<CopyButton value={signature || null} label="Copy signature" />
+				</div>
 				<Textarea
 					id="signature"
 					placeholder="0x…"
@@ -249,7 +378,10 @@
 
 			{#if resultJson}
 				<div class="grid gap-2">
-					<Label>Result</Label>
+					<div class="flex items-center justify-between">
+						<Label>Result</Label>
+						<CopyButton value={resultJson} label="Copy result JSON" />
+					</div>
 					<Textarea value={resultJson} readonly class="min-h-[140px] font-mono text-xs" />
 				</div>
 			{/if}

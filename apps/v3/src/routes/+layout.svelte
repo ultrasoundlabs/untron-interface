@@ -19,7 +19,9 @@
 		<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 			<div class="space-y-1">
 				<h1 class="text-2xl font-semibold tracking-tight">Untron V3 dashboard</h1>
-				<p class="text-sm text-muted-foreground">Internal panel for leases and claims.</p>
+				<p class="text-sm text-muted-foreground">
+					Developer UI for the next-generation Untron V3 protocol.
+				</p>
 			</div>
 			<div class="w-full lg:max-w-md">
 				<WalletConnect />
