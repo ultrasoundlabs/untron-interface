@@ -2,6 +2,13 @@
 	import { derived } from 'svelte/store';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { connectWallet, disconnectWallet } from '$lib/wagmi/wallet';
+	import * as Card from '$lib/components/ui/card';
+	import { Button } from '$lib/components/ui/button';
+	import * as Alert from '$lib/components/ui/alert';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Separator } from '$lib/components/ui/separator';
+	import PlugIcon from '@lucide/svelte/icons/plug';
+	import LogOutIcon from '@lucide/svelte/icons/log-out';
 
 	const accountAddress = derived(connection, ($connection) => $connection.address);
 	const chainId = derived(connection, ($connection) => $connection.chainId);
@@ -35,43 +42,51 @@
 	}
 </script>
 
-<section
-	class="rounded-xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950"
->
-	<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-		<div class="space-y-1">
-			<div class="text-sm font-medium">Wallet</div>
+<Card.Root>
+	<Card.Header class="pb-4">
+		<div class="flex items-start justify-between gap-4">
+			<div class="space-y-1">
+				<Card.Title class="text-base">Wallet</Card.Title>
+				{#if $isConnected}
+					<Card.Description>
+						<span class="font-mono">{String($accountAddress)}</span>
+					</Card.Description>
+				{:else}
+					<Card.Description>Not connected</Card.Description>
+				{/if}
+			</div>
+
 			{#if $isConnected}
-				<div class="text-sm text-muted-foreground">
-					<span class="font-mono">{String($accountAddress)}</span>
-					<span class="mx-2 opacity-50">·</span>
-					<span>chainId: {$chainId ?? 'unknown'}</span>
-				</div>
+				<Button variant="outline" onclick={onDisconnect} disabled={pending}>
+					<LogOutIcon />
+					{pending ? 'Disconnecting…' : 'Disconnect'}
+				</Button>
 			{:else}
-				<div class="text-sm text-muted-foreground">Not connected</div>
+				<Button onclick={onConnect} disabled={pending}>
+					<PlugIcon />
+					{pending ? 'Connecting…' : 'Connect'}
+				</Button>
+			{/if}
+		</div>
+	</Card.Header>
+
+	<Card.Content class="space-y-3">
+		<div class="flex flex-wrap items-center gap-2 text-sm">
+			<Badge variant="secondary">chainId: {$chainId ?? 'unknown'}</Badge>
+			{#if $isConnected}
+				<Badge variant="outline">connected</Badge>
+			{:else}
+				<Badge variant="outline">disconnected</Badge>
 			{/if}
 		</div>
 
-		{#if $isConnected}
-			<button
-				class="h-10 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-zinc-900"
-				onclick={onDisconnect}
-				disabled={pending}
-			>
-				{pending ? 'Disconnecting…' : 'Disconnect'}
-			</button>
-		{:else}
-			<button
-				class="h-10 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-zinc-900"
-				onclick={onConnect}
-				disabled={pending}
-			>
-				{pending ? 'Connecting…' : 'Connect wallet'}
-			</button>
-		{/if}
-	</div>
+		<Separator />
 
-	{#if errorMessage}
-		<p class="mt-3 text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
-	{/if}
-</section>
+		{#if errorMessage}
+			<Alert.Root variant="destructive">
+				<Alert.Title>Wallet error</Alert.Title>
+				<Alert.Description>{errorMessage}</Alert.Description>
+			</Alert.Root>
+		{/if}
+	</Card.Content>
+</Card.Root>
