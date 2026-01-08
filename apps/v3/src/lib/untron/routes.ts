@@ -1,7 +1,5 @@
-import type { ProtocolResponse } from './api';
-
-export type BridgerRoute = {
-	target_chain_id: string;
+export type SupportedPair = {
+	target_chain_id: number;
 	target_token: `0x${string}`;
 };
 
@@ -36,19 +34,14 @@ const CHAIN_META: Record<string, ChainMeta> = {
 	'988': { chainId: '988', name: 'Stable' }
 };
 
-function isBridgerRoute(value: unknown): value is BridgerRoute {
+function isSupportedPair(value: unknown): value is SupportedPair {
 	if (typeof value !== 'object' || value === null) return false;
 	const v = value as Record<string, unknown>;
 	return (
-		typeof v.target_chain_id === 'string' &&
+		typeof v.target_chain_id === 'number' &&
 		typeof v.target_token === 'string' &&
 		v.target_token.startsWith('0x')
 	);
-}
-
-export function getProtocolBridgerRoutes(protocol: ProtocolResponse): BridgerRoute[] {
-	const routes = Array.isArray(protocol.hub.bridgerRoutes) ? protocol.hub.bridgerRoutes : [];
-	return routes.filter(isBridgerRoute);
 }
 
 function sortChainIdsByName(chainIds: string[]): string[] {
@@ -64,38 +57,38 @@ function sortChainIdsByName(chainIds: string[]): string[] {
 	});
 }
 
-export function getDeprecatedTargetChains(protocol: ProtocolResponse): Set<string> {
-	const rows = Array.isArray(protocol.hub.deprecatedChains) ? protocol.hub.deprecatedChains : [];
-	const deprecated = new Set<string>();
-	for (const row of rows) {
-		if (typeof row !== 'object' || row === null) continue;
-		const r = row as Record<string, unknown>;
-		if (r.deprecated !== true) continue;
-		if (typeof r.target_chain_id === 'string') deprecated.add(r.target_chain_id);
-	}
-	return deprecated;
-}
-
-export function getTargetChainOptions(protocol: ProtocolResponse): string[] {
-	const deprecated = getDeprecatedTargetChains(protocol);
+export function getTargetChainOptions(
+	supportedPairs: Array<SupportedPair | Record<string, unknown>>,
+	deprecatedTargetChains: Set<string> = new Set()
+): string[] {
 	const ids = new Set<string>();
-	for (const r of getProtocolBridgerRoutes(protocol)) {
-		if (deprecated.has(r.target_chain_id)) continue;
-		ids.add(r.target_chain_id);
+	for (const r of supportedPairs) {
+		if (typeof r !== 'object' || r === null) continue;
+		const rr = r as Record<string, unknown>;
+		const chainId =
+			typeof rr.target_chain_id === 'number'
+				? String(rr.target_chain_id)
+				: typeof rr.target_chain_id === 'string'
+					? rr.target_chain_id
+					: null;
+		if (!chainId) continue;
+		if (deprecatedTargetChains.has(chainId)) continue;
+		ids.add(chainId);
 	}
 	return sortChainIdsByName([...ids]);
 }
 
 export function getTargetTokenOptions(
-	protocol: ProtocolResponse,
-	targetChainId: string
+	supportedPairs: Array<SupportedPair | Record<string, unknown>>,
+	targetChainId: string,
+	deprecatedTargetChains: Set<string> = new Set()
 ): `0x${string}`[] {
-	const deprecated = getDeprecatedTargetChains(protocol);
-	if (deprecated.has(targetChainId)) return [];
+	if (deprecatedTargetChains.has(targetChainId)) return [];
 
 	const tokens = new Set<`0x${string}`>();
-	for (const r of getProtocolBridgerRoutes(protocol)) {
-		if (r.target_chain_id !== targetChainId) continue;
+	for (const r of supportedPairs) {
+		if (!isSupportedPair(r)) continue;
+		if (String(r.target_chain_id) !== targetChainId) continue;
 		tokens.add(r.target_token);
 	}
 	return [...tokens].sort();

@@ -11,27 +11,38 @@
 	import { getAllLeases } from '$lib/untron/api';
 	import type { SqlRow } from '$lib/untron/types';
 	import { connection } from '$lib/wagmi/connectionStore';
+	import { startPolling } from '$lib/polling';
 
 	let rows = $state<SqlRow[] | null>(null);
-	let loading = $state(false);
+	let loading = $state(false); // initial load only
+	let refreshing = $state(false);
+	let refreshedPulse = $state(false);
 	let errorMessage = $state<string | null>(null);
 	let query = $state('');
 	let newLeaseOpen = $state(false);
 
-	async function refresh() {
+	async function refresh(mode: 'initial' | 'background' | 'manual' = 'manual') {
 		try {
-			loading = true;
+			if (mode === 'initial') loading = true;
+			else refreshing = true;
 			errorMessage = null;
 			rows = await getAllLeases(200, 0);
+			refreshedPulse = true;
+			setTimeout(() => (refreshedPulse = false), 600);
 		} catch (err) {
 			errorMessage = err instanceof Error ? err.message : String(err);
 		} finally {
-			loading = false;
+			if (mode === 'initial') loading = false;
+			else refreshing = false;
 		}
 	}
 
 	$effect(() => {
-		void refresh();
+		const stop = startPolling(() => refresh('background'), 3000, {
+			immediate: true,
+			skipIf: () => loading || refreshing
+		});
+		return stop;
 	});
 
 	const filtered = $derived.by(() => {
@@ -47,12 +58,19 @@
 		<div class="space-y-1">
 			<h2 class="text-xl font-semibold tracking-tight">All leases</h2>
 			<p class="text-sm text-muted-foreground">
-				Read-only list from `untron_v3_lease_full` via Ponder SQL.
+				Read-only list from the indexer (`GET /lease_view`).
 			</p>
 		</div>
 		<div class="flex items-center gap-2">
-			<Button variant="outline" onclick={refresh} disabled={loading}>
-				<RefreshCwIcon />
+			<Button
+				variant="outline"
+				onclick={() => refresh('manual')}
+				disabled={loading || refreshing}
+				title={refreshing ? 'Refreshing…' : 'Refresh'}
+			>
+				<RefreshCwIcon
+					class={loading || refreshing ? 'animate-spin' : refreshedPulse ? 'animate-pulse' : ''}
+				/>
 				Refresh
 			</Button>
 			<Button onclick={() => (newLeaseOpen = true)} disabled={!$connection.isConnected}>
@@ -82,7 +100,7 @@
 			</div>
 		</Card.Header>
 		<Card.Content>
-			{#if rows === null || loading}
+			{#if rows === null}
 				<div class="space-y-2">
 					<Skeleton class="h-10" />
 					<Skeleton class="h-10" />

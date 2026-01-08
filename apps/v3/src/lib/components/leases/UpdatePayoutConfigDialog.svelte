@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { updatePayoutConfigWithSig, getProtocol, type ProtocolResponse } from '$lib/untron/api';
-	import { readContract } from '@wagmi/core';
+	import { getProtocolInfo, getLeaseNonce, updatePayoutConfigWithSig } from '$lib/untron/api';
+	import { getAddress } from 'viem';
 	import {
 		buildPayoutConfigUpdateTypedData,
 		DEFAULT_EIP712_NAME,
 		DEFAULT_EIP712_VERSION,
 		signPayoutConfigUpdate
 	} from '$lib/untron/signing';
-	import { untronV3Abi } from '$lib/untron/abi';
 	import type { SqlRow } from '$lib/untron/types';
 	import { wagmiConfig } from '$lib/wagmi/exports';
 	import { Button } from '$lib/components/ui/button';
@@ -52,7 +51,7 @@
 		onUpdated
 	}: Props = $props();
 
-	let protocol = $state<ProtocolResponse | null>(null);
+	let protocolInfo = $state<Awaited<ReturnType<typeof getProtocolInfo>> | null>(null);
 	let pendingSign = $state(false);
 	let pendingSubmit = $state(false);
 	let errorMessage = $state<string | null>(null);
@@ -65,20 +64,42 @@
 	let deadline = $state('');
 	let signature = $state('');
 
-	const chainOptions = $derived.by(() => (protocol ? getTargetChainOptions(protocol) : []));
+	const chainOptions = $derived.by(() =>
+		protocolInfo
+			? getTargetChainOptions(protocolInfo.supportedPairs, protocolInfo.deprecatedTargetChains)
+			: []
+	);
 
 	const tokenOptions = $derived.by(() =>
-		protocol && targetChainId ? getTargetTokenOptions(protocol, targetChainId) : []
+		protocolInfo && targetChainId
+			? getTargetTokenOptions(
+					protocolInfo.supportedPairs,
+					targetChainId,
+					protocolInfo.deprecatedTargetChains
+				)
+			: []
 	);
 
 	function stringifyWithBigInt(value: unknown): string {
 		return JSON.stringify(value, (_k, v) => (typeof v === 'bigint' ? v.toString(10) : v), 2);
 	}
 
-	function setDefaults(p: ProtocolResponse) {
-		targetChainId ||= getTargetChainId(lease ?? {}) ?? String(p.hub.chainId);
+	function checksum(value: string, label: string): `0x${string}` {
+		try {
+			return getAddress(value) as `0x${string}`;
+		} catch {
+			throw new Error(`Invalid ${label} (expected EVM address)`);
+		}
+	}
+
+	function setDefaults() {
+		targetChainId ||= getTargetChainId(lease ?? {}) ?? '';
 		targetToken ||= getTargetToken(lease ?? {}) ?? '';
 		beneficiary ||= getBeneficiary(lease ?? {}) ?? account ?? '';
+		nonce ||=
+			typeof (lease as Record<string, unknown> | null)?.lease_nonce === 'string'
+				? ((lease as Record<string, unknown>).lease_nonce as string)
+				: '';
 
 		if (!deadline) {
 			const now = Math.floor(Date.now() / 1000);
@@ -87,41 +108,36 @@
 	}
 
 	async function refreshNonce() {
-		if (!protocol) return;
-		try {
-			const nonceValue = await readContract(wagmiConfig, {
-				chainId: protocol.hub.chainId,
-				address: protocol.hub.contractAddress,
-				abi: untronV3Abi,
-				functionName: 'leaseNonces',
-				args: [BigInt(leaseId)]
-			});
-			nonce = (nonceValue as bigint).toString(10);
-		} catch (err) {
-			const msg = err instanceof Error ? err.message : String(err);
-			throw new Error(`Failed to fetch onchain nonce: ${msg}`);
-		}
+		nonce = await getLeaseNonce(leaseId);
 	}
 
 	$effect(() => {
 		if (!open) return;
 		void (async () => {
-			protocol ??= await getProtocol();
-			setDefaults(protocol);
+			protocolInfo ??= await getProtocolInfo();
+			setDefaults();
 			if (!nonce) await refreshNonce();
 		})();
 	});
 
 	$effect(() => {
-		if (!open || !protocol) return;
+		if (!open || !protocolInfo) return;
 		if (!targetChainId) {
-			targetChainId = getTargetChainOptions(protocol)[0] ?? String(protocol.hub.chainId);
+			targetChainId =
+				getTargetChainOptions(
+					protocolInfo.supportedPairs,
+					protocolInfo.deprecatedTargetChains
+				)[0] ?? '';
 		}
 	});
 
 	$effect(() => {
-		if (!open || !protocol) return;
-		const tokens = getTargetTokenOptions(protocol, targetChainId);
+		if (!open || !protocolInfo) return;
+		const tokens = getTargetTokenOptions(
+			protocolInfo.supportedPairs,
+			targetChainId,
+			protocolInfo.deprecatedTargetChains
+		);
 		if (tokens.length === 0) {
 			targetToken = '';
 			return;
@@ -138,7 +154,11 @@
 	});
 
 	async function sign() {
-		if (!protocol) return;
+		if (!protocolInfo) return;
+		if (!protocolInfo.hubChainId) {
+			errorMessage = 'Missing PUBLIC_UNTRON_HUB_CHAIN_ID (needed for signing).';
+			return;
+		}
 		if (!account) {
 			errorMessage = 'Connect a wallet to sign.';
 			return;
@@ -153,14 +173,17 @@
 			errorMessage = null;
 			resultJson = null;
 			if (!nonce) await refreshNonce();
+
+			const beneficiaryChecksum = checksum(beneficiary, 'beneficiary');
+			const tokenChecksum = checksum(targetToken, 'target token');
 			signature = await signPayoutConfigUpdate({
 				wagmiConfig,
 				account,
-				protocol,
+				context: { hubChainId: protocolInfo.hubChainId, untronV3: protocolInfo.untronV3 },
 				leaseId,
 				targetChainId,
-				targetToken: targetToken as `0x${string}`,
-				beneficiary: beneficiary as `0x${string}`,
+				targetToken: tokenChecksum,
+				beneficiary: beneficiaryChecksum,
 				nonce,
 				deadline
 			});
@@ -180,29 +203,52 @@
 			errorMessage = 'Select a target chain and token.';
 			return;
 		}
+		const leaseIdNum = Number(leaseId);
+		if (!Number.isFinite(leaseIdNum) || !Number.isInteger(leaseIdNum) || leaseIdNum < 0) {
+			errorMessage = 'Invalid lease id (expected a non-negative integer).';
+			return;
+		}
+		const targetChainIdNum = Number(targetChainId);
+		if (
+			!Number.isFinite(targetChainIdNum) ||
+			!Number.isInteger(targetChainIdNum) ||
+			targetChainIdNum <= 0
+		) {
+			errorMessage = 'Invalid target chain id (expected a positive integer).';
+			return;
+		}
+		const deadlineNum = Number(deadline);
+		if (!Number.isFinite(deadlineNum) || !Number.isInteger(deadlineNum) || deadlineNum <= 0) {
+			errorMessage = 'Invalid deadline (expected a positive integer unix timestamp).';
+			return;
+		}
 
 		try {
 			pendingSubmit = true;
 			errorMessage = null;
 			resultJson = null;
 
-			const res = await updatePayoutConfigWithSig(leaseId, {
-				targetChainId,
-				targetToken: targetToken as `0x${string}`,
-				beneficiary: beneficiary as `0x${string}`,
-				deadline,
+			const beneficiaryChecksum = checksum(beneficiary, 'beneficiary');
+			const tokenChecksum = checksum(targetToken, 'target token');
+
+			const res = await updatePayoutConfigWithSig({
+				lease_id: leaseIdNum,
+				target_chain_id: targetChainIdNum,
+				target_token: tokenChecksum,
+				beneficiary: beneficiaryChecksum,
+				deadline: deadlineNum,
 				signature: signature as `0x${string}`
 			});
 
 			resultJson = stringifyWithBigInt({
 				...res,
-				typedData: protocol
+				typedData: protocolInfo?.hubChainId
 					? buildPayoutConfigUpdateTypedData({
-							protocol,
+							context: { hubChainId: protocolInfo.hubChainId, untronV3: protocolInfo.untronV3 },
 							leaseId,
 							targetChainId,
-							targetToken: targetToken as `0x${string}`,
-							beneficiary: beneficiary as `0x${string}`,
+							targetToken: tokenChecksum,
+							beneficiary: beneficiaryChecksum,
 							nonce,
 							deadline
 						})
@@ -223,8 +269,8 @@
 		<Dialog.Header>
 			<Dialog.Title>Update payout config</Dialog.Title>
 			<Dialog.Description>
-				Signs an EIP-712 `PayoutConfigUpdate` as the lessee, then relays via backend (`PUT
-				/leases/:id`).
+				Signs an EIP-712 `PayoutConfigUpdate` as the lessee, then relays via backend (`POST
+				/payout_config`).
 			</Dialog.Description>
 		</Dialog.Header>
 

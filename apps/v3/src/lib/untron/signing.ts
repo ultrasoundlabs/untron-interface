@@ -1,9 +1,13 @@
 import { getChainId, signTypedData, switchChain } from '@wagmi/core';
 import type { Config } from '@wagmi/core';
-import type { ProtocolResponse } from './api';
 
 export const DEFAULT_EIP712_NAME = 'Untron';
 export const DEFAULT_EIP712_VERSION = '1';
+
+export type PayoutConfigSigningContext = {
+	hubChainId: number;
+	untronV3: `0x${string}`;
+};
 
 function toUint256(value: string, label: string): bigint {
 	try {
@@ -26,7 +30,7 @@ export async function ensureWalletChainForSigning(wagmiConfig: Config, targetCha
 }
 
 export function buildPayoutConfigUpdateTypedData(args: {
-	protocol: ProtocolResponse;
+	context: PayoutConfigSigningContext;
 	leaseId: string;
 	targetChainId: string;
 	targetToken: `0x${string}`;
@@ -37,8 +41,8 @@ export function buildPayoutConfigUpdateTypedData(args: {
 	const domain = {
 		name: DEFAULT_EIP712_NAME,
 		version: DEFAULT_EIP712_VERSION,
-		chainId: args.protocol.hub.chainId,
-		verifyingContract: args.protocol.hub.contractAddress
+		chainId: args.context.hubChainId,
+		verifyingContract: args.context.untronV3
 	} as const;
 
 	const types = {
@@ -67,7 +71,7 @@ export function buildPayoutConfigUpdateTypedData(args: {
 export async function signPayoutConfigUpdate(args: {
 	wagmiConfig: Config;
 	account: `0x${string}`;
-	protocol: ProtocolResponse;
+	context: PayoutConfigSigningContext;
 	leaseId: string;
 	targetChainId: string;
 	targetToken: `0x${string}`;
@@ -75,7 +79,7 @@ export async function signPayoutConfigUpdate(args: {
 	nonce: string;
 	deadline: string;
 }): Promise<`0x${string}`> {
-	await ensureWalletChainForSigning(args.wagmiConfig, args.protocol.hub.chainId);
+	await ensureWalletChainForSigning(args.wagmiConfig, args.context.hubChainId);
 	const typed = buildPayoutConfigUpdateTypedData(args);
 	return (await signTypedData(args.wagmiConfig, {
 		account: args.account,

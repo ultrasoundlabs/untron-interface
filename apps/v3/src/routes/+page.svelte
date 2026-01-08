@@ -6,42 +6,51 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
-	import { getOwnedLeases, type ProtocolResponse, getProtocol } from '$lib/untron/api';
+	import { getOwnedLeases } from '$lib/untron/api';
 	import type { SqlRow } from '$lib/untron/types';
 	import LeaseCard from '$lib/components/leases/LeaseCard.svelte';
 	import NewLeaseDialog from '$lib/components/leases/NewLeaseDialog.svelte';
 	import KeyRoundIcon from '@lucide/svelte/icons/key-round';
+	import { startPolling } from '$lib/polling';
 
-	let protocol = $state<ProtocolResponse | null>(null);
 	let leases = $state<SqlRow[] | null>(null);
 	let errorMessage = $state<string | null>(null);
-	let loading = $state(false);
+	let loading = $state(false); // initial load only
+	let refreshing = $state(false);
+	let refreshedPulse = $state(false);
 	let newLeaseOpen = $state(false);
 
-	async function refresh() {
+	async function refresh(mode: 'initial' | 'background' | 'manual' = 'manual') {
 		if (!$connection.isConnected || !$connection.address) {
 			leases = [];
 			return;
 		}
 
 		try {
-			loading = true;
+			if (mode === 'initial') loading = true;
+			else refreshing = true;
 			errorMessage = null;
-			protocol ??= await getProtocol();
 			leases = await getOwnedLeases($connection.address as `0x${string}`);
+			refreshedPulse = true;
+			setTimeout(() => (refreshedPulse = false), 600);
 		} catch (err) {
 			errorMessage = err instanceof Error ? err.message : String(err);
 		} finally {
-			loading = false;
+			if (mode === 'initial') loading = false;
+			else refreshing = false;
 		}
 	}
 
 	$effect(() => {
-		if ($connection.isConnected && $connection.address) {
-			void refresh();
-		} else {
+		if (!$connection.isConnected || !$connection.address) {
 			leases = null;
+			return;
 		}
+		const stop = startPolling(() => refresh('background'), 3000, {
+			immediate: true,
+			skipIf: () => loading || refreshing || !$connection.isConnected || !$connection.address
+		});
+		return stop;
 	});
 </script>
 
@@ -57,8 +66,15 @@
 			</p>
 		</div>
 		<div class="flex items-center gap-2">
-			<Button variant="outline" onclick={refresh} disabled={loading}>
-				<RefreshCwIcon />
+			<Button
+				variant="outline"
+				onclick={() => refresh('manual')}
+				disabled={loading || refreshing}
+				title={refreshing ? 'Refreshing…' : 'Refresh'}
+			>
+				<RefreshCwIcon
+					class={loading || refreshing ? 'animate-spin' : refreshedPulse ? 'animate-pulse' : ''}
+				/>
 				Refresh
 			</Button>
 			<Button onclick={() => (newLeaseOpen = true)} disabled={!$connection.isConnected}>
@@ -82,7 +98,7 @@
 				<Card.Description>This view filters leases by `lessee`.</Card.Description>
 			</Card.Header>
 		</Card.Root>
-	{:else if leases === null || loading}
+	{:else if leases === null}
 		<div class="grid gap-4 lg:grid-cols-2">
 			<Skeleton class="h-[248px]" />
 			<Skeleton class="h-[248px]" />

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { getAddress } from 'viem';
 	import {
 		createLease,
-		getProtocol,
-		getRealtors,
-		type CreateLeaseBody,
-		type ProtocolResponse
+		findLeaseIdByReceiverSalt,
+		getProtocolInfo,
+		type CreateLeaseRequest
 	} from '$lib/untron/api';
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -15,7 +15,12 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Select from '$lib/components/ui/select';
 	import PlusIcon from '@lucide/svelte/icons/plus';
-	import { formatAddress, formatFeesPpmAndFlat, getTokenAlias } from '$lib/untron/format';
+	import {
+		formatAddress,
+		formatPpmAsPercent,
+		formatUsdtAtomic6,
+		getTokenAlias
+	} from '$lib/untron/format';
 	import {
 		getChainLabel,
 		getChainMeta,
@@ -33,34 +38,31 @@
 
 	let { open = $bindable(false), disabled = false, lessee = null, onCreated }: Props = $props();
 
-	let protocol = $state<ProtocolResponse | null>(null);
+	let protocolInfo = $state<Awaited<ReturnType<typeof getProtocolInfo>> | null>(null);
 	let pending = $state(false);
 	let errorMessage = $state<string | null>(null);
 	let resultJson = $state<string | null>(null);
-	let fixedFeeSource = $state<'realtor' | 'protocol_floor' | 'default'>('default');
+	let initializedDefaults = $state(false);
+
+	let payoutConfigMode = $state<'fixed' | 'changeable'>('fixed');
 
 	let receiverSalt = $state('');
-	let nukeableAfter = $state('');
-	let leaseFeePpm = $state('1000');
-	let flatFee = $state('0');
+	let durationSeconds = $state('');
 	let targetChainId = $state('');
 	let targetToken = $state('');
 	let beneficiary = $state('');
 
-	function protocolFloorPpm(p: ProtocolResponse): string | null {
-		const v = (p.hub.protocol as Record<string, unknown> | undefined)?.protocol_floor_ppm;
-		return typeof v === 'string' ? v : null;
-	}
-
-	function parseFeeFromRealtor(row: unknown): string | null {
-		if (typeof row !== 'object' || row === null) return null;
-		const r = row as Record<string, unknown>;
-		const v = r.effective_min_fee_ppm ?? r.min_fee_ppm;
-		return typeof v === 'string' ? v : null;
-	}
-
-	function setDefaultsFromProtocol(p: ProtocolResponse) {
-		targetChainId ||= String(p.hub.chainId);
+	function getSelectedPair() {
+		if (!protocolInfo || !targetChainId || !targetToken) return null;
+		const chainId = Number(targetChainId);
+		if (!Number.isFinite(chainId)) return null;
+		return (
+			protocolInfo.supportedPairs.find(
+				(p) =>
+					p.target_chain_id === chainId &&
+					p.target_token.toLowerCase() === targetToken.toLowerCase()
+			) ?? null
+		);
 	}
 
 	function setDefaultsFromWallet() {
@@ -68,55 +70,55 @@
 		beneficiary ||= lessee;
 	}
 
-	function setDefaultNukeableAfter() {
-		if (nukeableAfter) return;
-		const now = Math.floor(Date.now() / 1000);
-		nukeableAfter = String(now + 24 * 60 * 60);
+	function checksum(value: string, label: string): `0x${string}` {
+		try {
+			return getAddress(value) as `0x${string}`;
+		} catch {
+			throw new Error(`Invalid ${label} (expected EVM address)`);
+		}
+	}
+
+	function defaultDurationSecondsForUi(maxDurationSeconds: number): number {
+		const base = 600;
+		if (maxDurationSeconds === 0) return base;
+		return Math.max(1, Math.min(base, maxDurationSeconds));
 	}
 
 	$effect(() => {
+		if (!open) {
+			initializedDefaults = false;
+			return;
+		}
 		if (!open) return;
 		void (async () => {
-			protocol ??= await getProtocol();
-			setDefaultsFromProtocol(protocol);
+			protocolInfo ??= await getProtocolInfo();
 			setDefaultsFromWallet();
-			setDefaultNukeableAfter();
-
-			// Fees are not user-configurable; pick the backend relayer's effective minimum fee when available.
-			try {
-				const realtors = await getRealtors();
-				const ppm = parseFeeFromRealtor(realtors.realtor);
-				if (ppm) {
-					leaseFeePpm = ppm;
-					flatFee = '0';
-					fixedFeeSource = 'realtor';
-				} else {
-					const floor = protocolFloorPpm(protocol);
-					if (floor) {
-						leaseFeePpm = floor;
-						flatFee = '0';
-						fixedFeeSource = 'protocol_floor';
-					}
-				}
-			} catch {
-				const floor = protocolFloorPpm(protocol);
-				if (floor) {
-					leaseFeePpm = floor;
-					flatFee = '0';
-					fixedFeeSource = 'protocol_floor';
-				}
+			if (!initializedDefaults) {
+				durationSeconds = String(defaultDurationSecondsForUi(protocolInfo.maxDurationSeconds));
+				initializedDefaults = true;
 			}
 
-			const chains = getTargetChainOptions(protocol);
-			if (!targetChainId) targetChainId = chains[0] ?? String(protocol.hub.chainId);
-			const tokens = getTargetTokenOptions(protocol, targetChainId);
+			const chains = getTargetChainOptions(
+				protocolInfo.supportedPairs,
+				protocolInfo.deprecatedTargetChains
+			);
+			if (!targetChainId) targetChainId = chains[0] ?? '';
+			const tokens = getTargetTokenOptions(
+				protocolInfo.supportedPairs,
+				targetChainId,
+				protocolInfo.deprecatedTargetChains
+			);
 			if (!targetToken) targetToken = tokens[0] ?? '';
 		})();
 	});
 
 	$effect(() => {
-		if (!open || !protocol) return;
-		const tokens = getTargetTokenOptions(protocol, targetChainId);
+		if (!open || !protocolInfo) return;
+		const tokens = getTargetTokenOptions(
+			protocolInfo.supportedPairs,
+			targetChainId,
+			protocolInfo.deprecatedTargetChains
+		);
 		if (tokens.length === 0) {
 			targetToken = '';
 			return;
@@ -135,15 +137,29 @@
 
 	async function submit() {
 		if (!lessee) {
-			errorMessage = 'Connect a wallet to use it as the lessee.';
+			errorMessage = 'Connect a wallet to create a lease.';
 			return;
 		}
-		if (!protocol) {
+		if (!protocolInfo) {
 			errorMessage = 'Protocol config is not loaded yet.';
 			return;
 		}
 		if (!targetChainId || !targetToken) {
 			errorMessage = 'Select a target chain and token.';
+			return;
+		}
+		const duration = Number(durationSeconds.trim());
+		if (!Number.isFinite(duration) || !Number.isInteger(duration) || duration <= 0) {
+			errorMessage = 'Invalid duration_seconds (expected a positive integer).';
+			return;
+		}
+		if (protocolInfo.maxDurationSeconds !== 0 && duration > protocolInfo.maxDurationSeconds) {
+			errorMessage = `Duration exceeds max_duration_seconds (${protocolInfo.maxDurationSeconds}).`;
+			return;
+		}
+		const chainIdNum = Number(targetChainId);
+		if (!Number.isFinite(chainIdNum) || !Number.isInteger(chainIdNum) || chainIdNum <= 0) {
+			errorMessage = 'Invalid target_chain_id (expected a positive integer).';
 			return;
 		}
 
@@ -152,25 +168,39 @@
 			errorMessage = null;
 			resultJson = null;
 
-			const body: CreateLeaseBody = {
-				lessee,
-				nukeableAfter,
-				leaseFeePpm,
-				flatFee,
-				targetChainId,
-				targetToken: targetToken as `0x${string}`,
-				beneficiary: beneficiary as `0x${string}`
+			const beneficiaryChecksum = checksum(beneficiary.trim(), 'beneficiary');
+			const tokenChecksum = checksum(targetToken, 'target token');
+			const lesseeChecksum = checksum(lessee, 'connected wallet');
+
+			const body: CreateLeaseRequest = {
+				duration_seconds: duration,
+				target_chain_id: chainIdNum,
+				target_token: tokenChecksum,
+				beneficiary: beneficiaryChecksum
 			};
 
-			if (receiverSalt.trim().length) body.receiverSalt = receiverSalt.trim() as `0x${string}`;
+			if (payoutConfigMode === 'changeable') body.lessee = lesseeChecksum;
+
+			if (receiverSalt.trim().length) body.receiver_salt = receiverSalt.trim() as `0x${string}`;
 
 			const res = await createLease(body);
-			resultJson = JSON.stringify(res, null, 2);
-			onCreated?.(res.leaseId);
 
-			if (res.leaseId) {
+			let foundLeaseId: string | null = null;
+			for (let i = 0; i < 10; i++) {
+				foundLeaseId = await findLeaseIdByReceiverSalt({
+					receiverSalt: res.receiver_salt,
+					lessee: payoutConfigMode === 'changeable' ? lesseeChecksum : null
+				});
+				if (foundLeaseId) break;
+				await new Promise((r) => setTimeout(r, 1000));
+			}
+
+			resultJson = JSON.stringify({ ...res, lease_id: foundLeaseId }, null, 2);
+			onCreated?.(foundLeaseId);
+
+			if (foundLeaseId) {
 				open = false;
-				await goto(`/leases/${res.leaseId}`);
+				await goto(`/leases/${foundLeaseId}`);
 			}
 		} catch (err) {
 			errorMessage = err instanceof Error ? err.message : String(err);
@@ -184,15 +214,68 @@
 	<Dialog.Content class="sm:max-w-[560px]">
 		<Dialog.Header>
 			<Dialog.Title>New lease</Dialog.Title>
-			<Dialog.Description>Creates a lease via backend relayer (`POST /leases`).</Dialog.Description>
+			<Dialog.Description>Creates a lease via backend realtor (`POST /realtor`).</Dialog.Description
+			>
 		</Dialog.Header>
 
 		<div class="grid gap-4">
 			<div class="grid gap-2">
+				<Label>Payout config</Label>
+				<div class="flex flex-col gap-2">
+					<div class="inline-flex w-full rounded-md border p-1">
+						<Button
+							variant={payoutConfigMode === 'fixed' ? 'secondary' : 'ghost'}
+							size="sm"
+							class="flex-1"
+							onclick={() => (payoutConfigMode = 'fixed')}
+							disabled={disabled || pending}
+						>
+							Fixed
+						</Button>
+						<Button
+							variant={payoutConfigMode === 'changeable' ? 'secondary' : 'ghost'}
+							size="sm"
+							class="flex-1"
+							onclick={() => (payoutConfigMode = 'changeable')}
+							disabled={disabled || pending}
+						>
+							Changeable
+						</Button>
+					</div>
+					<div class="text-xs text-muted-foreground">
+						{#if payoutConfigMode === 'fixed'}
+							The lease’s payout settings (target chain/token + beneficiary) are frozen at creation
+							and cannot be updated later.
+						{:else}
+							The connected wallet becomes the lessee and can update payout settings later using an
+							EIP-712 signature.
+							{#if protocolInfo && protocolInfo.arbitraryLesseeFlatFee > 0}
+								This incurs an additional flat fee of {formatUsdtAtomic6(
+									protocolInfo.arbitraryLesseeFlatFee
+								) ?? protocolInfo.arbitraryLesseeFlatFee}{' '}
+								USDT.
+							{/if}
+						{/if}
+					</div>
+				</div>
+			</div>
+
+			<div class="grid gap-2">
 				<Label for="lessee">Lessee</Label>
 				<div class="flex items-center gap-2">
-					<Input id="lessee" value={lessee ?? ''} disabled />
-					<CopyButton value={lessee ?? null} label="Copy lessee" />
+					<Input
+						id="lessee"
+						value={payoutConfigMode === 'changeable'
+							? (lessee ?? '')
+							: '0x0000000000000000000000000000000000000000'}
+						disabled
+					/>
+					<CopyButton
+						value={payoutConfigMode === 'changeable'
+							? (lessee ?? null)
+							: '0x0000000000000000000000000000000000000000'}
+						label="Copy lessee"
+					/>
 				</div>
 			</div>
 
@@ -211,6 +294,23 @@
 
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
+					<Label for="durationSeconds">Duration (seconds)</Label>
+					<div class="flex items-center gap-2">
+						<Input
+							id="durationSeconds"
+							inputmode="numeric"
+							placeholder="600"
+							bind:value={durationSeconds}
+							disabled={disabled || pending}
+						/>
+						<CopyButton
+							value={durationSeconds}
+							label="Copy duration seconds"
+							disabled={disabled || pending}
+						/>
+					</div>
+				</div>
+				<div class="grid gap-2">
 					<Label for="targetChainId">Target chain id</Label>
 					<div class="flex items-center gap-2">
 						<Select.Root type="single" bind:value={targetChainId} disabled={disabled || pending}>
@@ -226,7 +326,7 @@
 								{/if}
 							</Select.Trigger>
 							<Select.Content>
-								{#each protocol ? getTargetChainOptions(protocol) : [] as chainId (chainId)}
+								{#each protocolInfo ? getTargetChainOptions(protocolInfo.supportedPairs, protocolInfo.deprecatedTargetChains) : [] as chainId (chainId)}
 									{@const meta = getChainMeta(chainId)}
 									<Select.Item value={chainId} label={getChainLabel(chainId)}>
 										{#snippet children()}
@@ -266,7 +366,7 @@
 								{/if}
 							</Select.Trigger>
 							<Select.Content>
-								{#each protocol ? getTargetTokenOptions(protocol, targetChainId) : [] as token (token)}
+								{#each protocolInfo ? getTargetTokenOptions(protocolInfo.supportedPairs, targetChainId, protocolInfo.deprecatedTargetChains) : [] as token (token)}
 									{@const alias = getTokenAlias(token)}
 									<Select.Item
 										value={token}
@@ -292,39 +392,6 @@
 
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div class="grid gap-2">
-					<Label>Fees (fixed)</Label>
-					<Input value={formatFeesPpmAndFlat(leaseFeePpm, flatFee)} disabled />
-					<div class="text-xs text-muted-foreground">
-						{#if fixedFeeSource === 'realtor'}
-							Uses backend relayer effective minimum fee.
-						{:else if fixedFeeSource === 'protocol_floor'}
-							Uses protocol floor fee.
-						{:else}
-							Uses default fee.
-						{/if}
-					</div>
-				</div>
-			</div>
-
-			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-				<div class="grid gap-2">
-					<Label for="nukeableAfter">Nukeable after (unix seconds)</Label>
-					<div class="flex items-center gap-2">
-						<Input
-							id="nukeableAfter"
-							inputmode="numeric"
-							placeholder="1735689600"
-							bind:value={nukeableAfter}
-							disabled={disabled || pending}
-						/>
-						<CopyButton
-							value={nukeableAfter}
-							label="Copy nukeable after"
-							disabled={disabled || pending}
-						/>
-					</div>
-				</div>
-				<div class="grid gap-2">
 					<Label for="receiverSalt">Receiver salt (optional)</Label>
 					<div class="flex items-center gap-2">
 						<Input
@@ -336,6 +403,31 @@
 					</div>
 				</div>
 			</div>
+
+			{#if protocolInfo && targetChainId && targetToken}
+				{@const pair = getSelectedPair()}
+				{#if pair}
+					{@const extraFlat =
+						payoutConfigMode === 'changeable' ? protocolInfo.arbitraryLesseeFlatFee : 0}
+					{@const totalFlat = pair.effective_flat_fee + extraFlat}
+					<div class="rounded-lg border bg-muted/20 p-3 text-xs">
+						<div class="font-medium">Effective fees</div>
+						<div class="mt-1 grid gap-0.5">
+							<div class="font-mono text-muted-foreground">
+								fee: {formatPpmAsPercent(pair.effective_fee_ppm) ?? `${pair.effective_fee_ppm} ppm`}
+							</div>
+							<div class="font-mono text-muted-foreground">
+								flat: {formatUsdtAtomic6(totalFlat) ?? totalFlat} USDT
+							</div>
+							{#if extraFlat > 0}
+								<div class="font-mono text-muted-foreground/80">
+									includes +{formatUsdtAtomic6(extraFlat) ?? extraFlat} USDT (changeable payout config)
+								</div>
+							{/if}
+						</div>
+					</div>
+				{/if}
+			{/if}
 
 			{#if errorMessage}
 				<Alert.Root variant="destructive">

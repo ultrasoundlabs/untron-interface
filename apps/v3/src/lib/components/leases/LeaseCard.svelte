@@ -8,6 +8,8 @@
 		formatAddress,
 		formatFeesPpmAndFlat,
 		formatNumberish,
+		formatUnixSecondsLocal,
+		formatUnixSecondsRelative,
 		getBeneficiary,
 		getFlatFee,
 		getIsActive,
@@ -156,7 +158,8 @@
 					<div class="font-mono">
 						<CopyableValue
 							value={nukeableAfter}
-							display={formatNumberish(nukeableAfter)}
+							display={formatUnixSecondsRelative(nukeableAfter) ?? formatNumberish(nukeableAfter)}
+							title={formatUnixSecondsLocal(nukeableAfter) ?? undefined}
 							copyValue={typeof nukeableAfter === 'string'
 								? nukeableAfter
 								: formatNumberish(nukeableAfter)}

@@ -4,7 +4,11 @@
 	import type { SqlRow } from '$lib/untron/types';
 	import {
 		formatAddress,
+		formatHexShort,
+		parseUnixSeconds,
 		formatUnixSeconds,
+		formatUnixSecondsLocal,
+		formatUnixSecondsRelative,
 		formatUsdtAtomic6,
 		formatPpmAsPercent,
 		estimateFeeFromNetAndPpm,
@@ -12,6 +16,7 @@
 	} from '$lib/untron/format';
 	import { getChainMeta } from '$lib/untron/routes';
 	import CopyableValue from '$lib/components/common/CopyableValue.svelte';
+	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 
 	type Props = {
 		rows: SqlRow[];
@@ -20,23 +25,71 @@
 
 	let { rows, leaseFeePpm = null }: Props = $props();
 
-	function getClaimIndex(row: SqlRow): string | null {
-		const v = row.claim_index ?? row.claimIndex;
-		if (typeof v === 'string') return v;
-		if (typeof v === 'number') return String(v);
-		return null;
-	}
-
-	function getClaimId(row: SqlRow): string | null {
-		const v = row.id ?? row.claim_id ?? row.claimId;
-		if (typeof v === 'string') return v;
-		if (typeof v === 'number') return String(v);
+	function getClaimSortKey(row: SqlRow): bigint | null {
+		const v = row.claim_id ?? row.claimId ?? row.claim_index ?? row.claimIndex;
+		if (typeof v === 'number' && Number.isFinite(v) && Number.isInteger(v)) return BigInt(v);
+		if (typeof v === 'string' && /^\d+$/.test(v)) {
+			try {
+				return BigInt(v);
+			} catch {
+				return null;
+			}
+		}
 		return null;
 	}
 
 	function getStatus(row: SqlRow): string | null {
 		const v = row.status;
 		return typeof v === 'string' ? v : null;
+	}
+
+	function getOriginTimestampSeconds(row: SqlRow): number | null {
+		return parseUnixSeconds(row.origin_timestamp ?? row.originTimestamp);
+	}
+
+	const sortedRows = $derived.by(() => {
+		const copy = [...rows];
+		copy.sort((a, b) => {
+			const aStatus = getStatus(a);
+			const bStatus = getStatus(b);
+			const aFinalizing = aStatus === 'finalizing';
+			const bFinalizing = bStatus === 'finalizing';
+			if (aFinalizing && !bFinalizing) return -1;
+			if (!aFinalizing && bFinalizing) return 1;
+			if (aFinalizing && bFinalizing) {
+				const at = getOriginTimestampSeconds(a) ?? -Infinity;
+				const bt = getOriginTimestampSeconds(b) ?? -Infinity;
+				if (at === bt) return 0;
+				return at > bt ? -1 : 1;
+			}
+
+			const ak = getClaimSortKey(a);
+			const bk = getClaimSortKey(b);
+			if (ak === null && bk === null) return 0;
+			if (ak === null) return 1;
+			if (bk === null) return -1;
+			if (ak === bk) return 0;
+			return ak > bk ? -1 : 1;
+		});
+		return copy;
+	});
+
+	function getClaimId(row: SqlRow): string | null {
+		const v = row.claim_id ?? row.claimId ?? row.claim_index ?? row.claimIndex;
+		if (typeof v === 'string') return v;
+		if (typeof v === 'number') return String(v);
+		return null;
+	}
+
+	function getOriginId(row: SqlRow): string | null {
+		const v = row.origin_id ?? row.originId ?? row.id;
+		return typeof v === 'string' ? v : null;
+	}
+
+	function tronScanTxUrl(originId: string): string | null {
+		const raw = originId.startsWith('0x') ? originId.slice(2) : originId;
+		if (!/^[0-9a-fA-F]{64}$/.test(raw)) return null;
+		return `https://tronscan.org/#/transaction/${raw}`;
 	}
 
 	function getTargetToken(row: SqlRow): string | null {
@@ -63,12 +116,8 @@
 		return null;
 	}
 
-	function getCreatedAt(row: SqlRow): string | null {
-		return formatUnixSeconds(row.created_at_block_timestamp ?? row.createdAtBlockTimestamp);
-	}
-
-	function getFilledAt(row: SqlRow): string | null {
-		return formatUnixSeconds(row.filled_at_block_timestamp ?? row.filledAtBlockTimestamp);
+	function getOriginTimestamp(row: SqlRow): string | null {
+		return formatUnixSeconds(row.origin_timestamp ?? row.originTimestamp);
 	}
 </script>
 
@@ -79,19 +128,40 @@
 			<Table.Head>Target</Table.Head>
 			<Table.Head>Amount</Table.Head>
 			<Table.Head>Beneficiary</Table.Head>
-			<Table.Head>Created</Table.Head>
+			<Table.Head>Origin</Table.Head>
 			<Table.Head>Status</Table.Head>
 		</Table.Row>
 	</Table.Header>
 	<Table.Body>
-		{#each rows as row (getClaimId(row) ?? `${getClaimIndex(row) ?? ''}-${JSON.stringify(row)}`)}
+		{#each sortedRows as row (getClaimId(row) ?? `${getOriginId(row) ?? ''}-${JSON.stringify(row)}`)}
 			<Table.Row>
 				<Table.Cell class="space-y-0.5">
 					<div class="font-mono">
-						{getClaimIndex(row) ?? '—'}
+						{getClaimId(row) ?? '—'}
 					</div>
 					<div class="font-mono text-xs text-muted-foreground">
-						{getClaimId(row) ? formatAddress(getClaimId(row)!, 14, 10) : '—'}
+						{#if getOriginId(row)}
+							{@const oid = getOriginId(row)!}
+							{@const tronUrl = tronScanTxUrl(oid)}
+							<span class="inline-flex items-center gap-1">
+								{#if tronUrl}
+									<a
+										href={tronUrl}
+										target="_blank"
+										rel="noreferrer"
+										class="inline-flex items-center gap-1 hover:underline"
+										title="Open on Tronscan"
+									>
+										origin {formatHexShort(oid, 14, 10)}
+										<ExternalLinkIcon class="h-3 w-3 opacity-70" />
+									</a>
+								{:else}
+									origin {formatHexShort(oid, 14, 10)}
+								{/if}
+							</span>
+						{:else}
+							—
+						{/if}
 					</div>
 				</Table.Cell>
 				<Table.Cell class="space-y-0.5">
@@ -169,34 +239,26 @@
 					/>
 				</Table.Cell>
 				<Table.Cell class="font-mono">
-					{@const created = getCreatedAt(row)}
-					{#if created}
+					{@const origin = getOriginTimestamp(row)}
+					{#if origin}
 						<CopyableValue
-							value={created}
-							display={created}
-							copyValue={created}
-							label="Copy created timestamp"
+							value={origin}
+							display={formatUnixSecondsRelative(row.origin_timestamp ?? row.originTimestamp) ??
+								origin}
+							title={formatUnixSecondsLocal(row.origin_timestamp ?? row.originTimestamp) ??
+								undefined}
+							copyValue={origin}
+							label="Copy origin timestamp"
 						/>
 					{:else}
 						—
 					{/if}
-					{#if getStatus(row) === 'filled'}
-						{@const filled = getFilledAt(row)}
-						{#if filled}
-							<div class="text-xs text-muted-foreground">
-								<CopyableValue
-									value={filled}
-									display={`filled ${filled}`}
-									copyValue={filled}
-									label="Copy filled timestamp"
-								/>
-							</div>
-						{/if}
-					{/if}
 				</Table.Cell>
 				<Table.Cell>
-					{#if getStatus(row) === 'pending'}
-						<Badge variant="secondary">pending</Badge>
+					{#if getStatus(row) === 'finalizing'}
+						<Badge variant="secondary">finalizing</Badge>
+					{:else if getStatus(row) === 'created'}
+						<Badge variant="secondary">created</Badge>
 					{:else if getStatus(row) === 'filled'}
 						<Badge>filled</Badge>
 					{:else}

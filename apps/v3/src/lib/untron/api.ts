@@ -1,7 +1,9 @@
 import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
+import { api as createApiClient } from '$lib/api/client';
+import type { components } from '$lib/api/schema';
+import { getAddress } from 'viem';
 import type { SqlRow } from './types';
-import { tronCreate2AddressBase58 } from '$lib/tron/create2';
 
 export class UntronApiError extends Error {
 	details: unknown;
@@ -12,130 +14,211 @@ export class UntronApiError extends Error {
 	}
 }
 
-function getApiBaseUrl(): string {
-	const envUrl = env.PUBLIC_UNTRON_API_URL ?? "https://tyo-api.untron.finance/v3";
-	if (envUrl && envUrl.trim().length > 0) return envUrl.replace(/\/$/, '');
-	return 'http://localhost:42069';
+function checksumEvmAddress(address: string): `0x${string}` {
+	return getAddress(address) as `0x${string}`;
 }
 
-function lowerHexAddress(address: string): string {
-	// We intentionally lowercase for SQL comparisons (DB stores lowercase).
-	return address.toLowerCase();
+function requireBrowser() {
+	if (!browser) throw new Error('Untron API helpers must run in the browser (ssr is disabled)');
 }
 
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-	const res = await fetch(url, init);
-	const text = await res.text();
-
-	let data: unknown = null;
-	try {
-		data = text.length ? JSON.parse(text) : null;
-	} catch {
-		// ignore; treat as raw text
+function getHubChainId(): number | null {
+	const raw = env.PUBLIC_UNTRON_HUB_CHAIN_ID;
+	if (!raw) return null;
+	const parsed = Number(raw);
+	if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) {
+		throw new Error('Invalid PUBLIC_UNTRON_HUB_CHAIN_ID (expected a positive integer)');
 	}
-
-	if (!res.ok) {
-		throw new UntronApiError(typeof data === 'string' ? data : res.statusText, data);
-	}
-
-	if (
-		typeof data === 'object' &&
-		data !== null &&
-		'ok' in data &&
-		(data as { ok?: unknown }).ok === false
-	) {
-		const err = (data as { error?: { message?: unknown; details?: unknown } }).error;
-		throw new UntronApiError(
-			typeof err?.message === 'string' ? err.message : 'Request failed',
-			err?.details ?? null
-		);
-	}
-
-	return data as T;
+	return parsed;
 }
 
-export type ProtocolResponse = {
-	ok: true;
-	hub: {
-		chainId: number;
-		contractAddress: `0x${string}`;
-		protocol: Record<string, unknown>;
-		deprecatedChains?: unknown[];
-		swapRates?: unknown[];
-		bridgerRoutes?: unknown[];
-	};
-	controller: { chainId: number; address: string; receiverBytecodeHash?: `0x${string}` };
+function requireHubChainId(): number {
+	const chainId = getHubChainId();
+	if (chainId === null) {
+		throw new Error('Missing PUBLIC_UNTRON_HUB_CHAIN_ID (needed for EIP-712 signing)');
+	}
+	return chainId;
+}
+
+type RealtorInfoResponse = components['schemas']['RealtorInfoResponse'];
+type RealtorTargetPairResponse = components['schemas']['RealtorTargetPairResponse'];
+type HubProtocolConfig = components['schemas']['hub_protocol_config'];
+type HubChains = components['schemas']['hub_chains'];
+export type LeaseViewResponse = components['schemas']['LeaseViewResponse'];
+export type LeaseClaimView = components['schemas']['LeaseClaimView'];
+export type CreateLeaseRequest = components['schemas']['CreateLeaseRequest'];
+export type CreateLeaseResponse = components['schemas']['CreateLeaseResponse'];
+export type SetPayoutConfigRequest = components['schemas']['SetPayoutConfigRequest'];
+export type SetPayoutConfigResponse = components['schemas']['SetPayoutConfigResponse'];
+
+export type ProtocolInfo = {
+	hubChainId: number | null;
+	untronV3: `0x${string}`;
+	realtorAddress: `0x${string}`;
+	allowed: boolean;
+	defaultDurationSeconds: number;
+	effectiveDurationSeconds: number;
+	maxDurationSeconds: number;
+	minFeePpm: number;
+	minFlatFee: number;
+	arbitraryLesseeFlatFee: number;
+	supportedPairs: RealtorTargetPairResponse[];
+	deprecatedTargetChains: Set<string>;
+	floorFeePpm: number | null;
+	floorFlatFee: number | null;
 };
 
-let protocolPromise: Promise<ProtocolResponse> | null = null;
+function toInt(value: unknown, label: string): number {
+	const n = typeof value === 'number' ? value : Number(String(value));
+	if (!Number.isFinite(n) || !Number.isInteger(n)) throw new Error(`Invalid ${label}`);
+	return n;
+}
 
-export async function getProtocol(): Promise<ProtocolResponse> {
-	if (!browser) throw new Error('getProtocol must run in the browser (ssr is disabled)');
-	if (!protocolPromise) {
-		const url = `${getApiBaseUrl()}/protocol`;
-		protocolPromise = fetchJson<ProtocolResponse>(url);
+function toEq(value: string): string {
+	return `eq.${value}`;
+}
+
+function toIn(values: string[]): string {
+	// PostgREST in.(...) filter; values must not contain commas.
+	return `in.(${values.join(',')})`;
+}
+
+function mapErrorMessage(error: unknown, response: Response): string {
+	if (error && typeof error === 'object' && 'error' in error) {
+		const maybe = (error as { error?: unknown }).error;
+		if (typeof maybe === 'string' && maybe.trim().length) return maybe;
 	}
-	return await protocolPromise;
+	return response.statusText || `Request failed (${response.status})`;
 }
 
-export async function ponderSqlDb<T extends SqlRow = SqlRow>(
-	sql: string,
-	params: unknown[] = []
-): Promise<T[]> {
-	const url = new URL(`${getApiBaseUrl()}/sql/db`);
-	url.searchParams.set('sql', JSON.stringify({ json: { sql, params } }));
-	const data = await fetchJson<{ rows: T[] }>(url.toString());
-	return data.rows ?? [];
+async function unwrap<T>(
+	result: Promise<{ data?: T; error?: unknown; response: Response }>
+): Promise<T> {
+	const { data, error, response } = await result;
+	if (data !== undefined) return data;
+	throw new UntronApiError(mapErrorMessage(error, response), error ?? null);
 }
 
-function getReceiverSalt(row: SqlRow): `0x${string}` | null {
-	const v = row.receiver_salt ?? row.receiverSalt;
-	if (typeof v === 'string' && v.startsWith('0x')) return v as `0x${string}`;
-	return null;
-}
+let protocolInfoPromise: Promise<ProtocolInfo> | null = null;
 
-function hasTronReceiver(row: SqlRow): boolean {
-	for (const [k, v] of Object.entries(row)) {
-		if (!k.toLowerCase().includes('receiver')) continue;
-		if (typeof v === 'string' && v.startsWith('T')) return true;
+export async function getProtocolInfo(): Promise<ProtocolInfo> {
+	requireBrowser();
+	if (!protocolInfoPromise) {
+		protocolInfoPromise = (async () => {
+			const client = createApiClient();
+			const [realtorInfo, protocolConfigRows, deprecatedChains] = await Promise.all([
+				unwrap<RealtorInfoResponse>(client.GET('/realtor')),
+				unwrap<HubProtocolConfig[]>(
+					client.GET('/hub_protocol_config', { params: { query: { limit: '1' } } })
+				),
+				unwrap<HubChains[]>(
+					client.GET('/hub_chains', { params: { query: { deprecated: 'eq.true' } } })
+				)
+			]);
+
+			const deprecatedTargetChains = new Set<string>();
+			for (const row of deprecatedChains) {
+				if (row.deprecated !== true) continue;
+				if (typeof row.target_chain_id === 'number')
+					deprecatedTargetChains.add(String(row.target_chain_id));
+			}
+
+			const cfg = protocolConfigRows[0] ?? null;
+
+			const untronV3 = checksumEvmAddress(realtorInfo.untron_v3);
+			const realtorAddress = checksumEvmAddress(realtorInfo.realtor_address);
+
+			return {
+				hubChainId: getHubChainId(),
+				untronV3,
+				realtorAddress,
+				allowed: realtorInfo.allowed,
+				defaultDurationSeconds: realtorInfo.default_duration_seconds,
+				effectiveDurationSeconds: realtorInfo.effective_duration_seconds,
+				maxDurationSeconds: realtorInfo.max_duration_seconds,
+				minFeePpm: realtorInfo.min_fee_ppm,
+				minFlatFee: realtorInfo.min_flat_fee,
+				arbitraryLesseeFlatFee: realtorInfo.arbitrary_lessee_flat_fee,
+				supportedPairs: realtorInfo.supported_pairs ?? [],
+				deprecatedTargetChains,
+				floorFeePpm: typeof cfg?.floor_ppm === 'number' ? cfg.floor_ppm : null,
+				floorFlatFee: typeof cfg?.floor_flat_fee === 'number' ? cfg.floor_flat_fee : null
+			};
+		})();
 	}
-	return false;
+	return await protocolInfoPromise;
 }
 
-function attachComputedReceiverTron(rows: SqlRow[], protocol: ProtocolResponse): SqlRow[] {
-	const bytecodeHash = protocol.controller.receiverBytecodeHash;
-	if (!bytecodeHash) return rows;
+type LeaseViewRow = components['schemas']['lease_view'];
+type ReceiverSaltCandidate = components['schemas']['receiver_salt_candidates'];
+export type UnaccountedReceiverUsdtTransfer =
+	components['schemas']['unaccounted_receiver_usdt_transfers'];
 
-	return rows.map((row) => {
-		if (hasTronReceiver(row)) return row;
-		const receiverSalt = getReceiverSalt(row);
-		if (!receiverSalt) return row;
+function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: Map<string, string>): SqlRow {
+	const leaseId = row.lease_id === undefined ? null : String(row.lease_id);
+	const receiverSalt = typeof row.receiver_salt === 'string' ? row.receiver_salt : null;
+	const receiverTron = receiverSalt ? (receiverBySalt.get(receiverSalt) ?? null) : null;
+	const now = Math.floor(Date.now() / 1000);
 
-		try {
-			const receiver = tronCreate2AddressBase58({
-				deployerBase58: protocol.controller.address,
-				saltHex: receiverSalt,
-				bytecodeHashHex: bytecodeHash
-			});
-			return { ...row, receiver_tron_computed: receiver };
-		} catch {
-			return row;
-		}
-	});
+	return {
+		lease_id: leaseId,
+		receiver_salt: receiverSalt,
+		receiver_address_tron: receiverTron,
+		realtor: row.realtor ?? null,
+		lessee: row.lessee ?? null,
+		start_time: row.start_time ?? null,
+		nukeable_after: row.nukeable_after ?? null,
+		is_active: true,
+		is_nukeable_yet: typeof row.nukeable_after === 'number' ? row.nukeable_after <= now : null,
+		lease_fee_ppm: row.lease_fee_ppm ?? null,
+		flat_fee: row.flat_fee === undefined ? null : String(row.flat_fee),
+		target_chain_id:
+			row.payout_target_chain_id === undefined ? null : String(row.payout_target_chain_id),
+		target_token: row.payout_target_token ?? null,
+		beneficiary: row.payout_beneficiary ?? null,
+		claims_total: row.claims_total ?? null,
+		claims_filled: row.claims_filled ?? null
+	};
+}
+
+async function getReceiverBySalt(salts: string[]): Promise<Map<string, string>> {
+	if (salts.length === 0) return new Map();
+	const client = createApiClient();
+	const rows = await unwrap<ReceiverSaltCandidate[]>(
+		client.GET('/receiver_salt_candidates', {
+			params: {
+				query: {
+					receiver_salt: toIn([...new Set(salts)])
+				}
+			}
+		})
+	);
+	const map = new Map<string, string>();
+	for (const r of rows) {
+		if (typeof r.receiver_salt !== 'string') continue;
+		if (typeof r.receiver !== 'string') continue;
+		map.set(r.receiver_salt, r.receiver);
+	}
+	return map;
 }
 
 export async function getAllLeases(limit = 100, offset = 0): Promise<SqlRow[]> {
-	const protocol = await getProtocol();
-	const rows = await ponderSqlDb(
-		`SELECT *
-FROM untron_v3_lease_full
-WHERE chain_id = $1
-  AND contract_address = $2
-ORDER BY lease_id DESC
-LIMIT $3 OFFSET $4;`,
-		[protocol.hub.chainId, lowerHexAddress(protocol.hub.contractAddress), limit, offset]
+	requireBrowser();
+	const client = createApiClient();
+	const rows = await unwrap<LeaseViewRow[]>(
+		client.GET('/lease_view', {
+			params: {
+				query: {
+					order: 'lease_id.desc',
+					limit: String(limit),
+					offset: String(offset)
+				}
+			}
+		})
 	);
-	return attachComputedReceiverTron(rows, protocol);
+	const salts = rows.map((r) => r.receiver_salt).filter((v): v is string => typeof v === 'string');
+	const receiverBySalt = await getReceiverBySalt(salts);
+	return rows.map((r) => normalizeLeaseViewRow(r, receiverBySalt));
 }
 
 export async function getOwnedLeases(
@@ -143,133 +226,140 @@ export async function getOwnedLeases(
 	limit = 50,
 	offset = 0
 ): Promise<SqlRow[]> {
-	const protocol = await getProtocol();
-	const rows = await ponderSqlDb(
-		`SELECT *
-FROM untron_v3_lease_full
-WHERE chain_id = $1
-  AND contract_address = $2
-  AND lessee = $3
-ORDER BY lease_id DESC
-LIMIT $4 OFFSET $5;`,
-		[
-			protocol.hub.chainId,
-			lowerHexAddress(protocol.hub.contractAddress),
-			lowerHexAddress(owner),
-			limit,
-			offset
-		]
+	requireBrowser();
+	const client = createApiClient();
+	const rows = await unwrap<LeaseViewRow[]>(
+		client.GET('/lease_view', {
+			params: {
+				query: {
+					lessee: toEq(checksumEvmAddress(owner)),
+					order: 'lease_id.desc',
+					limit: String(limit),
+					offset: String(offset)
+				}
+			}
+		})
 	);
-	return attachComputedReceiverTron(rows, protocol);
+	const salts = rows.map((r) => r.receiver_salt).filter((v): v is string => typeof v === 'string');
+	const receiverBySalt = await getReceiverBySalt(salts);
+	return rows.map((r) => normalizeLeaseViewRow(r, receiverBySalt));
+}
+
+function normalizeLeaseDetails(view: LeaseViewResponse): SqlRow {
+	const payout = view.payout_config_current ?? null;
+	const now = Math.floor(Date.now() / 1000);
+
+	return {
+		lease_id: view.lease_id,
+		receiver_salt: view.receiver_salt,
+		receiver_address_tron: view.receiver_address_tron ?? null,
+		receiver_address_evm: view.receiver_address_evm ?? null,
+		realtor: view.realtor,
+		lessee: view.lessee,
+		start_time: view.start_time,
+		nukeable_after: view.nukeable_after,
+		lease_fee_ppm: view.lease_fee_ppm,
+		flat_fee: view.flat_fee,
+		lease_nonce: view.lease_nonce,
+		target_chain_id: payout ? String(payout.target_chain_id) : null,
+		target_token: payout?.target_token ?? null,
+		beneficiary: payout?.beneficiary ?? null,
+		is_active: true,
+		is_nukeable_yet: view.nukeable_after <= now,
+		claims_total: view.claims_total,
+		claims_filled: view.claims_filled,
+		payout_config_history: view.payout_config_history,
+		claims: view.claims
+	};
 }
 
 export async function getLeaseById(leaseId: string): Promise<SqlRow | null> {
-	const protocol = await getProtocol();
-	const rows = await ponderSqlDb(
-		`SELECT *
-FROM untron_v3_lease_full
-WHERE chain_id = $1
-  AND contract_address = $2
-  AND lease_id = $3
-LIMIT 1;`,
-		[protocol.hub.chainId, lowerHexAddress(protocol.hub.contractAddress), leaseId]
+	requireBrowser();
+	const id = toInt(leaseId, 'lease id');
+	const client = createApiClient();
+	const view = await unwrap<LeaseViewResponse>(
+		client.GET('/leases/{lease_id}', { params: { path: { lease_id: id } } })
 	);
-	return attachComputedReceiverTron(rows, protocol)[0] ?? null;
+	return view ? normalizeLeaseDetails(view) : null;
 }
 
-export async function getClaimsByLeaseId(leaseId: string, limit = 100): Promise<SqlRow[]> {
-	const protocol = await getProtocol();
-	return await ponderSqlDb(
-		`SELECT *
-FROM untron_v3_claim_full
-WHERE chain_id = $1
-  AND contract_address = $2
-  AND lease_id = $3
-ORDER BY claim_index DESC
-LIMIT $4;`,
-		[protocol.hub.chainId, lowerHexAddress(protocol.hub.contractAddress), leaseId, limit]
+export async function getRealtor(): Promise<RealtorInfoResponse> {
+	requireBrowser();
+	const client = createApiClient();
+	return await unwrap<RealtorInfoResponse>(client.GET('/realtor'));
+}
+
+export async function createLease(body: CreateLeaseRequest): Promise<CreateLeaseResponse> {
+	requireBrowser();
+	const client = createApiClient();
+	return await unwrap<CreateLeaseResponse>(
+		client.POST('/realtor', {
+			body
+		})
 	);
 }
-
-export type CreateLeaseBody = {
-	receiverSalt?: `0x${string}`;
-	lessee: `0x${string}`;
-	nukeableAfter: string;
-	leaseFeePpm: string;
-	flatFee: string;
-	targetChainId: string;
-	targetToken: `0x${string}`;
-	beneficiary: `0x${string}`;
-};
-
-export type RealtorsResponse = {
-	ok: true;
-	chainId: number;
-	contractAddress: `0x${string}`;
-	relayerAddress: `0x${string}`;
-	realtor: SqlRow | null;
-};
-
-export async function getRealtors(): Promise<RealtorsResponse> {
-	const url = `${getApiBaseUrl()}/realtors`;
-	return await fetchJson<RealtorsResponse>(url);
-}
-
-export type CreateLeaseResponse = {
-	ok: true;
-	chainId: number;
-	contractAddress: `0x${string}`;
-	receiverSalt: `0x${string}`;
-	leaseId: string | null;
-	userOperation: {
-		bundlerUrl: string;
-		userOpHash: `0x${string}`;
-		transactionHash: `0x${string}`;
-		blockNumber: string;
-		success: boolean;
-	};
-};
-
-export async function createLease(body: CreateLeaseBody): Promise<CreateLeaseResponse> {
-	const url = `${getApiBaseUrl()}/leases`;
-	return await fetchJson<CreateLeaseResponse>(url, {
-		method: 'POST',
-		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify(body)
-	});
-}
-
-export type UpdatePayoutConfigBody = {
-	targetChainId: string;
-	targetToken: `0x${string}`;
-	beneficiary: `0x${string}`;
-	deadline: string;
-	signature: `0x${string}`;
-};
-
-export type UpdatePayoutConfigResponse = {
-	ok: true;
-	chainId: number;
-	contractAddress: `0x${string}`;
-	leaseId: string;
-	updated: boolean;
-	userOperation: {
-		bundlerUrl: string;
-		userOpHash: `0x${string}`;
-		transactionHash: `0x${string}`;
-		blockNumber: string;
-		success: boolean;
-	};
-};
 
 export async function updatePayoutConfigWithSig(
-	leaseId: string,
-	body: UpdatePayoutConfigBody
-): Promise<UpdatePayoutConfigResponse> {
-	const url = `${getApiBaseUrl()}/leases/${encodeURIComponent(leaseId)}`;
-	return await fetchJson<UpdatePayoutConfigResponse>(url, {
-		method: 'PUT',
-		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify(body)
-	});
+	body: SetPayoutConfigRequest
+): Promise<SetPayoutConfigResponse> {
+	requireBrowser();
+	const client = createApiClient();
+	return await unwrap<SetPayoutConfigResponse>(
+		client.POST('/payout_config', {
+			body
+		})
+	);
+}
+
+export async function findLeaseIdByReceiverSalt(args: {
+	receiverSalt: string;
+	lessee?: `0x${string}` | null;
+}): Promise<string | null> {
+	requireBrowser();
+	const client = createApiClient();
+	const rows = await unwrap<LeaseViewRow[]>(
+		client.GET('/lease_view', {
+			params: {
+				query: {
+					receiver_salt: toEq(args.receiverSalt),
+					...(args.lessee ? { lessee: toEq(checksumEvmAddress(args.lessee)) } : {}),
+					order: 'lease_id.desc',
+					limit: '1'
+				}
+			}
+		})
+	);
+	const leaseId = rows[0]?.lease_id;
+	return leaseId === undefined ? null : String(leaseId);
+}
+
+export async function getLeaseNonce(leaseId: string): Promise<string> {
+	requireBrowser();
+	const client = createApiClient();
+	const rows = await unwrap<Array<components['schemas']['hub_lease_nonces']>>(
+		client.GET('/hub_lease_nonces', { params: { query: { lease_id: toEq(leaseId), limit: '1' } } })
+	);
+	const nonce = rows[0]?.nonce;
+	return nonce === undefined ? '0' : String(nonce);
+}
+
+export async function getUnaccountedReceiverUsdtTransfers(args: {
+	receiverSalt: string;
+	expectedLeaseId?: string | null;
+	limit?: number;
+}): Promise<UnaccountedReceiverUsdtTransfer[]> {
+	requireBrowser();
+	const client = createApiClient();
+	return await unwrap<UnaccountedReceiverUsdtTransfer[]>(
+		client.GET('/unaccounted_receiver_usdt_transfers', {
+			params: {
+				query: {
+					receiver_salt: toEq(args.receiverSalt),
+					...(args.expectedLeaseId ? { expected_lease_id: toEq(args.expectedLeaseId) } : {}),
+					order: 'block_timestamp.desc',
+					limit: String(args.limit ?? 50)
+				}
+			}
+		})
+	);
 }

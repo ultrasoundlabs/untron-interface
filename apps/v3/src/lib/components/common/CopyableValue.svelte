@@ -7,6 +7,7 @@
 		copyValue?: string | null;
 		display?: string | null;
 		label?: string;
+		title?: string | null;
 		class?: string;
 	};
 
@@ -15,6 +16,7 @@
 		copyValue = null,
 		display = null,
 		label = 'Copy value',
+		title = null,
 		class: className
 	}: Props = $props();
 
@@ -28,9 +30,10 @@
 	const raw = $derived(asString(value));
 	const shown = $derived(display ?? raw);
 	const toCopy = $derived(copyValue ?? raw);
+	const tooltip = $derived(title ?? shown);
 </script>
 
 <span class={cn('inline-flex min-w-0 items-center gap-1', className)}>
-	<span class="min-w-0 truncate">{shown ?? '—'}</span>
+	<span class="min-w-0 truncate" title={tooltip ?? undefined}>{shown ?? '—'}</span>
 	<CopyButton value={toCopy} {label} disabled={!toCopy} />
 </span>

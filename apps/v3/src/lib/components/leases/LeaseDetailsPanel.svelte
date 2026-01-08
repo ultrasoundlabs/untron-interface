@@ -9,6 +9,9 @@
 		formatFeesPpmAndFlat,
 		formatHexShort,
 		formatNumberish,
+		formatUnixSeconds,
+		formatUnixSecondsLocal,
+		formatUnixSecondsRelative,
 		getBeneficiary,
 		getFlatFee,
 		getIsActive,
@@ -42,15 +45,8 @@
 		return typeof v === 'string' ? v : null;
 	}
 
-	function getCreatedAt(row: SqlRow): string | null {
-		const v = row.created_at_block_timestamp ?? row.createdAtBlockTimestamp ?? row.created_at;
-		if (typeof v === 'string') return v;
-		if (typeof v === 'number') return String(v);
-		return null;
-	}
-
-	function getUpdatedAt(row: SqlRow): string | null {
-		const v = row.updated_at_block_timestamp ?? row.updatedAtBlockTimestamp ?? row.updated_at;
+	function getLeaseNonce(row: SqlRow): string | null {
+		const v = row.lease_nonce ?? row.leaseNonce;
 		if (typeof v === 'string') return v;
 		if (typeof v === 'number') return String(v);
 		return null;
@@ -78,33 +74,43 @@
 				<div class="text-muted-foreground">Receiver salt</div>
 				<div class="font-mono">{formatHexShort(getReceiverSalt(lease)) ?? '—'}</div>
 
+				<div class="text-muted-foreground">Start time</div>
+				<div class="font-mono">
+					{#if lease.start_time !== undefined}
+						{@const start = formatUnixSeconds(lease.start_time)}
+						<CopyableValue
+							value={start}
+							display={formatUnixSecondsRelative(lease.start_time) ??
+								start ??
+								formatNumberish(lease.start_time)}
+							title={formatUnixSecondsLocal(lease.start_time) ?? undefined}
+							copyValue={start ?? formatNumberish(lease.start_time)}
+							label="Copy start time"
+						/>
+					{:else}
+						—
+					{/if}
+				</div>
+
 				<div class="text-muted-foreground">Nukeable after</div>
 				<div class="font-mono">
 					<CopyableValue
 						value={getNukeableAfter(lease)}
-						display={formatNumberish(getNukeableAfter(lease))}
+						display={formatUnixSecondsRelative(getNukeableAfter(lease)) ??
+							formatNumberish(getNukeableAfter(lease))}
+						title={formatUnixSecondsLocal(getNukeableAfter(lease)) ?? undefined}
 						copyValue={formatNumberish(getNukeableAfter(lease))}
 						label="Copy nukeable after"
 					/>
 				</div>
 
-				<div class="text-muted-foreground">Created at</div>
+				<div class="text-muted-foreground">Lease nonce</div>
 				<div class="font-mono">
 					<CopyableValue
-						value={getCreatedAt(lease)}
-						display={formatNumberish(getCreatedAt(lease))}
-						copyValue={formatNumberish(getCreatedAt(lease))}
-						label="Copy created at"
-					/>
-				</div>
-
-				<div class="text-muted-foreground">Updated at</div>
-				<div class="font-mono">
-					<CopyableValue
-						value={getUpdatedAt(lease)}
-						display={formatNumberish(getUpdatedAt(lease))}
-						copyValue={formatNumberish(getUpdatedAt(lease))}
-						label="Copy updated at"
+						value={getLeaseNonce(lease)}
+						display={formatNumberish(getLeaseNonce(lease))}
+						copyValue={formatNumberish(getLeaseNonce(lease))}
+						label="Copy lease nonce"
 					/>
 				</div>
 
@@ -161,7 +167,7 @@
 	<Dialog.Content class="sm:max-w-[720px]">
 		<Dialog.Header>
 			<Dialog.Title>Lease row</Dialog.Title>
-			<Dialog.Description>`untron_v3_lease_full` (raw)</Dialog.Description>
+			<Dialog.Description>Realtor lease view response (raw)</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex justify-end">
 			<CopyButton value={rawJson} label="Copy raw JSON" />

@@ -53,12 +53,13 @@ export function formatFeesPpmAndFlat(ppm: unknown, flatFee: unknown): string {
 
 	const flat = parseBigIntish(flatFee);
 	if (flat === null || flat === 0n) return percent;
-	return `${percent} {flat: ${flat.toString(10)}}`;
+	const flatUsdt = formatUsdtAtomic6(flat);
+	return `${percent} + ${flatUsdt ?? flat.toString(10)} USDT`;
 }
 
 const TOKEN_ALIASES: Record<string, string> = {
-	'0x3c499c542cef5e3811e1192ce70d8cc03d5c3359': 'USDC',
-	'0xc2132d05d31c914a87c6611c10748aeb04b58e8f': 'USDT'
+	'0xaf88d065e77c8cc2239327c5edb3a432268e5831': 'USDC',
+	'0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9': 'USDT'
 };
 
 export function getTokenAlias(address: string): string | null {
@@ -98,6 +99,56 @@ export function formatUnixSeconds(value: unknown): string | null {
 	} catch {
 		return null;
 	}
+}
+
+export function parseUnixSeconds(value: unknown): number | null {
+	if (value === null || value === undefined) return null;
+	if (typeof value === 'number' && Number.isFinite(value)) return value;
+	if (typeof value === 'bigint') return Number(value);
+	if (typeof value === 'string' && value.trim().length) {
+		const n = Number(value);
+		if (Number.isFinite(n)) return n;
+	}
+	return null;
+}
+
+export function formatUnixSecondsLocal(value: unknown): string | null {
+	const n = parseUnixSeconds(value);
+	if (n === null) return null;
+	try {
+		return new Date(n * 1000).toLocaleString(undefined, { timeZoneName: 'short' });
+	} catch {
+		return new Date(n * 1000).toString();
+	}
+}
+
+function formatRelativeDeltaSeconds(deltaSeconds: number): string {
+	const abs = Math.abs(deltaSeconds);
+	const suffix = deltaSeconds < 0 ? 'ago' : 'in';
+
+	const units: Array<[number, string]> = [
+		[60 * 60 * 24, 'd'],
+		[60 * 60, 'h'],
+		[60, 'm'],
+		[1, 's']
+	];
+
+	for (const [unitSeconds, label] of units) {
+		if (abs >= unitSeconds) {
+			const v = Math.floor(abs / unitSeconds);
+			return suffix === 'ago' ? `${v}${label} ago` : `in ${v}${label}`;
+		}
+	}
+
+	return deltaSeconds < 0 ? 'just now' : 'soon';
+}
+
+export function formatUnixSecondsRelative(value: unknown, nowSeconds?: number): string | null {
+	const n = parseUnixSeconds(value);
+	if (n === null) return null;
+	const now = nowSeconds ?? Math.floor(Date.now() / 1000);
+	const delta = Math.floor(n - now);
+	return formatRelativeDeltaSeconds(delta);
 }
 
 export type FeeFromNetResult = { feeAtomic: bigint; grossAtomic: bigint; exact: boolean };
