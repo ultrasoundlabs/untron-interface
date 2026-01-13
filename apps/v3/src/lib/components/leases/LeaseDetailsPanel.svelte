@@ -114,14 +114,17 @@
 					/>
 				</div>
 
-				<div class="text-muted-foreground">Active</div>
+				<div class="text-muted-foreground">Status</div>
 				<div class="font-mono">
-					{getIsActive(lease) === null ? '—' : String(getIsActive(lease))}
-				</div>
-
-				<div class="text-muted-foreground">Nukeable</div>
-				<div class="font-mono">
-					{getIsNukeableYet(lease) === null ? '—' : String(getIsNukeableYet(lease))}
+					{#if getIsNukeableYet(lease) === true}
+						expired
+					{:else if getIsActive(lease) === true}
+						active
+					{:else if getIsActive(lease) === false}
+						inactive
+					{:else}
+						—
+					{/if}
 				</div>
 
 				<div class="text-muted-foreground">Fees</div>

@@ -159,6 +159,7 @@ function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: Map<string, st
 	const receiverSalt = typeof row.receiver_salt === 'string' ? row.receiver_salt : null;
 	const receiverTron = receiverSalt ? (receiverBySalt.get(receiverSalt) ?? null) : null;
 	const now = Math.floor(Date.now() / 1000);
+	const isExpired = typeof row.nukeable_after === 'number' ? row.nukeable_after <= now : false;
 
 	return {
 		lease_id: leaseId,
@@ -168,8 +169,8 @@ function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: Map<string, st
 		lessee: row.lessee ?? null,
 		start_time: row.start_time ?? null,
 		nukeable_after: row.nukeable_after ?? null,
-		is_active: true,
-		is_nukeable_yet: typeof row.nukeable_after === 'number' ? row.nukeable_after <= now : null,
+		is_active: !isExpired,
+		is_nukeable_yet: typeof row.nukeable_after === 'number' ? isExpired : null,
 		lease_fee_ppm: row.lease_fee_ppm ?? null,
 		flat_fee: row.flat_fee === undefined ? null : String(row.flat_fee),
 		target_chain_id:
@@ -248,6 +249,7 @@ export async function getOwnedLeases(
 function normalizeLeaseDetails(view: LeaseViewResponse): SqlRow {
 	const payout = view.payout_config_current ?? null;
 	const now = Math.floor(Date.now() / 1000);
+	const isExpired = view.nukeable_after <= now;
 
 	return {
 		lease_id: view.lease_id,
@@ -264,8 +266,8 @@ function normalizeLeaseDetails(view: LeaseViewResponse): SqlRow {
 		target_chain_id: payout ? String(payout.target_chain_id) : null,
 		target_token: payout?.target_token ?? null,
 		beneficiary: payout?.beneficiary ?? null,
-		is_active: true,
-		is_nukeable_yet: view.nukeable_after <= now,
+		is_active: !isExpired,
+		is_nukeable_yet: isExpired,
 		claims_total: view.claims_total,
 		claims_filled: view.claims_filled,
 		payout_config_history: view.payout_config_history,

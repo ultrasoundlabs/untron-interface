@@ -7,6 +7,7 @@
 		formatAddress,
 		getTokenAlias,
 		getIsActive,
+		getIsNukeableYet,
 		getLeaseId,
 		getLessee,
 		getBeneficiary,
@@ -98,7 +99,10 @@
 					{/if}
 				</Table.Cell>
 				<Table.Cell>
-					{#if getIsActive(row) === true}
+					{@const expired = getIsNukeableYet(row) === true}
+					{#if expired}
+						<Badge variant="secondary">expired</Badge>
+					{:else if getIsActive(row) === true}
 						<Badge>active</Badge>
 					{:else if getIsActive(row) === false}
 						<Badge variant="secondary">inactive</Badge>

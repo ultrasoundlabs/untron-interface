@@ -64,13 +64,12 @@
 				</Card.Description>
 			</div>
 			<div class="flex flex-wrap items-center justify-end gap-1.5">
-				{#if isActive === true}
+				{#if isNukeableYet === true}
+					<Badge variant="secondary">expired</Badge>
+				{:else if isActive === true}
 					<Badge>active</Badge>
 				{:else if isActive === false}
 					<Badge variant="secondary">inactive</Badge>
-				{/if}
-				{#if isNukeableYet === true}
-					<Badge variant="outline">nukeable</Badge>
 				{/if}
 			</div>
 		</div>
