@@ -32,7 +32,7 @@
 
 <button
 	onclick={toggleTheme}
-	class="flex h-10 min-w-[44px] items-center justify-center gap-2 rounded-xl bg-white px-3 text-zinc-900 transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 dark:focus-visible:ring-white dark:focus-visible:ring-offset-zinc-900"
+	class="flex h-10 min-w-[44px] items-center justify-center gap-2 rounded-xl bg-white px-3 text-zinc-900 transition-colors hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 dark:focus-visible:ring-white dark:focus-visible:ring-offset-zinc-900"
 	aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
 >
 	{#if isDark}

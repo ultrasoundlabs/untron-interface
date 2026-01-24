@@ -10,20 +10,20 @@
 
 	let tokenFailed = $state(false);
 
-const normalizedTokenLogo = $derived.by(() => {
-	if (!tokenLogoUrl) return undefined;
-	if (tokenLogoUrl.startsWith('http') || tokenLogoUrl.startsWith('data:')) return tokenLogoUrl;
-	return tokenLogoUrl.startsWith('/') ? tokenLogoUrl : `/${tokenLogoUrl}`;
-});
+	const normalizedTokenLogo = $derived.by(() => {
+		if (!tokenLogoUrl) return undefined;
+		if (tokenLogoUrl.startsWith('http') || tokenLogoUrl.startsWith('data:')) return tokenLogoUrl;
+		return tokenLogoUrl.startsWith('/') ? tokenLogoUrl : `/${tokenLogoUrl}`;
+	});
 
 	$effect(() => {
-		tokenLogoUrl;
-		tokenFailed = false;
+		if (tokenLogoUrl) tokenFailed = false;
+		else tokenFailed = false;
 	});
 </script>
 
 <div
-	class={`relative inline-flex select-none items-center justify-center ${className}`}
+	class={`relative inline-flex items-center justify-center select-none ${className}`}
 	style={`width:${size}px;height:${size}px;`}
 >
 	<div
@@ -39,7 +39,9 @@ const normalizedTokenLogo = $derived.by(() => {
 				}}
 			/>
 		{:else}
-			<div class="flex h-full w-full items-center justify-center text-sm font-semibold text-zinc-500 dark:text-zinc-200">
+			<div
+				class="flex h-full w-full items-center justify-center text-sm font-semibold text-zinc-500 dark:text-zinc-200"
+			>
 				{tokenSymbol?.slice(0, 3) ?? '?'}
 			</div>
 		{/if}

@@ -140,19 +140,19 @@
 									currentChainId === item.chain.chainId && currentToken === item.token.symbol}
 								<button
 									type="button"
-								onclick={() => handleBalanceClick(item)}
-								class="flex w-full items-center gap-3 rounded-xl border-2 p-3 transition-all duration-150 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20
+									onclick={() => handleBalanceClick(item)}
+									class="flex w-full items-center gap-3 rounded-xl border-2 p-3 transition-all duration-150 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20
 									{isSelected
-									? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
-									: 'border-zinc-200 dark:border-zinc-700'}"
-							>
-								<!-- Token icon -->
-								<TokenNetworkIcon
-									className="shrink-0"
-									size={40}
-									tokenLogoUrl={item.token.logoUrl}
-									tokenSymbol={item.token.symbol}
-								/>
+										? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
+										: 'border-zinc-200 dark:border-zinc-700'}"
+								>
+									<!-- Token icon -->
+									<TokenNetworkIcon
+										className="shrink-0"
+										size={40}
+										tokenLogoUrl={item.token.logoUrl}
+										tokenSymbol={item.token.symbol}
+									/>
 
 									<!-- Token & Chain info -->
 									<div class="flex flex-1 flex-col items-start">

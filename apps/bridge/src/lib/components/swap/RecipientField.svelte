@@ -176,7 +176,7 @@
 						<button
 							type="button"
 							onclick={handlePasteClick}
-							class="h-auto rounded-lg bg-black px-2 py-1.5 text-[11px] font-semibold leading-none text-white transition-colors hover:bg-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-900"
+							class="h-auto rounded-lg bg-black px-2 py-1.5 text-[11px] leading-none font-semibold text-white transition-colors hover:bg-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-900"
 						>
 							Paste
 						</button>

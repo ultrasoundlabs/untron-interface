@@ -100,7 +100,7 @@
 			<Button
 				size="sm"
 				variant="ghost"
-				class="h-auto bg-zinc-100 px-2 py-1.5 text-[11px] font-semibold leading-none text-primary hover:bg-zinc-200 hover:text-primary dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
+				class="h-auto bg-zinc-100 px-2 py-1.5 text-[11px] leading-none font-semibold text-primary hover:bg-zinc-200 hover:text-primary dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
 				onclick={(event) => {
 					event.stopPropagation();
 					onMaxClick?.();
@@ -150,7 +150,9 @@
 				onclick={() => onTokenSelect?.()}
 				disabled={selectorDisabled || isTron}
 				class="relative flex items-center gap-2 rounded-xl px-3 py-2 transition-colors duration-150
-					{!isTron && !selectorDisabled ? 'bg-zinc-100 cursor-pointer hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700' : 'bg-transparent dark:bg-transparent cursor-default'}
+					{!isTron && !selectorDisabled
+					? 'cursor-pointer bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700'
+					: 'cursor-default bg-transparent dark:bg-transparent'}
 					{selectorDisabled && !isTron ? 'opacity-80' : ''}"
 			>
 				<!-- Token Logo -->
@@ -193,7 +195,6 @@
 					</svg>
 				{/if}
 			</button>
-
 		</div>
 	</div>
 </div>

@@ -120,7 +120,13 @@
 	}
 	body {
 		@apply bg-background text-foreground antialiased;
-		font-family: 'Inter', 'Inter var', system-ui, -apple-system, 'Segoe UI', sans-serif;
+		font-family:
+			'Inter',
+			'Inter var',
+			system-ui,
+			-apple-system,
+			'Segoe UI',
+			sans-serif;
 		font-feature-settings:
 			'rlig' 1,
 			'calt' 1;

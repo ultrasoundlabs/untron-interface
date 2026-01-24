@@ -298,9 +298,7 @@
 
 <div class="mx-auto w-full max-w-md" in:fly={{ y: 20, duration: 300, delay: 100 }}>
 	<!-- Swap Card -->
-	<div
-		class="rounded-3xl p-4"
-	>
+	<div class="rounded-3xl p-4">
 		<!-- Source Row -->
 		<AmountRow
 			isSource={true}
@@ -402,7 +400,7 @@
 			<Button
 				onclick={handleSwap}
 				disabled={isButtonDisabled}
-				class="w-full h-12 rounded-xl text-base font-semibold transition-all duration-150"
+				class="h-12 w-full rounded-xl text-base font-semibold transition-all duration-150"
 				size="lg"
 			>
 				{#if swapStore.isCreatingOrder}
