@@ -5,7 +5,7 @@ type Turnstile = {
 		container: HTMLElement,
 		options: {
 			sitekey: string;
-			size: 'invisible';
+			size?: 'compact' | 'flexible' | 'normal';
 			appearance?: 'interaction-only' | 'always' | 'execute';
 			action?: string;
 			callback: (token: string) => void;
@@ -97,7 +97,7 @@ async function ensureWidget(): Promise<string> {
 
 	widgetId = window.turnstile.render(containerEl, {
 		sitekey: siteKey,
-		size: 'invisible',
+		size: 'normal',
 		appearance: 'interaction-only',
 		action: 'create_order',
 		callback: (token) => {
