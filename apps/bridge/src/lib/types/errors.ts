@@ -1,4 +1,5 @@
 export type SwapServiceErrorCode =
+	| 'DISABLED'
 	| 'UNSUPPORTED_CHAIN'
 	| 'UNSUPPORTED_TOKEN'
 	| 'INVALID_AMOUNT'

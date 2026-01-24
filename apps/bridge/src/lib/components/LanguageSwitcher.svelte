@@ -35,9 +35,16 @@
 	function handleLocaleChange(locale: Locale) {
 		setLocale(locale);
 		currentLocale = locale;
+		if (typeof document !== 'undefined') {
+			document.documentElement.lang = locale;
+		}
 	}
 
 	onMount(() => {
+		if (typeof document !== 'undefined') {
+			document.documentElement.lang = currentLocale;
+		}
+
 		// Only auto-detect if enabled and no cookie is set (first visit)
 		if (autoDetect && typeof window !== 'undefined') {
 			const cookieLocale = extractLocaleFromCookie();

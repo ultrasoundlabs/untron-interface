@@ -29,44 +29,11 @@ export class SwapServiceError extends Error {
 	}
 }
 
-const JSON_HEADERS = {
-	'Content-Type': 'application/json'
-};
-
-async function handleResponse<T>(response: Response): Promise<T> {
-	let payload: unknown = null;
-	const text = await response.text();
-
-	if (text) {
-		try {
-			payload = JSON.parse(text);
-		} catch {
-			throw new SwapServiceError('Invalid server response', 'INVALID_RESPONSE', response.status);
-		}
-	}
-
-	if (!response.ok) {
-		const message =
-			typeof (payload as { message?: string })?.message === 'string'
-				? (payload as { message: string }).message
-				: 'Request failed';
-		const code =
-			typeof (payload as { code?: SwapServiceErrorCode })?.code === 'string'
-				? ((payload as { code: SwapServiceErrorCode }).code as SwapServiceErrorCode)
-				: 'UNKNOWN_ERROR';
-		throw new SwapServiceError(message, code, response.status);
-	}
-
-	return payload as T;
-}
-
-async function postJson<T>(url: string, body: unknown): Promise<T> {
-	const res = await fetch(url, {
-		method: 'POST',
-		headers: JSON_HEADERS,
-		body: JSON.stringify(body)
-	});
-	return handleResponse<T>(res);
+function backendDisabled(): never {
+	throw new SwapServiceError(
+		'Backend is disabled in this build',
+		'DISABLED' satisfies SwapServiceErrorCode
+	);
 }
 
 export async function fetchCapacity(params: {
@@ -74,7 +41,14 @@ export async function fetchCapacity(params: {
 	evmChainId: number;
 	evmToken: EvmStablecoin;
 }): Promise<CapacityInfo> {
-	return postJson<CapacityInfo>('/api/swap/capacity', params);
+	void params;
+	return {
+		maxAmount: '1000000000000',
+		minAmount: '0',
+		availableLiquidity: '1000000000000',
+		fetchedAt: Date.now(),
+		refreshAt: Date.now() + 30_000
+	};
 }
 
 export async function fetchQuote(params: {
@@ -84,29 +58,44 @@ export async function fetchQuote(params: {
 	amount: string;
 	recipientAddress: string;
 }): Promise<SwapQuote> {
-	return postJson<SwapQuote>('/api/swap/quote', params);
+	return {
+		direction: params.direction,
+		inputAmount: params.amount,
+		outputAmount: params.amount,
+		effectiveRate: '1',
+		fees: {
+			protocolFeeBps: 0,
+			protocolFeeAmount: '0',
+			networkFeeAmount: '0',
+			totalFeeAmount: '0'
+		},
+		estimatedTimeSeconds: 0,
+		expiresAt: Date.now() + 60_000
+	};
 }
 
 export async function getOrder(orderId: string): Promise<TronToEvmOrderView | EvmRelayOrderView> {
-	const res = await fetch(`/api/swap/order/${orderId}`);
-	const data = await handleResponse<{ order: TronToEvmOrderView | EvmRelayOrderView }>(res);
-	return data.order;
+	void orderId;
+	throw new SwapServiceError('Order not found', 'ORDER_NOT_FOUND', 404);
 }
 
 export async function prepareEvmToTronSwap(
 	request: EvmToTronPrepareRequest
 ): Promise<EvmToTronPrepareResponse> {
-	return postJson<EvmToTronPrepareResponse>('/api/swap/evm-to-tron/prepare', request);
+	void request;
+	return backendDisabled();
 }
 
 export async function executeEvmToTronSwap(
 	request: EvmToTronExecuteRequest
 ): Promise<EvmToTronExecuteResponse> {
-	return postJson<EvmToTronExecuteResponse>('/api/swap/evm-to-tron/execute', request);
+	void request;
+	return backendDisabled();
 }
 
 export async function requestTronDeposit(
 	request: TronToEvmDepositRequest
 ): Promise<TronDepositResponse> {
-	return postJson<TronDepositResponse>('/api/swap/tron-to-evm/deposit', request);
+	void request;
+	return backendDisabled();
 }
