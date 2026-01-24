@@ -28,6 +28,18 @@ export const TRON_USDT: TronToken = {
 	logoUrl: '/logos/tokens/usdt.svg'
 };
 
+export function getTronToken(symbol: EvmStablecoin): TronToken {
+	// Only USDT address is hardcoded today; others are display-only unless added.
+	if (symbol === 'USDT') return TRON_USDT;
+	return {
+		symbol,
+		name: TOKEN_METADATA[symbol].name,
+		address: '',
+		decimals: TOKEN_METADATA[symbol].decimals,
+		logoUrl: TOKEN_METADATA[symbol].logoUrl
+	};
+}
+
 // ============================================================================
 // EVM Chains Configuration
 // ============================================================================

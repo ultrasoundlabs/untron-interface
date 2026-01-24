@@ -94,12 +94,12 @@
 	<div class="space-y-4">
 		{#each faqs as item (item.id)}
 			<div
-				class="overflow-hidden rounded-2xl bg-white transition-all duration-200 dark:bg-white"
+				class="overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-all duration-200 dark:border-zinc-700 dark:bg-zinc-900"
 				in:fade={{ duration: transitionDuration }}
 			>
 				<button
 					type="button"
-					class="flex w-full items-center justify-between gap-3 px-4 py-4 text-left md:px-5 md:py-4"
+					class="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors hover:bg-zinc-50 md:px-5 md:py-4 dark:hover:bg-zinc-800/50"
 					onclick={() => toggle(item.id)}
 				>
 					<div class="flex items-center gap-3">

@@ -1,0 +1,1101 @@
+{
+	"components": {
+		"parameters": {
+			"IdempotencyKey": {
+				"description": "Required idempotency key for order creation. Replays with the same key should not create duplicates.\n",
+				"in": "header",
+				"name": "Idempotency-Key",
+				"required": true,
+				"schema": {
+					"maxLength": 256,
+					"minLength": 1,
+					"type": "string"
+				}
+			},
+			"IfNoneMatch": {
+				"description": "Optional ETag value from a prior capabilities response.",
+				"in": "header",
+				"name": "If-None-Match",
+				"required": false,
+				"schema": {
+					"type": "string"
+				}
+			},
+			"OrderId": {
+				"description": "Server-generated order identifier.",
+				"in": "path",
+				"name": "orderId",
+				"required": true,
+				"schema": {
+					"minLength": 1,
+					"type": "string"
+				}
+			},
+			"XClientOrderId": {
+				"description": "Optional client-provided order identifier (for UX/debugging).",
+				"in": "header",
+				"name": "X-Client-Order-Id",
+				"required": false,
+				"schema": {
+					"maxLength": 256,
+					"minLength": 1,
+					"type": "string"
+				}
+			}
+		},
+		"responses": {
+			"Problem": {
+				"content": {
+					"application/problem+json": {
+						"schema": {
+							"$ref": "#/components/schemas/Problem"
+						}
+					}
+				},
+				"description": "Error response (RFC 7807 Problem Details)"
+			}
+		},
+		"schemas": {
+			"AccountId": {
+				"description": "CAIP-10 account identifier (e.g. \"eip155:1:0xabc...\").",
+				"examples": ["eip155:42161:0xRecipientAddress"],
+				"type": "string"
+			},
+			"Amount": {
+				"description": "Base-unit integer amount encoded as a string (no decimals).",
+				"examples": ["0", "1000000"],
+				"pattern": "^[0-9]+$",
+				"type": "string"
+			},
+			"AssetFamily": {
+				"properties": {
+					"assetFamilyId": {
+						"description": "Stable, human-meaningful identifier (e.g. \"usdc\").",
+						"examples": ["usdc"],
+						"type": "string"
+					},
+					"currency": {
+						"description": "Denomination currency (e.g. \"USD\").",
+						"examples": ["USD"],
+						"type": "string"
+					},
+					"issuer": {
+						"examples": ["circle"],
+						"type": "string"
+					},
+					"name": {
+						"examples": ["USD Coin"],
+						"type": "string"
+					},
+					"representations": {
+						"items": {
+							"$ref": "#/components/schemas/Representation"
+						},
+						"type": "array"
+					},
+					"symbol": {
+						"examples": ["USDC"],
+						"type": "string"
+					}
+				},
+				"required": ["assetFamilyId", "symbol", "name", "currency", "issuer", "representations"],
+				"type": "object"
+			},
+			"AssetId": {
+				"description": "CAIP-19 asset identifier (e.g. \"eip155:1/erc20:0xa0b8...\").",
+				"examples": ["eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"],
+				"type": "string"
+			},
+			"Capabilities": {
+				"properties": {
+					"assetFamilies": {
+						"items": {
+							"$ref": "#/components/schemas/AssetFamily"
+						},
+						"type": "array"
+					},
+					"capabilitiesVersion": {
+						"description": "Monotonic capabilities version timestamp.",
+						"format": "date-time",
+						"type": "string"
+					},
+					"refundPolicyModes": {
+						"description": "Refund policy modes supported by the service (informational).",
+						"items": {
+							"$ref": "#/components/schemas/RefundPolicyMode"
+						},
+						"type": "array"
+					},
+					"routes": {
+						"items": {
+							"$ref": "#/components/schemas/Route"
+						},
+						"type": "array"
+					}
+				},
+				"required": ["capabilitiesVersion", "assetFamilies", "routes"],
+				"type": "object"
+			},
+			"ChainId": {
+				"description": "CAIP-2 chain identifier (e.g. \"eip155:1\").",
+				"examples": ["eip155:1", "tron:0x2b6653dc"],
+				"type": "string"
+			},
+			"CreateOrderRequest": {
+				"properties": {
+					"quoteId": {
+						"examples": ["qt_01J..."],
+						"type": "string"
+					},
+					"recipient": {
+						"$ref": "#/components/schemas/AccountId"
+					},
+					"refund": {
+						"$ref": "#/components/schemas/OrderRefundRequest"
+					}
+				},
+				"required": ["quoteId", "recipient"],
+				"type": "object"
+			},
+			"DepositAcceptance": {
+				"properties": {
+					"overpay": {
+						"description": "Overpay policy. Known values: \"refund_excess\", \"cap\", \"accept\".\n",
+						"examples": ["refund_excess"],
+						"type": "string",
+						"x-extensible-enum": ["refund_excess", "cap", "accept"]
+					},
+					"underpay": {
+						"description": "Underpay policy. Known values: \"await_remainder\", \"partial_fill\", \"reject\".\n",
+						"examples": ["await_remainder"],
+						"type": "string",
+						"x-extensible-enum": ["await_remainder", "partial_fill", "reject"]
+					}
+				},
+				"required": ["underpay", "overpay"],
+				"type": "object"
+			},
+			"DepositDefaults": {
+				"properties": {
+					"maxAcceptedAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"minAcceptedAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"overpayBehavior": {
+						"description": "Overpay behavior. Known values: \"refund_excess\", \"cap\", \"accept\".\n",
+						"examples": ["refund_excess"],
+						"type": "string",
+						"x-extensible-enum": ["refund_excess", "cap", "accept"]
+					},
+					"underpayBehavior": {
+						"description": "Underpay behavior. Known values: \"await_remainder\", \"partial_fill\", \"reject\".\n",
+						"examples": ["await_remainder"],
+						"type": "string",
+						"x-extensible-enum": ["await_remainder", "partial_fill", "reject"]
+					}
+				},
+				"required": [
+					"minAcceptedAmount",
+					"maxAcceptedAmount",
+					"underpayBehavior",
+					"overpayBehavior"
+				],
+				"type": "object"
+			},
+			"DepositFill": {
+				"allOf": [
+					{
+						"if": {
+							"properties": {
+								"partialFillSupported": {
+									"enum": [true]
+								}
+							}
+						},
+						"then": {
+							"required": ["mode", "minFillAmount"]
+						}
+					}
+				],
+				"properties": {
+					"minFillAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"mode": {
+						"description": "Fill mode (e.g. \"proportional\").",
+						"examples": ["proportional"],
+						"type": "string"
+					},
+					"partialFillSupported": {
+						"type": "boolean"
+					}
+				},
+				"required": ["partialFillSupported"],
+				"type": "object"
+			},
+			"DepositRequirement": {
+				"properties": {
+					"acceptance": {
+						"$ref": "#/components/schemas/DepositAcceptance"
+					},
+					"address": {
+						"description": "Deposit address on the source chain.",
+						"type": "string"
+					},
+					"assetId": {
+						"$ref": "#/components/schemas/AssetId"
+					},
+					"expectedAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"expiresAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"fill": {
+						"$ref": "#/components/schemas/DepositFill"
+					},
+					"maxAcceptedAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"memo": {
+						"description": "Optional memo/tag for chains that require it.",
+						"type": ["string", "null"]
+					},
+					"minAcceptedAmount": {
+						"$ref": "#/components/schemas/Amount"
+					}
+				},
+				"required": [
+					"assetId",
+					"address",
+					"expectedAmount",
+					"minAcceptedAmount",
+					"maxAcceptedAmount",
+					"acceptance",
+					"fill",
+					"expiresAt"
+				],
+				"type": "object"
+			},
+			"FamilySelector": {
+				"properties": {
+					"assetFamilyId": {
+						"description": "Asset family id (e.g. \"usdc\").",
+						"type": "string"
+					},
+					"chainId": {
+						"$ref": "#/components/schemas/ChainId"
+					}
+				},
+				"required": ["chainId", "assetFamilyId"],
+				"type": "object"
+			},
+			"FeeComponent": {
+				"discriminator": {
+					"propertyName": "type"
+				},
+				"oneOf": [
+					{
+						"$ref": "#/components/schemas/PpmFee"
+					},
+					{
+						"$ref": "#/components/schemas/FlatFee"
+					}
+				]
+			},
+			"FeePreview": {
+				"properties": {
+					"effectiveInputAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"feeTotal": {
+						"$ref": "#/components/schemas/Amount"
+					}
+				},
+				"required": ["feeTotal", "effectiveInputAmount"],
+				"type": "object"
+			},
+			"FlatFee": {
+				"properties": {
+					"amount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"appliesTo": {
+						"description": "Fee base (e.g. \"perOrder\").",
+						"examples": ["perOrder"],
+						"type": "string",
+						"x-extensible-enum": ["acceptedAmount", "perOrder"]
+					},
+					"assetId": {
+						"$ref": "#/components/schemas/AssetId"
+					},
+					"proration": {
+						"description": "Proration policy (e.g. \"first_fill\").",
+						"examples": ["first_fill"],
+						"type": "string",
+						"x-extensible-enum": ["proportional", "first_fill"]
+					},
+					"type": {
+						"enum": ["flat"],
+						"type": "string"
+					}
+				},
+				"required": ["type", "amount", "assetId", "appliesTo", "proration"],
+				"type": "object"
+			},
+			"NextAction": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"type": {
+						"description": "Next action type (e.g. \"send_more\").",
+						"examples": ["send_more"],
+						"type": "string"
+					}
+				},
+				"required": ["type"],
+				"type": "object"
+			},
+			"Order": {
+				"properties": {
+					"amounts": {
+						"$ref": "#/components/schemas/OrderAmounts"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"depositRequirement": {
+						"$ref": "#/components/schemas/DepositRequirement"
+					},
+					"fees": {
+						"items": {
+							"$ref": "#/components/schemas/FeeComponent"
+						},
+						"type": "array"
+					},
+					"nextAction": {
+						"$ref": "#/components/schemas/NextAction"
+					},
+					"orderId": {
+						"examples": ["ord_01J..."],
+						"type": "string"
+					},
+					"pollAfterSeconds": {
+						"description": "Recommended polling interval hint.",
+						"format": "int32",
+						"minimum": 0,
+						"type": "integer"
+					},
+					"quote": {
+						"$ref": "#/components/schemas/OrderQuoteSummary"
+					},
+					"recipient": {
+						"$ref": "#/components/schemas/AccountId"
+					},
+					"refund": {
+						"$ref": "#/components/schemas/OrderRefund"
+					},
+					"refundPolicy": {
+						"$ref": "#/components/schemas/RefundPolicy"
+					},
+					"resolution": {
+						"$ref": "#/components/schemas/Resolution"
+					},
+					"status": {
+						"description": "Order status.\nKnown values: \"requires_funding\", \"funding_incomplete\", \"funding_detected\", \"executing\",\n\"settling\", \"completed\", \"action_required\", \"failed\", \"expired\", \"canceled\".\n",
+						"examples": ["requires_funding"],
+						"type": "string",
+						"x-extensible-enum": [
+							"requires_funding",
+							"funding_incomplete",
+							"funding_detected",
+							"executing",
+							"settling",
+							"completed",
+							"action_required",
+							"failed",
+							"expired",
+							"canceled"
+						]
+					},
+					"substatus": {
+						"description": "More specific status indicator (e.g. \"manual_refund_required\").",
+						"examples": ["manual_refund_required"],
+						"type": "string"
+					}
+				},
+				"required": [
+					"orderId",
+					"createdAt",
+					"status",
+					"recipient",
+					"fees",
+					"refundPolicy",
+					"amounts"
+				],
+				"type": "object"
+			},
+			"OrderAmounts": {
+				"properties": {
+					"acceptedAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"estimatedToAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"excessAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"feePreview": {
+						"$ref": "#/components/schemas/FeePreview"
+					},
+					"receivedAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"remainingAmount": {
+						"$ref": "#/components/schemas/Amount"
+					}
+				},
+				"required": [
+					"receivedAmount",
+					"acceptedAmount",
+					"remainingAmount",
+					"excessAmount",
+					"feePreview"
+				],
+				"type": "object"
+			},
+			"OrderQuoteSummary": {
+				"properties": {
+					"expiresAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"quoteId": {
+						"examples": ["qt_01J..."],
+						"type": "string"
+					}
+				},
+				"required": ["quoteId", "expiresAt"],
+				"type": "object"
+			},
+			"OrderRefund": {
+				"properties": {
+					"destination": {
+						"$ref": "#/components/schemas/RefundAssetDestination"
+					},
+					"excessAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"status": {
+						"description": "Refund status (e.g. \"pending\", \"completed\", \"failed\").",
+						"examples": ["pending"],
+						"type": "string",
+						"x-extensible-enum": ["pending", "completed", "failed"]
+					}
+				},
+				"required": ["status", "excessAmount"],
+				"type": "object"
+			},
+			"OrderRefundRequest": {
+				"properties": {
+					"to": {
+						"$ref": "#/components/schemas/AccountId"
+					}
+				},
+				"type": "object"
+			},
+			"PpmFee": {
+				"properties": {
+					"appliesTo": {
+						"description": "Fee base (e.g. \"acceptedAmount\").",
+						"examples": ["acceptedAmount"],
+						"type": "string",
+						"x-extensible-enum": ["acceptedAmount", "perOrder"]
+					},
+					"chargedIn": {
+						"description": "What asset the fee is charged in (e.g. \"fromAsset\").",
+						"examples": ["fromAsset"],
+						"type": "string",
+						"x-extensible-enum": ["fromAsset", "toAsset"]
+					},
+					"ppm": {
+						"description": "Proportional fee in parts-per-million.",
+						"format": "int32",
+						"minimum": 0,
+						"type": "integer"
+					},
+					"proration": {
+						"description": "Proration policy (e.g. \"proportional\").",
+						"examples": ["proportional"],
+						"type": "string",
+						"x-extensible-enum": ["proportional", "first_fill"]
+					},
+					"type": {
+						"enum": ["ppm"],
+						"type": "string"
+					}
+				},
+				"required": ["type", "ppm", "chargedIn", "appliesTo", "proration"],
+				"type": "object"
+			},
+			"Problem": {
+				"description": "RFC 7807 Problem Details (application/problem+json).\nAdditional fields (e.g. errorCode, allowedRefundChainIds) may be provided.\n",
+				"properties": {
+					"detail": {
+						"description": "A human-readable explanation specific to this occurrence.",
+						"type": "string"
+					},
+					"errorCode": {
+						"description": "Service-specific stable error code.",
+						"type": "string"
+					},
+					"instance": {
+						"description": "A URI reference that identifies the specific occurrence of the problem.",
+						"format": "uri",
+						"type": "string"
+					},
+					"status": {
+						"description": "The HTTP status code.",
+						"format": "int32",
+						"type": "integer"
+					},
+					"title": {
+						"description": "A short, human-readable summary of the problem.",
+						"type": "string"
+					},
+					"type": {
+						"description": "A URI reference that identifies the problem type.",
+						"format": "uri",
+						"type": "string"
+					}
+				},
+				"required": ["type", "title", "status"],
+				"type": "object"
+			},
+			"Quote": {
+				"properties": {
+					"depositDefaults": {
+						"$ref": "#/components/schemas/DepositDefaults"
+					},
+					"estimatedToAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"expiresAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"fees": {
+						"items": {
+							"$ref": "#/components/schemas/FeeComponent"
+						},
+						"type": "array"
+					},
+					"fromAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"fromAssetId": {
+						"$ref": "#/components/schemas/AssetId"
+					},
+					"quoteId": {
+						"examples": ["qt_01J..."],
+						"type": "string"
+					},
+					"refundPolicyPreview": {
+						"$ref": "#/components/schemas/RefundPolicyPreview"
+					},
+					"route": {
+						"$ref": "#/components/schemas/RoutePlan"
+					},
+					"toAssetId": {
+						"$ref": "#/components/schemas/AssetId"
+					}
+				},
+				"required": [
+					"quoteId",
+					"expiresAt",
+					"fromAssetId",
+					"toAssetId",
+					"fromAmount",
+					"estimatedToAmount",
+					"fees",
+					"depositDefaults",
+					"refundPolicyPreview",
+					"route"
+				],
+				"type": "object"
+			},
+			"QuoteRequest": {
+				"description": "Quote request.\n\nCanonical form uses CAIP-19 asset ids.\nOptional \"family sugar\" form uses (chainId, assetFamilyId) pairs.\n",
+				"oneOf": [
+					{
+						"$ref": "#/components/schemas/QuoteRequestCanonical"
+					},
+					{
+						"$ref": "#/components/schemas/QuoteRequestFamily"
+					}
+				]
+			},
+			"QuoteRequestCanonical": {
+				"not": {
+					"anyOf": [
+						{
+							"required": ["from"]
+						},
+						{
+							"required": ["to"]
+						}
+					]
+				},
+				"properties": {
+					"fromAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"fromAssetId": {
+						"$ref": "#/components/schemas/AssetId"
+					},
+					"recipient": {
+						"$ref": "#/components/schemas/AccountId"
+					},
+					"refundTo": {
+						"$ref": "#/components/schemas/AccountId"
+					},
+					"slippageBps": {
+						"description": "Maximum acceptable slippage in basis points.",
+						"format": "int32",
+						"maximum": 10000,
+						"minimum": 0,
+						"type": "integer"
+					},
+					"toAssetId": {
+						"$ref": "#/components/schemas/AssetId"
+					}
+				},
+				"required": ["fromAssetId", "toAssetId", "fromAmount", "recipient"],
+				"type": "object"
+			},
+			"QuoteRequestFamily": {
+				"not": {
+					"anyOf": [
+						{
+							"required": ["fromAssetId"]
+						},
+						{
+							"required": ["toAssetId"]
+						}
+					]
+				},
+				"properties": {
+					"from": {
+						"$ref": "#/components/schemas/FamilySelector"
+					},
+					"fromAmount": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"recipient": {
+						"$ref": "#/components/schemas/AccountId"
+					},
+					"refundTo": {
+						"$ref": "#/components/schemas/AccountId"
+					},
+					"slippageBps": {
+						"format": "int32",
+						"maximum": 10000,
+						"minimum": 0,
+						"type": "integer"
+					},
+					"to": {
+						"$ref": "#/components/schemas/FamilySelector"
+					}
+				},
+				"required": ["from", "to", "fromAmount", "recipient"],
+				"type": "object"
+			},
+			"RefundAssetDestination": {
+				"properties": {
+					"assetId": {
+						"$ref": "#/components/schemas/AssetId"
+					},
+					"chainId": {
+						"$ref": "#/components/schemas/ChainId"
+					}
+				},
+				"required": ["chainId", "assetId"],
+				"type": "object"
+			},
+			"RefundFees": {
+				"properties": {
+					"estimatedMaxFee": {
+						"$ref": "#/components/schemas/Amount"
+					},
+					"mayIncurBridgeFee": {
+						"description": "Whether the refund path may incur a bridge fee.",
+						"type": "boolean"
+					},
+					"payer": {
+						"description": "Who pays refund-related fees. Known values: \"user\", \"service\".",
+						"examples": ["user"],
+						"type": "string",
+						"x-extensible-enum": ["user", "service"]
+					},
+					"policy": {
+						"description": "Refund fee handling. Known values: \"deduct_from_refund\".",
+						"examples": ["deduct_from_refund"],
+						"type": "string",
+						"x-extensible-enum": ["deduct_from_refund"]
+					}
+				},
+				"type": "object"
+			},
+			"RefundPolicy": {
+				"properties": {
+					"defaultDestination": {
+						"$ref": "#/components/schemas/RefundAssetDestination"
+					},
+					"mode": {
+						"$ref": "#/components/schemas/RefundPolicyMode"
+					},
+					"refundFees": {
+						"$ref": "#/components/schemas/RefundFees"
+					},
+					"requiresRefundAddress": {
+						"type": "boolean"
+					},
+					"supportedRefundDestinations": {
+						"items": {
+							"$ref": "#/components/schemas/RefundAssetDestination"
+						},
+						"minItems": 0,
+						"type": "array"
+					}
+				},
+				"required": ["mode", "supportedRefundDestinations"],
+				"type": "object"
+			},
+			"RefundPolicyMode": {
+				"description": "Refund policy mode.\nKnown values: \"automatic\", \"automatic_if_supported\", \"manual_required\", \"not_supported\".\n",
+				"examples": ["automatic"],
+				"type": "string",
+				"x-extensible-enum": [
+					"automatic",
+					"automatic_if_supported",
+					"manual_required",
+					"not_supported"
+				]
+			},
+			"RefundPolicyPreview": {
+				"properties": {
+					"defaultDestination": {
+						"$ref": "#/components/schemas/RefundAssetDestination"
+					},
+					"mode": {
+						"$ref": "#/components/schemas/RefundPolicyMode"
+					},
+					"refundFees": {
+						"$ref": "#/components/schemas/RefundFees"
+					},
+					"supportedRefundDestinations": {
+						"items": {
+							"$ref": "#/components/schemas/RefundAssetDestination"
+						},
+						"minItems": 0,
+						"type": "array"
+					}
+				},
+				"required": ["mode", "supportedRefundDestinations"],
+				"type": "object"
+			},
+			"Representation": {
+				"properties": {
+					"assetId": {
+						"$ref": "#/components/schemas/AssetId"
+					},
+					"chainId": {
+						"$ref": "#/components/schemas/ChainId"
+					},
+					"decimals": {
+						"format": "int32",
+						"minimum": 0,
+						"type": "integer"
+					}
+				},
+				"required": ["chainId", "assetId", "decimals"],
+				"type": "object"
+			},
+			"Resolution": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"supportReference": {
+						"description": "Reference code for support workflows.",
+						"type": "string"
+					},
+					"type": {
+						"description": "Resolution type (e.g. \"contact_support\").",
+						"examples": ["contact_support"],
+						"type": "string"
+					}
+				},
+				"required": ["type"],
+				"type": "object"
+			},
+			"Route": {
+				"properties": {
+					"features": {
+						"$ref": "#/components/schemas/RouteFeatures"
+					},
+					"fromChainId": {
+						"$ref": "#/components/schemas/ChainId"
+					},
+					"pairs": {
+						"items": {
+							"$ref": "#/components/schemas/RoutePair"
+						},
+						"type": "array"
+					},
+					"toChainId": {
+						"$ref": "#/components/schemas/ChainId"
+					}
+				},
+				"required": ["fromChainId", "toChainId", "pairs", "features"],
+				"type": "object"
+			},
+			"RouteFeatures": {
+				"properties": {
+					"overpayRefund": {
+						"type": "boolean"
+					},
+					"partialFill": {
+						"type": "boolean"
+					},
+					"refundDestinations": {
+						"type": "boolean"
+					}
+				},
+				"required": ["partialFill", "overpayRefund", "refundDestinations"],
+				"type": "object"
+			},
+			"RoutePair": {
+				"properties": {
+					"fromFamily": {
+						"description": "Asset family id (e.g. \"usdt\").",
+						"type": "string"
+					},
+					"toFamily": {
+						"description": "Asset family id (e.g. \"usdc\").",
+						"type": "string"
+					}
+				},
+				"required": ["fromFamily", "toFamily"],
+				"type": "object"
+			},
+			"RoutePlan": {
+				"properties": {
+					"kind": {
+						"description": "Route type identifier (e.g. \"bridge_then_swap\").",
+						"examples": ["bridge_then_swap"],
+						"type": "string"
+					},
+					"opaque": {
+						"description": "Opaque route data for server use (e.g. base64).",
+						"examples": ["base64/or/whatever"],
+						"type": "string"
+					}
+				},
+				"required": ["kind", "opaque"],
+				"type": "object"
+			}
+		}
+	},
+	"info": {
+		"description": "Current OpenAPI spec for the Untron Swap/Bridge API.\n\nNote: `openapi/base.yaml` is intended to be the long-lived compatibility baseline for breaking-change checks.\n",
+		"title": "Untron Bridge API",
+		"version": "1.0.0"
+	},
+	"openapi": "3.1.0",
+	"paths": {
+		"/v1/capabilities": {
+			"get": {
+				"description": "Returns the live \"graph\" of what is possible right now (chains, assets, and routes).\nThis endpoint is descriptive only and does not create commitments.\n",
+				"operationId": "getCapabilities",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/IfNoneMatch"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Capabilities"
+								}
+							}
+						},
+						"description": "Current capabilities",
+						"headers": {
+							"Cache-Control": {
+								"description": "Caching policy (recommendation: max-age=60)",
+								"schema": {
+									"type": "string"
+								}
+							},
+							"ETag": {
+								"description": "Entity tag for caching",
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"304": {
+						"description": "Not Modified"
+					},
+					"default": {
+						"$ref": "#/components/responses/Problem"
+					}
+				},
+				"summary": "Get current capabilities graph",
+				"tags": ["Capabilities"]
+			}
+		},
+		"/v1/orders": {
+			"post": {
+				"description": "Creates an order from a quote.\n\nIdempotency:\n- Requires `Idempotency-Key` header.\n- Repeating the same request with the same key should return the same order.\n",
+				"operationId": "createOrder",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/IdempotencyKey"
+					},
+					{
+						"$ref": "#/components/parameters/XClientOrderId"
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateOrderRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Order"
+								}
+							}
+						},
+						"description": "Order (idempotent replay)"
+					},
+					"201": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Order"
+								}
+							}
+						},
+						"description": "Order created"
+					},
+					"default": {
+						"$ref": "#/components/responses/Problem"
+					}
+				},
+				"summary": "Create an order (idempotent)",
+				"tags": ["Orders"]
+			}
+		},
+		"/v1/orders/{orderId}": {
+			"get": {
+				"operationId": "getOrder",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/OrderId"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Order"
+								}
+							}
+						},
+						"description": "Order"
+					},
+					"default": {
+						"$ref": "#/components/responses/Problem"
+					}
+				},
+				"summary": "Get an order (single source of truth)",
+				"tags": ["Orders"]
+			}
+		},
+		"/v1/quotes": {
+			"post": {
+				"description": "Creates an ephemeral quote (\"offer\") which:\n- selects the best route right now\n- has an expiry\n- fully defines expected fees and deposit expectations\n",
+				"operationId": "createQuote",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/QuoteRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Quote"
+								}
+							}
+						},
+						"description": "Quote"
+					},
+					"default": {
+						"$ref": "#/components/responses/Problem"
+					}
+				},
+				"summary": "Create a quote",
+				"tags": ["Quotes"]
+			}
+		}
+	},
+	"servers": [
+		{
+			"description": "Production",
+			"url": "https://api.untron.finance/bridge"
+		},
+		{
+			"description": "Local development",
+			"url": "http://localhost:8080"
+		}
+	],
+	"tags": [
+		{
+			"name": "Capabilities"
+		},
+		{
+			"name": "Quotes"
+		},
+		{
+			"name": "Orders"
+		}
+	]
+}

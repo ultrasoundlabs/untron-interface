@@ -178,7 +178,7 @@
 							onclick={handlePasteClick}
 							class="h-auto rounded-lg bg-black px-2 py-1.5 text-[11px] leading-none font-semibold text-white transition-colors hover:bg-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-900"
 						>
-							Paste
+							{m.common_paste()}
 						</button>
 						{#if connectedWallet && (!address || address !== connectedWallet) && onUseConnectedWallet}
 							<button

@@ -14,7 +14,8 @@
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest --run --project server",
 		"test:browser": "vitest --run --project client",
-		"test": "bun run test:unit"
+		"test": "bun run test:unit",
+		"gen:api": "openapi-typescript ./openapi.json -o ./src/lib/api/schema.d.ts"
 	},
 	"devDependencies": {
 		"@castlenine/svelte-qrcode": "^2.3.0",
@@ -58,8 +59,10 @@
 		"vitest-browser-svelte": "^2.0.1"
 	},
 	"dependencies": {
+		"@shapeshiftoss/caip": "^8.16.7",
 		"@wagmi/connectors": "^7.0.2",
 		"@wagmi/core": "^3.0.0",
+		"openapi-fetch": "^0.15.0",
 		"viem": "^2.40.0",
 		"zod": "^4.1.13"
 	}

@@ -2,39 +2,61 @@
 	import { fade, fly } from 'svelte/transition';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { m } from '$lib/paraglide/messages.js';
-	import type { SwapDirection, EvmStablecoin, TokenChainBalance } from '$lib/types/swap';
-	import { TOKEN_METADATA, getChainsForToken } from '$lib/config/swapConfig';
+	import type {
+		SwapDirection,
+		EvmStablecoin,
+		TokenChainBalance,
+		SupportedChain
+	} from '$lib/types/swap';
+	import { TOKEN_METADATA } from '$lib/config/swapConfig';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { formatAtomicToDecimal } from '$lib/math/amounts';
 	import TokenNetworkIcon from './TokenNetworkIcon.svelte';
 
 	interface Props {
 		open: boolean;
+		mode: 'evm' | 'tron';
 		direction: SwapDirection;
 		currentChainId: number;
 		currentToken: string;
+		currentTronToken?: string;
+		availableTokens: EvmStablecoin[];
+		getChainsForToken: (token: EvmStablecoin, direction: SwapDirection) => SupportedChain[];
 		/** User's token balances (for EVM→Tron flow) */
 		balances?: TokenChainBalance[];
 		onSelect: (chainId: number, tokenSymbol: string) => void;
+		onSelectTron?: (tokenSymbol: string) => void;
 	}
 
 	let {
 		open = $bindable(),
+		mode = 'evm',
 		direction,
 		currentChainId,
 		currentToken,
+		currentTronToken,
+		availableTokens,
+		getChainsForToken,
 		balances = [],
-		onSelect
+		onSelect,
+		onSelectTron
 	}: Props = $props();
 
 	// Selection state
 	let selectedToken = $state<EvmStablecoin | null>(null);
 	let step = $state<'balances' | 'token' | 'chain'>('token');
 
+	const isTronMode = $derived(mode === 'tron');
+	const isEvmToTron = $derived(direction === 'EVM_TO_TRON');
+
 	// Reset state when dialog opens
 	$effect(() => {
 		if (open) {
 			selectedToken = null;
+			if (isTronMode) {
+				step = 'token';
+				return;
+			}
 			// For EVM→Tron, start with balances view if wallet connected and has balances
 			if (direction === 'EVM_TO_TRON' && $connection.isConnected && balances.length > 0) {
 				step = 'balances';
@@ -44,17 +66,8 @@
 		}
 	});
 
-	const isEvmToTron = $derived(direction === 'EVM_TO_TRON');
-
-	const availableTokens = $derived(
-		(['USDT', 'USDC'] as EvmStablecoin[]).filter((symbol) => {
-			const chains = getChainsForToken(symbol, direction);
-			return chains.length > 0;
-		})
-	);
-
 	const availableChains = $derived(
-		selectedToken ? getChainsForToken(selectedToken, direction) : []
+		!isTronMode && selectedToken ? getChainsForToken(selectedToken, direction) : []
 	);
 
 	// Sort balances by amount (descending)
@@ -74,6 +87,11 @@
 	}
 
 	function handleTokenClick(symbol: EvmStablecoin) {
+		if (isTronMode) {
+			onSelectTron?.(symbol);
+			open = false;
+			return;
+		}
 		selectedToken = symbol;
 		step = 'chain';
 	}
@@ -86,6 +104,7 @@
 	}
 
 	function handleBack() {
+		if (isTronMode) return;
 		if (step === 'chain') {
 			step = 'token';
 			selectedToken = null;
@@ -95,6 +114,7 @@
 	}
 
 	function showHypotheticalSelection() {
+		if (isTronMode) return;
 		step = 'token';
 	}
 
@@ -213,7 +233,7 @@
 			{:else if step === 'token'}
 				<!-- Token Selection -->
 				<div in:fade={{ duration: 150 }}>
-					{#if isEvmToTron && balances.length > 0}
+					{#if !isTronMode && isEvmToTron && balances.length > 0}
 						<!-- Back button for EVM→Tron -->
 						<button
 							type="button"
@@ -235,7 +255,9 @@
 					<div class="grid grid-cols-3 gap-3">
 						{#each availableTokens as symbol (symbol)}
 							{@const meta = TOKEN_METADATA[symbol]}
-							{@const isTokenSelected = currentToken === symbol}
+							{@const isTokenSelected = isTronMode
+								? currentTronToken === symbol
+								: currentToken === symbol}
 							<button
 								type="button"
 								onclick={() => handleTokenClick(symbol)}
@@ -257,7 +279,7 @@
 						{/each}
 					</div>
 				</div>
-			{:else}
+			{:else if !isTronMode}
 				<!-- Chain Selection -->
 				<div in:fly={{ x: 20, duration: 200 }}>
 					<!-- Back button -->
@@ -310,7 +332,9 @@
 								<div class="flex flex-col items-start">
 									<span class="font-medium text-zinc-900 dark:text-white">{chain.name}</span>
 									{#if chain.isTestnet}
-										<span class="text-xs text-amber-600 dark:text-amber-400">Testnet</span>
+										<span class="text-xs text-amber-600 dark:text-amber-400">
+											{m.common_testnet()}
+										</span>
 									{/if}
 								</div>
 								{#if isChainSelected}
