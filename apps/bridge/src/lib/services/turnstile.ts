@@ -1,4 +1,4 @@
-import { env } from '$env/dynamic/public';
+import { PUBLIC_TURNSTILE_SITE_KEY } from '$env/static/public';
 
 type Turnstile = {
 	render: (
@@ -35,7 +35,7 @@ let resolveToken: ((token: string) => void) | null = null;
 let rejectToken: ((err: Error) => void) | null = null;
 
 function getSiteKey(): string | null {
-	const key = env.PUBLIC_TURNSTILE_SITE_KEY?.trim();
+	const key = PUBLIC_TURNSTILE_SITE_KEY?.trim();
 	return key && key.length > 0 ? key : null;
 }
 
