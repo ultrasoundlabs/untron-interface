@@ -6,6 +6,7 @@ type Turnstile = {
 		options: {
 			sitekey: string;
 			size?: 'compact' | 'flexible' | 'normal';
+			execution?: 'render' | 'execute';
 			appearance?: 'interaction-only' | 'always' | 'execute';
 			action?: string;
 			callback: (token: string) => void;
@@ -97,8 +98,9 @@ async function ensureWidget(): Promise<string> {
 
 	widgetId = window.turnstile.render(containerEl, {
 		sitekey: siteKey,
+		execution: 'execute',
 		size: 'normal',
-		appearance: 'interaction-only',
+		appearance: 'execute',
 		action: 'create_order',
 		callback: (token) => {
 			resolveToken?.(token);
@@ -132,9 +134,25 @@ export async function getTurnstileToken(): Promise<string> {
 		if (!window.turnstile) throw new Error('Turnstile not available');
 
 		const token = await new Promise<string>((resolve, reject) => {
-			resolveToken = resolve;
-			rejectToken = reject;
-			window.turnstile!.execute(id);
+			const timeoutId = window.setTimeout(() => {
+				rejectToken?.(new Error('Turnstile timed out'));
+			}, 15_000);
+
+			resolveToken = (token) => {
+				window.clearTimeout(timeoutId);
+				resolve(token);
+			};
+			rejectToken = (err) => {
+				window.clearTimeout(timeoutId);
+				reject(err);
+			};
+
+			try {
+				window.turnstile!.execute(id);
+			} catch (err) {
+				window.clearTimeout(timeoutId);
+				reject(err instanceof Error ? err : new Error('Turnstile execute failed'));
+			}
 		});
 
 		window.turnstile.reset(id);
