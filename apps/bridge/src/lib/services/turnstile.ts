@@ -35,6 +35,18 @@ let inFlightTokenPromise: Promise<string> | null = null;
 let resolveToken: ((token: string) => void) | null = null;
 let rejectToken: ((err: Error) => void) | null = null;
 
+function hideWidget() {
+	if (!containerEl) return;
+	containerEl.style.opacity = '0';
+	containerEl.style.pointerEvents = 'none';
+}
+
+function showWidget() {
+	if (!containerEl) return;
+	containerEl.style.opacity = '1';
+	containerEl.style.pointerEvents = 'auto';
+}
+
 function getSiteKey(): string | null {
 	const key = PUBLIC_TURNSTILE_SITE_KEY?.trim();
 	return key && key.length > 0 ? key : null;
@@ -87,10 +99,11 @@ async function ensureWidget(): Promise<string> {
 		containerEl = document.createElement('div');
 		containerEl.id = 'untron-turnstile';
 		containerEl.style.position = 'fixed';
-		containerEl.style.left = '-9999px';
-		containerEl.style.top = '-9999px';
-		containerEl.style.width = '1px';
-		containerEl.style.height = '1px';
+		containerEl.style.right = '12px';
+		containerEl.style.bottom = '12px';
+		containerEl.style.zIndex = '2147483647';
+		containerEl.style.transition = 'opacity 120ms ease';
+		hideWidget();
 		document.body.appendChild(containerEl);
 	}
 
@@ -100,7 +113,7 @@ async function ensureWidget(): Promise<string> {
 		sitekey: siteKey,
 		execution: 'execute',
 		size: 'normal',
-		appearance: 'execute',
+		appearance: 'interaction-only',
 		action: 'create_order',
 		callback: (token) => {
 			resolveToken?.(token);
@@ -134,15 +147,22 @@ export async function getTurnstileToken(): Promise<string> {
 		if (!window.turnstile) throw new Error('Turnstile not available');
 
 		const token = await new Promise<string>((resolve, reject) => {
+			const showTimeoutId = window.setTimeout(() => {
+				// If an interactive challenge is required, it needs to be visible/clickable.
+				showWidget();
+			}, 800);
+
 			const timeoutId = window.setTimeout(() => {
 				rejectToken?.(new Error('Turnstile timed out'));
-			}, 15_000);
+			}, 90_000);
 
 			resolveToken = (token) => {
+				window.clearTimeout(showTimeoutId);
 				window.clearTimeout(timeoutId);
 				resolve(token);
 			};
 			rejectToken = (err) => {
+				window.clearTimeout(showTimeoutId);
 				window.clearTimeout(timeoutId);
 				reject(err);
 			};
@@ -150,12 +170,14 @@ export async function getTurnstileToken(): Promise<string> {
 			try {
 				window.turnstile!.execute(id);
 			} catch (err) {
+				window.clearTimeout(showTimeoutId);
 				window.clearTimeout(timeoutId);
 				reject(err instanceof Error ? err : new Error('Turnstile execute failed'));
 			}
 		});
 
 		window.turnstile.reset(id);
+		hideWidget();
 		return token;
 	})().finally(() => {
 		inFlightTokenPromise = null;
