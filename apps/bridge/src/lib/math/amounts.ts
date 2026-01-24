@@ -1,5 +1,3 @@
-import type { CapacityInfo } from '$lib/types/swap';
-
 const DECIMAL_REGEX = /^(\d+)(?:\.(\d+))?$/;
 const TEN_THOUSAND = 10000n;
 
@@ -96,24 +94,24 @@ export function formatAtomicToDecimal(
 	return `${wholeString}.${fractionalStr}`;
 }
 
-export function isAmountWithinCapacity(
+export function isAmountWithinBounds(
 	amountAtomic: bigint,
-	capacity: CapacityInfo | null | undefined
+	bounds:
+		| {
+				min: string;
+				max: string;
+		  }
+		| null
+		| undefined
 ): { ok: boolean; tooLow: boolean; tooHigh: boolean } {
-	if (!capacity) {
-		return { ok: true, tooLow: false, tooHigh: false };
-	}
+	if (!bounds) return { ok: true, tooLow: false, tooHigh: false };
 
-	const min = BigInt(capacity.minAmount);
-	const max = BigInt(capacity.maxAmount);
+	const min = BigInt(bounds.min);
+	const max = BigInt(bounds.max);
 	const tooLow = amountAtomic < min;
 	const tooHigh = amountAtomic > max;
 
-	return {
-		ok: !tooLow && !tooHigh,
-		tooLow,
-		tooHigh
-	};
+	return { ok: !tooLow && !tooHigh, tooLow, tooHigh };
 }
 
 export function applyBps(amountAtomic: bigint, bps: number): bigint {

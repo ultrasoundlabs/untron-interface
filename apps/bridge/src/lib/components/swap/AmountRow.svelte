@@ -8,7 +8,7 @@
 	interface Props {
 		/** Whether this is the source (input) or destination (output) row */
 		isSource: boolean;
-		/** Whether this row is for Tron (fixed, non-selectable) */
+		/** Whether this row is for Tron */
 		isTron: boolean;
 		/** Amount value (for source: editable, for destination: read-only) */
 		amount: string;
@@ -148,12 +148,12 @@
 			<button
 				type="button"
 				onclick={() => onTokenSelect?.()}
-				disabled={selectorDisabled || isTron}
+				disabled={selectorDisabled}
 				class="relative flex items-center gap-2 rounded-xl px-3 py-2 transition-colors duration-150
-					{!isTron && !selectorDisabled
+					{!selectorDisabled
 					? 'cursor-pointer bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700'
 					: 'cursor-default bg-transparent dark:bg-transparent'}
-					{selectorDisabled && !isTron ? 'opacity-80' : ''}"
+					{selectorDisabled ? 'opacity-80' : ''}"
 			>
 				<!-- Token Logo -->
 				<TokenNetworkIcon
@@ -177,8 +177,8 @@
 					{/if}
 				</div>
 
-				<!-- Dropdown Arrow (only for EVM) -->
-				{#if !isTron && !selectorDisabled}
+				<!-- Dropdown Arrow -->
+				{#if !selectorDisabled}
 					<svg
 						class="ml-1 h-4 w-4 text-zinc-400 transition-transform group-hover:translate-y-0.5"
 						fill="none"

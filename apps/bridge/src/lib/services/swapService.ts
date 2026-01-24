@@ -1,101 +1,164 @@
 /**
- * Swap service - frontend client for the Untron API routes.
+ * Bridge API service (client-side).
+ *
+ * This file intentionally contains no chain/wallet logic — it only talks to the
+ * Untron Bridge HTTP API described by `openapi.json`.
  */
 
-import type {
-	CapacityInfo,
-	EvmRelayOrderView,
-	EvmStablecoin,
-	EvmToTronExecuteRequest,
-	EvmToTronExecuteResponse,
-	EvmToTronPrepareRequest,
-	EvmToTronPrepareResponse,
-	SwapDirection,
-	SwapQuote,
-	TronDepositResponse,
-	TronToEvmDepositRequest,
-	TronToEvmOrderView
-} from '$lib/types/swap';
+import { api } from '$lib/api/client';
+import type { components } from '$lib/api/schema';
+import type { BridgeCapabilities, BridgeOrder, BridgeQuote } from '$lib/types/swap';
 import type { SwapServiceErrorCode } from '$lib/types/errors';
+
+type Problem = components['schemas']['Problem'];
 
 export class SwapServiceError extends Error {
 	constructor(
 		message: string,
 		public code: SwapServiceErrorCode,
-		public statusCode?: number
+		public statusCode?: number,
+		public problem?: Problem
 	) {
 		super(message);
 		this.name = 'SwapServiceError';
 	}
 }
 
-function backendDisabled(): never {
-	throw new SwapServiceError(
-		'Backend is disabled in this build',
-		'DISABLED' satisfies SwapServiceErrorCode
-	);
+function formatProblem(problem: Problem): string {
+	const title = problem.title?.trim();
+	const detail = problem.detail?.trim();
+	if (title && detail) return `${title}: ${detail}`;
+	return title || detail || 'Request failed';
 }
 
-export async function fetchCapacity(params: {
-	direction: SwapDirection;
-	evmChainId: number;
-	evmToken: EvmStablecoin;
-}): Promise<CapacityInfo> {
-	void params;
-	return {
-		maxAmount: '1000000000000',
-		minAmount: '0',
-		availableLiquidity: '1000000000000',
-		fetchedAt: Date.now(),
-		refreshAt: Date.now() + 30_000
+function toSwapServiceError(args: {
+	code: SwapServiceErrorCode;
+	statusCode?: number;
+	problem?: Problem;
+	fallbackMessage?: string;
+}): SwapServiceError {
+	const message = args.problem
+		? formatProblem(args.problem)
+		: (args.fallbackMessage ?? 'Request failed');
+	return new SwapServiceError(message, args.code, args.statusCode, args.problem);
+}
+
+export async function fetchCapabilities(fetchImpl?: typeof fetch): Promise<{
+	capabilities: BridgeCapabilities;
+	etag?: string;
+}> {
+	const client = api(fetchImpl);
+	const res = await client.GET('/v1/capabilities', {});
+
+	if (res.data) {
+		return { capabilities: res.data, etag: res.response.headers.get('ETag') ?? undefined };
+	}
+
+	if (res.response.status === 304) {
+		throw toSwapServiceError({
+			code: 'INVALID_RESPONSE',
+			statusCode: 304,
+			fallbackMessage: 'Capabilities not modified (ETag caching not enabled in this client)'
+		});
+	}
+
+	const problem = (res.error as { 'application/problem+json'?: Problem } | undefined)?.[
+		'application/problem+json'
+	];
+
+	throw toSwapServiceError({
+		code: 'INVALID_RESPONSE',
+		statusCode: res.response.status,
+		problem
+	});
+}
+
+export async function createQuote(
+	request: components['schemas']['QuoteRequest'],
+	fetchImpl?: typeof fetch
+): Promise<BridgeQuote> {
+	const client = api(fetchImpl);
+	const res = await client.POST('/v1/quotes', { body: request });
+
+	if (res.data) return res.data;
+
+	const problem = (res.error as { 'application/problem+json'?: Problem } | undefined)?.[
+		'application/problem+json'
+	];
+
+	throw toSwapServiceError({
+		code: 'INVALID_REQUEST',
+		statusCode: res.response.status,
+		problem
+	});
+}
+
+export async function createOrder(
+	args: {
+		quoteId: string;
+		recipient: components['schemas']['AccountId'];
+		refundTo?: components['schemas']['AccountId'];
+		idempotencyKey: string;
+		clientOrderId?: string;
+		turnstileToken?: string;
+	},
+	fetchImpl?: typeof fetch
+): Promise<BridgeOrder> {
+	const client = api(fetchImpl);
+	const body: components['schemas']['CreateOrderRequest'] = {
+		quoteId: args.quoteId,
+		recipient: args.recipient,
+		...(args.refundTo ? { refund: { to: args.refundTo } } : {})
 	};
+
+	const res = await client.POST('/v1/orders', {
+		body,
+		params: {
+			header: {
+				'Idempotency-Key': args.idempotencyKey,
+				...(args.clientOrderId ? { 'X-Client-Order-Id': args.clientOrderId } : {}),
+				...(args.turnstileToken ? { 'cf-turnstile-response': args.turnstileToken } : {})
+			} as unknown as {
+				'Idempotency-Key': string;
+				'X-Client-Order-Id'?: string;
+			}
+		}
+	});
+
+	if (res.data) return res.data;
+
+	const problem = (res.error as { 'application/problem+json'?: Problem } | undefined)?.[
+		'application/problem+json'
+	];
+
+	throw toSwapServiceError({
+		code: 'INVALID_REQUEST',
+		statusCode: res.response.status,
+		problem
+	});
 }
 
-export async function fetchQuote(params: {
-	direction: SwapDirection;
-	evmChainId: number;
-	evmToken: EvmStablecoin;
-	amount: string;
-	recipientAddress: string;
-}): Promise<SwapQuote> {
-	return {
-		direction: params.direction,
-		inputAmount: params.amount,
-		outputAmount: params.amount,
-		effectiveRate: '1',
-		fees: {
-			protocolFeeBps: 0,
-			protocolFeeAmount: '0',
-			networkFeeAmount: '0',
-			totalFeeAmount: '0'
-		},
-		estimatedTimeSeconds: 0,
-		expiresAt: Date.now() + 60_000
-	};
-}
+export async function getOrder(orderId: string, fetchImpl?: typeof fetch): Promise<BridgeOrder> {
+	const client = api(fetchImpl);
+	const res = await client.GET('/v1/orders/{orderId}', { params: { path: { orderId } } });
 
-export async function getOrder(orderId: string): Promise<TronToEvmOrderView | EvmRelayOrderView> {
-	void orderId;
-	throw new SwapServiceError('Order not found', 'ORDER_NOT_FOUND', 404);
-}
+	if (res.data) return res.data;
 
-export async function prepareEvmToTronSwap(
-	request: EvmToTronPrepareRequest
-): Promise<EvmToTronPrepareResponse> {
-	void request;
-	return backendDisabled();
-}
+	const problem = (res.error as { 'application/problem+json'?: Problem } | undefined)?.[
+		'application/problem+json'
+	];
 
-export async function executeEvmToTronSwap(
-	request: EvmToTronExecuteRequest
-): Promise<EvmToTronExecuteResponse> {
-	void request;
-	return backendDisabled();
-}
+	if (res.response.status === 404) {
+		throw toSwapServiceError({
+			code: 'ORDER_NOT_FOUND',
+			statusCode: 404,
+			problem
+		});
+	}
 
-export async function requestTronDeposit(
-	request: TronToEvmDepositRequest
-): Promise<TronDepositResponse> {
-	void request;
-	return backendDisabled();
+	throw toSwapServiceError({
+		code: 'INVALID_RESPONSE',
+		statusCode: res.response.status,
+		problem
+	});
 }

@@ -4,103 +4,170 @@
  */
 
 import { getContext, setContext } from 'svelte';
+import { SvelteSet } from 'svelte/reactivity';
+import type { components } from '$lib/api/schema';
+import { parseAssetId, parseCaip2, toAccountId } from '$lib/utils/caip';
 import type {
-	CapacityInfo,
+	BridgeCapabilities,
+	BridgeQuote,
 	EvmStablecoin,
 	SupportedChain,
 	SupportedToken,
 	SwapDirection,
-	SwapExecutionSummary,
-	SwapQuote,
 	SwapValidationError
 } from '$lib/types/swap';
 import type { SwapServiceErrorCode } from '$lib/types/errors';
 import {
-	TRON_USDT,
-	getDefaultEvmSelection,
+	getTronToken,
 	getChainById,
-	getTokenOnChain,
-	isTokenAvailableForDirection
+	getDefaultEvmSelection,
+	getTokenOnChain
 } from '$lib/config/swapConfig';
-import { getChainId, signTypedData, switchChain } from '@wagmi/core';
-import { config as wagmiConfig } from '$lib/wagmi/config';
 import * as swapService from '$lib/services/swapService';
 import {
-	parseDecimalToAtomic,
 	formatAtomicToDecimal,
-	isAmountWithinCapacity
+	isAmountWithinBounds,
+	parseDecimalToAtomic
 } from '$lib/math/amounts';
 import { isValidEvmAddress, isValidTronAddress } from '$lib/validation/addresses';
-
-// ============================================================================
-// Types
-// ============================================================================
+import { getTurnstileToken } from '$lib/services/turnstile';
 
 export interface SwapState {
-	// Core swap parameters
 	direction: SwapDirection;
 	evmChain: SupportedChain;
 	evmToken: SupportedToken;
-	amount: string; // Human-readable decimal string
-	amountAtomic: string; // Source token amount in smallest unit
+	amount: string;
+	amountAtomic: string;
 
-	// Recipient
 	recipientAddress: string;
 	recipientLocked: boolean;
 
-	// Quote & capacity
-	quote: SwapQuote | null;
-	capacity: CapacityInfo | null;
+	capabilities: BridgeCapabilities | null;
+	quote: BridgeQuote | null;
 
-	// Loading states
+	isLoadingCapabilities: boolean;
 	isLoadingQuote: boolean;
-	isLoadingCapacity: boolean;
 	isCreatingOrder: boolean;
 
-	// Errors
+	capabilitiesError: string | null;
 	quoteError: string | null;
-	capacityError: string | null;
 	validationErrors: SwapValidationError[];
 }
 
 const SWAP_STORE_KEY = Symbol('swap-store');
 
-// ============================================================================
-// Store Implementation
-// ============================================================================
+const TRON_MAINNET_CAIP2 = 'tron:0x2b6653dc';
+const QUOTE_DEBOUNCE_MS = 800;
+
+function toFamilyId(symbol: EvmStablecoin): string {
+	return symbol.toLowerCase();
+}
+
+function fromFamilyId(familyId: string): EvmStablecoin | null {
+	const lower = familyId.toLowerCase();
+	if (lower === 'usdt') return 'USDT';
+	if (lower === 'usdc') return 'USDC';
+	return null;
+}
+
+function toEvmCaip2(chainId: number): string {
+	return `eip155:${chainId}`;
+}
+
+function parseEvmChainIdFromCaip2(chainId: string): number | null {
+	const parsed = parseCaip2(chainId);
+	if (!parsed || parsed.chainNamespace !== 'eip155') return null;
+	const evmChainId = Number.parseInt(parsed.chainReference, 10);
+	return Number.isFinite(evmChainId) ? evmChainId : null;
+}
+
+function findTronChainId(capabilities: BridgeCapabilities | null): string {
+	if (!capabilities) return TRON_MAINNET_CAIP2;
+	const tronChainIds = new SvelteSet<string>();
+	for (const route of capabilities.routes) {
+		if (route.fromChainId.startsWith('tron:')) tronChainIds.add(route.fromChainId);
+		if (route.toChainId.startsWith('tron:')) tronChainIds.add(route.toChainId);
+	}
+	if (tronChainIds.has(TRON_MAINNET_CAIP2)) return TRON_MAINNET_CAIP2;
+	return tronChainIds.values().next().value ?? TRON_MAINNET_CAIP2;
+}
+
+function getRepresentation(args: {
+	capabilities: BridgeCapabilities | null;
+	familyId: string;
+	chainId: string;
+}): { assetId: string; decimals: number } | null {
+	const family = args.capabilities?.assetFamilies.find(
+		(f) => f.assetFamilyId.toLowerCase() === args.familyId.toLowerCase()
+	);
+	const rep = family?.representations.find((r) => r.chainId === args.chainId);
+	if (!rep) return null;
+	return { assetId: rep.assetId, decimals: rep.decimals };
+}
+
+function buildSupportedPairs(capabilities: BridgeCapabilities | null): SvelteSet<string> {
+	const set = new SvelteSet<string>();
+	if (!capabilities) return set;
+
+	for (const route of capabilities.routes) {
+		// Tron -> EVM (destination selection is (evmChainId, toFamily))
+		if (route.fromChainId.startsWith('tron:') && route.toChainId.startsWith('eip155:')) {
+			const evmChainId = parseEvmChainIdFromCaip2(route.toChainId);
+			if (!evmChainId) continue;
+			if (!getChainById(evmChainId)) continue;
+			for (const pair of route.pairs) {
+				const token = fromFamilyId(pair.toFamily);
+				if (!token) continue;
+				if (!getTokenOnChain(evmChainId, token)) continue;
+				set.add(`TRON_TO_EVM:${evmChainId}:${token}`);
+			}
+		}
+
+		// EVM -> Tron (source selection is (evmChainId, fromFamily))
+		if (route.fromChainId.startsWith('eip155:') && route.toChainId.startsWith('tron:')) {
+			const evmChainId = parseEvmChainIdFromCaip2(route.fromChainId);
+			if (!evmChainId) continue;
+			if (!getChainById(evmChainId)) continue;
+			for (const pair of route.pairs) {
+				const token = fromFamilyId(pair.fromFamily);
+				if (!token) continue;
+				if (!getTokenOnChain(evmChainId, token)) continue;
+				set.add(`EVM_TO_TRON:${evmChainId}:${token}`);
+			}
+		}
+	}
+
+	return set;
+}
 
 export function createSwapStore() {
 	const defaultEvm = getDefaultEvmSelection();
 
-	// Core state using $state rune
 	let direction = $state<SwapDirection>('TRON_TO_EVM');
 	let evmChain = $state<SupportedChain>(defaultEvm.chain);
 	let evmToken = $state<SupportedToken>(defaultEvm.token);
+	let tronToken = $state<EvmStablecoin>('USDT');
 	let amount = $state<string>('');
 	let amountAtomic = $state<string>('');
 
 	let recipientAddress = $state<string>('');
 	let recipientLocked = $state<boolean>(false);
 
-	let quote = $state<SwapQuote | null>(null);
-	let capacity = $state<CapacityInfo | null>(null);
+	let capabilities = $state<BridgeCapabilities | null>(null);
+	let quote = $state<BridgeQuote | null>(null);
 	let walletBalanceAtomic = $state<string | null>(null);
 	let submitErrorCode = $state<SwapServiceErrorCode | null>(null);
 
+	let isLoadingCapabilities = $state<boolean>(false);
 	let isLoadingQuote = $state<boolean>(false);
-	let isLoadingCapacity = $state<boolean>(false);
 	let isCreatingOrder = $state<boolean>(false);
 
+	let capabilitiesError = $state<string | null>(null);
 	let quoteError = $state<string | null>(null);
-	let capacityError = $state<string | null>(null);
 
-	// Whether we should avoid auto-prefilling the recipient from the connected wallet
-	// (e.g. after the user manually cleared the prefilled bubble)
 	let walletRecipientAutofillDisabled = $state<boolean>(false);
 
-	// Debounce timer for quote fetching
 	let quoteDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-
 	function cancelQuoteDebounce() {
 		if (quoteDebounceTimer) {
 			clearTimeout(quoteDebounceTimer);
@@ -108,99 +175,72 @@ export function createSwapStore() {
 		}
 	}
 
-	// Request IDs for guarding against stale async responses
 	let quoteRequestId = 0;
-	let capacityRequestId = 0;
-
-	// ============================================================================
-	// Derived Values
-	// ============================================================================
+	let capabilitiesRequestId = 0;
 
 	const isFromTron = $derived(direction === 'TRON_TO_EVM');
 	const isToTron = $derived(direction === 'EVM_TO_TRON');
+	const isBusy = $derived(isLoadingCapabilities || isLoadingQuote || isCreatingOrder);
 
-	const isBusy = $derived(isLoadingQuote || isLoadingCapacity || isCreatingOrder);
+	const tronChainId = $derived(findTronChainId(capabilities));
+	const supportedPairs = $derived(buildSupportedPairs(capabilities));
 
-	// Source and destination info for display
-	const sourceInfo = $derived(
-		isFromTron
-			? { type: 'tron' as const, token: TRON_USDT }
-			: { type: 'evm' as const, chain: evmChain, token: evmToken }
+	const isPairSupported = $derived(
+		supportedPairs.has(`${direction}:${evmChain.chainId}:${evmToken.symbol}`)
 	);
 
-	const destinationInfo = $derived(
-		isFromTron
-			? { type: 'evm' as const, chain: evmChain, token: evmToken }
-			: { type: 'tron' as const, token: TRON_USDT }
-	);
+	const tronTokenUi = $derived(getTronToken(tronToken));
 
 	function getSourceDecimals(): number {
-		return isFromTron ? TRON_USDT.decimals : evmToken.decimals;
+		return isFromTron ? tronTokenUi.decimals : evmToken.decimals;
 	}
 
-	// Validation
+	const amountBounds = $derived.by(() => {
+		if (!quote) return null;
+		return {
+			min: quote.depositDefaults.minAcceptedAmount,
+			max: quote.depositDefaults.maxAcceptedAmount
+		};
+	});
+
 	const validationErrors = $derived.by(() => {
 		const errors: SwapValidationError[] = [];
 
-		// Amount validation
+		if (!capabilities) {
+			errors.push({ field: 'general', code: 'CAPABILITIES_UNAVAILABLE' });
+		}
+
+		if (capabilities && !isPairSupported) {
+			errors.push({ field: 'general', code: 'PAIR_UNSUPPORTED' });
+		}
+
 		if (!amount) {
-			errors.push({
-				field: 'amount',
-				code: 'AMOUNT_REQUIRED'
-			});
+			errors.push({ field: 'amount', code: 'AMOUNT_REQUIRED' });
 		} else {
 			const parsed = parseDecimalToAtomic(amount, getSourceDecimals(), { strict: true });
 			if (!parsed) {
-				errors.push({
-					field: 'amount',
-					code: 'AMOUNT_INVALID'
-				});
+				errors.push({ field: 'amount', code: 'AMOUNT_INVALID' });
 			} else {
 				const amountBigInt = parsed.value;
 				if (amountBigInt <= 0n) {
-					errors.push({
-						field: 'amount',
-						code: 'AMOUNT_ZERO'
-					});
+					errors.push({ field: 'amount', code: 'AMOUNT_ZERO' });
 				}
-				const capacityCheck = isAmountWithinCapacity(amountBigInt, capacity);
-				if (capacityCheck.tooLow) {
-					errors.push({
-						field: 'amount',
-						code: 'AMOUNT_TOO_LOW'
-					});
-				}
-				if (capacityCheck.tooHigh) {
-					errors.push({
-						field: 'amount',
-						code: 'AMOUNT_TOO_HIGH'
-					});
-				}
+				const boundsCheck = isAmountWithinBounds(amountBigInt, amountBounds);
+				if (boundsCheck.tooLow) errors.push({ field: 'amount', code: 'AMOUNT_TOO_LOW' });
+				if (boundsCheck.tooHigh) errors.push({ field: 'amount', code: 'AMOUNT_TOO_HIGH' });
 			}
 		}
 
-		// Recipient validation
 		if (!recipientAddress) {
-			errors.push({
-				field: 'recipient',
-				code: 'RECIPIENT_REQUIRED'
-			});
+			errors.push({ field: 'recipient', code: 'RECIPIENT_REQUIRED' });
 		} else {
 			if (isFromTron) {
-				// EVM address validation (basic)
 				if (!isValidEvmAddress(recipientAddress)) {
-					errors.push({
-						field: 'recipient',
-						code: 'RECIPIENT_INVALID_EVM'
-					});
+					errors.push({ field: 'recipient', code: 'RECIPIENT_INVALID_EVM' });
 				}
 			} else {
-				// Tron address validation (basic - starts with T, 34 chars)
 				if (!isValidTronAddress(recipientAddress)) {
-					errors.push({
-						field: 'recipient',
-						code: 'RECIPIENT_INVALID_TRON'
-					});
+					errors.push({ field: 'recipient', code: 'RECIPIENT_INVALID_TRON' });
 				}
 			}
 		}
@@ -210,235 +250,243 @@ export function createSwapStore() {
 
 	const isValid = $derived(validationErrors.length === 0);
 
-	const canSubmit = $derived(isValid && !isBusy && quote !== null && !!amountAtomic);
+	const canSubmit = $derived(
+		isValid && !isBusy && quote !== null && !!amountAtomic && isPairSupported
+	);
 
-	// Max available amount (min of capacity and user balance if applicable)
 	const maxAvailableAmount = $derived.by(() => {
+		const quoteMax = quote?.depositDefaults.maxAcceptedAmount ?? null;
+
 		if (isFromTron) {
-			return capacity?.maxAmount ?? '0';
+			return quoteMax ?? '0';
 		}
 
-		const capacityMax = capacity?.maxAmount ?? null;
-		const walletBalance = walletBalanceAtomic;
-
-		if (capacityMax && walletBalance) {
-			const capacityBig = BigInt(capacityMax);
-			const walletBig = BigInt(walletBalance);
-			return (walletBig < capacityBig ? walletBig : capacityBig).toString();
+		// EVM source: clamp by wallet balance if known
+		const walletBal = walletBalanceAtomic;
+		if (quoteMax && walletBal) {
+			const quoteMaxBig = BigInt(quoteMax);
+			const walletBig = BigInt(walletBal);
+			return (walletBig < quoteMaxBig ? walletBig : quoteMaxBig).toString();
 		}
 
-		if (walletBalance) {
-			return walletBalance;
-		}
-
-		return capacityMax ?? '0';
+		return walletBal ?? quoteMax ?? '0';
 	});
 
-	// ============================================================================
-	// Actions
-	// ============================================================================
+	function clearQuote() {
+		cancelQuoteDebounce();
+		quote = null;
+		quoteError = null;
+		quoteRequestId++;
+	}
+
+	function scheduleQuoteFetch() {
+		cancelQuoteDebounce();
+		quoteDebounceTimer = setTimeout(() => {
+			void fetchQuote();
+		}, QUOTE_DEBOUNCE_MS);
+	}
+
+	function flipSides() {
+		direction = isFromTron ? 'EVM_TO_TRON' : 'TRON_TO_EVM';
+		clearQuote();
+		submitErrorCode = null;
+		if (capabilities) {
+			ensureSupportedSelection(capabilities, direction);
+		}
+	}
+
+	function ensureSupportedSelection(caps: BridgeCapabilities, dir: SwapDirection) {
+		const pairs = buildSupportedPairs(caps);
+		const candidates: string[] = [];
+
+		const current = `${dir}:${evmChain.chainId}:${evmToken.symbol}`;
+		candidates.push(current);
+
+		for (const token of ['USDC', 'USDT'] as const) {
+			candidates.push(`${dir}:${evmChain.chainId}:${token}`);
+		}
+
+		candidates.push(`${dir}:${defaultEvm.chain.chainId}:${defaultEvm.token.symbol}`);
+
+		for (const key of pairs) {
+			if (key.startsWith(`${dir}:`)) candidates.push(key);
+		}
+
+		const picked = candidates.find((k) => pairs.has(k));
+		if (picked) {
+			const [, chainIdStr, tokenStr] = picked.split(':');
+			const chainId = Number.parseInt(chainIdStr ?? '', 10);
+			const token = tokenStr === 'USDT' || tokenStr === 'USDC' ? (tokenStr as EvmStablecoin) : null;
+			if (Number.isFinite(chainId) && token) {
+				setEvmChainAndToken(chainId, token);
+			}
+		}
+
+		const supportedTron = getSupportedTronTokens(dir);
+		if (supportedTron.length > 0 && !supportedTron.includes(tronToken)) {
+			tronToken = supportedTron[0]!;
+		}
+	}
+
+	function setEvmChainAndToken(chainId: number, tokenSymbol: EvmStablecoin) {
+		if (evmChain.chainId === chainId && evmToken.symbol === tokenSymbol) return;
+
+		const nextChain = getChainById(chainId);
+		const nextToken = getTokenOnChain(chainId, tokenSymbol);
+		if (!nextChain || !nextToken) return;
+
+		evmChain = nextChain;
+		evmToken = nextToken;
+
+		clearQuote();
+		if (amountAtomic && recipientAddress) scheduleQuoteFetch();
+	}
+
+	function setTronTokenSymbol(tokenSymbol: EvmStablecoin) {
+		if (tronToken === tokenSymbol) return;
+		tronToken = tokenSymbol;
+		clearQuote();
+		if (amountAtomic && recipientAddress) scheduleQuoteFetch();
+	}
+
+	function setAmount(newAmount: string) {
+		amount = newAmount;
+		submitErrorCode = null;
+
+		const parsed = parseDecimalToAtomic(newAmount, getSourceDecimals(), { strict: false });
+		amountAtomic = parsed ? parsed.value.toString() : '';
+
+		clearQuote();
+		if (amountAtomic && recipientAddress) scheduleQuoteFetch();
+	}
+
+	function setMaxAmount() {
+		const maxAtomic = maxAvailableAmount;
+		if (!maxAtomic || maxAtomic === '0') return;
+		amountAtomic = maxAtomic;
+		amount = formatAtomicToDecimal(maxAtomic, getSourceDecimals(), {
+			maxFractionDigits: getSourceDecimals(),
+			trimTrailingZeros: true,
+			useGrouping: false
+		});
+		clearQuote();
+		if (recipientAddress) scheduleQuoteFetch();
+	}
+
+	function setRecipient(addr: string) {
+		recipientAddress = addr.trim();
+		submitErrorCode = null;
+		clearQuote();
+		if (amountAtomic && recipientAddress) scheduleQuoteFetch();
+	}
+
+	function lockRecipient() {
+		if (!recipientAddress) return;
+		recipientLocked = true;
+	}
+
+	function clearRecipient() {
+		recipientAddress = '';
+		recipientLocked = false;
+		walletRecipientAutofillDisabled = true;
+		clearQuote();
+	}
+
+	function setRecipientToWallet(wallet: string) {
+		recipientAddress = wallet;
+		recipientLocked = true;
+		walletRecipientAutofillDisabled = false;
+		clearQuote();
+		if (amountAtomic && recipientAddress) scheduleQuoteFetch();
+	}
+
+	function prefillRecipientFromWallet(wallet: string) {
+		if (walletRecipientAutofillDisabled) return;
+		if (recipientAddress) return;
+		if (isToTron) return; // Tron address required; don't prefill with EVM wallet
+		setRecipientToWallet(wallet);
+	}
+
+	function clearRecipientOnWalletDisconnect() {
+		if (recipientLocked) {
+			recipientAddress = '';
+			recipientLocked = false;
+		}
+		walletRecipientAutofillDisabled = false;
+		clearQuote();
+	}
 
 	function setWalletBalanceAtomic(balance: string | null) {
 		walletBalanceAtomic = balance;
 	}
 
-	function setDirection(newDirection: SwapDirection) {
-		if (direction === newDirection) return;
-
-		direction = newDirection;
-		submitErrorCode = null;
-
-		// Reset state on direction change
-		amount = '';
-		amountAtomic = '';
-		recipientAddress = '';
-		recipientLocked = false;
-		walletRecipientAutofillDisabled = false;
-		walletBalanceAtomic = null;
-		quote = null;
-		capacity = null;
-		quoteError = null;
-		capacityError = null;
-		cancelQuoteDebounce();
-
-		// Refresh capacity for the new direction/pair
-		refreshCapacity();
-
-		// For Tron→EVM, we might want to prefill recipient with connected wallet
-		// This is handled externally by the component watching wallet state
-	}
-
-	function flipSides() {
-		setDirection(isFromTron ? 'EVM_TO_TRON' : 'TRON_TO_EVM');
-	}
-
-	function setEvmChainAndToken(chainId: number, tokenSymbol: EvmStablecoin) {
-		const chain = getChainById(chainId);
-		const token = getTokenOnChain(chainId, tokenSymbol);
-
-		if (!chain || !token) {
-			console.error('Invalid chain or token selection:', chainId, tokenSymbol);
-			return;
-		}
-
-		if (!isTokenAvailableForDirection(chainId, tokenSymbol, direction)) {
-			console.error('Token not available for this direction:', tokenSymbol, direction);
-			return;
-		}
-
-		submitErrorCode = null;
-		evmChain = chain;
-		evmToken = token;
-
-		// Reset state on pair change
-		amount = '';
-		amountAtomic = '';
-		recipientAddress = '';
-		recipientLocked = false;
-		walletRecipientAutofillDisabled = false;
-		walletBalanceAtomic = null;
-		quote = null;
-		capacity = null;
-		quoteError = null;
-		capacityError = null;
-		cancelQuoteDebounce();
-
-		// Refresh capacity for new pair
-		refreshCapacity();
-	}
-
-	function isRecipientValidForCurrentDirection(address: string): boolean {
-		if (!address) return false;
-		return isFromTron ? isValidEvmAddress(address) : isValidTronAddress(address);
-	}
-
-	function hasQuotePrerequisites(): boolean {
-		return (
-			!!amountAtomic && !!recipientAddress && isRecipientValidForCurrentDirection(recipientAddress)
-		);
-	}
-
-	function scheduleQuoteFetch() {
-		cancelQuoteDebounce();
-
-		if (hasQuotePrerequisites()) {
-			quoteDebounceTimer = setTimeout(() => {
-				fetchQuote();
-			}, 500);
-		} else {
-			quote = null;
-			quoteError = null;
-		}
-	}
-
-	function setAmount(newAmount: string) {
-		submitErrorCode = null;
-		amount = newAmount;
-		const parsed = newAmount
-			? parseDecimalToAtomic(newAmount, getSourceDecimals(), { strict: true })
-			: null;
-		amountAtomic = parsed ? parsed.value.toString() : '';
-
-		scheduleQuoteFetch();
-	}
-
-	function setMaxAmount() {
-		if (!maxAvailableAmount || maxAvailableAmount === '0') return;
-
-		submitErrorCode = null;
-		amountAtomic = maxAvailableAmount;
-		amount = formatAtomicToDecimal(maxAvailableAmount, getSourceDecimals(), {
-			maxFractionDigits: getSourceDecimals(),
-			useGrouping: false
-		});
-		scheduleQuoteFetch();
-	}
-
-	function setRecipient(address: string) {
-		submitErrorCode = null;
-		recipientAddress = address;
-
-		const recipientIsValid = isRecipientValidForCurrentDirection(recipientAddress);
-
-		if (!recipientAddress) {
-			recipientLocked = false;
-			cancelQuoteDebounce();
-			quote = null;
-			quoteError = null;
-			return;
-		}
-
-		recipientLocked = recipientIsValid;
-
-		if (recipientIsValid) {
-			if (amountAtomic) {
-				scheduleQuoteFetch();
-			}
-		} else {
-			cancelQuoteDebounce();
-			quote = null;
-			quoteError = null;
-		}
-	}
-
-	function lockRecipient() {
-		if (recipientAddress) {
-			recipientLocked = true;
-
-			// If we have an amount, fetch quote
-			if (amount) {
-				fetchQuote();
-			}
-		}
-	}
-
-	function clearRecipient() {
-		submitErrorCode = null;
-		recipientAddress = '';
-		recipientLocked = false;
-		cancelQuoteDebounce();
-		quote = null;
-		// User explicitly cleared the recipient bubble; don't immediately auto-prefill it again
-		walletRecipientAutofillDisabled = true;
-	}
-
-	function prefillRecipientFromWallet(walletAddress: string) {
-		// Only prefill for Tron→EVM direction
-		if (isFromTron && !recipientLocked && !recipientAddress && !walletRecipientAutofillDisabled) {
-			setRecipient(walletAddress);
-			recipientLocked = true;
-		}
-	}
-
-	/**
-	 * Explicitly set the recipient to the connected wallet from a user action
-	 * (e.g. clicking "My Wallet"). This should work even if auto-prefill was
-	 * previously disabled.
-	 */
-	function setRecipientToWallet(walletAddress: string) {
-		walletRecipientAutofillDisabled = false;
-		setRecipient(walletAddress);
-	}
-
-	function clearRecipientOnWalletDisconnect() {
-		// Only clear if it was prefilled (for Tron→EVM)
-		if (isFromTron && recipientLocked) {
-			recipientAddress = '';
-			recipientLocked = false;
-			walletRecipientAutofillDisabled = false;
-		}
-	}
-
-	// ============================================================================
-	// Async Actions
-	// ============================================================================
-
-	async function fetchQuote() {
-		if (!amountAtomic || !recipientAddress) return;
+	async function refreshCapabilities() {
+		const currentRequestId = ++capabilitiesRequestId;
+		isLoadingCapabilities = true;
+		capabilitiesError = null;
 
 		try {
-			const amountBigInt = BigInt(amountAtomic);
-			if (amountBigInt <= 0n) return;
+			const { capabilities: caps } = await swapService.fetchCapabilities();
+			if (currentRequestId !== capabilitiesRequestId) return;
+			capabilities = caps;
+			ensureSupportedSelection(caps, direction);
+		} catch (err) {
+			if (currentRequestId !== capabilitiesRequestId) return;
+			capabilities = null;
+			capabilitiesError = err instanceof Error ? err.message : 'Failed to load capabilities';
+		} finally {
+			if (currentRequestId === capabilitiesRequestId) {
+				isLoadingCapabilities = false;
+			}
+		}
+	}
+
+	function buildQuoteRequest(): components['schemas']['QuoteRequest'] | null {
+		if (!capabilities) return null;
+		if (!amountAtomic) return null;
+		if (!recipientAddress) return null;
+		if (!isPairSupported) return null;
+
+		const evmChainCaip2 = toEvmCaip2(evmChain.chainId);
+
+		const tronAsset = getRepresentation({
+			capabilities,
+			familyId: toFamilyId(tronToken),
+			chainId: tronChainId
+		});
+		if (!tronAsset) return null;
+
+		const evmAsset = getRepresentation({
+			capabilities,
+			familyId: toFamilyId(evmToken.symbol),
+			chainId: evmChainCaip2
+		});
+		if (!evmAsset) return null;
+
+		if (isFromTron) {
+			return {
+				fromAssetId: tronAsset.assetId,
+				toAssetId: evmAsset.assetId,
+				fromAmount: amountAtomic,
+				recipient: toAccountId({ chainId: evmChainCaip2, account: recipientAddress })
+			};
+		}
+
+		return {
+			fromAssetId: evmAsset.assetId,
+			toAssetId: tronAsset.assetId,
+			fromAmount: amountAtomic,
+			recipient: toAccountId({ chainId: tronChainId, account: recipientAddress })
+		};
+	}
+
+	async function fetchQuote() {
+		const request = buildQuoteRequest();
+		if (!request) return;
+
+		try {
+			const amt = BigInt(amountAtomic);
+			if (amt <= 0n) return;
 		} catch {
 			return;
 		}
@@ -448,21 +496,11 @@ export function createSwapStore() {
 		quoteError = null;
 
 		try {
-			const result = await swapService.fetchQuote({
-				direction,
-				evmChainId: evmChain.chainId,
-				evmToken: evmToken.symbol as EvmStablecoin,
-				amount: amountAtomic,
-				recipientAddress
-			});
-			if (currentRequestId !== quoteRequestId) {
-				return;
-			}
+			const result = await swapService.createQuote(request);
+			if (currentRequestId !== quoteRequestId) return;
 			quote = result;
 		} catch (err) {
-			if (currentRequestId !== quoteRequestId) {
-				return;
-			}
+			if (currentRequestId !== quoteRequestId) return;
 			quoteError = err instanceof Error ? err.message : 'Failed to fetch quote';
 			quote = null;
 		} finally {
@@ -472,56 +510,40 @@ export function createSwapStore() {
 		}
 	}
 
-	async function refreshCapacity() {
-		const currentRequestId = ++capacityRequestId;
-		isLoadingCapacity = true;
-		capacityError = null;
-
-		try {
-			const result = await swapService.fetchCapacity({
-				direction,
-				evmChainId: evmChain.chainId,
-				evmToken: evmToken.symbol as EvmStablecoin
-			});
-			if (currentRequestId !== capacityRequestId) {
-				return;
-			}
-			capacity = result;
-		} catch (err) {
-			if (currentRequestId !== capacityRequestId) {
-				return;
-			}
-			capacityError = err instanceof Error ? err.message : 'Failed to fetch capacity';
-		} finally {
-			if (currentRequestId === capacityRequestId) {
-				isLoadingCapacity = false;
-			}
-		}
-	}
-
 	async function createOrder(walletAddress?: `0x${string}`): Promise<string | null> {
-		if (!canSubmit) return null;
+		if (!canSubmit || !quote) return null;
 
 		isCreatingOrder = true;
 		submitErrorCode = null;
 
 		try {
-			if (isToTron) {
-				if (!walletAddress) {
-					throw new Error('Missing wallet address for EVM→Tron signing');
-				}
-				const execution = await executeEvmToTronSwap(walletAddress);
-				return execution.orderId;
-			} else {
-				const response = await swapService.requestTronDeposit({
-					direction: 'TRON_TO_EVM',
-					evmChainId: evmChain.chainId,
-					evmToken: evmToken.symbol as EvmStablecoin,
-					amount: amountAtomic,
-					recipientAddress
-				});
-				return response.orderId;
+			const recipientAccountId = buildQuoteRequest()?.recipient;
+			if (!recipientAccountId) {
+				submitErrorCode = 'INVALID_REQUEST';
+				return null;
 			}
+
+			const evmChainCaip2 = toEvmCaip2(evmChain.chainId);
+			const refundTo =
+				isToTron && walletAddress
+					? toAccountId({ chainId: evmChainCaip2, account: walletAddress })
+					: undefined;
+
+			const idempotencyKey = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+			const clientOrderId = globalThis.crypto?.randomUUID?.() ?? undefined;
+
+			const turnstileToken = await getTurnstileToken();
+
+			const order = await swapService.createOrder({
+				quoteId: quote.quoteId,
+				recipient: recipientAccountId,
+				refundTo,
+				idempotencyKey,
+				clientOrderId,
+				turnstileToken
+			});
+
+			return order.orderId;
 		} catch (err) {
 			if (err instanceof swapService.SwapServiceError) {
 				submitErrorCode = err.code;
@@ -535,88 +557,114 @@ export function createSwapStore() {
 		}
 	}
 
-	async function ensureWalletChainForSigning(targetChainId: number): Promise<void> {
-		try {
-			const currentChainId = await getChainId(wagmiConfig);
-			if (currentChainId === targetChainId) {
-				return;
+	function getSupportedTokenSymbols(): EvmStablecoin[] {
+		const tokens: EvmStablecoin[] = [];
+		for (const key of supportedPairs) {
+			if (!key.startsWith(`${direction}:`)) continue;
+			const tokenStr = key.split(':')[2];
+			if (tokenStr === 'USDT' || tokenStr === 'USDC') {
+				const token = tokenStr as EvmStablecoin;
+				if (!tokens.includes(token)) tokens.push(token);
 			}
-		} catch {
-			// If we can't read the current chain (e.g. no connector yet), fall through
-			// to switchChain which will surface a proper error if it can't proceed.
 		}
-
-		// Prompt the user (via their wallet) to switch to the chain we're about to
-		// request an EIP-712 signature for. This avoids \"Chain Id mismatch\" errors
-		// from providers that validate the domain.chainId against the active network.
-		await switchChain(wagmiConfig, { chainId: targetChainId });
+		return tokens;
 	}
 
-	async function executeEvmToTronSwap(walletAddress: `0x${string}`): Promise<SwapExecutionSummary> {
-		await ensureWalletChainForSigning(evmChain.chainId);
+	function getSupportedTronTokens(dir: SwapDirection): EvmStablecoin[] {
+		if (!capabilities) return [];
 
-		const evmToTronDirection = 'EVM_TO_TRON' as const;
+		const tokens = new SvelteSet<EvmStablecoin>();
 
-		const prepareResponse = await swapService.prepareEvmToTronSwap({
-			direction: evmToTronDirection,
-			evmChainId: evmChain.chainId,
-			evmToken: evmToken.symbol as EvmStablecoin,
-			amount: amountAtomic,
-			recipientAddress,
-			evmSignerAddress: walletAddress
-		});
+		for (const route of capabilities.routes) {
+			if (dir === 'TRON_TO_EVM') {
+				if (!route.fromChainId.startsWith('tron:') || !route.toChainId.startsWith('eip155:'))
+					continue;
+				for (const pair of route.pairs) {
+					const token = fromFamilyId(pair.fromFamily);
+					if (token) tokens.add(token);
+				}
+			} else {
+				if (!route.fromChainId.startsWith('eip155:') || !route.toChainId.startsWith('tron:'))
+					continue;
+				for (const pair of route.pairs) {
+					const token = fromFamilyId(pair.toFamily);
+					if (token) tokens.add(token);
+				}
+			}
+		}
 
-		const payloadSignatures: Record<string, `0x${string}`> = {};
+		const ordered: EvmStablecoin[] = [];
+		for (const sym of ['USDT', 'USDC'] as const) {
+			if (tokens.has(sym)) ordered.push(sym);
+		}
+		return ordered;
+	}
 
-		for (const payload of prepareResponse.payloads) {
-			const signature = await signTypedData(wagmiConfig, {
-				account: walletAddress,
-				domain: payload.domain as Record<string, unknown>,
-				types: payload.types as Record<string, Array<{ name: string; type: string }>>,
-				primaryType: payload.primaryType as keyof typeof payload.types,
-				message: payload.message as Record<string, unknown>
+	function getSupportedChainsForToken(token: EvmStablecoin, dir: SwapDirection): SupportedChain[] {
+		const ids: number[] = [];
+		for (const key of supportedPairs) {
+			if (!key.startsWith(`${dir}:`)) continue;
+			const [, chainIdStr, tokenStr] = key.split(':');
+			if (tokenStr !== token) continue;
+			const parsed = Number.parseInt(chainIdStr ?? '', 10);
+			if (!Number.isFinite(parsed)) continue;
+			ids.push(parsed);
+		}
+		const uniqueIds: number[] = [];
+		for (const id of ids) {
+			if (!uniqueIds.includes(id)) uniqueIds.push(id);
+		}
+		return uniqueIds
+			.map((id) => getChainById(id))
+			.filter((c): c is SupportedChain => c !== undefined);
+	}
+
+	function getSupportedEvmSourcePairs(): Array<{
+		chainId: number;
+		token: EvmStablecoin;
+		assetId: string;
+		contractAddress: `0x${string}`;
+		decimals: number;
+	}> {
+		if (!capabilities) return [];
+
+		const pairs: Array<{
+			chainId: number;
+			token: EvmStablecoin;
+			assetId: string;
+			contractAddress: `0x${string}`;
+			decimals: number;
+		}> = [];
+
+		for (const key of supportedPairs) {
+			if (!key.startsWith('EVM_TO_TRON:')) continue;
+			const [, chainIdStr, tokenStr] = key.split(':');
+			const chainId = Number.parseInt(chainIdStr ?? '', 10);
+			const token = tokenStr === 'USDT' || tokenStr === 'USDC' ? (tokenStr as EvmStablecoin) : null;
+			if (!Number.isFinite(chainId) || !token) continue;
+			if (!getChainById(chainId)) continue;
+
+			const rep = getRepresentation({
+				capabilities,
+				familyId: toFamilyId(token),
+				chainId: toEvmCaip2(chainId)
 			});
-			payloadSignatures[payload.id] = signature as `0x${string}`;
+			if (!rep) continue;
+
+			const parsed = parseAssetId(rep.assetId);
+			if (!parsed || parsed.chainNamespace !== 'eip155' || parsed.assetNamespace !== 'erc20')
+				continue;
+			const contractAddress = parsed.assetReference as `0x${string}`;
+			pairs.push({ chainId, token, assetId: rep.assetId, contractAddress, decimals: rep.decimals });
 		}
 
-		const executeResponse = await swapService.executeEvmToTronSwap({
-			direction: evmToTronDirection,
-			evmChainId: evmChain.chainId,
-			evmToken: evmToken.symbol as EvmStablecoin,
-			amount: amountAtomic,
-			recipientAddress,
-			evmSignerAddress: walletAddress,
-			payloads: prepareResponse.payloads,
-			payloadSignatures
-		});
-
-		return executeResponse.execution;
+		return pairs;
 	}
 
-	function reset() {
-		const defaultEvm = getDefaultEvmSelection();
-		direction = 'TRON_TO_EVM';
-		evmChain = defaultEvm.chain;
-		evmToken = defaultEvm.token;
-		amount = '';
-		amountAtomic = '';
-		recipientAddress = '';
-		recipientLocked = false;
-		walletRecipientAutofillDisabled = false;
-		walletBalanceAtomic = null;
-		quote = null;
-		capacity = null;
-		quoteError = null;
-		capacityError = null;
-		cancelQuoteDebounce();
-	}
+	// Initial capabilities fetch
+	void refreshCapabilities();
 
-	// Initial capacity fetch
-	refreshCapacity();
-
-	// Return the store interface
 	return {
-		// State getters (using getters for reactivity)
 		get direction() {
 			return direction;
 		},
@@ -625,6 +673,9 @@ export function createSwapStore() {
 		},
 		get evmToken() {
 			return evmToken;
+		},
+		get tronToken() {
+			return tronTokenUi;
 		},
 		get amount() {
 			return amount;
@@ -638,43 +689,38 @@ export function createSwapStore() {
 		get recipientLocked() {
 			return recipientLocked;
 		},
+		get capabilities() {
+			return capabilities;
+		},
+		get capabilitiesError() {
+			return capabilitiesError;
+		},
 		get quote() {
 			return quote;
-		},
-		get capacity() {
-			return capacity;
-		},
-		get isLoadingQuote() {
-			return isLoadingQuote;
-		},
-		get isLoadingCapacity() {
-			return isLoadingCapacity;
-		},
-		get isCreatingOrder() {
-			return isCreatingOrder;
 		},
 		get quoteError() {
 			return quoteError;
 		},
-		get capacityError() {
-			return capacityError;
+		get submitErrorCode() {
+			return submitErrorCode;
 		},
-
-		// Derived getters
+		get isLoadingCapabilities() {
+			return isLoadingCapabilities;
+		},
+		get isLoadingQuote() {
+			return isLoadingQuote;
+		},
+		get isCreatingOrder() {
+			return isCreatingOrder;
+		},
+		get isBusy() {
+			return isBusy;
+		},
 		get isFromTron() {
 			return isFromTron;
 		},
 		get isToTron() {
 			return isToTron;
-		},
-		get isBusy() {
-			return isBusy;
-		},
-		get sourceInfo() {
-			return sourceInfo;
-		},
-		get destinationInfo() {
-			return destinationInfo;
 		},
 		get validationErrors() {
 			return validationErrors;
@@ -688,40 +734,40 @@ export function createSwapStore() {
 		get maxAvailableAmount() {
 			return maxAvailableAmount;
 		},
-		get submitErrorCode() {
-			return submitErrorCode;
-		},
 
-		// Actions
-		setDirection,
 		flipSides,
 		setEvmChainAndToken,
+		setTronTokenSymbol,
 		setAmount,
 		setMaxAmount,
 		setRecipient,
 		lockRecipient,
 		clearRecipient,
 		setRecipientToWallet,
-		setWalletBalanceAtomic,
 		prefillRecipientFromWallet,
 		clearRecipientOnWalletDisconnect,
-		fetchQuote,
-		refreshCapacity,
+		setWalletBalanceAtomic,
+		refreshCapabilities,
 		createOrder,
-		reset
+
+		// Helpers for UI
+		getSupportedTokenSymbols,
+		getSupportedChainsForToken,
+		getSupportedTronTokens: () => getSupportedTronTokens(direction),
+		getSupportedEvmSourcePairs
 	};
 }
 
 export type SwapStore = ReturnType<typeof createSwapStore>;
-
-// ============================================================================
-// Context Helpers
-// ============================================================================
 
 export function setSwapStoreContext(store: SwapStore) {
 	setContext(SWAP_STORE_KEY, store);
 }
 
 export function getSwapStoreContext(): SwapStore {
-	return getContext<SwapStore>(SWAP_STORE_KEY);
+	const store = getContext<SwapStore>(SWAP_STORE_KEY);
+	if (!store) {
+		throw new Error('SwapStore context not found');
+	}
+	return store;
 }
