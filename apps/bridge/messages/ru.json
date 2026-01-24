@@ -16,6 +16,7 @@
 	"common_token": "Токен",
 	"common_testnet": "Тестовая сеть",
 	"common_on_chain": "В сети {chain}",
+	"turnstile_nudge": "Пожалуйста, пройдите проверку ниже, чтобы продолжить.",
 	"home_greeting": "Добрый день! Что поменяем сегодня?",
 	"home_greeting_morning": "Доброе утро, давайте обменяем!",
 	"home_greeting_evening": "Добрый вечер, давайте обменяем!",

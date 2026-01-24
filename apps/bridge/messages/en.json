@@ -16,6 +16,7 @@
 	"common_token": "Token",
 	"common_testnet": "Testnet",
 	"common_on_chain": "On {chain}",
+	"turnstile_nudge": "Please complete the verification below to continue.",
 	"home_greeting": "Good afternoon, let's swap!",
 	"home_greeting_morning": "Good morning, let's swap!",
 	"home_greeting_evening": "Good evening, let's swap!",
