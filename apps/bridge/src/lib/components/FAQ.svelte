@@ -94,7 +94,7 @@
 	<div class="space-y-4">
 		{#each faqs as item (item.id)}
 			<div
-				class="overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 shadow-sm shadow-zinc-200/50 backdrop-blur-sm transition-all duration-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/80 dark:shadow-black/30"
+				class="overflow-hidden rounded-2xl bg-white transition-all duration-200 dark:bg-white"
 				in:fade={{ duration: transitionDuration }}
 			>
 				<button
@@ -109,19 +109,19 @@
 							<span aria-hidden="true">{item.emoji}</span>
 						</div>
 						<div>
-							<p class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+							<p class="text-sm font-semibold text-zinc-900 md:text-base dark:text-zinc-50">
 								{item.question()}
 							</p>
 						</div>
 					</div>
 
 					<div
-						class="ml-2 flex h-7 w-7 items-center justify-center rounded-full border border-zinc-200 text-zinc-500 transition-transform duration-200 dark:border-zinc-700 dark:text-zinc-400"
+						class="ml-2 flex h-6 w-6 items-center justify-center text-zinc-500 transition-transform duration-200 dark:text-zinc-400"
 						aria-hidden="true"
 						style={`transform: rotate(${getIsOpen(item.id) ? 90 : 0}deg);`}
 					>
 						<svg
-							class="h-3.5 w-3.5"
+							class="h-4 w-4"
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 20 20"
 							fill="currentColor"
@@ -137,9 +137,9 @@
 
 				{#if getIsOpen(item.id)}
 					<div
-						class="px-4 pt-0 pb-4 text-sm text-zinc-700 md:px-5 md:pb-5 dark:text-zinc-300"
+						class="px-4 pt-0 pb-4 text-sm leading-relaxed text-zinc-700 md:px-5 md:pb-5 md:text-sm dark:text-zinc-300"
 						in:slide={{ duration: transitionDuration }}
-						out:fade={{ duration: transitionDuration }}
+						out:slide={{ duration: transitionDuration }}
 					>
 						<p>{item.answer()}</p>
 					</div>

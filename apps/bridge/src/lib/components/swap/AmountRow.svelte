@@ -2,6 +2,7 @@
 	import { fade, scale } from 'svelte/transition';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { m } from '$lib/paraglide/messages.js';
+	import TokenNetworkIcon from './TokenNetworkIcon.svelte';
 	import type { SupportedChain, SupportedToken, TronToken } from '$lib/types/swap';
 
 	interface Props {
@@ -43,13 +44,42 @@
 		onTokenSelect
 	}: Props = $props();
 
+	function sanitizeAmount(rawValue: string) {
+		const numericOnly = rawValue.replace(/[^0-9.]/g, '');
+		const parts = numericOnly.split('.');
+		return parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : numericOnly;
+	}
+
+	function handleBeforeInput(event: InputEvent) {
+		const target = event.target as HTMLInputElement | null;
+		if (!target) return;
+
+		const data = event.data ?? '';
+
+		// Allow deletions and caret movement
+		if (!data) return;
+
+		const selectionStart = target.selectionStart ?? target.value.length;
+		const selectionEnd = target.selectionEnd ?? target.value.length;
+		const proposed = `${target.value.slice(0, selectionStart)}${data}${target.value.slice(selectionEnd)}`;
+		const sanitized = sanitizeAmount(proposed);
+
+		if (sanitized !== proposed) {
+			event.preventDefault();
+			target.value = sanitized;
+			onAmountChange?.(sanitized);
+		}
+	}
+
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;
-		// Only allow numbers and decimals
-		const value = target.value.replace(/[^0-9.]/g, '');
-		// Prevent multiple decimals
-		const parts = value.split('.');
-		const sanitized = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : value;
+
+		const sanitized = sanitizeAmount(target.value);
+
+		if (sanitized !== target.value) {
+			target.value = sanitized;
+		}
+
 		onAmountChange?.(sanitized);
 	}
 
@@ -57,22 +87,24 @@
 </script>
 
 <div
-	class="group relative rounded-2xl bg-zinc-100 p-4 transition-colors dark:bg-zinc-800/50"
-	class:ring-2={isSource}
-	class:ring-zinc-300={isSource}
-	class:dark:ring-zinc-600={isSource}
+	class={`group relative rounded-4xl p-6 transition-colors ${
+		isSource ? 'bg-white dark:bg-zinc-900' : 'bg-white dark:bg-zinc-900/90'
+	}`}
 >
 	<!-- Label -->
-	<div class="mb-2 flex items-center justify-between">
-		<span class="text-sm text-zinc-500 dark:text-zinc-400">
+	<div class="mb-1 flex items-center justify-between">
+		<span class="text-m text-black dark:text-zinc-400">
 			{isSource ? m.swap_you_send() : m.swap_you_receive()}
 		</span>
 		{#if isSource && onMaxClick}
 			<Button
-				variant="ghost"
 				size="sm"
-				class="h-6 px-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
-				onclick={onMaxClick}
+				variant="ghost"
+				class="h-auto bg-zinc-100 px-2 py-1.5 text-[11px] leading-none font-semibold text-primary hover:bg-zinc-200 hover:text-primary dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
+				onclick={(event) => {
+					event.stopPropagation();
+					onMaxClick?.();
+				}}
 			>
 				{m.swap_max()}
 			</Button>
@@ -88,6 +120,7 @@
 					inputmode="decimal"
 					value={displayAmount}
 					{placeholder}
+					onbeforeinput={handleBeforeInput}
 					oninput={handleInput}
 					class="w-full bg-transparent text-3xl font-semibold text-zinc-900 placeholder-zinc-400 outline-none dark:text-white dark:placeholder-zinc-500"
 				/>
@@ -110,59 +143,58 @@
 			{/if}
 		</div>
 
-		<!-- Token Selector -->
-		<button
-			type="button"
-			onclick={() => onTokenSelect?.()}
-			disabled={selectorDisabled || isTron}
-			class="flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 transition-all duration-150
-				{isTron ? 'cursor-default bg-zinc-200 dark:bg-zinc-700/50' : 'bg-white shadow-sm dark:bg-zinc-700'}
-				{!isTron && !selectorDisabled ? 'cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-600' : ''}
-				{selectorDisabled && !isTron ? 'cursor-default' : ''}"
-		>
-			<!-- Token Logo -->
-			<div class="relative h-7 w-7 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-600">
-				<img
-					src={token.logoUrl}
-					alt={token.symbol}
-					class="h-full w-full object-cover"
-					onerror={(e) => {
-						(e.target as HTMLImageElement).style.display = 'none';
-					}}
+		<div class="relative shrink-0">
+			<!-- Token Selector -->
+			<button
+				type="button"
+				onclick={() => onTokenSelect?.()}
+				disabled={selectorDisabled || isTron}
+				class="relative flex items-center gap-2 rounded-xl px-3 py-2 transition-colors duration-150
+					{!isTron && !selectorDisabled
+					? 'cursor-pointer bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700'
+					: 'cursor-default bg-transparent dark:bg-transparent'}
+					{selectorDisabled && !isTron ? 'opacity-80' : ''}"
+			>
+				<!-- Token Logo -->
+				<TokenNetworkIcon
+					className="shrink-0"
+					size={28}
+					tokenLogoUrl={token.logoUrl}
+					tokenSymbol={token.symbol}
 				/>
-			</div>
 
-			<!-- Token & Chain Info -->
-			<div class="flex flex-col items-start">
-				<span class="text-sm font-semibold text-zinc-900 dark:text-white">
-					{token.symbol}
-				</span>
-				{#if chain}
-					<span class="text-xs text-zinc-500 dark:text-zinc-400">
-						{chain.name}
+				<!-- Token & Chain Info -->
+				<div class="flex flex-col items-start leading-tight">
+					<span class="text-sm font-semibold text-zinc-900 dark:text-white">
+						{token.symbol}
 					</span>
-				{:else if isTron}
-					<span class="text-xs text-zinc-500 dark:text-zinc-400">Tron</span>
-				{/if}
-			</div>
+					{#if chain}
+						<span class="text-xs text-zinc-500 dark:text-zinc-400">
+							{chain.name}
+						</span>
+					{:else if isTron}
+						<span class="text-xs text-zinc-500 dark:text-zinc-400">Tron</span>
+					{/if}
+				</div>
 
-			<!-- Dropdown Arrow (only for EVM) -->
-			{#if !isTron && !selectorDisabled}
-				<svg
-					class="ml-1 h-4 w-4 text-zinc-400 transition-transform group-hover:translate-y-0.5"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-					in:scale={{ duration: 150, start: 0.8 }}
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 9l-7 7-7-7"
-					/>
-				</svg>
-			{/if}
-		</button>
+				<!-- Dropdown Arrow (only for EVM) -->
+				{#if !isTron && !selectorDisabled}
+					<svg
+						class="ml-1 h-4 w-4 text-zinc-400 transition-transform group-hover:translate-y-0.5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						in:scale={{ duration: 150, start: 0.8 }}
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				{/if}
+			</button>
+		</div>
 	</div>
 </div>
