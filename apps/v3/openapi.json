@@ -2785,6 +2785,11 @@
 						"description": "Queue index (uint256, decimal string).",
 						"example": "0"
 					},
+					"fill_tx_hash": {
+						"type": ["string", "null"],
+						"description": "Fill (payout) transaction hash on the destination chain (0x hex).",
+						"example": "0x0000000000000000000000000000000000000000000000000000000000000000"
+					},
 					"status": {
 						"type": "string",
 						"description": "Claim lifecycle status.",

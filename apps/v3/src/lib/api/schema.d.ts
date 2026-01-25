@@ -1122,6 +1122,11 @@ export interface components {
 			 */
 			queue_index: string;
 			/**
+			 * @description Fill (payout) transaction hash on the destination chain (0x hex).
+			 * @example 0x0000000000000000000000000000000000000000000000000000000000000000
+			 */
+			fill_tx_hash?: string | null;
+			/**
 			 * @description Claim lifecycle status.
 			 * @example created
 			 */
