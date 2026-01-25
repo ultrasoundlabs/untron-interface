@@ -252,8 +252,7 @@
 							{#if protocolInfo && protocolInfo.arbitraryLesseeFlatFee > 0}
 								This incurs an additional flat fee of {formatUsdtAtomic6(
 									protocolInfo.arbitraryLesseeFlatFee
-								) ?? protocolInfo.arbitraryLesseeFlatFee}{' '}
-								USDT.
+								) ?? protocolInfo.arbitraryLesseeFlatFee} USDT.
 							{/if}
 						{/if}
 					</div>
@@ -329,12 +328,10 @@
 								{#each protocolInfo ? getTargetChainOptions(protocolInfo.supportedPairs, protocolInfo.deprecatedTargetChains) : [] as chainId (chainId)}
 									{@const meta = getChainMeta(chainId)}
 									<Select.Item value={chainId} label={getChainLabel(chainId)}>
-										{#snippet children()}
-											<span class="inline-flex w-full items-center gap-2">
-												<span class="flex-1 truncate">{meta?.name ?? chainId}</span>
-												<span class="font-mono text-xs text-muted-foreground">{chainId}</span>
-											</span>
-										{/snippet}
+										<span class="inline-flex w-full items-center gap-2">
+											<span class="flex-1 truncate">{meta?.name ?? chainId}</span>
+											<span class="font-mono text-xs text-muted-foreground">{chainId}</span>
+										</span>
 									</Select.Item>
 								{/each}
 							</Select.Content>
@@ -374,14 +371,12 @@
 											? `${alias} (${formatAddress(token, 10, 6)})`
 											: formatAddress(token, 10, 6)}
 									>
-										{#snippet children()}
-											<span class="inline-flex w-full items-center gap-2">
-												<span class="flex-1 truncate">{alias ?? formatAddress(token, 10, 6)}</span>
-												<span class="font-mono text-xs text-muted-foreground">
-													{formatAddress(token, 8, 6)}
-												</span>
+										<span class="inline-flex w-full items-center gap-2">
+											<span class="flex-1 truncate">{alias ?? formatAddress(token, 10, 6)}</span>
+											<span class="font-mono text-xs text-muted-foreground">
+												{formatAddress(token, 8, 6)}
 											</span>
-										{/snippet}
+										</span>
 									</Select.Item>
 								{/each}
 							</Select.Content>

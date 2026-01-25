@@ -25,6 +25,14 @@
 
 	let { rows, leaseFeePpm = null }: Props = $props();
 
+	type DepositEntry = {
+		tx_hash?: unknown;
+		sender?: unknown;
+		amount?: unknown;
+		block_timestamp?: unknown;
+		log_index?: unknown;
+	};
+
 	function getClaimSortKey(row: SqlRow): bigint | null {
 		const v = row.claim_id ?? row.claimId ?? row.claim_index ?? row.claimIndex;
 		if (typeof v === 'number' && Number.isFinite(v) && Number.isInteger(v)) return BigInt(v);
@@ -52,8 +60,8 @@
 		copy.sort((a, b) => {
 			const aStatus = getStatus(a);
 			const bStatus = getStatus(b);
-			const aFinalizing = aStatus === 'finalizing';
-			const bFinalizing = bStatus === 'finalizing';
+			const aFinalizing = aStatus === 'finalizing' || aStatus === 'pending';
+			const bFinalizing = bStatus === 'finalizing' || bStatus === 'pending';
 			if (aFinalizing && !bFinalizing) return -1;
 			if (!aFinalizing && bFinalizing) return 1;
 			if (aFinalizing && bFinalizing) {
@@ -86,10 +94,42 @@
 		return typeof v === 'string' ? v : null;
 	}
 
-	function tronScanTxUrl(originId: string): string | null {
-		const raw = originId.startsWith('0x') ? originId.slice(2) : originId;
+	function getDepositEntries(row: SqlRow): DepositEntry[] {
+		const v = row.usdt_deposit_attribution ?? row.usdtDepositAttribution;
+		return Array.isArray(v) ? (v as DepositEntry[]) : [];
+	}
+
+	function getDepositTxHash(entry: DepositEntry): string | null {
+		return typeof entry.tx_hash === 'string' ? entry.tx_hash : null;
+	}
+
+	function tronScanTxUrl(txHash: string): string | null {
+		const raw = txHash.startsWith('0x') ? txHash.slice(2) : txHash;
 		if (!/^[0-9a-fA-F]{64}$/.test(raw)) return null;
 		return `https://tronscan.org/#/transaction/${raw}`;
+	}
+
+	function getDepositBlockTimestamp(entry: DepositEntry): number | null {
+		return typeof entry.block_timestamp === 'number' ? entry.block_timestamp : null;
+	}
+
+	function getDepositSender(entry: DepositEntry): string | null {
+		return typeof entry.sender === 'string' ? entry.sender : null;
+	}
+
+	function getRowKey(row: SqlRow): string {
+		const claimId = getClaimId(row);
+		if (claimId) return `claim-${claimId}`;
+		const deposits = getDepositEntries(row);
+		const first = deposits[0] ?? null;
+		const txHash = first ? getDepositTxHash(first) : null;
+		if (txHash) {
+			const logIndex = first && typeof first.log_index === 'number' ? String(first.log_index) : '';
+			return `deposit-${txHash}-${logIndex}`;
+		}
+		const originId = getOriginId(row);
+		if (originId) return `origin-${originId}`;
+		return `row-${JSON.stringify(row)}`;
 	}
 
 	function getTargetToken(row: SqlRow): string | null {
@@ -133,14 +173,58 @@
 		</Table.Row>
 	</Table.Header>
 	<Table.Body>
-		{#each sortedRows as row (getClaimId(row) ?? `${getOriginId(row) ?? ''}-${JSON.stringify(row)}`)}
+		{#each sortedRows as row (getRowKey(row))}
+			{@const deposits = getDepositEntries(row)}
 			<Table.Row>
 				<Table.Cell class="space-y-0.5">
 					<div class="font-mono">
 						{getClaimId(row) ?? '—'}
 					</div>
 					<div class="font-mono text-xs text-muted-foreground">
-						{#if getOriginId(row)}
+						{#if deposits.length > 0}
+							{@const shown = deposits.slice(0, 2)}
+							<div class="space-y-0.5">
+								{#each shown as d (getDepositTxHash(d) ?? JSON.stringify(d))}
+									{@const txHash = getDepositTxHash(d)}
+									{@const tronUrl = txHash ? tronScanTxUrl(txHash) : null}
+									{@const ts = getDepositBlockTimestamp(d)}
+									{@const sender = getDepositSender(d)}
+									<span class="inline-flex flex-wrap items-center gap-1">
+										{#if txHash && tronUrl}
+											<a
+												href={tronUrl}
+												target="_blank"
+												rel="noreferrer"
+												class="inline-flex items-center gap-1 hover:underline"
+												title="Open on Tronscan"
+											>
+												deposit {formatHexShort(txHash, 14, 10)}
+												<ExternalLinkIcon class="h-3 w-3 opacity-70" />
+											</a>
+										{:else if txHash}
+											deposit {formatHexShort(txHash, 14, 10)}
+										{:else}
+											deposit —
+										{/if}
+										{#if ts}
+											<span class="opacity-70">·</span>
+											<span title={formatUnixSecondsLocal(ts) ?? undefined} class="opacity-70">
+												{formatUnixSecondsRelative(ts) ?? formatUnixSeconds(ts) ?? ts}
+											</span>
+										{/if}
+										{#if sender}
+											<span class="opacity-70">·</span>
+											<span title={sender} class="opacity-70"
+												>from {formatAddress(sender, 8, 6)}</span
+											>
+										{/if}
+									</span>
+								{/each}
+								{#if deposits.length > shown.length}
+									<div class="opacity-70">+{deposits.length - shown.length} more deposits</div>
+								{/if}
+							</div>
+						{:else if getOriginId(row)}
 							{@const oid = getOriginId(row)!}
 							{@const tronUrl = tronScanTxUrl(oid)}
 							<span class="inline-flex items-center gap-1">
@@ -255,7 +339,9 @@
 					{/if}
 				</Table.Cell>
 				<Table.Cell>
-					{#if getStatus(row) === 'finalizing'}
+					{#if getStatus(row) === 'pending'}
+						<Badge variant="secondary">pending</Badge>
+					{:else if getStatus(row) === 'finalizing'}
 						<Badge variant="secondary">finalizing</Badge>
 					{:else if getStatus(row) === 'created'}
 						<Badge variant="secondary">created</Badge>

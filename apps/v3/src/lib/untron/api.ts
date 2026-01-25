@@ -32,14 +32,6 @@ function getHubChainId(): number | null {
 	return parsed;
 }
 
-function requireHubChainId(): number {
-	const chainId = getHubChainId();
-	if (chainId === null) {
-		throw new Error('Missing PUBLIC_UNTRON_HUB_CHAIN_ID (needed for EIP-712 signing)');
-	}
-	return chainId;
-}
-
 type RealtorInfoResponse = components['schemas']['RealtorInfoResponse'];
 type RealtorTargetPairResponse = components['schemas']['RealtorTargetPairResponse'];
 type HubProtocolConfig = components['schemas']['hub_protocol_config'];
@@ -151,8 +143,6 @@ export async function getProtocolInfo(): Promise<ProtocolInfo> {
 
 type LeaseViewRow = components['schemas']['lease_view'];
 type ReceiverSaltCandidate = components['schemas']['receiver_salt_candidates'];
-export type UnaccountedReceiverUsdtTransfer =
-	components['schemas']['unaccounted_receiver_usdt_transfers'];
 
 function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: Map<string, string>): SqlRow {
 	const leaseId = row.lease_id === undefined ? null : String(row.lease_id);
@@ -271,7 +261,11 @@ function normalizeLeaseDetails(view: LeaseViewResponse): SqlRow {
 		claims_total: view.claims_total,
 		claims_filled: view.claims_filled,
 		payout_config_history: view.payout_config_history,
-		claims: view.claims
+		claims: view.claims,
+		pending_usdt_deposits: view.pending_usdt_deposits,
+		pending_usdt_deposits_amount: view.pending_usdt_deposits_amount,
+		pending_usdt_deposits_latest_block_timestamp: view.pending_usdt_deposits_latest_block_timestamp,
+		pending_usdt_deposits_total: view.pending_usdt_deposits_total
 	};
 }
 
@@ -343,25 +337,4 @@ export async function getLeaseNonce(leaseId: string): Promise<string> {
 	);
 	const nonce = rows[0]?.nonce;
 	return nonce === undefined ? '0' : String(nonce);
-}
-
-export async function getUnaccountedReceiverUsdtTransfers(args: {
-	receiverSalt: string;
-	expectedLeaseId?: string | null;
-	limit?: number;
-}): Promise<UnaccountedReceiverUsdtTransfer[]> {
-	requireBrowser();
-	const client = createApiClient();
-	return await unwrap<UnaccountedReceiverUsdtTransfer[]>(
-		client.GET('/unaccounted_receiver_usdt_transfers', {
-			params: {
-				query: {
-					receiver_salt: toEq(args.receiverSalt),
-					...(args.expectedLeaseId ? { expected_lease_id: toEq(args.expectedLeaseId) } : {}),
-					order: 'block_timestamp.desc',
-					limit: String(args.limit ?? 50)
-				}
-			}
-		})
-	);
 }

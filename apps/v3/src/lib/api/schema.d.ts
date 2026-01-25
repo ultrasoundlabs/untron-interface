@@ -272,6 +272,33 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/hub_controller_state': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Hub controller sync state (materialized)
+		 * @description This single-row view is a DB projection of hub events and is intended to replace hub
+		 *     read-RPC calls:
+		 *
+		 *     - `last_controller_event_tip` == UntronV3Base.lastControllerEventTip()
+		 *     - `last_controller_event_seq` == UntronV3Base.lastControllerEventSeq()
+		 *     - `next_controller_event_index` == UntronV3Base.nextControllerEventIndex()
+		 *
+		 *     Values reflect the hub's canonical event stream as applied by the indexer.
+		 */
+		get: operations['hub_controller_state_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/controller_lp': {
 		parameters: {
 			query?: never;
@@ -354,6 +381,29 @@ export interface paths {
 		 *     - 'pull'               => no claim yet and a later pull timestamp suggests pre-entitle would revert
 		 */
 		get: operations['receiver_usdt_transfer_actionability_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/relayer_hub_state': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Relayer hub state bundle
+		 * @description Convenience single-row view combining:
+		 *     - api.hub_controller_state
+		 *
+		 *     Intended for relayer use to minimize HTTP round trips.
+		 */
+		get: operations['relayer_hub_state_get'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -1020,6 +1070,13 @@ export interface components {
 			 * @example 0
 			 */
 			amount_usdt: string;
+			/**
+			 * @description Best-effort attribution of this claim's underlying USDT deposits.
+			 *
+			 *     - For pre-entitle origins, this is usually a single entry.
+			 *     - For receiver-pull origins, this may contain multiple entries (FIFO approximation) or be empty.
+			 */
+			usdt_deposit_attribution: components['schemas']['UsdtDepositAttributionEntryView'][];
 			/** @example 0x0000000000000000000000000000000000000003 */
 			beneficiary: string;
 			/**
@@ -1127,6 +1184,31 @@ export interface components {
 			 * @example 0
 			 */
 			claims_total: number;
+			/**
+			 * @description Canonical receiver USDT deposits that are still eligible for `preEntitle`
+			 *     and have not yet been accounted for by a hub pre-entitle claim.
+			 *
+			 *     Entries are a minimal, stable subset:
+			 *     `{ tx_hash, sender, amount, block_timestamp, log_index }`.
+			 */
+			pending_usdt_deposits: components['schemas']['UsdtDepositAttributionEntryView'][];
+			/**
+			 * @description Sum of pending deposit amounts (uint256, decimal string).
+			 * @example 0
+			 */
+			pending_usdt_deposits_amount: string;
+			/**
+			 * Format: int64
+			 * @description Latest pending deposit Tron block timestamp (seconds).
+			 * @example 0
+			 */
+			pending_usdt_deposits_latest_block_timestamp: number;
+			/**
+			 * Format: int64
+			 * @description Total number of pending deposits.
+			 * @example 0
+			 */
+			pending_usdt_deposits_total: number;
 			/**
 			 * @description Flat fee (USDT units) (uint256, decimal string).
 			 * @example 0
@@ -1287,6 +1369,11 @@ export interface components {
 			 * @example 0x0000000000000000000000000000000000000005
 			 */
 			untron_v3: string;
+			/**
+			 * @description Optional upstream principal/user identifier echoed from `x-untron-principal-id`.
+			 * @example acct_123
+			 */
+			user?: string | null;
 		};
 		RealtorTargetPairResponse: {
 			/**
@@ -1658,6 +1745,51 @@ export interface components {
 			 * @description Controller ABI-encoded event payload (0x hex)
 			 */
 			abi_encoded_event_data?: string;
+		};
+		/**
+		 * @description Hub controller sync state (materialized)
+		 *
+		 *     This single-row view is a DB projection of hub events and is intended to replace hub
+		 *     read-RPC calls:
+		 *
+		 *     - `last_controller_event_tip` == UntronV3Base.lastControllerEventTip()
+		 *     - `last_controller_event_seq` == UntronV3Base.lastControllerEventSeq()
+		 *     - `next_controller_event_index` == UntronV3Base.nextControllerEventIndex()
+		 *
+		 *     Values reflect the hub's canonical event stream as applied by the indexer.
+		 */
+		hub_controller_state: {
+			/** @description UntronV3Base.lastControllerEventSeq() */
+			last_controller_event_seq?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: text
+			 * @description UntronV3Base.lastControllerEventTip() (bytes32 hex)
+			 */
+			last_controller_event_tip?: string;
+			/** @description UntronV3Base.nextControllerEventIndex() */
+			next_controller_event_index?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+		};
+		/**
+		 * @description Relayer hub state bundle
+		 *
+		 *     Convenience single-row view combining:
+		 *     - api.hub_controller_state
+		 *
+		 *     Intended for relayer use to minimize HTTP round trips.
+		 */
+		relayer_hub_state: {
+			last_controller_event_seq?: components['schemas']['PgNumeric'];
+			/** Format: text */
+			last_controller_event_tip?: string;
+			next_controller_event_index?: components['schemas']['PgNumeric'];
 		};
 		/** @description Current controller LP address (singleton) */
 		controller_lp: {
@@ -2696,6 +2828,42 @@ export interface components {
 			/** @description Amount deposited/withdrawn (uint256, USDT units) */
 			amount?: components['schemas']['PgNumeric'];
 		};
+		/**
+		 * @description Minimal USDT deposit attribution entry.
+		 *
+		 *     Stable subset:
+		 *     `{ tx_hash, sender, amount, block_timestamp, log_index }`.
+		 */
+		UsdtDepositAttributionEntryView: {
+			/** @description Tron transaction hash (0x hex). */
+			tx_hash: string;
+			/** @description Sender address (Tron, base58check). */
+			sender: string;
+			/** @description Transfer amount (uint256, decimal string). */
+			amount: string;
+			/**
+			 * Format: int64
+			 * @description Tron block timestamp (seconds).
+			 */
+			block_timestamp: number;
+			/**
+			 * Format: int64
+			 * @description Log index within the transaction.
+			 */
+			log_index: number;
+		};
+		/** @description Arbitrary JSON value. */
+		JsonValue:
+			| {
+					[key: string]: unknown;
+			  }
+			| unknown[]
+			| string
+			| number
+			| boolean
+			| null;
+		/** @description Numeric value represented as a JSON number. */
+		NumericValue: number;
 		/** @description Postgres JSON/JSONB encoded as raw JSON. */
 		PgJson: {
 			[key: string]: unknown;
@@ -2839,6 +3007,21 @@ export interface components {
 		'rowFilter.hub_controller_processed.event_signature': string;
 		/** @description Controller ABI-encoded event payload (0x hex) */
 		'rowFilter.hub_controller_processed.abi_encoded_event_data': string;
+		/** @description Event sequence at which this state snapshot became current */
+		'rowFilter.hub_controller_state.valid_from_seq': string;
+		'rowFilter.hub_controller_state.valid_to_seq': string;
+		/** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
+		'rowFilter.hub_controller_state.last_controller_event_tip': string;
+		/** @description UntronV3Base.lastControllerEventSeq() */
+		'rowFilter.hub_controller_state.last_controller_event_seq': string;
+		/** @description UntronV3Base.nextControllerEventIndex() */
+		'rowFilter.hub_controller_state.next_controller_event_index': string;
+		/** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
+		'rowFilter.relayer_hub_state.last_controller_event_tip': string;
+		/** @description UntronV3Base.lastControllerEventSeq() */
+		'rowFilter.relayer_hub_state.last_controller_event_seq': string;
+		/** @description UntronV3Base.nextControllerEventIndex() */
+		'rowFilter.relayer_hub_state.next_controller_event_index': string;
 		/** @description Controller event sequence at which this LP became current */
 		'rowFilter.controller_lp.valid_from_seq': string;
 		'rowFilter.controller_lp.valid_to_seq': string;
@@ -3927,6 +4110,54 @@ export interface operations {
 			};
 		};
 	};
+	hub_controller_state_get: {
+		parameters: {
+			query?: {
+				/** @description Event sequence at which this state snapshot became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_controller_state.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_controller_state.valid_to_seq'];
+				/** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
+				last_controller_event_tip?: components['parameters']['rowFilter.hub_controller_state.last_controller_event_tip'];
+				/** @description UntronV3Base.lastControllerEventSeq() */
+				last_controller_event_seq?: components['parameters']['rowFilter.hub_controller_state.last_controller_event_seq'];
+				/** @description UntronV3Base.nextControllerEventIndex() */
+				next_controller_event_index?: components['parameters']['rowFilter.hub_controller_state.next_controller_event_index'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_controller_state'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_controller_state'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_controller_state'][];
+					'text/csv': components['schemas']['hub_controller_state'][];
+				};
+			};
+		};
+	};
 	controller_lp_get: {
 		parameters: {
 			query?: {
@@ -4119,6 +4350,51 @@ export interface operations {
 					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['receiver_usdt_transfer_actionability'][];
 					'application/vnd.pgrst.object+json': components['schemas']['receiver_usdt_transfer_actionability'][];
 					'text/csv': components['schemas']['receiver_usdt_transfer_actionability'][];
+				};
+			};
+		};
+	};
+	relayer_hub_state_get: {
+		parameters: {
+			query?: {
+				/** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
+				last_controller_event_tip?: components['parameters']['rowFilter.relayer_hub_state.last_controller_event_tip'];
+				/** @description UntronV3Base.lastControllerEventSeq() */
+				last_controller_event_seq?: components['parameters']['rowFilter.relayer_hub_state.last_controller_event_seq'];
+				/** @description UntronV3Base.nextControllerEventIndex() */
+				next_controller_event_index?: components['parameters']['rowFilter.relayer_hub_state.next_controller_event_index'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['relayer_hub_state'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['relayer_hub_state'][];
+					'application/vnd.pgrst.object+json': components['schemas']['relayer_hub_state'][];
+					'text/csv': components['schemas']['relayer_hub_state'][];
 				};
 			};
 		};
