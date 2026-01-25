@@ -33,6 +33,10 @@
 		log_index?: unknown;
 	};
 
+	const ARBITRUM_CHAIN_ID = 42161;
+	const ARBITRUM_USDT = '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9';
+	const ARBITRUM_USDC = '0xaf88d065e77c8cc2239327c5edb3a432268e5831';
+
 	function getClaimSortKey(row: SqlRow): bigint | null {
 		const v = row.claim_id ?? row.claimId ?? row.claim_index ?? row.claimIndex;
 		if (typeof v === 'number' && Number.isFinite(v) && Number.isInteger(v)) return BigInt(v);
@@ -109,6 +113,32 @@
 		return `https://tronscan.org/#/transaction/${raw}`;
 	}
 
+	function getFillTxHash(row: SqlRow): string | null {
+		const v = row.fill_tx_hash ?? row.fillTxHash;
+		return typeof v === 'string' ? v : null;
+	}
+
+	function evmTxHashToUrl(
+		txHash: string,
+		chainId: number,
+		targetToken: string | null
+	): string | null {
+		if (!txHash.startsWith('0x') || !/^[0-9a-fA-F]{64}$/.test(txHash.slice(2))) return null;
+
+		if (chainId === ARBITRUM_CHAIN_ID) return `https://arbiscan.io/tx/${txHash}`;
+
+		if (targetToken && targetToken.toLowerCase() === ARBITRUM_USDT) {
+			return `https://layerzeroscan.com/tx/${txHash}`;
+		}
+
+		if (targetToken && targetToken.toLowerCase() === ARBITRUM_USDC) {
+			// TODO: switch to a CCTP explorer; placeholder for now.
+			return `https://arbiscan.io/tx/${txHash}`;
+		}
+
+		return null;
+	}
+
 	function getDepositBlockTimestamp(entry: DepositEntry): number | null {
 		return typeof entry.block_timestamp === 'number' ? entry.block_timestamp : null;
 	}
@@ -142,6 +172,13 @@
 		if (typeof v === 'string') return v;
 		if (typeof v === 'number') return String(v);
 		return null;
+	}
+
+	function getTargetChainIdNumber(row: SqlRow): number | null {
+		const s = getTargetChainId(row);
+		if (!s) return null;
+		const n = Number(s);
+		return Number.isFinite(n) && Number.isInteger(n) ? n : null;
 	}
 
 	function getBeneficiary(row: SqlRow): string | null {
@@ -245,6 +282,31 @@
 							</span>
 						{:else}
 							—
+						{/if}
+						{#if getStatus(row) === 'filled'}
+							{@const fillTxHash = getFillTxHash(row)}
+							{@const chainId = getTargetChainIdNumber(row)}
+							{@const token = getTargetToken(row)}
+							{@const payoutUrl =
+								fillTxHash && chainId ? evmTxHashToUrl(fillTxHash, chainId, token) : null}
+							{#if fillTxHash}
+								<span class="mt-1 inline-flex items-center gap-1">
+									{#if payoutUrl}
+										<a
+											href={payoutUrl}
+											target="_blank"
+											rel="noreferrer"
+											class="inline-flex items-center gap-1 hover:underline"
+											title="Open payout tx"
+										>
+											payout {formatHexShort(fillTxHash, 14, 10)}
+											<ExternalLinkIcon class="h-3 w-3 opacity-70" />
+										</a>
+									{:else}
+										payout {formatHexShort(fillTxHash, 14, 10)}
+									{/if}
+								</span>
+							{/if}
 						{/if}
 					</div>
 				</Table.Cell>
