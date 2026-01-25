@@ -725,6 +725,65 @@
 				"operationId": "hub_controller_processed_get"
 			}
 		},
+		"/hub_controller_state": {
+			"get": {
+				"description": "This single-row view is a DB projection of hub events and is intended to replace hub\nread-RPC calls:\n\n- `last_controller_event_tip` == UntronV3Base.lastControllerEventTip()\n- `last_controller_event_seq` == UntronV3Base.lastControllerEventSeq()\n- `next_controller_event_index` == UntronV3Base.nextControllerEventIndex()\n\nValues reflect the hub's canonical event stream as applied by the indexer.",
+				"parameters": [
+					{ "$ref": "#/components/parameters/rowFilter.hub_controller_state.valid_from_seq" },
+					{ "$ref": "#/components/parameters/rowFilter.hub_controller_state.valid_to_seq" },
+					{
+						"$ref": "#/components/parameters/rowFilter.hub_controller_state.last_controller_event_tip"
+					},
+					{
+						"$ref": "#/components/parameters/rowFilter.hub_controller_state.last_controller_event_seq"
+					},
+					{
+						"$ref": "#/components/parameters/rowFilter.hub_controller_state.next_controller_event_index"
+					},
+					{ "$ref": "#/components/parameters/select" },
+					{ "$ref": "#/components/parameters/order" },
+					{ "$ref": "#/components/parameters/range" },
+					{ "$ref": "#/components/parameters/rangeUnit" },
+					{ "$ref": "#/components/parameters/offset" },
+					{ "$ref": "#/components/parameters/limit" },
+					{ "$ref": "#/components/parameters/preferCount" }
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": { "$ref": "#/components/schemas/hub_controller_state" },
+									"type": "array"
+								}
+							},
+							"application/vnd.pgrst.object+json;nulls=stripped": {
+								"schema": {
+									"items": { "$ref": "#/components/schemas/hub_controller_state" },
+									"type": "array"
+								}
+							},
+							"application/vnd.pgrst.object+json": {
+								"schema": {
+									"items": { "$ref": "#/components/schemas/hub_controller_state" },
+									"type": "array"
+								}
+							},
+							"text/csv": {
+								"schema": {
+									"items": { "$ref": "#/components/schemas/hub_controller_state" },
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"summary": "Hub controller sync state (materialized)",
+				"tags": ["hub_controller_state"],
+				"operationId": "hub_controller_state_get"
+			}
+		},
 		"/controller_lp": {
 			"get": {
 				"parameters": [
@@ -991,6 +1050,63 @@
 				"summary": "Receiver USDT deposits + actionability hints (preEntitle vs pull)",
 				"tags": ["receiver_usdt_transfer_actionability"],
 				"operationId": "receiver_usdt_transfer_actionability_get"
+			}
+		},
+		"/relayer_hub_state": {
+			"get": {
+				"description": "Convenience single-row view combining:\n- api.hub_controller_state\n\nIntended for relayer use to minimize HTTP round trips.",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/rowFilter.relayer_hub_state.last_controller_event_tip"
+					},
+					{
+						"$ref": "#/components/parameters/rowFilter.relayer_hub_state.last_controller_event_seq"
+					},
+					{
+						"$ref": "#/components/parameters/rowFilter.relayer_hub_state.next_controller_event_index"
+					},
+					{ "$ref": "#/components/parameters/select" },
+					{ "$ref": "#/components/parameters/order" },
+					{ "$ref": "#/components/parameters/range" },
+					{ "$ref": "#/components/parameters/rangeUnit" },
+					{ "$ref": "#/components/parameters/offset" },
+					{ "$ref": "#/components/parameters/limit" },
+					{ "$ref": "#/components/parameters/preferCount" }
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": { "$ref": "#/components/schemas/relayer_hub_state" },
+									"type": "array"
+								}
+							},
+							"application/vnd.pgrst.object+json;nulls=stripped": {
+								"schema": {
+									"items": { "$ref": "#/components/schemas/relayer_hub_state" },
+									"type": "array"
+								}
+							},
+							"application/vnd.pgrst.object+json": {
+								"schema": {
+									"items": { "$ref": "#/components/schemas/relayer_hub_state" },
+									"type": "array"
+								}
+							},
+							"text/csv": {
+								"schema": {
+									"items": { "$ref": "#/components/schemas/relayer_hub_state" },
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"summary": "Relayer hub state bundle",
+				"tags": ["relayer_hub_state"],
+				"operationId": "relayer_hub_state_get"
 			}
 		},
 		"/hub_payout_configs": {
@@ -2608,6 +2724,7 @@
 					"origin_token",
 					"origin_timestamp",
 					"origin_raw_amount",
+					"usdt_deposit_attribution",
 					"valid_from_seq"
 				],
 				"properties": {
@@ -2615,6 +2732,11 @@
 						"type": "string",
 						"description": "USDT-denominated claim amount (uint256, decimal string).",
 						"example": "0"
+					},
+					"usdt_deposit_attribution": {
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/UsdtDepositAttributionEntryView" },
+						"description": "Best-effort attribution of this claim's underlying USDT deposits.\n\n- For pre-entitle origins, this is usually a single entry.\n- For receiver-pull origins, this may contain multiple entries (FIFO approximation) or be empty."
 					},
 					"beneficiary": {
 						"type": "string",
@@ -2721,7 +2843,11 @@
 					"payout_config_history",
 					"claims",
 					"claims_total",
-					"claims_filled"
+					"claims_filled",
+					"pending_usdt_deposits",
+					"pending_usdt_deposits_total",
+					"pending_usdt_deposits_amount",
+					"pending_usdt_deposits_latest_block_timestamp"
 				],
 				"properties": {
 					"claims": {
@@ -2740,6 +2866,29 @@
 						"type": "integer",
 						"format": "int64",
 						"description": "Total number of claims.",
+						"example": 0,
+						"minimum": 0
+					},
+					"pending_usdt_deposits": {
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/UsdtDepositAttributionEntryView" },
+						"description": "Canonical receiver USDT deposits that are still eligible for `preEntitle`\nand have not yet been accounted for by a hub pre-entitle claim.\n\nEntries are a minimal, stable subset:\n`{ tx_hash, sender, amount, block_timestamp, log_index }`."
+					},
+					"pending_usdt_deposits_amount": {
+						"type": "string",
+						"description": "Sum of pending deposit amounts (uint256, decimal string).",
+						"example": "0"
+					},
+					"pending_usdt_deposits_latest_block_timestamp": {
+						"type": "integer",
+						"format": "int64",
+						"description": "Latest pending deposit Tron block timestamp (seconds).",
+						"example": 0
+					},
+					"pending_usdt_deposits_total": {
+						"type": "integer",
+						"format": "int64",
+						"description": "Total number of pending deposits.",
 						"example": 0,
 						"minimum": 0
 					},
@@ -2945,6 +3094,11 @@
 						"description": "UntronV3 contract address on hub chain.",
 						"example": "0x0000000000000000000000000000000000000005",
 						"pattern": "^0x[0-9a-fA-F]{40}$"
+					},
+					"user": {
+						"type": ["string", "null"],
+						"description": "Optional upstream principal/user identifier echoed from `x-untron-principal-id`.",
+						"example": "acct_123"
 					}
 				}
 			},
@@ -3286,6 +3440,40 @@
 						"format": "text",
 						"type": "string"
 					}
+				},
+				"type": "object"
+			},
+			"hub_controller_state": {
+				"description": "Hub controller sync state (materialized)\n\nThis single-row view is a DB projection of hub events and is intended to replace hub\nread-RPC calls:\n\n- `last_controller_event_tip` == UntronV3Base.lastControllerEventTip()\n- `last_controller_event_seq` == UntronV3Base.lastControllerEventSeq()\n- `next_controller_event_index` == UntronV3Base.nextControllerEventIndex()\n\nValues reflect the hub's canonical event stream as applied by the indexer.",
+				"properties": {
+					"last_controller_event_seq": {
+						"allOf": [{ "$ref": "#/components/schemas/PgNumeric" }],
+						"description": "UntronV3Base.lastControllerEventSeq()"
+					},
+					"last_controller_event_tip": {
+						"type": "string",
+						"format": "text",
+						"description": "UntronV3Base.lastControllerEventTip() (bytes32 hex)"
+					},
+					"next_controller_event_index": {
+						"allOf": [{ "$ref": "#/components/schemas/PgNumeric" }],
+						"description": "UntronV3Base.nextControllerEventIndex()"
+					},
+					"valid_from_seq": {
+						"description": "Note:\nThis is a Primary Key.<pk/>",
+						"format": "bigint",
+						"type": "integer"
+					},
+					"valid_to_seq": { "format": "bigint", "type": "integer" }
+				},
+				"type": "object"
+			},
+			"relayer_hub_state": {
+				"description": "Relayer hub state bundle\n\nConvenience single-row view combining:\n- api.hub_controller_state\n\nIntended for relayer use to minimize HTTP round trips.",
+				"properties": {
+					"last_controller_event_seq": { "allOf": [{ "$ref": "#/components/schemas/PgNumeric" }] },
+					"last_controller_event_tip": { "type": "string", "format": "text" },
+					"next_controller_event_index": { "allOf": [{ "$ref": "#/components/schemas/PgNumeric" }] }
 				},
 				"type": "object"
 			},
@@ -4123,6 +4311,45 @@
 				},
 				"type": "object"
 			},
+			"UsdtDepositAttributionEntryView": {
+				"type": "object",
+				"description": "Minimal USDT deposit attribution entry.\n\nStable subset:\n`{ tx_hash, sender, amount, block_timestamp, log_index }`.",
+				"required": ["tx_hash", "sender", "amount", "block_timestamp", "log_index"],
+				"properties": {
+					"tx_hash": { "type": "string", "description": "Tron transaction hash (0x hex)." },
+					"sender": { "type": "string", "description": "Sender address (Tron, base58check)." },
+					"amount": {
+						"type": "string",
+						"description": "Transfer amount (uint256, decimal string)."
+					},
+					"block_timestamp": {
+						"type": "integer",
+						"format": "int64",
+						"description": "Tron block timestamp (seconds)."
+					},
+					"log_index": {
+						"type": "integer",
+						"format": "int64",
+						"description": "Log index within the transaction."
+					}
+				}
+			},
+			"JsonValue": {
+				"description": "Arbitrary JSON value.",
+				"oneOf": [
+					{ "type": "object", "additionalProperties": true },
+					{ "type": "array", "items": {} },
+					{ "type": "string" },
+					{ "type": "number" },
+					{ "type": "integer" },
+					{ "type": "boolean" },
+					{ "type": "null" }
+				]
+			},
+			"NumericValue": {
+				"description": "Numeric value represented as a JSON number.",
+				"type": "number"
+			},
 			"PgJson": {
 				"type": "object",
 				"additionalProperties": {},
@@ -4606,6 +4833,61 @@
 			"rowFilter.hub_controller_processed.abi_encoded_event_data": {
 				"name": "abi_encoded_event_data",
 				"description": "Controller ABI-encoded event payload (0x hex)",
+				"required": false,
+				"in": "query",
+				"schema": { "type": "string" }
+			},
+			"rowFilter.hub_controller_state.valid_from_seq": {
+				"name": "valid_from_seq",
+				"description": "Event sequence at which this state snapshot became current",
+				"required": false,
+				"in": "query",
+				"schema": { "type": "string" }
+			},
+			"rowFilter.hub_controller_state.valid_to_seq": {
+				"name": "valid_to_seq",
+				"required": false,
+				"in": "query",
+				"schema": { "type": "string" }
+			},
+			"rowFilter.hub_controller_state.last_controller_event_tip": {
+				"name": "last_controller_event_tip",
+				"description": "UntronV3Base.lastControllerEventTip() (bytes32 hex)",
+				"required": false,
+				"in": "query",
+				"schema": { "type": "string" }
+			},
+			"rowFilter.hub_controller_state.last_controller_event_seq": {
+				"name": "last_controller_event_seq",
+				"description": "UntronV3Base.lastControllerEventSeq()",
+				"required": false,
+				"in": "query",
+				"schema": { "type": "string" }
+			},
+			"rowFilter.hub_controller_state.next_controller_event_index": {
+				"name": "next_controller_event_index",
+				"description": "UntronV3Base.nextControllerEventIndex()",
+				"required": false,
+				"in": "query",
+				"schema": { "type": "string" }
+			},
+			"rowFilter.relayer_hub_state.last_controller_event_tip": {
+				"name": "last_controller_event_tip",
+				"description": "UntronV3Base.lastControllerEventTip() (bytes32 hex)",
+				"required": false,
+				"in": "query",
+				"schema": { "type": "string" }
+			},
+			"rowFilter.relayer_hub_state.last_controller_event_seq": {
+				"name": "last_controller_event_seq",
+				"description": "UntronV3Base.lastControllerEventSeq()",
+				"required": false,
+				"in": "query",
+				"schema": { "type": "string" }
+			},
+			"rowFilter.relayer_hub_state.next_controller_event_index": {
+				"name": "next_controller_event_index",
+				"description": "UntronV3Base.nextControllerEventIndex()",
 				"required": false,
 				"in": "query",
 				"schema": { "type": "string" }

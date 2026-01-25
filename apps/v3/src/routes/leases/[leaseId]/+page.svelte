@@ -12,14 +12,14 @@
 	import ClaimsTable from '$lib/components/leases/ClaimsTable.svelte';
 	import LeaseDetailsPanel from '$lib/components/leases/LeaseDetailsPanel.svelte';
 	import { connection } from '$lib/wagmi/connectionStore';
-	import { getLeaseById, getUnaccountedReceiverUsdtTransfers } from '$lib/untron/api';
+	import { getLeaseById } from '$lib/untron/api';
 	import type { SqlRow } from '$lib/untron/types';
-	import { getLeaseFeePpm, getLeaseId } from '$lib/untron/format';
+	import { getLeaseFeePpm } from '$lib/untron/format';
 	import UpdatePayoutConfigDialog from '$lib/components/leases/UpdatePayoutConfigDialog.svelte';
 	import { startPolling } from '$lib/polling';
 
 	let lease = $state<SqlRow | null>(null);
-	let unaccounted = $state<SqlRow[] | null>(null);
+	let pendingDeposits = $state<SqlRow[] | null>(null);
 	let loading = $state(false); // initial load only
 	let refreshing = $state(false);
 	let refreshedPulse = $state(false);
@@ -36,32 +36,25 @@
 			errorMessage = null;
 			const nextLease = await getLeaseById(leaseId);
 
-			let nextUnaccounted: SqlRow[] | null = unaccounted;
-			const receiverSalt =
-				nextLease && typeof nextLease.receiver_salt === 'string' ? nextLease.receiver_salt : null;
-			const expectedLeaseId = nextLease ? getLeaseId(nextLease) : null;
-			if (nextLease && receiverSalt && expectedLeaseId) {
-				const transfers = await getUnaccountedReceiverUsdtTransfers({
-					receiverSalt,
-					expectedLeaseId
-				});
-				nextUnaccounted = transfers.map((t) => ({
+			let nextPending: SqlRow[] | null = pendingDeposits;
+			const deposits = nextLease?.pending_usdt_deposits;
+			if (Array.isArray(deposits)) {
+				nextPending = deposits.map((d) => ({
 					claim_id: null,
-					amount_usdt: t.amount === undefined ? null : String(t.amount),
+					amount_usdt: typeof d?.amount === 'string' ? d.amount : null,
 					beneficiary: typeof nextLease?.beneficiary === 'string' ? nextLease.beneficiary : null,
 					target_chain_id:
 						typeof nextLease?.target_chain_id === 'string' ? nextLease.target_chain_id : null,
 					target_token: typeof nextLease?.target_token === 'string' ? nextLease.target_token : null,
-					origin_id: t.tx_hash ?? null,
-					origin_timestamp: t.block_timestamp ?? null,
-					origin_token: t.token ?? null,
-					status: 'finalizing'
+					origin_timestamp: typeof d?.block_timestamp === 'number' ? d.block_timestamp : null,
+					status: 'pending',
+					usdt_deposit_attribution: [d]
 				}));
 			} else if (nextLease) {
-				nextUnaccounted = [];
+				nextPending = [];
 			}
 			lease = nextLease;
-			unaccounted = nextUnaccounted;
+			pendingDeposits = nextPending;
 			refreshedPulse = true;
 			setTimeout(() => (refreshedPulse = false), 600);
 		} catch (err) {
@@ -149,24 +142,24 @@
 			</Card.Header>
 			<Card.Content>
 				{@const claimRows = (lease?.claims as SqlRow[] | undefined) ?? []}
-				{@const finalizingRows = unaccounted ?? []}
+				{@const finalizingRows = pendingDeposits ?? []}
 				{@const allRows = [...finalizingRows, ...claimRows]}
 				{#if finalizingRows.length > 0}
 					<Alert.Root class="mb-4">
 						<HourglassIcon />
 						<Alert.Title class="flex items-center gap-2">
-							Finalizing deposits
+							Pending deposits
 							<Badge variant="secondary">{finalizingRows.length}</Badge>
 						</Alert.Title>
 						<Alert.Description>
 							{finalizingRows.length === 1
-								? "A USDT transfer was detected into this receiver but hasn't been confirmed by the protocol yet."
-								: `${finalizingRows.length} USDT transfers were detected into this receiver but haven\'t been confirmed by the protocol yet.`}
-							This usually means that the transaction hasn't yet been finalized on Tron.
+								? "A USDT deposit was detected into this receiver but hasn't been accounted for by a claim yet."
+								: `${finalizingRows.length} USDT deposits were detected into this receiver but haven't been accounted for by claims yet.`}
+							This can be normal while the indexer and protocol catch up.
 							<br />
 							<br />
 							Finality on Tron is about 54 seconds. If your deposit is much older than that and still
-							"finalizing," please contact us.
+							pending, please contact us.
 						</Alert.Description>
 					</Alert.Root>
 				{/if}
