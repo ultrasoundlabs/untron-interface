@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
 	import * as Table from '$lib/components/ui/table';
 	import type { SqlRow } from '$lib/untron/types';
 	import {
@@ -283,31 +284,6 @@
 						{:else}
 							—
 						{/if}
-						{#if getStatus(row) === 'filled'}
-							{@const fillTxHash = getFillTxHash(row)}
-							{@const chainId = getTargetChainIdNumber(row)}
-							{@const token = getTargetToken(row)}
-							{@const payoutUrl =
-								fillTxHash && chainId ? evmTxHashToUrl(fillTxHash, chainId, token) : null}
-							{#if fillTxHash}
-								<span class="mt-1 inline-flex items-center gap-1">
-									{#if payoutUrl}
-										<a
-											href={payoutUrl}
-											target="_blank"
-											rel="noreferrer"
-											class="inline-flex items-center gap-1 hover:underline"
-											title="Open payout tx"
-										>
-											payout {formatHexShort(fillTxHash, 14, 10)}
-											<ExternalLinkIcon class="h-3 w-3 opacity-70" />
-										</a>
-									{:else}
-										payout {formatHexShort(fillTxHash, 14, 10)}
-									{/if}
-								</span>
-							{/if}
-						{/if}
 					</div>
 				</Table.Cell>
 				<Table.Cell class="space-y-0.5">
@@ -408,7 +384,27 @@
 					{:else if getStatus(row) === 'created'}
 						<Badge variant="secondary">created</Badge>
 					{:else if getStatus(row) === 'filled'}
-						<Badge>filled</Badge>
+						{@const fillTxHash = getFillTxHash(row)}
+						{@const chainId = getTargetChainIdNumber(row)}
+						{@const token = getTargetToken(row)}
+						{@const payoutUrl =
+							fillTxHash && chainId ? evmTxHashToUrl(fillTxHash, chainId, token) : null}
+						{#if payoutUrl}
+							<Button
+								href={payoutUrl}
+								target="_blank"
+								rel="noreferrer"
+								variant="outline"
+								size="sm"
+								class="h-7 gap-1 px-2 text-xs"
+								title="View fill transaction"
+							>
+								filled
+								<ExternalLinkIcon class="h-3 w-3 opacity-70" />
+							</Button>
+						{:else}
+							<Badge>filled</Badge>
+						{/if}
 					{:else}
 						<Badge variant="outline">{getStatus(row) ?? 'unknown'}</Badge>
 					{/if}
