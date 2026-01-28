@@ -91,6 +91,14 @@ async function unwrap<T>(
 	throw new UntronApiError(mapErrorMessage(error, response), error ?? null);
 }
 
+async function unwrapWithResponse<T>(
+	result: Promise<{ data?: T; error?: unknown; response: Response }>
+): Promise<{ data: T; response: Response }> {
+	const { data, error, response } = await result;
+	if (data !== undefined) return { data, response };
+	throw new UntronApiError(mapErrorMessage(error, response), error ?? null);
+}
+
 let protocolInfoPromise: Promise<ProtocolInfo> | null = null;
 
 export async function getProtocolInfo(): Promise<ProtocolInfo> {
@@ -144,10 +152,20 @@ export async function getProtocolInfo(): Promise<ProtocolInfo> {
 type LeaseViewRow = components['schemas']['lease_view'];
 type ReceiverSaltCandidate = components['schemas']['receiver_salt_candidates'];
 
-function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: Map<string, string>): SqlRow {
+type ReceiverBySalt = Map<string, { receiverTron: string | null; receiverEvm: `0x${string}` | null }>;
+
+function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: ReceiverBySalt): SqlRow {
 	const leaseId = row.lease_id === undefined ? null : String(row.lease_id);
 	const receiverSalt = typeof row.receiver_salt === 'string' ? row.receiver_salt : null;
-	const receiverTron = receiverSalt ? (receiverBySalt.get(receiverSalt) ?? null) : null;
+	const receiverFallback = receiverSalt ? (receiverBySalt.get(receiverSalt) ?? null) : null;
+	const receiverTron =
+		typeof row.receiver_address_tron === 'string'
+			? row.receiver_address_tron
+			: receiverFallback?.receiverTron ?? null;
+	const receiverEvm =
+		typeof row.receiver_address_evm === 'string'
+			? checksumEvmAddress(row.receiver_address_evm)
+			: receiverFallback?.receiverEvm ?? null;
 	const now = Math.floor(Date.now() / 1000);
 	const isExpired = typeof row.nukeable_after === 'number' ? row.nukeable_after <= now : false;
 
@@ -155,6 +173,7 @@ function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: Map<string, st
 		lease_id: leaseId,
 		receiver_salt: receiverSalt,
 		receiver_address_tron: receiverTron,
+		receiver_address_evm: receiverEvm,
 		realtor: row.realtor ?? null,
 		lessee: row.lessee ?? null,
 		start_time: row.start_time ?? null,
@@ -172,7 +191,7 @@ function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: Map<string, st
 	};
 }
 
-async function getReceiverBySalt(salts: string[]): Promise<Map<string, string>> {
+async function getReceiverBySalt(salts: string[]): Promise<ReceiverBySalt> {
 	if (salts.length === 0) return new Map();
 	const client = createApiClient();
 	const rows = await unwrap<ReceiverSaltCandidate[]>(
@@ -184,32 +203,67 @@ async function getReceiverBySalt(salts: string[]): Promise<Map<string, string>> 
 			}
 		})
 	);
-	const map = new Map<string, string>();
+	const map: ReceiverBySalt = new Map();
 	for (const r of rows) {
 		if (typeof r.receiver_salt !== 'string') continue;
-		if (typeof r.receiver !== 'string') continue;
-		map.set(r.receiver_salt, r.receiver);
+		const receiverTron = typeof r.receiver === 'string' ? r.receiver : null;
+		const receiverEvm =
+			typeof r.receiver_evm === 'string' ? checksumEvmAddress(r.receiver_evm) : null;
+		map.set(r.receiver_salt, { receiverTron, receiverEvm });
 	}
 	return map;
 }
 
-export async function getAllLeases(limit = 100, offset = 0): Promise<SqlRow[]> {
+function parseTotalFromContentRange(response: Response): number | null {
+	// PostgREST returns `Content-Range: 0-49/123` when Prefer: count=exact is used.
+	const raw = response.headers.get('content-range') ?? response.headers.get('Content-Range');
+	if (!raw) return null;
+	const m = /\/(\d+)$/.exec(raw.trim());
+	if (!m) return null;
+	const total = Number(m[1]);
+	return Number.isFinite(total) && Number.isInteger(total) && total >= 0 ? total : null;
+}
+
+export type LeasesPage = { rows: SqlRow[]; total: number | null };
+
+export async function getLeasesPage(limit = 50, offset = 0): Promise<LeasesPage> {
 	requireBrowser();
 	const client = createApiClient();
-	const rows = await unwrap<LeaseViewRow[]>(
+	const start = Math.max(0, Math.floor(offset));
+	const safeLimit = Math.max(1, Math.floor(limit));
+	const end = start + safeLimit - 1;
+
+	const { data: rows, response } = await unwrapWithResponse<LeaseViewRow[]>(
 		client.GET('/lease_view', {
 			params: {
 				query: {
-					order: 'lease_id.desc',
-					limit: String(limit),
-					offset: String(offset)
+					order: 'lease_id.desc'
+				},
+				header: {
+					Prefer: 'count=exact',
+					'Range-Unit': 'items',
+					Range: `${start}-${end}`
 				}
 			}
 		})
 	);
-	const salts = rows.map((r) => r.receiver_salt).filter((v): v is string => typeof v === 'string');
+
+	const total = parseTotalFromContentRange(response);
+	const salts = rows
+		.filter((r) => {
+			if (typeof r.receiver_salt !== 'string') return false;
+			if (typeof r.receiver_address_tron !== 'string') return true;
+			if (typeof r.receiver_address_evm !== 'string') return true;
+			return false;
+		})
+		.map((r) => r.receiver_salt as string);
 	const receiverBySalt = await getReceiverBySalt(salts);
-	return rows.map((r) => normalizeLeaseViewRow(r, receiverBySalt));
+
+	return { rows: rows.map((r) => normalizeLeaseViewRow(r, receiverBySalt)), total };
+}
+
+export async function getAllLeases(limit = 100, offset = 0): Promise<SqlRow[]> {
+	return (await getLeasesPage(limit, offset)).rows;
 }
 
 export async function getOwnedLeases(
@@ -231,7 +285,14 @@ export async function getOwnedLeases(
 			}
 		})
 	);
-	const salts = rows.map((r) => r.receiver_salt).filter((v): v is string => typeof v === 'string');
+	const salts = rows
+		.filter((r) => {
+			if (typeof r.receiver_salt !== 'string') return false;
+			if (typeof r.receiver_address_tron !== 'string') return true;
+			if (typeof r.receiver_address_evm !== 'string') return true;
+			return false;
+		})
+		.map((r) => r.receiver_salt as string);
 	const receiverBySalt = await getReceiverBySalt(salts);
 	return rows.map((r) => normalizeLeaseViewRow(r, receiverBySalt));
 }

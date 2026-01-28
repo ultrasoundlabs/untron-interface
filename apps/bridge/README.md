@@ -20,6 +20,13 @@ bun run dev
 
 This app is intentionally frontend-only (no SvelteKit server routes, workflows, or relayer code). It talks directly to the Untron Bridge API.
 
+## Deploy notes (static)
+
+This app is built as an SPA (see `src/routes/+layout.ts` with `ssr = false`) using `@sveltejs/adapter-static`.
+
+Deep-link reloads like `/orders/<id>` require your host to serve the SPA fallback (`build/200.html`) for unknown paths.
+This repo ships a `static/_redirects` file (emitted to `build/_redirects`) for Netlify / Cloudflare Pages-style routing.
+
 ## Before committing
 
 ```

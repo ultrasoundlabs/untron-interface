@@ -4078,6 +4078,17 @@
 				"properties": {
 					"lease_id": { "allOf": [{ "$ref": "#/components/schemas/PgNumeric" }] },
 					"receiver_salt": { "format": "text", "type": "string" },
+					"receiver_address_tron": {
+						"type": ["string", "null"],
+						"description": "Receiver address on Tron (base58check, T...).\n\nDerived from `receiver_salt` using the controller's deterministic receiver scheme.",
+						"example": "T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb"
+					},
+					"receiver_address_evm": {
+						"type": ["string", "null"],
+						"description": "Receiver address in EVM hex form (0x...).\n\nThis is the 20-byte address corresponding to the Tron receiver address.",
+						"example": "0x0000000000000000000000000000000000000000",
+						"pattern": "^0x[0-9a-fA-F]{40}$"
+					},
 					"lease_number": { "allOf": [{ "$ref": "#/components/schemas/PgNumeric" }] },
 					"realtor": { "format": "text", "type": "string" },
 					"lessee": { "format": "text", "type": "string" },
@@ -4385,7 +4396,7 @@
 				"description": "Preference",
 				"required": false,
 				"in": "header",
-				"schema": { "type": "string", "enum": ["count=none"] }
+				"schema": { "type": "string", "enum": ["count=none", "count=exact", "count=planned", "count=estimated"] }
 			},
 			"preferPost": {
 				"name": "Prefer",

@@ -20,6 +20,7 @@
 		getLeaseId,
 		getLessee,
 		getNukeableAfter,
+		getReceiverEvm,
 		getReceiverTron,
 		getTargetChainId,
 		getTargetToken,
@@ -139,6 +140,7 @@
 			</div>
 
 			<AddressWithCopy label="Receiver (Tron)" value={getReceiverTron(lease)} />
+			<AddressWithCopy label="Receiver (EVM)" value={getReceiverEvm(lease)} />
 			<AddressWithCopy label="Lessee (EVM)" value={getLessee(lease)} />
 			<AddressWithCopy label="Beneficiary (EVM)" value={getBeneficiary(lease)} />
 			<AddressWithCopy label="Target token (EVM)" value={getTargetToken(lease)} />
