@@ -197,6 +197,10 @@ export function isTronAddress(value: unknown): value is string {
 	return typeof value === 'string' && value.startsWith('T') && value.length >= 20;
 }
 
+export function isEvmAddress(value: unknown): value is `0x${string}` {
+	return typeof value === 'string' && /^0x[0-9a-fA-F]{40}$/.test(value);
+}
+
 export function getLeaseId(row: SqlRow): string | null {
 	const v = row.lease_id ?? row.leaseId;
 	if (typeof v === 'string') return v;
@@ -231,6 +235,23 @@ export function getReceiverTron(row: SqlRow): string | null {
 	for (const [k, v] of Object.entries(row)) {
 		if (!k.toLowerCase().includes('receiver')) continue;
 		if (isTronAddress(v)) return v;
+	}
+	return null;
+}
+
+export function getReceiverEvm(row: SqlRow): `0x${string}` | null {
+	const candidates: unknown[] = [
+		row.receiver_address_evm,
+		row.receiver_evm,
+		row.receiverEvm,
+		row.receiverAddressEvm
+	];
+	for (const v of candidates) {
+		if (isEvmAddress(v)) return v;
+	}
+	for (const [k, v] of Object.entries(row)) {
+		if (!k.toLowerCase().includes('receiver')) continue;
+		if (isEvmAddress(v)) return v;
 	}
 	return null;
 }
