@@ -14,13 +14,6 @@ bun run build
 bun run preview
 ```
 
-## Deploy notes (static)
-
-This app is built as an SPA (see `src/routes/+layout.ts` with `ssr = false`) using `@sveltejs/adapter-static`.
-
-Deep-link reloads like `/leases/<id>` require your host to serve the SPA fallback (`build/200.html`) for unknown paths.
-This repo ships a `static/_redirects` file (emitted to `build/_redirects`) for Netlify / Cloudflare Pages-style routing.
-
 ## Env
 
 - `PUBLIC_UNTRON_API_URL` (required): Untron V3 API base URL (OpenAPI; serves realtor endpoints and PostgREST indexer endpoints).
