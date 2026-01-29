@@ -70,6 +70,13 @@
 		"zod": "^4.1.13"
 	},
 	"optionalDependencies": {
-		"@rollup/rollup-linux-x64-gnu": "^4.0.0"
+		"@rollup/rollup-linux-x64-gnu": "4.53.3",
+		"@rollup/rollup-linux-x64-musl": "4.53.3",
+		"lightningcss-linux-x64-gnu": "1.30.2",
+		"lightningcss-linux-x64-musl": "1.30.2"
+	},
+	"overrides": {
+		"rollup": "4.53.3",
+		"lightningcss": "1.30.2"
 	}
 }
