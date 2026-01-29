@@ -21,6 +21,11 @@ This repo contains all Untron frontends and shared UI tooling.
 - i18n: Paraglide (bridge app).
 - Web3: viem + Wagmi Core.
 
+## Deploy (Cloudflare Pages)
+
+- Cloudflare Pages currently runs `npm install` in the app directory even if the build command uses `bun`.
+- npm sometimes drops native optional deps; to keep deploys stable we pin platform bindings in each app `package.json` under `optionalDependencies` (Rollup / LightningCSS / Tailwind Oxide).
+
 ## Design System Rules (high priority)
 
 ### One font only
