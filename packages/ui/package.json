@@ -1,0 +1,32 @@
+{
+	"name": "@untron/ui",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"exports": {
+		"./alert": "./src/components/ui/alert/index.ts",
+		"./badge": "./src/components/ui/badge/index.ts",
+		"./button": "./src/components/ui/button/index.ts",
+		"./card": "./src/components/ui/card/index.ts",
+		"./chart": "./src/components/ui/chart/index.ts",
+		"./dialog": "./src/components/ui/dialog/index.ts",
+		"./dropdown-menu": "./src/components/ui/dropdown-menu/index.ts",
+		"./input": "./src/components/ui/input/index.ts",
+		"./label": "./src/components/ui/label/index.ts",
+		"./select": "./src/components/ui/select/index.ts",
+		"./separator": "./src/components/ui/separator/index.ts",
+		"./skeleton": "./src/components/ui/skeleton/index.ts",
+		"./table": "./src/components/ui/table/index.ts",
+		"./textarea": "./src/components/ui/textarea/index.ts",
+		"./utils": "./src/utils.ts"
+	},
+	"dependencies": {
+		"@lucide/svelte": "^0.561.0",
+		"bits-ui": "^2.14.4",
+		"clsx": "^2.1.1",
+		"layerchart": "2.0.0-next.43",
+		"tailwind-merge": "^3.4.0",
+		"tailwind-variants": "^3.2.2"
+	}
+}
+

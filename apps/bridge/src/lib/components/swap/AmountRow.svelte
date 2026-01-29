@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button } from '@untron/ui/button';
 	import { m } from '$lib/paraglide/messages.js';
 	import TokenNetworkIcon from './TokenNetworkIcon.svelte';
 	import type { SupportedChain, SupportedToken, TronToken } from '$lib/types/swap';

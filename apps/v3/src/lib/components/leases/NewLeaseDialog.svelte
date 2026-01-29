@@ -7,13 +7,13 @@
 		getProtocolInfo,
 		type CreateLeaseRequest
 	} from '$lib/untron/api';
-	import { Button } from '$lib/components/ui/button';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import * as Alert from '$lib/components/ui/alert';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Textarea } from '$lib/components/ui/textarea';
-	import * as Select from '$lib/components/ui/select';
+	import { Button } from '@untron/ui/button';
+	import * as Dialog from '@untron/ui/dialog';
+	import * as Alert from '@untron/ui/alert';
+	import { Input } from '@untron/ui/input';
+	import { Label } from '@untron/ui/label';
+	import { Textarea } from '@untron/ui/textarea';
+	import * as Select from '@untron/ui/select';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import {
 		formatAddress,
@@ -318,7 +318,7 @@
 									{@const meta = getChainMeta(targetChainId)}
 									<span data-slot="select-value" class="flex w-full items-center gap-2">
 										<span class="flex-1 truncate">{meta?.name ?? targetChainId}</span>
-										<span class="font-mono text-xs text-muted-foreground">{targetChainId}</span>
+										<span class="font-sans text-xs text-muted-foreground">{targetChainId}</span>
 									</span>
 								{:else}
 									<span data-slot="select-value" class="text-muted-foreground">Select chain…</span>
@@ -330,7 +330,7 @@
 									<Select.Item value={chainId} label={getChainLabel(chainId)}>
 										<span class="inline-flex w-full items-center gap-2">
 											<span class="flex-1 truncate">{meta?.name ?? chainId}</span>
-											<span class="font-mono text-xs text-muted-foreground">{chainId}</span>
+											<span class="font-sans text-xs text-muted-foreground">{chainId}</span>
 										</span>
 									</Select.Item>
 								{/each}
@@ -353,7 +353,7 @@
 										<span class="flex-1 truncate">{alias ?? formatAddress(targetToken, 10, 6)}</span
 										>
 										{#if alias}
-											<span class="font-mono text-xs text-muted-foreground">
+											<span class="font-sans text-xs text-muted-foreground">
 												{formatAddress(targetToken, 8, 6)}
 											</span>
 										{/if}
@@ -373,7 +373,7 @@
 									>
 										<span class="inline-flex w-full items-center gap-2">
 											<span class="flex-1 truncate">{alias ?? formatAddress(token, 10, 6)}</span>
-											<span class="font-mono text-xs text-muted-foreground">
+											<span class="font-sans text-xs text-muted-foreground">
 												{formatAddress(token, 8, 6)}
 											</span>
 										</span>
@@ -408,14 +408,14 @@
 					<div class="rounded-lg border bg-muted/20 p-3 text-xs">
 						<div class="font-medium">Effective fees</div>
 						<div class="mt-1 grid gap-0.5">
-							<div class="font-mono text-muted-foreground">
+							<div class="font-sans text-muted-foreground">
 								fee: {formatPpmAsPercent(pair.effective_fee_ppm) ?? `${pair.effective_fee_ppm} ppm`}
 							</div>
-							<div class="font-mono text-muted-foreground">
+							<div class="font-sans text-muted-foreground">
 								flat: {formatUsdtAtomic6(totalFlat) ?? totalFlat} USDT
 							</div>
 							{#if extraFlat > 0}
-								<div class="font-mono text-muted-foreground/80">
+								<div class="font-sans text-muted-foreground/80">
 									includes +{formatUsdtAtomic6(extraFlat) ?? extraFlat} USDT (changeable payout config)
 								</div>
 							{/if}
@@ -437,7 +437,7 @@
 						<Label>Result</Label>
 						<CopyButton value={resultJson} label="Copy result JSON" />
 					</div>
-					<Textarea value={resultJson} readonly class="min-h-[120px] font-mono text-xs" />
+					<Textarea value={resultJson} readonly class="min-h-[120px] font-sans text-xs" />
 				</div>
 			{/if}
 		</div>

@@ -3,7 +3,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { connectWallet } from '$lib/wagmi/wallet';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button } from '@untron/ui/button';
 	import { formatAtomicToDecimal } from '$lib/math/amounts';
 	import { config as wagmiConfig } from '$lib/wagmi/config';
 	import { getChainById, getTokenOnChain } from '$lib/config/swapConfig';
@@ -147,7 +147,7 @@
 		<div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
 			<div class="mb-2 text-sm text-zinc-500 dark:text-zinc-400">{m.order_deposit_address()}</div>
 			<code
-				class="block w-full overflow-hidden rounded-lg bg-zinc-100 px-3 py-2 font-mono text-sm text-ellipsis text-zinc-900 dark:bg-zinc-800 dark:text-white"
+				class="block w-full overflow-hidden rounded-lg bg-zinc-100 px-3 py-2 font-sans text-sm text-ellipsis text-zinc-900 dark:bg-zinc-800 dark:text-white"
 			>
 				{deposit.address}
 			</code>
@@ -171,7 +171,7 @@
 					class="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
 				>
 					<div class="flex items-center justify-between gap-3">
-						<span class="font-mono text-xs">{txHash}</span>
+						<span class="font-sans text-xs">{txHash}</span>
 						{#if explorerTxUrl(txHash)}
 							<a
 								href={explorerTxUrl(txHash) ?? '#'}

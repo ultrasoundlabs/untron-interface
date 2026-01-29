@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button } from '@untron/ui/button';
 	import { m } from '$lib/paraglide/messages.js';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { connectWallet } from '$lib/wagmi/wallet';

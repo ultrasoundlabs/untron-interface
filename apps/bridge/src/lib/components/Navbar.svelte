@@ -1,30 +1,55 @@
 <script lang="ts">
 	import LanguageSwitcher from './LanguageSwitcher.svelte';
-	import ThemeSwitcher from './ThemeSwitcher.svelte';
-	import WalletStatus from './WalletStatus.svelte';
+	import AppHeader from '@untron/stylekit/components/AppHeader.svelte';
+	import ThemePicker from '@untron/stylekit/components/ThemePicker.svelte';
+	import UntronLogo from '@untron/stylekit/components/UntronLogo.svelte';
+	import ProductNav from '@untron/stylekit/components/ProductNav.svelte';
+	import WalletStatus from '@untron/stylekit/components/WalletStatus.svelte';
+	import { env } from '$env/dynamic/public';
+	import { page } from '$app/stores';
+	import { connection } from '$lib/wagmi/connectionStore';
+	import { connectWallet, disconnectWallet } from '$lib/wagmi/wallet';
+	import { WALLETS } from '$lib/config/wallets';
+	import { m } from '$lib/paraglide/messages.js';
+
+	const navItems = [
+		{ id: 'bridge', label: 'Bridge', href: env.PUBLIC_BRIDGE_URL ?? '/' },
+		{ id: 'v3', label: 'V3', href: env.PUBLIC_V3_URL ?? '#', disabled: !env.PUBLIC_V3_URL },
+		{
+			id: 'integrate',
+			label: 'Integrate',
+			href: env.PUBLIC_DOCS_URL ?? '#',
+			disabled: !env.PUBLIC_DOCS_URL
+		}
+	] as const;
 </script>
 
-<nav class="sticky top-0 z-50 flex w-full justify-center px-4 py-6">
-	<div class="flex w-full max-w-[1082px] items-center justify-between">
-		<!-- Logo / Wordmark -->
-		<a href="/" class="group flex items-center">
-			<img
-				src="/logos/untron/full.svg"
-				alt="Untron"
-				class="hidden h-[48px] w-auto md:block dark:invert"
-			/>
-			<img
-				src="/logos/untron/icon.svg"
-				alt="Untron"
-				class="block h-[48px] w-auto md:hidden dark:invert"
-			/>
-		</a>
-
-		<!-- Right side controls -->
-		<div class="flex items-center gap-2">
-			<ThemeSwitcher />
-			<LanguageSwitcher />
-			<WalletStatus />
+<AppHeader maxWidthClass="max-w-[1082px]">
+	{#snippet left()}
+		<div class="flex items-center gap-3">
+			<UntronLogo />
+			<ProductNav items={navItems} activeId="bridge" />
 		</div>
-	</div>
-</nav>
+	{/snippet}
+
+	{#snippet right()}
+		<ThemePicker />
+		<LanguageSwitcher />
+		<WalletStatus
+			connection={$connection}
+			{connectWallet}
+			{disconnectWallet}
+			wallets={WALLETS}
+			currentUrl={$page.url.href}
+			strings={{
+				connectWallet: m.wallet_connect_wallet(),
+				disconnect: m.wallet_disconnect(),
+				copyAddress: m.wallet_copy_address(),
+				copied: m.wallet_copied(),
+				connectOptionsTitle: m.wallet_connect_options_title(),
+				connectOptionsDesc: m.wallet_connect_options_desc(),
+				copyLink: m.wallet_copy_link()
+			}}
+		/>
+	{/snippet}
+</AppHeader>

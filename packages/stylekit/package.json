@@ -1,0 +1,22 @@
+{
+	"name": "@untron/stylekit",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./theme": "./src/theme.ts",
+		"./theme.css": "./src/theme.css",
+		"./components/AppHeader.svelte": "./src/components/AppHeader.svelte",
+		"./components/AppFooter.svelte": "./src/components/AppFooter.svelte",
+		"./components/ProductNav.svelte": "./src/components/ProductNav.svelte",
+		"./components/WalletStatus.svelte": "./src/components/WalletStatus.svelte",
+		"./components/UntronFooter.svelte": "./src/components/UntronFooter.svelte",
+		"./components/ThemePicker.svelte": "./src/components/ThemePicker.svelte",
+		"./components/UntronLogo.svelte": "./src/components/UntronLogo.svelte",
+		"./head/inter.svelte": {
+			"types": "./src/head/inter.svelte.d.ts",
+			"default": "./src/head/inter.svelte"
+		}
+	}
+}

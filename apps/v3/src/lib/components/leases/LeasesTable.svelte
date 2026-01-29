@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
-	import * as Table from '$lib/components/ui/table';
+	import { Badge } from '@untron/ui/badge';
+	import { Button } from '@untron/ui/button';
+	import * as Table from '@untron/ui/table';
 	import type { SqlRow } from '$lib/untron/types';
 	import {
 		formatAddress,
@@ -41,10 +41,10 @@
 	<Table.Body>
 		{#each rows as row (getLeaseId(row) ?? JSON.stringify(row))}
 			<Table.Row>
-				<Table.Cell class="font-mono">
+				<Table.Cell class="font-sans tabular-nums">
 					{getLeaseId(row) ?? '—'}
 				</Table.Cell>
-				<Table.Cell class="font-mono">
+				<Table.Cell class="font-sans">
 					<CopyableValue
 						value={getReceiverTron(row)}
 						display={getReceiverTron(row) ?? '—'}
@@ -52,7 +52,7 @@
 						label="Copy receiver (Tron)"
 					/>
 				</Table.Cell>
-				<Table.Cell class="font-mono">
+				<Table.Cell class="font-sans">
 					{@const lessee = getLessee(row)}
 					<CopyableValue
 						value={lessee}
@@ -61,7 +61,7 @@
 						label="Copy lessee"
 					/>
 				</Table.Cell>
-				<Table.Cell class="font-mono">
+				<Table.Cell class="font-sans">
 					{@const b = getBeneficiary(row)}
 					<CopyableValue
 						value={b}
@@ -74,16 +74,16 @@
 					{#if getTargetChainId(row)}
 						{@const chainId = getTargetChainId(row)!}
 						{@const meta = getChainMeta(chainId)}
-						<div class="font-mono">
+						<div class="font-sans tabular-nums">
 							{meta?.name ?? chainId} ({chainId})
 						</div>
 					{:else}
-						<div class="font-mono">—</div>
+						<div class="font-sans">—</div>
 					{/if}
 					{#if getTargetToken(row)}
 						{@const token = getTargetToken(row)!}
 						{@const alias = getTokenAlias(token)}
-						<div class="font-mono text-xs text-muted-foreground">
+						<div class="font-sans text-xs text-muted-foreground">
 							<div class="text-foreground">{alias ?? formatAddress(token)}</div>
 							{#if alias}
 								<span class="mt-0.5 block">

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import * as Alert from '$lib/components/ui/alert';
-	import { Skeleton } from '$lib/components/ui/skeleton';
+	import * as Card from '@untron/ui/card';
+	import { Button } from '@untron/ui/button';
+	import { Input } from '@untron/ui/input';
+	import * as Alert from '@untron/ui/alert';
+	import { Skeleton } from '@untron/ui/skeleton';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import LeasesTable from '$lib/components/leases/LeasesTable.svelte';

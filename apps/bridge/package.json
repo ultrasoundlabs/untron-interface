@@ -35,7 +35,6 @@
 		"@tailwindcss/vite": "^4.1.17",
 		"@types/node": "^22",
 		"@vitest/browser-playwright": "^4.0.10",
-		"bits-ui": "^2.11.0",
 		"clsx": "^2.1.1",
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
@@ -60,8 +59,11 @@
 	},
 	"dependencies": {
 		"@shapeshiftoss/caip": "^8.16.7",
+		"@untron/stylekit": "workspace:*",
+		"@untron/ui": "workspace:*",
 		"@wagmi/connectors": "^7.0.2",
 		"@wagmi/core": "^3.0.0",
+		"bits-ui": "^2.14.4",
 		"openapi-fetch": "^0.15.0",
 		"viem": "^2.40.0",
 		"zod": "^4.1.13"

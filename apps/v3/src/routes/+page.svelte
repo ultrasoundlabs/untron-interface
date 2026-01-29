@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { connection } from '$lib/wagmi/connectionStore';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import * as Alert from '$lib/components/ui/alert';
-	import { Skeleton } from '$lib/components/ui/skeleton';
+	import * as Card from '@untron/ui/card';
+	import { Button } from '@untron/ui/button';
+	import * as Alert from '@untron/ui/alert';
+	import { Skeleton } from '@untron/ui/skeleton';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 	import { getOwnedLeases } from '$lib/untron/api';

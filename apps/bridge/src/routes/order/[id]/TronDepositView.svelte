@@ -105,7 +105,7 @@
 			<!-- Address with copy -->
 			<div class="flex items-center gap-2">
 				<code
-					class="flex-1 overflow-hidden rounded-lg bg-zinc-100 px-3 py-2 font-mono text-sm text-ellipsis text-zinc-900 dark:bg-zinc-800 dark:text-white"
+					class="flex-1 overflow-hidden rounded-lg bg-zinc-100 px-3 py-2 font-sans text-sm text-ellipsis text-zinc-900 dark:bg-zinc-800 dark:text-white"
 				>
 					{deposit.address}
 				</code>
@@ -159,7 +159,7 @@
 			<span class="text-zinc-500 dark:text-zinc-400">
 				{m.order_time_remaining()}:
 			</span>
-			<span class="font-mono font-medium text-zinc-900 dark:text-white">
+			<span class="font-sans font-medium text-zinc-900 dark:text-white">
 				{timeRemaining}
 			</span>
 		</div>
@@ -168,7 +168,7 @@
 			<div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
 				<div class="mb-2 text-sm text-zinc-500 dark:text-zinc-400">{m.order_memo()}</div>
 				<code
-					class="block w-full overflow-hidden rounded-lg bg-zinc-100 px-3 py-2 font-mono text-sm text-ellipsis text-zinc-900 dark:bg-zinc-800 dark:text-white"
+					class="block w-full overflow-hidden rounded-lg bg-zinc-100 px-3 py-2 font-sans text-sm text-ellipsis text-zinc-900 dark:bg-zinc-800 dark:text-white"
 				>
 					{deposit.memo}
 				</code>

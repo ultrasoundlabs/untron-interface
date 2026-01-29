@@ -9,13 +9,13 @@
 	} from '$lib/untron/signing';
 	import type { SqlRow } from '$lib/untron/types';
 	import { wagmiConfig } from '$lib/wagmi/exports';
-	import { Button } from '$lib/components/ui/button';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import * as Alert from '$lib/components/ui/alert';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Textarea } from '$lib/components/ui/textarea';
-	import * as Select from '$lib/components/ui/select';
+	import { Button } from '@untron/ui/button';
+	import * as Dialog from '@untron/ui/dialog';
+	import * as Alert from '@untron/ui/alert';
+	import { Input } from '@untron/ui/input';
+	import { Label } from '@untron/ui/label';
+	import { Textarea } from '@untron/ui/textarea';
+	import * as Select from '@untron/ui/select';
 	import PenLineIcon from '@lucide/svelte/icons/pen-line';
 	import SendIcon from '@lucide/svelte/icons/send';
 	import {
@@ -277,7 +277,7 @@
 		<div class="grid gap-4">
 			<div class="grid gap-1">
 				<div class="text-sm font-medium">EIP-712 domain</div>
-				<div class="font-mono text-xs text-muted-foreground">
+				<div class="font-sans text-xs text-muted-foreground">
 					name: {DEFAULT_EIP712_NAME}, version: {DEFAULT_EIP712_VERSION}
 				</div>
 			</div>
@@ -300,7 +300,7 @@
 								{@const meta = getChainMeta(targetChainId)}
 								<span data-slot="select-value" class="flex w-full items-center gap-2">
 									<span class="flex-1 truncate">{meta?.name ?? targetChainId}</span>
-									<span class="font-mono text-xs text-muted-foreground">{targetChainId}</span>
+									<span class="font-sans text-xs text-muted-foreground">{targetChainId}</span>
 								</span>
 							{:else}
 								<span data-slot="select-value" class="text-muted-foreground">Select chain…</span>
@@ -312,7 +312,7 @@
 								<Select.Item value={chainId} label={getChainLabel(chainId)}>
 									<span class="inline-flex w-full items-center gap-2">
 										<span class="flex-1 truncate">{meta?.name ?? chainId}</span>
-										<span class="font-mono text-xs text-muted-foreground">{chainId}</span>
+										<span class="font-sans text-xs text-muted-foreground">{chainId}</span>
 									</span>
 								</Select.Item>
 							{/each}
@@ -350,7 +350,7 @@
 							<span data-slot="select-value" class="flex w-full items-center gap-2">
 								<span class="flex-1 truncate">{alias ?? formatAddress(targetToken, 10, 6)}</span>
 								{#if alias}
-									<span class="font-mono text-xs text-muted-foreground">
+									<span class="font-sans text-xs text-muted-foreground">
 										{formatAddress(targetToken, 8, 6)}
 									</span>
 								{/if}
@@ -370,7 +370,7 @@
 							>
 								<span class="inline-flex w-full items-center gap-2">
 									<span class="flex-1 truncate">{alias ?? formatAddress(token, 10, 6)}</span>
-									<span class="font-mono text-xs text-muted-foreground">
+									<span class="font-sans text-xs text-muted-foreground">
 										{formatAddress(token, 8, 6)}
 									</span>
 								</span>
@@ -406,7 +406,7 @@
 					id="signature"
 					placeholder="0x…"
 					bind:value={signature}
-					class="min-h-[92px] font-mono text-xs"
+					class="min-h-[92px] font-sans text-xs"
 					disabled={disabled || pendingSign || pendingSubmit}
 				/>
 			</div>
@@ -424,7 +424,7 @@
 						<Label>Result</Label>
 						<CopyButton value={resultJson} label="Copy result JSON" />
 					</div>
-					<Textarea value={resultJson} readonly class="min-h-[140px] font-mono text-xs" />
+					<Textarea value={resultJson} readonly class="min-h-[140px] font-sans text-xs" />
 				</div>
 			{/if}
 		</div>

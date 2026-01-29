@@ -3,19 +3,16 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import { m } from '$lib/paraglide/messages.js';
+	import InterHead from '@untron/stylekit/head/inter.svelte';
 
 	let { children } = $props();
 </script>
 
+<InterHead />
+
 <svelte:head>
 	<title>{m.app_title()}</title>
 	<link rel="icon" href="/logos/untron/icon.svg" />
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link
-		rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-	/>
 </svelte:head>
 
 <Navbar />
