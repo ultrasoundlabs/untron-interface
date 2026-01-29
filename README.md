@@ -12,6 +12,7 @@ This is the **public** repository for Untron's frontend interfaces, including th
 
 ```bash
 git clone git@github.com:ultrasoundlabs/untron-interface.git
+node -v # should be v22.16.0 (see .nvmrc)
 bun install
 bun dev
 ```
