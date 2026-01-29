@@ -2,7 +2,9 @@
 	import { onMount } from 'svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import {
+		assertIsLocale,
 		getLocale,
+		isLocale,
 		setLocale,
 		locales,
 		extractLocaleFromNavigator,
@@ -14,13 +16,31 @@
 	const languageLabels: Record<Locale, string> = {
 		en: 'English',
 		es: 'Español',
-		ru: 'Русский'
+		pt: 'Português',
+		ru: 'Русский',
+		uk: 'Українська',
+		'zh-CN': '简体中文',
+		'zh-HK': '廣東話',
+		th: 'ไทย',
+		id: 'Bahasa Indonesia',
+		vi: 'Tiếng Việt',
+		ms: 'Bahasa Melayu',
+		fil: 'Filipino'
 	};
 
 	const languageCodes: Record<Locale, string> = {
 		en: '🇺🇸',
 		es: '🇪🇸',
-		ru: '🇷🇺'
+		pt: '🇵🇹',
+		ru: '🇷🇺',
+		uk: '🇺🇦',
+		'zh-CN': '🇨🇳',
+		'zh-HK': '🇭🇰',
+		th: '🇹🇭',
+		id: '🇮🇩',
+		vi: '🇻🇳',
+		ms: '🇲🇾',
+		fil: '🇵🇭'
 	};
 
 	interface Props {
@@ -32,12 +52,38 @@
 
 	let currentLocale = $state<Locale>(getLocale());
 
-	function handleLocaleChange(locale: Locale) {
-		setLocale(locale);
-		currentLocale = locale;
+	function handleLocaleChange(locale: Locale | string) {
+		const normalized = assertIsLocale(locale);
+		setLocale(normalized);
+		currentLocale = normalized;
 		if (typeof document !== 'undefined') {
-			document.documentElement.lang = locale;
+			document.documentElement.lang = normalized;
 		}
+	}
+
+	function detectBrowserLocale(): Locale | undefined {
+		if (typeof navigator === 'undefined') return undefined;
+
+		// Handles typical cases like `pt-BR -> pt` and also case-insensitive matches.
+		const extracted = extractLocaleFromNavigator();
+		if (extracted) return assertIsLocale(extracted);
+
+		const languages = navigator.languages ?? [];
+		const lower = languages.map((lang) => lang.toLowerCase());
+		const has = (tag: string) => lower.some((lang) => lang === tag || lang.startsWith(`${tag}-`));
+
+		// Some browsers still report Tagalog as `tl` instead of `fil`.
+		if (has('tl') && isLocale('fil')) return assertIsLocale('fil');
+
+		// Prefer sensible defaults for generic Chinese tags.
+		if ((has('zh-hant') || has('zh-hk') || has('zh-mo') || has('zh-tw')) && isLocale('zh-HK')) {
+			return assertIsLocale('zh-HK');
+		}
+		if ((has('zh-hans') || has('zh-cn') || has('zh-sg') || has('zh')) && isLocale('zh-CN')) {
+			return assertIsLocale('zh-CN');
+		}
+
+		return undefined;
 	}
 
 	onMount(() => {
@@ -49,7 +95,7 @@
 		if (autoDetect && typeof window !== 'undefined') {
 			const cookieLocale = extractLocaleFromCookie();
 			if (!cookieLocale) {
-				const browserLocale = extractLocaleFromNavigator();
+				const browserLocale = detectBrowserLocale();
 				if (browserLocale && browserLocale !== currentLocale) {
 					handleLocaleChange(browserLocale);
 				}
@@ -79,13 +125,13 @@
 		{/snippet}
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content align="end">
-		<DropdownMenu.RadioGroup
-			value={currentLocale}
-			onValueChange={(v) => handleLocaleChange(v as Locale)}
-		>
+		<DropdownMenu.RadioGroup value={currentLocale} onValueChange={(v) => handleLocaleChange(v)}>
 			{#each locales as locale (locale)}
 				<DropdownMenu.RadioItem value={locale}>
-					{languageLabels[locale]}
+					<span class="flex items-center gap-2">
+						<span class="text-lg leading-none">{languageCodes[locale]}</span>
+						<span>{languageLabels[locale]}</span>
+					</span>
 				</DropdownMenu.RadioItem>
 			{/each}
 		</DropdownMenu.RadioGroup>
