@@ -151,6 +151,51 @@ export function formatUnixSecondsRelative(value: unknown, nowSeconds?: number): 
 	return formatRelativeDeltaSeconds(delta);
 }
 
+export function formatUnixSecondsRelativeDetailed(
+	value: unknown,
+	nowSeconds?: number
+): string | null {
+	const n = parseUnixSeconds(value);
+	if (n === null) return null;
+	const now = nowSeconds ?? Math.floor(Date.now() / 1000);
+	let delta = Math.floor(n - now);
+	const past = delta < 0;
+	delta = Math.abs(delta);
+
+	if (delta < 3) return past ? 'just now' : 'soon';
+
+	const days = Math.floor(delta / (60 * 60 * 24));
+	delta -= days * 60 * 60 * 24;
+	const hours = Math.floor(delta / (60 * 60));
+	delta -= hours * 60 * 60;
+	const minutes = Math.floor(delta / 60);
+	const seconds = delta - minutes * 60;
+
+	let core = '';
+	if (days > 0) core = `${days}d ${hours}h`;
+	else if (hours > 0) core = `${hours}h ${minutes}m`;
+	else if (minutes > 0) core = `${minutes}m ${seconds}s`;
+	else core = `${seconds}s`;
+
+	return past ? `${core} ago` : `in ${core}`;
+}
+
+export function formatUnixSecondsLocalMinute(value: unknown): string | null {
+	const n = parseUnixSeconds(value);
+	if (n === null) return null;
+	try {
+		return new Date(n * 1000).toLocaleString(undefined, {
+			year: 'numeric',
+			month: 'short',
+			day: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+	} catch {
+		return new Date(n * 1000).toString();
+	}
+}
+
 export type FeeFromNetResult = { feeAtomic: bigint; grossAtomic: bigint; exact: boolean };
 
 export function estimateFeeFromNetAndPpm(

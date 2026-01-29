@@ -14,6 +14,7 @@
 	import type { SqlRow } from '$lib/untron/types';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { startPolling } from '$lib/polling';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 
 	const PAGE_SIZE = 50;
 
@@ -113,7 +114,7 @@
 		if (clamped === pageIndex) return;
 		pageIndex = clamped;
 
-		const sp = new URLSearchParams($page.url.searchParams);
+		const sp = new SvelteURLSearchParams($page.url.searchParams);
 		if (clamped === 0) sp.delete('page');
 		else sp.set('page', String(clamped + 1));
 		const search = sp.toString();
@@ -240,7 +241,9 @@
 							variant="outline"
 							size="sm"
 							onclick={() => goToPage(pageIndex + 1)}
-							disabled={totalPages !== null ? pageIndex >= totalPages - 1 : (rows?.length ?? 0) < PAGE_SIZE}
+							disabled={totalPages !== null
+								? pageIndex >= totalPages - 1
+								: (rows?.length ?? 0) < PAGE_SIZE}
 						>
 							Next
 						</Button>

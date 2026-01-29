@@ -42,6 +42,8 @@ export type CreateLeaseRequest = components['schemas']['CreateLeaseRequest'];
 export type CreateLeaseResponse = components['schemas']['CreateLeaseResponse'];
 export type SetPayoutConfigRequest = components['schemas']['SetPayoutConfigRequest'];
 export type SetPayoutConfigResponse = components['schemas']['SetPayoutConfigResponse'];
+export type UsdtDepositTx = components['schemas']['usdt_deposit_txs'];
+export type UsdtDepositsDaily = components['schemas']['usdt_deposits_daily'];
 
 export type ProtocolInfo = {
 	hubChainId: number | null;
@@ -152,7 +154,10 @@ export async function getProtocolInfo(): Promise<ProtocolInfo> {
 type LeaseViewRow = components['schemas']['lease_view'];
 type ReceiverSaltCandidate = components['schemas']['receiver_salt_candidates'];
 
-type ReceiverBySalt = Map<string, { receiverTron: string | null; receiverEvm: `0x${string}` | null }>;
+type ReceiverBySalt = Map<
+	string,
+	{ receiverTron: string | null; receiverEvm: `0x${string}` | null }
+>;
 
 function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: ReceiverBySalt): SqlRow {
 	const leaseId = row.lease_id === undefined ? null : String(row.lease_id);
@@ -161,11 +166,11 @@ function normalizeLeaseViewRow(row: LeaseViewRow, receiverBySalt: ReceiverBySalt
 	const receiverTron =
 		typeof row.receiver_address_tron === 'string'
 			? row.receiver_address_tron
-			: receiverFallback?.receiverTron ?? null;
+			: (receiverFallback?.receiverTron ?? null);
 	const receiverEvm =
 		typeof row.receiver_address_evm === 'string'
 			? checksumEvmAddress(row.receiver_address_evm)
-			: receiverFallback?.receiverEvm ?? null;
+			: (receiverFallback?.receiverEvm ?? null);
 	const now = Math.floor(Date.now() / 1000);
 	const isExpired = typeof row.nukeable_after === 'number' ? row.nukeable_after <= now : false;
 
@@ -264,6 +269,64 @@ export async function getLeasesPage(limit = 50, offset = 0): Promise<LeasesPage>
 
 export async function getAllLeases(limit = 100, offset = 0): Promise<SqlRow[]> {
 	return (await getLeasesPage(limit, offset)).rows;
+}
+
+export type DepositsPage = { rows: UsdtDepositTx[]; total: number | null };
+
+export async function getDepositsPage(args?: {
+	limit?: number;
+	offset?: number;
+	recommendedAction?: string | null;
+	recommendedActions?: string[] | null;
+	claimStatus?: 'created' | 'filled' | null;
+	claimOrigin?: number | null;
+}): Promise<DepositsPage> {
+	requireBrowser();
+	const client = createApiClient();
+	const start = Math.max(0, Math.floor(args?.offset ?? 0));
+	const safeLimit = Math.max(1, Math.floor(args?.limit ?? 50));
+	const end = start + safeLimit - 1;
+
+	const query: Record<string, string> = {
+		order: 'block_timestamp.desc,log_index.desc'
+	};
+	if (args?.recommendedAction) query.recommended_action = toEq(args.recommendedAction);
+	else if (args?.recommendedActions?.length)
+		query.recommended_action = toIn(args.recommendedActions);
+	if (args?.claimStatus) query.claim_status = toEq(args.claimStatus);
+	if (typeof args?.claimOrigin === 'number' && Number.isFinite(args.claimOrigin))
+		query.claim_origin = toEq(String(args.claimOrigin));
+
+	const { data: rows, response } = await unwrapWithResponse<UsdtDepositTx[]>(
+		client.GET('/usdt_deposit_txs', {
+			params: {
+				query,
+				header: {
+					Prefer: 'count=exact',
+					'Range-Unit': 'items',
+					Range: `${start}-${end}`
+				}
+			}
+		})
+	);
+
+	const total = parseTotalFromContentRange(response);
+	return { rows, total };
+}
+
+export async function getUsdtDepositsDaily(limit = 30): Promise<UsdtDepositsDaily[]> {
+	requireBrowser();
+	const client = createApiClient();
+	return await unwrap<UsdtDepositsDaily[]>(
+		client.GET('/usdt_deposits_daily', {
+			params: {
+				query: {
+					order: 'day.desc',
+					limit: String(Math.max(1, Math.floor(limit)))
+				}
+			}
+		})
+	);
 }
 
 export async function getOwnedLeases(

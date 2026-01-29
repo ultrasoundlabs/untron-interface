@@ -6,6 +6,7 @@
 	import WalletConnect from '$lib/components/WalletConnect.svelte';
 	import LayoutDashboardIcon from '@lucide/svelte/icons/layout-dashboard';
 	import ListIcon from '@lucide/svelte/icons/list';
+	import ArrowDownToLineIcon from '@lucide/svelte/icons/arrow-down-to-line';
 
 	let { children } = $props();
 </script>
@@ -14,7 +15,7 @@
 	<title>Untron V3</title>
 </svelte:head>
 
-<div class="mx-auto max-w-6xl px-4 py-10">
+<div class="mx-auto max-w-7xl px-4 py-10">
 	<header class="flex flex-col gap-6">
 		<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 			<div class="space-y-1">
@@ -39,6 +40,13 @@
 			>
 				<ListIcon />
 				All leases
+			</Button>
+			<Button
+				href="/deposits"
+				variant={$page.url.pathname.startsWith('/deposits') ? 'default' : 'ghost'}
+			>
+				<ArrowDownToLineIcon />
+				All deposits
 			</Button>
 		</nav>
 	</header>
