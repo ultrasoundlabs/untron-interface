@@ -155,7 +155,7 @@
 							{finalizingRows.length === 1
 								? "A USDT deposit was detected into this receiver but hasn't been accounted for by a claim yet."
 								: `${finalizingRows.length} USDT deposits were detected into this receiver but haven't been accounted for by claims yet.`}
-								This usually means that the transaction hasn't yet been finalized on Tron.
+							This usually means that the transaction hasn't yet been finalized on Tron.
 							<br />
 							<br />
 							Finality on Tron is about 54 seconds. If your deposit is much older than that and still

@@ -2625,6 +2625,2552 @@
 				"tags": ["hub_lp_vault_events"],
 				"operationId": "hub_lp_vault_events_get"
 			}
+		},
+		"/active_leases_daily": {
+			"get": {
+				"operationId": "active_leases_daily_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "leases_started",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "leases_ended",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "leases_active",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/active_leases_daily"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily active lease count (running starts minus ends) over a continuous day series.",
+				"tags": ["active_leases_daily"]
+			}
+		},
+		"/claim_fill_latency_daily": {
+			"get": {
+				"operationId": "claim_fill_latency_daily_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "filled_claims_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "avg_seconds",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "p50_seconds",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "p90_seconds",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/claim_fill_latency_daily"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily latency stats for filled claims: (ClaimFilled block_time - origin_timestamp).",
+				"tags": ["claim_fill_latency_daily"]
+			}
+		},
+		"/claim_usdt_deposit_attribution": {
+			"get": {
+				"description": "Returns a JSON array of deposit attribution entries for each claim:\n- Pre-entitle origins (0/1): matched by txId to `ctl.receiver_usdt_transfers`.\n- Receiver-pull origin (2): FIFO allocation of `origin_raw_amount` across receiver USDT transfers since previous pull.",
+				"operationId": "claim_usdt_deposit_attribution_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "lease_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "usdt_deposit_attribution",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/claim_usdt_deposit_attribution"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "USDT deposit attribution per claim (best-effort).",
+				"tags": ["claim_usdt_deposit_attribution"]
+			}
+		},
+		"/claims_created_daily": {
+			"get": {
+				"operationId": "claims_created_daily_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claims_created_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claims_created_subjective_pre_entitle",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claims_created_pre_entitle",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claims_created_receiver_pull",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_usdt_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/claims_created_daily"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily rollup of claims created (first version per claim; timestamp from hub event stream).",
+				"tags": ["claims_created_daily"]
+			}
+		},
+		"/claims_filled_daily": {
+			"get": {
+				"operationId": "claims_filled_daily_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claims_filled_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_usdt_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/claims_filled_daily"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily rollup of filled claims (current rows only; timestamp from ClaimFilled event).",
+				"tags": ["claims_filled_daily"]
+			}
+		},
+		"/hub_claim_first_versions": {
+			"get": {
+				"operationId": "hub_claim_first_versions_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "lease_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "created_from_seq",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "origin",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "origin_timestamp",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_usdt",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "target_chain_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "target_token",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "beneficiary",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/hub_claim_first_versions"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "First persisted version per (lease_id, claim_id), used for claim-created time-series.",
+				"tags": ["hub_claim_first_versions"]
+			}
+		},
+		"/lease_kpis": {
+			"get": {
+				"operationId": "lease_kpis_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "lease_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "lease_number",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "realtor",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "lessee",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "receiver_salt",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "start_time",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "nukeable_after",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "start_time_utc",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "nukeable_after_utc",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_amount_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_latest_block_timestamp",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claims_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claims_filled",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claims_amount_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claims_latest_origin_timestamp",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/lease_kpis"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Per-lease KPIs: deposits, claims, and last activity timestamps (best-effort).",
+				"tags": ["lease_kpis"]
+			}
+		},
+		"/leases_ending_daily": {
+			"get": {
+				"operationId": "leases_ending_daily_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "leases_ending_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/leases_ending_daily"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily count of current leases by nukeable_after (scheduled/expected end time).",
+				"tags": ["leases_ending_daily"]
+			}
+		},
+		"/leases_started_daily": {
+			"get": {
+				"operationId": "leases_started_daily_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "leases_started_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/leases_started_daily"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily count of current leases by start_time (not historical versions).",
+				"tags": ["leases_started_daily"]
+			}
+		},
+		"/protocol_pnl_timeseries": {
+			"get": {
+				"operationId": "protocol_pnl_timeseries_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "block_timestamp",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "block_time",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "pnl",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "delta",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "reason",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "valid_from_seq",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/protocol_pnl_timeseries"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Protocol PnL snapshots as a time-series (timestamped by hub event stream).",
+				"tags": ["protocol_pnl_timeseries"]
+			}
+		},
+		"/realtor_deposits_daily": {
+			"get": {
+				"operationId": "realtor_deposits_daily_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "realtor",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "leases_touched",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/realtor_deposits_daily"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily USDT deposits attributed to realtor (via expected_lease_id -> lease.realtor).",
+				"tags": ["realtor_deposits_daily"]
+			}
+		},
+		"/usdt_deposit_backlog_age_buckets": {
+			"get": {
+				"operationId": "usdt_deposit_backlog_age_buckets_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "recommended_action",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "age_bucket",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/usdt_deposit_backlog_age_buckets"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Deposit backlog grouped into age buckets (relative to now()).",
+				"tags": ["usdt_deposit_backlog_age_buckets"]
+			}
+		},
+		"/usdt_deposit_backlog_summary": {
+			"get": {
+				"operationId": "usdt_deposit_backlog_summary_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "recommended_action",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "oldest_block_timestamp",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "newest_block_timestamp",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/usdt_deposit_backlog_summary"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Current deposit actionability backlog summary grouped by `recommended_action`.",
+				"tags": ["usdt_deposit_backlog_summary"]
+			}
+		},
+		"/usdt_deposit_funnel_daily": {
+			"get": {
+				"operationId": "usdt_deposit_funnel_daily_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "stage",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/usdt_deposit_funnel_daily"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Deposit funnel time-series. `stage` is `recommended_action` plus an `all` row per day.",
+				"tags": ["usdt_deposit_funnel_daily"]
+			}
+		},
+		"/usdt_deposit_txs": {
+			"get": {
+				"description": "Rows correspond to canonical TRC-20 `Transfer` logs (tx_hash + log_index) into deterministic receivers.\n\nLinkage fields:\n- `expected_*` => best-effort attribution by (receiver_salt, timestamp) to the active lease window.\n- `claim_*`    => direct hub claim match for pre-entitle origins (origin_id == tx_hash), if any.\n- `linked_claims` => JSON array of best-effort claim attributions from `api.claim_usdt_deposit_attribution`\n  (includes receiver-pull FIFO allocations).",
+				"operationId": "usdt_deposit_txs_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "chain_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "token",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "receiver_salt",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "sender",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "recipient",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "block_number",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "block_timestamp",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "block_time",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "block_hash",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "tx_hash",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "log_index",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "inserted_at",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "recommended_action",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "expected_lease_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "expected_lease_number",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "expected_realtor",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "expected_lessee",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_lease_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_id",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_origin",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_status",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_amount_usdt",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_lease_number",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_realtor",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "claim_lessee",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposit_processed",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposit_processed_last_checked_at",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "linked_claims",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "linked_claims_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "linked_claims_amount",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/usdt_deposit_txs"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Chronological USDT deposit Transfer logs into deterministic receivers, enriched with lease/claim linkage.",
+				"tags": ["usdt_deposit_txs"]
+			}
+		},
+		"/usdt_deposits_cumulative": {
+			"get": {
+				"operationId": "usdt_deposits_cumulative_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_total_cum",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_total_cum",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/usdt_deposits_cumulative"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily USDT deposits plus cumulative totals (running sums).",
+				"tags": ["usdt_deposits_cumulative"]
+			}
+		},
+		"/usdt_deposits_daily": {
+			"get": {
+				"operationId": "usdt_deposits_daily_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "unique_senders",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "unique_receivers",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "leases_touched",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/usdt_deposits_daily"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily rollup of canonical USDT deposit logs (count + sum + uniques).",
+				"tags": ["usdt_deposits_daily"]
+			}
+		},
+		"/usdt_deposits_daily_by_action": {
+			"get": {
+				"operationId": "usdt_deposits_daily_by_action_get",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "day",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "recommended_action",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "deposits_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "amount_total",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filtering Columns",
+						"in": "query",
+						"name": "select",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Ordering",
+						"in": "query",
+						"name": "order",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "header",
+						"name": "Range-Unit",
+						"schema": {
+							"default": "items",
+							"type": "string"
+						},
+						"style": "simple"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "offset",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Limiting and Pagination",
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"type": "string"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Preference",
+						"in": "header",
+						"name": "Prefer",
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/usdt_deposits_daily_by_action"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					}
+				},
+				"summary": "Daily USDT deposit rollup split by `recommended_action` (operator funnel stage).",
+				"tags": ["usdt_deposits_daily_by_action"]
+			}
 		}
 	},
 	"components": {
@@ -4371,7 +6917,651 @@
 				"additionalProperties": {},
 				"description": "Postgres JSON/JSONB encoded as raw JSON."
 			},
-			"PgNumeric": { "type": "number", "description": "Postgres NUMERIC encoded as a JSON number." }
+			"PgNumeric": {
+				"type": "number",
+				"description": "Postgres NUMERIC encoded as a JSON number."
+			},
+			"active_leases_daily": {
+				"description": "Daily active lease count (running starts minus ends) over a continuous day series.",
+				"properties": {
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"leases_active": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"leases_ended": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"leases_started": {
+						"format": "bigint",
+						"type": "integer"
+					}
+				},
+				"type": "object"
+			},
+			"claim_fill_latency_daily": {
+				"description": "Daily latency stats for filled claims: (ClaimFilled block_time - origin_timestamp).",
+				"properties": {
+					"avg_seconds": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"filled_claims_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"p50_seconds": {
+						"format": "double precision",
+						"type": "number"
+					},
+					"p90_seconds": {
+						"format": "double precision",
+						"type": "number"
+					}
+				},
+				"type": "object"
+			},
+			"claim_usdt_deposit_attribution": {
+				"description": "USDT deposit attribution per claim (best-effort).\n\nReturns a JSON array of deposit attribution entries for each claim:\n- Pre-entitle origins (0/1): matched by txId to `ctl.receiver_usdt_transfers`.\n- Receiver-pull origin (2): FIFO allocation of `origin_raw_amount` across receiver USDT transfers since previous pull.",
+				"properties": {
+					"claim_id": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"lease_id": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"usdt_deposit_attribution": {
+						"type": "object"
+					}
+				},
+				"type": "object"
+			},
+			"claims_created_daily": {
+				"description": "Daily rollup of claims created (first version per claim; timestamp from hub event stream).",
+				"properties": {
+					"amount_usdt_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"claims_created_pre_entitle": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"claims_created_receiver_pull": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"claims_created_subjective_pre_entitle": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"claims_created_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"claims_filled_daily": {
+				"description": "Daily rollup of filled claims (current rows only; timestamp from ClaimFilled event).",
+				"properties": {
+					"amount_usdt_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"claims_filled_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"hub_claim_first_versions": {
+				"description": "First persisted version per (lease_id, claim_id), used for claim-created time-series.",
+				"properties": {
+					"amount_usdt": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"beneficiary": {
+						"format": "text",
+						"type": "string"
+					},
+					"claim_id": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						],
+						"description": "Note:\nThis is a Primary Key.<pk/>"
+					},
+					"created_from_seq": {
+						"description": "Note:\nThis is a Primary Key.<pk/>",
+						"format": "bigint",
+						"type": "integer"
+					},
+					"lease_id": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						],
+						"description": "Note:\nThis is a Primary Key.<pk/>"
+					},
+					"origin": {
+						"format": "smallint",
+						"type": "integer"
+					},
+					"origin_timestamp": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"target_chain_id": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"target_token": {
+						"format": "text",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"lease_kpis": {
+				"description": "Per-lease KPIs: deposits, claims, and last activity timestamps (best-effort).",
+				"properties": {
+					"claims_amount_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"claims_filled": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"claims_latest_origin_timestamp": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"claims_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"deposits_amount_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"deposits_latest_block_timestamp": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"deposits_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"lease_id": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"lease_number": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"lessee": {
+						"format": "text",
+						"type": "string"
+					},
+					"nukeable_after": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"nukeable_after_utc": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"realtor": {
+						"format": "text",
+						"type": "string"
+					},
+					"receiver_salt": {
+						"format": "text",
+						"type": "string"
+					},
+					"start_time": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"start_time_utc": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"leases_ending_daily": {
+				"description": "Daily count of current leases by nukeable_after (scheduled/expected end time).",
+				"properties": {
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"leases_ending_total": {
+						"format": "bigint",
+						"type": "integer"
+					}
+				},
+				"type": "object"
+			},
+			"leases_started_daily": {
+				"description": "Daily count of current leases by start_time (not historical versions).",
+				"properties": {
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"leases_started_total": {
+						"format": "bigint",
+						"type": "integer"
+					}
+				},
+				"type": "object"
+			},
+			"protocol_pnl_timeseries": {
+				"description": "Protocol PnL snapshots as a time-series (timestamped by hub event stream).",
+				"properties": {
+					"block_time": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"block_timestamp": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"delta": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"pnl": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"reason": {
+						"format": "smallint",
+						"type": "integer"
+					},
+					"valid_from_seq": {
+						"description": "Note:\nThis is a Primary Key.<pk/>",
+						"format": "bigint",
+						"type": "integer"
+					}
+				},
+				"type": "object"
+			},
+			"realtor_deposits_daily": {
+				"description": "Daily USDT deposits attributed to realtor (via expected_lease_id -> lease.realtor).",
+				"properties": {
+					"amount_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"deposits_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"leases_touched": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"realtor": {
+						"format": "text",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"usdt_deposit_backlog_age_buckets": {
+				"description": "Deposit backlog grouped into age buckets (relative to now()).",
+				"properties": {
+					"age_bucket": {
+						"format": "text",
+						"type": "string"
+					},
+					"amount_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"deposits_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"recommended_action": {
+						"format": "text",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"usdt_deposit_backlog_summary": {
+				"description": "Current deposit actionability backlog summary grouped by `recommended_action`.",
+				"properties": {
+					"amount_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"deposits_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"newest_block_timestamp": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"oldest_block_timestamp": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"recommended_action": {
+						"format": "text",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"usdt_deposit_funnel_daily": {
+				"description": "Deposit funnel time-series. `stage` is `recommended_action` plus an `all` row per day.",
+				"properties": {
+					"amount_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"deposits_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"stage": {
+						"format": "text",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"usdt_deposit_txs": {
+				"description": "Chronological USDT deposit Transfer logs into deterministic receivers, enriched with lease/claim linkage.\n\nRows correspond to canonical TRC-20 `Transfer` logs (tx_hash + log_index) into deterministic receivers.\n\nLinkage fields:\n- `expected_*` => best-effort attribution by (receiver_salt, timestamp) to the active lease window.\n- `claim_*`    => direct hub claim match for pre-entitle origins (origin_id == tx_hash), if any.\n- `linked_claims` => JSON array of best-effort claim attributions from `api.claim_usdt_deposit_attribution`\n  (includes receiver-pull FIFO allocations).",
+				"properties": {
+					"amount": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"block_hash": {
+						"format": "text",
+						"type": "string"
+					},
+					"block_number": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"block_time": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"block_timestamp": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"chain_id": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"claim_amount_usdt": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"claim_id": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"claim_lease_id": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"claim_lease_number": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"claim_lessee": {
+						"format": "text",
+						"type": "string"
+					},
+					"claim_origin": {
+						"format": "smallint",
+						"type": "integer"
+					},
+					"claim_realtor": {
+						"format": "text",
+						"type": "string"
+					},
+					"claim_status": {
+						"enum": ["created", "filled"],
+						"format": "hub.claim_status",
+						"type": "string"
+					},
+					"deposit_processed": {
+						"type": "boolean"
+					},
+					"deposit_processed_last_checked_at": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"expected_lease_id": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"expected_lease_number": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NumericValue"
+							}
+						]
+					},
+					"expected_lessee": {
+						"format": "text",
+						"type": "string"
+					},
+					"expected_realtor": {
+						"format": "text",
+						"type": "string"
+					},
+					"inserted_at": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"linked_claims": {
+						"type": "object"
+					},
+					"linked_claims_amount": {
+						"format": "text",
+						"type": "string"
+					},
+					"linked_claims_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"log_index": {
+						"format": "integer",
+						"type": "integer"
+					},
+					"receiver_salt": {
+						"format": "text",
+						"type": "string"
+					},
+					"recipient": {
+						"format": "text",
+						"type": "string"
+					},
+					"recommended_action": {
+						"format": "text",
+						"type": "string"
+					},
+					"sender": {
+						"format": "text",
+						"type": "string"
+					},
+					"token": {
+						"format": "text",
+						"type": "string"
+					},
+					"tx_hash": {
+						"format": "text",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"usdt_deposits_cumulative": {
+				"description": "Daily USDT deposits plus cumulative totals (running sums).",
+				"properties": {
+					"amount_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"amount_total_cum": {
+						"format": "text",
+						"type": "string"
+					},
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"deposits_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"deposits_total_cum": {
+						"format": "bigint",
+						"type": "integer"
+					}
+				},
+				"type": "object"
+			},
+			"usdt_deposits_daily": {
+				"description": "Daily rollup of canonical USDT deposit logs (count + sum + uniques).",
+				"properties": {
+					"amount_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"deposits_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"leases_touched": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"unique_receivers": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"unique_senders": {
+						"format": "bigint",
+						"type": "integer"
+					}
+				},
+				"type": "object"
+			},
+			"usdt_deposits_daily_by_action": {
+				"description": "Daily USDT deposit rollup split by `recommended_action` (operator funnel stage).",
+				"properties": {
+					"amount_total": {
+						"format": "text",
+						"type": "string"
+					},
+					"day": {
+						"format": "timestamp with time zone",
+						"type": "string"
+					},
+					"deposits_total": {
+						"format": "bigint",
+						"type": "integer"
+					},
+					"recommended_action": {
+						"format": "text",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			}
 		},
 		"parameters": {
 			"preferParams": {
@@ -4396,7 +7586,10 @@
 				"description": "Preference",
 				"required": false,
 				"in": "header",
-				"schema": { "type": "string", "enum": ["count=none", "count=exact", "count=planned", "count=estimated"] }
+				"schema": {
+					"type": "string",
+					"enum": ["count=none", "count=exact", "count=planned", "count=estimated"]
+				}
 			},
 			"preferPost": {
 				"name": "Prefer",
@@ -6228,6 +9421,1014 @@
 				"required": false,
 				"in": "query",
 				"schema": { "type": "string" }
+			},
+			"rowFilter.active_leases_daily.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.active_leases_daily.leases_active": {
+				"in": "query",
+				"name": "leases_active",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.active_leases_daily.leases_ended": {
+				"in": "query",
+				"name": "leases_ended",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.active_leases_daily.leases_started": {
+				"in": "query",
+				"name": "leases_started",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claim_fill_latency_daily.avg_seconds": {
+				"in": "query",
+				"name": "avg_seconds",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claim_fill_latency_daily.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claim_fill_latency_daily.filled_claims_total": {
+				"in": "query",
+				"name": "filled_claims_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claim_fill_latency_daily.p50_seconds": {
+				"in": "query",
+				"name": "p50_seconds",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claim_fill_latency_daily.p90_seconds": {
+				"in": "query",
+				"name": "p90_seconds",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claim_usdt_deposit_attribution.claim_id": {
+				"in": "query",
+				"name": "claim_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claim_usdt_deposit_attribution.lease_id": {
+				"in": "query",
+				"name": "lease_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claim_usdt_deposit_attribution.usdt_deposit_attribution": {
+				"in": "query",
+				"name": "usdt_deposit_attribution",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claims_created_daily.amount_usdt_total": {
+				"in": "query",
+				"name": "amount_usdt_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claims_created_daily.claims_created_pre_entitle": {
+				"in": "query",
+				"name": "claims_created_pre_entitle",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claims_created_daily.claims_created_receiver_pull": {
+				"in": "query",
+				"name": "claims_created_receiver_pull",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claims_created_daily.claims_created_subjective_pre_entitle": {
+				"in": "query",
+				"name": "claims_created_subjective_pre_entitle",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claims_created_daily.claims_created_total": {
+				"in": "query",
+				"name": "claims_created_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claims_created_daily.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claims_filled_daily.amount_usdt_total": {
+				"in": "query",
+				"name": "amount_usdt_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claims_filled_daily.claims_filled_total": {
+				"in": "query",
+				"name": "claims_filled_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.claims_filled_daily.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.hub_claim_first_versions.amount_usdt": {
+				"in": "query",
+				"name": "amount_usdt",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.hub_claim_first_versions.beneficiary": {
+				"in": "query",
+				"name": "beneficiary",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.hub_claim_first_versions.claim_id": {
+				"in": "query",
+				"name": "claim_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.hub_claim_first_versions.created_from_seq": {
+				"in": "query",
+				"name": "created_from_seq",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.hub_claim_first_versions.lease_id": {
+				"in": "query",
+				"name": "lease_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.hub_claim_first_versions.origin": {
+				"in": "query",
+				"name": "origin",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.hub_claim_first_versions.origin_timestamp": {
+				"in": "query",
+				"name": "origin_timestamp",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.hub_claim_first_versions.target_chain_id": {
+				"in": "query",
+				"name": "target_chain_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.hub_claim_first_versions.target_token": {
+				"in": "query",
+				"name": "target_token",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.claims_amount_total": {
+				"in": "query",
+				"name": "claims_amount_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.claims_filled": {
+				"in": "query",
+				"name": "claims_filled",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.claims_latest_origin_timestamp": {
+				"in": "query",
+				"name": "claims_latest_origin_timestamp",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.claims_total": {
+				"in": "query",
+				"name": "claims_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.deposits_amount_total": {
+				"in": "query",
+				"name": "deposits_amount_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.deposits_latest_block_timestamp": {
+				"in": "query",
+				"name": "deposits_latest_block_timestamp",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.deposits_total": {
+				"in": "query",
+				"name": "deposits_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.lease_id": {
+				"in": "query",
+				"name": "lease_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.lease_number": {
+				"in": "query",
+				"name": "lease_number",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.lessee": {
+				"in": "query",
+				"name": "lessee",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.nukeable_after": {
+				"in": "query",
+				"name": "nukeable_after",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.nukeable_after_utc": {
+				"in": "query",
+				"name": "nukeable_after_utc",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.realtor": {
+				"in": "query",
+				"name": "realtor",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.receiver_salt": {
+				"in": "query",
+				"name": "receiver_salt",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.start_time": {
+				"in": "query",
+				"name": "start_time",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_kpis.start_time_utc": {
+				"in": "query",
+				"name": "start_time_utc",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_view.pending_usdt_deposits": {
+				"in": "query",
+				"name": "pending_usdt_deposits",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_view.pending_usdt_deposits_amount": {
+				"in": "query",
+				"name": "pending_usdt_deposits_amount",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_view.pending_usdt_deposits_latest_block_timestamp": {
+				"in": "query",
+				"name": "pending_usdt_deposits_latest_block_timestamp",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_view.pending_usdt_deposits_total": {
+				"in": "query",
+				"name": "pending_usdt_deposits_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_view.receiver_address_evm": {
+				"in": "query",
+				"name": "receiver_address_evm",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.lease_view.receiver_address_tron": {
+				"in": "query",
+				"name": "receiver_address_tron",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.leases_ending_daily.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.leases_ending_daily.leases_ending_total": {
+				"in": "query",
+				"name": "leases_ending_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.leases_started_daily.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.leases_started_daily.leases_started_total": {
+				"in": "query",
+				"name": "leases_started_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.protocol_pnl_timeseries.block_time": {
+				"in": "query",
+				"name": "block_time",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.protocol_pnl_timeseries.block_timestamp": {
+				"in": "query",
+				"name": "block_timestamp",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.protocol_pnl_timeseries.delta": {
+				"in": "query",
+				"name": "delta",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.protocol_pnl_timeseries.pnl": {
+				"in": "query",
+				"name": "pnl",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.protocol_pnl_timeseries.reason": {
+				"in": "query",
+				"name": "reason",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.protocol_pnl_timeseries.valid_from_seq": {
+				"in": "query",
+				"name": "valid_from_seq",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.realtor_deposits_daily.amount_total": {
+				"in": "query",
+				"name": "amount_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.realtor_deposits_daily.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.realtor_deposits_daily.deposits_total": {
+				"in": "query",
+				"name": "deposits_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.realtor_deposits_daily.leases_touched": {
+				"in": "query",
+				"name": "leases_touched",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.realtor_deposits_daily.realtor": {
+				"in": "query",
+				"name": "realtor",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_backlog_age_buckets.age_bucket": {
+				"in": "query",
+				"name": "age_bucket",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_backlog_age_buckets.amount_total": {
+				"in": "query",
+				"name": "amount_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_backlog_age_buckets.deposits_total": {
+				"in": "query",
+				"name": "deposits_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_backlog_age_buckets.recommended_action": {
+				"in": "query",
+				"name": "recommended_action",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_backlog_summary.amount_total": {
+				"in": "query",
+				"name": "amount_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_backlog_summary.deposits_total": {
+				"in": "query",
+				"name": "deposits_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_backlog_summary.newest_block_timestamp": {
+				"in": "query",
+				"name": "newest_block_timestamp",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_backlog_summary.oldest_block_timestamp": {
+				"in": "query",
+				"name": "oldest_block_timestamp",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_backlog_summary.recommended_action": {
+				"in": "query",
+				"name": "recommended_action",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_funnel_daily.amount_total": {
+				"in": "query",
+				"name": "amount_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_funnel_daily.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_funnel_daily.deposits_total": {
+				"in": "query",
+				"name": "deposits_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_funnel_daily.stage": {
+				"in": "query",
+				"name": "stage",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.amount": {
+				"in": "query",
+				"name": "amount",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.block_hash": {
+				"in": "query",
+				"name": "block_hash",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.block_number": {
+				"in": "query",
+				"name": "block_number",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.block_time": {
+				"in": "query",
+				"name": "block_time",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.block_timestamp": {
+				"in": "query",
+				"name": "block_timestamp",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.chain_id": {
+				"in": "query",
+				"name": "chain_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.claim_amount_usdt": {
+				"in": "query",
+				"name": "claim_amount_usdt",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.claim_id": {
+				"in": "query",
+				"name": "claim_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.claim_lease_id": {
+				"in": "query",
+				"name": "claim_lease_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.claim_lease_number": {
+				"in": "query",
+				"name": "claim_lease_number",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.claim_lessee": {
+				"in": "query",
+				"name": "claim_lessee",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.claim_origin": {
+				"in": "query",
+				"name": "claim_origin",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.claim_realtor": {
+				"in": "query",
+				"name": "claim_realtor",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.claim_status": {
+				"in": "query",
+				"name": "claim_status",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.deposit_processed": {
+				"in": "query",
+				"name": "deposit_processed",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.deposit_processed_last_checked_at": {
+				"in": "query",
+				"name": "deposit_processed_last_checked_at",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.expected_lease_id": {
+				"in": "query",
+				"name": "expected_lease_id",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.expected_lease_number": {
+				"in": "query",
+				"name": "expected_lease_number",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.expected_lessee": {
+				"in": "query",
+				"name": "expected_lessee",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.expected_realtor": {
+				"in": "query",
+				"name": "expected_realtor",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.inserted_at": {
+				"in": "query",
+				"name": "inserted_at",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.linked_claims": {
+				"in": "query",
+				"name": "linked_claims",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.linked_claims_amount": {
+				"in": "query",
+				"name": "linked_claims_amount",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.linked_claims_total": {
+				"in": "query",
+				"name": "linked_claims_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.log_index": {
+				"in": "query",
+				"name": "log_index",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.receiver_salt": {
+				"in": "query",
+				"name": "receiver_salt",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.recipient": {
+				"in": "query",
+				"name": "recipient",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.recommended_action": {
+				"in": "query",
+				"name": "recommended_action",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.sender": {
+				"in": "query",
+				"name": "sender",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.token": {
+				"in": "query",
+				"name": "token",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposit_txs.tx_hash": {
+				"in": "query",
+				"name": "tx_hash",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_cumulative.amount_total": {
+				"in": "query",
+				"name": "amount_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_cumulative.amount_total_cum": {
+				"in": "query",
+				"name": "amount_total_cum",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_cumulative.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_cumulative.deposits_total": {
+				"in": "query",
+				"name": "deposits_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_cumulative.deposits_total_cum": {
+				"in": "query",
+				"name": "deposits_total_cum",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily.amount_total": {
+				"in": "query",
+				"name": "amount_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily.deposits_total": {
+				"in": "query",
+				"name": "deposits_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily.leases_touched": {
+				"in": "query",
+				"name": "leases_touched",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily.unique_receivers": {
+				"in": "query",
+				"name": "unique_receivers",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily.unique_senders": {
+				"in": "query",
+				"name": "unique_senders",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily_by_action.amount_total": {
+				"in": "query",
+				"name": "amount_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily_by_action.day": {
+				"in": "query",
+				"name": "day",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily_by_action.deposits_total": {
+				"in": "query",
+				"name": "deposits_total",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
+			},
+			"rowFilter.usdt_deposits_daily_by_action.recommended_action": {
+				"in": "query",
+				"name": "recommended_action",
+				"schema": {
+					"type": "string"
+				},
+				"style": "form"
 			}
 		}
 	},

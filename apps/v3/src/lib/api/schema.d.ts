@@ -4,5814 +4,7348 @@
  */
 
 export interface paths {
-    "/leases/{lease_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Fetch an aggregated lease view
-         * @description Returns a realtor-side aggregated view of a lease in the Untron V3 protocol.
-         *
-         *     This endpoint is designed to provide a stable response schema while still exposing rich information sourced from the indexer API.
-         *
-         *     Uint256-like values are returned as decimal strings.
-         */
-        get: operations["get_lease"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/payout_config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Relay a gasless payout config update
-         * @description Relays a lessee-signed EIP-712 `setPayoutConfigWithSig` update.
-         *
-         *     Prevalidation uses indexer data:
-         *     - lease must exist and must have been created by this realtor
-         *     - chain must not be deprecated (if known by indexer)
-         *     - swap rate/bridger routing must be configured (best-effort)
-         *     - lease nonce is fetched from hub_lease_nonces (defaults to 0 if absent)
-         *
-         *     Signature validation:
-         *     - EOAs are validated locally by recovering the signer from the EIP-712 digest.
-         *     - For contract lessees (ERC-1271), the service attempts an `eth_call` to `isValidSignature`.
-         */
-        post: operations["post_payout_config"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/realtor": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Fetch realtor terms and supported pairs
-         * @description Returns current realtor limits, effective fee defaults, fee adders, and the list of supported (target_chain_id,target_token) pairs derived from the current bridger routing table.
-         */
-        get: operations["get_realtor"];
-        put?: never;
-        /**
-         * Create an address lease in Untron V3 protocol.
-         * @description Creates a lease on Untron V3 through the API's realtor.
-         *
-         *     The caller must provide payout destination (target_chain_id,target_token,beneficiary) and duration_seconds. Optionally, provide receiver_salt and lessee.
-         *
-         *     The (target_chain_id,target_token) pair must exist in the current bridger routing table (hub_bridgers with valid_to_seq is null). If lessee is provided, arbitrary_lessee_flat_fee is added to the flat fee.
-         */
-        post: operations["post_realtor"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** OpenAPI description (this document) */
-        get: operations["root_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_pulled_from_receiver": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Controller sweep ledger (append-only)
-         * @description Records each receiver sweep and the computed USDT-equivalent amount.
-         */
-        get: operations["controller_pulled_from_receiver_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_usdt_transfers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Controller executor USDT transfer ledger (append-only) */
-        get: operations["controller_usdt_transfers_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_receivers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Current mapping of receiver salts to deployed receiver addresses (KV) */
-        get: operations["controller_receivers_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_lp_allowlist": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current LP allowlist (KV)
-         * @description LPs must be allowlisted to deposit principal into the hub fast-fill vault.
-         */
-        get: operations["hub_lp_allowlist_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/unaccounted_receiver_usdt_transfers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Unaccounted receiver USDT deposits
-         * @description Tron TRC-20 Transfer logs not yet reflected as hub claims
-         *
-         *     Rows in this view correspond to canonical TRC-20 USDT transfers into
-         *     deterministic receivers that do NOT yet have a hub-side claim with
-         *     `origin in (pre-entitle, subjective pre-entitle)` matching
-         *     `origin_id = tx_hash`.
-         *
-         *     This view is intended for operators to identify deposits that may require
-         *     action (preEntitle or receiver pull).
-         */
-        get: operations["unaccounted_receiver_usdt_transfers_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_claims": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current claim states (KV)
-         * @description Claims are created by proven Tron deposits / LP-sponsored subjective pre-entitlement / controller profit volume,
-         *     and transition to `filled` when a filler settles them.
-         */
-        get: operations["hub_claims_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/receiver_usdt_indexer_status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Receiver USDT transfer indexer status (tail + backfill).
-         * @description The TRC-20 receiver transfer indexer has two moving parts:
-         *     - a single shared tail cursor (`ctl.receiver_usdt_tail_cursor.next_block`), and
-         *     - per-receiver backfill cursors (`ctl.receiver_watchlist.backfill_next_block`).
-         *
-         *     Relayers should generally avoid acting on receiver-transfer-derived state unless:
-         *     - `min_backfill_next_block` is NULL (no pending backfills), and
-         *     - `tail_next_block` is close to the Tron head (with the relayer's own head check).
-         */
-        get: operations["receiver_usdt_indexer_status_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_controller_processed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Hub-side controller processed events ledger (append-only)
-         * @description Records that the hub processed a queued controller event during reconciliation.
-         */
-        get: operations["hub_controller_processed_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_controller_state": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Hub controller sync state (materialized)
-         * @description This single-row view is a DB projection of hub events and is intended to replace hub
-         *     read-RPC calls:
-         *
-         *     - `last_controller_event_tip` == UntronV3Base.lastControllerEventTip()
-         *     - `last_controller_event_seq` == UntronV3Base.lastControllerEventSeq()
-         *     - `next_controller_event_index` == UntronV3Base.nextControllerEventIndex()
-         *
-         *     Values reflect the hub's canonical event stream as applied by the indexer.
-         */
-        get: operations["hub_controller_state_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_lp": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Current controller LP address (singleton) */
-        get: operations["controller_lp_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/receiver_usdt_balances": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Net receiver USDT balances derived from indexed transfer logs and pull
-         * @description ledgers.
-         *
-         *     This is a deterministic approximation of each receiver's USDT balance:
-         *       sum(incoming TRC-20 transfers into the receiver) - sum(controller pulls from that receiver)
-         *
-         *     It assumes receiver addresses do not have other outflows besides controller pulls.
-         */
-        get: operations["receiver_usdt_balances_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_payloads": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current controller rebalancer payloads (KV)
-         * @description Payloads configure how USDT is bridged out of Tron for each rebalancer implementation.
-         */
-        get: operations["controller_payloads_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/receiver_usdt_transfer_actionability": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Receiver USDT deposits + actionability hints (preEntitle vs pull)
-         * @description For each canonical TRC-20 USDT transfer into a deterministic receiver, this view shows:
-         *     - whether the hub has already accounted for it (matching claim origin_id == tx_hash),
-         *     - the latest observed receiver pull timestamp for (receiver_salt, token), and
-         *     - whether `preEntitle` is still time-eligible (`transfer_ts > last_pull_ts`).
-         *
-         *     `recommended_action` is a best-effort operator hint:
-         *     - 'already_accounted' => hub claim exists (origin pre-entitle or subjective pre-entitle)
-         *     - 'pre_entitle'        => no claim yet and pre-entitle timing is still allowed
-         *     - 'pull'               => no claim yet and a later pull timestamp suggests pre-entitle would revert
-         */
-        get: operations["receiver_usdt_transfer_actionability_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/relayer_hub_state": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Relayer hub state bundle
-         * @description Convenience single-row view combining:
-         *     - api.hub_controller_state
-         *
-         *     Intended for relayer use to minimize HTTP round trips.
-         */
-        get: operations["relayer_hub_state_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_payout_configs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current payout configuration per lease (KV)
-         * @description Defines destination chain, settlement token, and beneficiary for newly created claims under each lease.
-         */
-        get: operations["hub_payout_configs_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/stream_ingest_summary": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Per-stream ingestion/projection summary for relayers.
-         * @description This view is intentionally minimal:
-         *     - It does NOT attempt to query RPC head (that stays in the relayer).
-         *     - It DOES let relayers detect when projections are behind ingestion (`is_projection_caught_up = false`),
-         *       which would make derived "current state" views stale.
-         */
-        get: operations["stream_ingest_summary_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_owner": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Current controller owner (singleton) */
-        get: operations["controller_owner_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_swap_rates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current swap rates for settlement tokens (KV)
-         * @description Rates are used by fillers to swap USDT into the target token during claim settlement.
-         */
-        get: operations["hub_swap_rates_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Health check endpoint
-         * @description Always returns a single row with `status = 'ok'` if PostgREST can query the database.
-         */
-        get: operations["health_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/realtor_effective_config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Realtor effective config
-         * @description (protocol floors + realtor overrides + rate remaining).
-         *
-         *     This view merges the protocol-wide floor limits with the current realtor row and returns:
-         *     - `allowed`
-         *     - `min_fee_ppm`, `min_flat_fee`, `max_duration_seconds` (effective minima/maxima)
-         *     - `lease_rate_*` and `lease_rate_remaining` (best-effort, computed from current leases within the window)
-         */
-        get: operations["realtor_effective_config_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_lp_tokens_withdrawn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Controller LP token withdrawal ledger (append-only) */
-        get: operations["controller_lp_tokens_withdrawn_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_protocol_config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current hub protocol configuration (singleton)
-         * @description Derived from a set of hub config events (USDT, Tron reader, fee floors, rate limits).
-         */
-        get: operations["hub_protocol_config_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_lp_balances": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current derived LP principal balances (KV)
-         * @description Derived deterministically from hub `LpDeposited`/`LpWithdrawn` events.
-         */
-        get: operations["hub_lp_balances_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_lease_nonces": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current per-lease nonces (KV)
-         * @description Used for replay protection on EIP-712 signature-based payout config updates.
-         */
-        get: operations["hub_lease_nonces_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_usdt": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Current controller canonical USDT token (singleton) */
-        get: operations["controller_usdt_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current hub owner (singleton)
-         * @description Derived from `OwnershipTransferred` events emitted via `UntronV3Index`.
-         */
-        get: operations["hub_ownership_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_leases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current lease registry (KV)
-         * @description Leases define who controls payouts (lessee), which receiver salt they apply to, and fee schedule parameters.
-         */
-        get: operations["hub_leases_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_executor": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Current controller executor (singleton) */
-        get: operations["controller_executor_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_lp_exchange_rates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current LP exchange rates for non-USDT tokens (KV)
-         * @description Used by controller sweeps to compute USDT-equivalent amounts.
-         */
-        get: operations["controller_lp_exchange_rates_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/event_appended": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Canonical raw EventAppended stream (both hub + controller)
-         * @description This is the canonical ordered stream of Untron "semantic events", as emitted by the onchain index contracts.
-         *     Each row corresponds to one onchain `EventAppended` log and includes:
-         *     - hash-chain linkage (prev_tip/new_tip/event_seq)
-         *     - the semantic event name (`event_type`) and decoded arguments (`args`)
-         *     - block/tx metadata for auditability
-         *
-         *     This view filters to `canonical=true` only.
-         */
-        get: operations["event_appended_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/stream_cursor": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Projection cursors (per stream)
-         * @description Shows how far the database has applied canonical events to derived state tables.
-         *
-         *     Fields:
-         *     - `applied_through_seq`: highest contiguous canonical event_seq applied
-         *     - `tip`: expected prev_tip for the next event
-         *     - `updated_at`: last time the cursor advanced/rolled back
-         */
-        get: operations["stream_cursor_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_protocol_pnl": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current protocol PnL snapshot (singleton)
-         * @description Tracks fee revenue and rebalance/withdrawal deltas as emitted by the hub contract.
-         */
-        get: operations["hub_protocol_pnl_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_bridgers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current bridger routing table (KV)
-         * @description If a claim targets a different chain than the hub chain, the configured bridger is used to deliver funds.
-         */
-        get: operations["hub_bridgers_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/lease_view": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Aggregated lease view (single-row per lease_id).
-         * @description This view joins:
-         *     - current hub lease (hub.lease_versions)
-         *     - current payout config (hub.payout_config_versions)
-         *     - payout config history (hub.payout_config_versions, all versions)
-         *     - current per-lease nonce (hub.lease_nonce_versions)
-         *     - current claim states (hub.claim_versions)
-         *
-         *     It is intended for clients that want a single PostgREST request to fetch a full
-         *     lease "detail" payload.
-         */
-        get: operations["lease_view_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_tokens_rescued": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Hub token rescue ledger (append-only) */
-        get: operations["hub_tokens_rescued_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_tip_proofs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Controller tip proof logs (IsEventChainTipCalled)
-         * @description On Tron, the controller exposes `isEventChainTip(bytes32)` which emits `IsEventChainTipCalled`.
-         *     This event is NOT appended into the controller's hash chain; it is used as a proof-carrying log to
-         *     anchor controller event sequences.
-         *
-         *     This view filters to `canonical=true` only.
-         */
-        get: operations["controller_tip_proofs_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_realtors": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current realtor allowlist + realtor config (KV)
-         * @description Realtors are addresses allowed to create leases on the hub (`UntronV3.createLease`).
-         */
-        get: operations["hub_realtors_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/controller_usdt_rebalanced": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Controller USDT rebalance ledger (append-only) */
-        get: operations["controller_usdt_rebalanced_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_controller_tip_updates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Hub-side controller tip update ledger (append-only)
-         * @description Records the raw controller event bytes that were hash-linked into the controller tip as seen by the hub.
-         */
-        get: operations["hub_controller_tip_updates_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/receiver_salt_candidates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Receiver salt candidates for realtor selection.
-         * @description Joins:
-         *     - `api.controller_receivers` (allowed salts)
-         *     - `api.receiver_usdt_balances` (cached balance view)
-         *     - latest hub lease by receiver_salt (for `nukeable_after`)
-         *
-         *     Computed fields:
-         *     - `has_balance`: `balance_amount > 0`
-         *     - `is_free`: receiver has no current lease or lease is nukeable (based on `nukeable_after <= now`)
-         */
-        get: operations["receiver_salt_candidates_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_chains": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Current chain deprecation flags (KV)
-         * @description Deprecated destination chains cannot be selected in new payout configs.
-         */
-        get: operations["hub_chains_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hub_lp_vault_events": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Hub LP vault deposit/withdraw ledger (append-only) */
-        get: operations["hub_lp_vault_events_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
+	'/leases/{lease_id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Fetch an aggregated lease view
+		 * @description Returns a realtor-side aggregated view of a lease in the Untron V3 protocol.
+		 *
+		 *     This endpoint is designed to provide a stable response schema while still exposing rich information sourced from the indexer API.
+		 *
+		 *     Uint256-like values are returned as decimal strings.
+		 */
+		get: operations['get_lease'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/payout_config': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/**
+		 * Relay a gasless payout config update
+		 * @description Relays a lessee-signed EIP-712 `setPayoutConfigWithSig` update.
+		 *
+		 *     Prevalidation uses indexer data:
+		 *     - lease must exist and must have been created by this realtor
+		 *     - chain must not be deprecated (if known by indexer)
+		 *     - swap rate/bridger routing must be configured (best-effort)
+		 *     - lease nonce is fetched from hub_lease_nonces (defaults to 0 if absent)
+		 *
+		 *     Signature validation:
+		 *     - EOAs are validated locally by recovering the signer from the EIP-712 digest.
+		 *     - For contract lessees (ERC-1271), the service attempts an `eth_call` to `isValidSignature`.
+		 */
+		post: operations['post_payout_config'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/realtor': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Fetch realtor terms and supported pairs
+		 * @description Returns current realtor limits, effective fee defaults, fee adders, and the list of supported (target_chain_id,target_token) pairs derived from the current bridger routing table.
+		 */
+		get: operations['get_realtor'];
+		put?: never;
+		/**
+		 * Create an address lease in Untron V3 protocol.
+		 * @description Creates a lease on Untron V3 through the API's realtor.
+		 *
+		 *     The caller must provide payout destination (target_chain_id,target_token,beneficiary) and duration_seconds. Optionally, provide receiver_salt and lessee.
+		 *
+		 *     The (target_chain_id,target_token) pair must exist in the current bridger routing table (hub_bridgers with valid_to_seq is null). If lessee is provided, arbitrary_lessee_flat_fee is added to the flat fee.
+		 */
+		post: operations['post_realtor'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** OpenAPI description (this document) */
+		get: operations['root_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_pulled_from_receiver': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Controller sweep ledger (append-only)
+		 * @description Records each receiver sweep and the computed USDT-equivalent amount.
+		 */
+		get: operations['controller_pulled_from_receiver_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_usdt_transfers': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Controller executor USDT transfer ledger (append-only) */
+		get: operations['controller_usdt_transfers_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_receivers': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Current mapping of receiver salts to deployed receiver addresses (KV) */
+		get: operations['controller_receivers_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_lp_allowlist': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current LP allowlist (KV)
+		 * @description LPs must be allowlisted to deposit principal into the hub fast-fill vault.
+		 */
+		get: operations['hub_lp_allowlist_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/unaccounted_receiver_usdt_transfers': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Unaccounted receiver USDT deposits
+		 * @description Tron TRC-20 Transfer logs not yet reflected as hub claims
+		 *
+		 *     Rows in this view correspond to canonical TRC-20 USDT transfers into
+		 *     deterministic receivers that do NOT yet have a hub-side claim with
+		 *     `origin in (pre-entitle, subjective pre-entitle)` matching
+		 *     `origin_id = tx_hash`.
+		 *
+		 *     This view is intended for operators to identify deposits that may require
+		 *     action (preEntitle or receiver pull).
+		 */
+		get: operations['unaccounted_receiver_usdt_transfers_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_claims': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current claim states (KV)
+		 * @description Claims are created by proven Tron deposits / LP-sponsored subjective pre-entitlement / controller profit volume,
+		 *     and transition to `filled` when a filler settles them.
+		 */
+		get: operations['hub_claims_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/receiver_usdt_indexer_status': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Receiver USDT transfer indexer status (tail + backfill).
+		 * @description The TRC-20 receiver transfer indexer has two moving parts:
+		 *     - a single shared tail cursor (`ctl.receiver_usdt_tail_cursor.next_block`), and
+		 *     - per-receiver backfill cursors (`ctl.receiver_watchlist.backfill_next_block`).
+		 *
+		 *     Relayers should generally avoid acting on receiver-transfer-derived state unless:
+		 *     - `min_backfill_next_block` is NULL (no pending backfills), and
+		 *     - `tail_next_block` is close to the Tron head (with the relayer's own head check).
+		 */
+		get: operations['receiver_usdt_indexer_status_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_controller_processed': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Hub-side controller processed events ledger (append-only)
+		 * @description Records that the hub processed a queued controller event during reconciliation.
+		 */
+		get: operations['hub_controller_processed_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_controller_state': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Hub controller sync state (materialized)
+		 * @description This single-row view is a DB projection of hub events and is intended to replace hub
+		 *     read-RPC calls:
+		 *
+		 *     - `last_controller_event_tip` == UntronV3Base.lastControllerEventTip()
+		 *     - `last_controller_event_seq` == UntronV3Base.lastControllerEventSeq()
+		 *     - `next_controller_event_index` == UntronV3Base.nextControllerEventIndex()
+		 *
+		 *     Values reflect the hub's canonical event stream as applied by the indexer.
+		 */
+		get: operations['hub_controller_state_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_lp': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Current controller LP address (singleton) */
+		get: operations['controller_lp_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/receiver_usdt_balances': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Net receiver USDT balances derived from indexed transfer logs and pull
+		 * @description ledgers.
+		 *
+		 *     This is a deterministic approximation of each receiver's USDT balance:
+		 *       sum(incoming TRC-20 transfers into the receiver) - sum(controller pulls from that receiver)
+		 *
+		 *     It assumes receiver addresses do not have other outflows besides controller pulls.
+		 */
+		get: operations['receiver_usdt_balances_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_payloads': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current controller rebalancer payloads (KV)
+		 * @description Payloads configure how USDT is bridged out of Tron for each rebalancer implementation.
+		 */
+		get: operations['controller_payloads_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/receiver_usdt_transfer_actionability': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Receiver USDT deposits + actionability hints (preEntitle vs pull)
+		 * @description For each canonical TRC-20 USDT transfer into a deterministic receiver, this view shows:
+		 *     - whether the hub has already accounted for it (matching claim origin_id == tx_hash),
+		 *     - the latest observed receiver pull timestamp for (receiver_salt, token), and
+		 *     - whether `preEntitle` is still time-eligible (`transfer_ts > last_pull_ts`).
+		 *
+		 *     `recommended_action` is a best-effort operator hint:
+		 *     - 'already_accounted' => hub claim exists (origin pre-entitle or subjective pre-entitle)
+		 *     - 'pre_entitle'        => no claim yet and pre-entitle timing is still allowed
+		 *     - 'pull'               => no claim yet and a later pull timestamp suggests pre-entitle would revert
+		 */
+		get: operations['receiver_usdt_transfer_actionability_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/relayer_hub_state': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Relayer hub state bundle
+		 * @description Convenience single-row view combining:
+		 *     - api.hub_controller_state
+		 *
+		 *     Intended for relayer use to minimize HTTP round trips.
+		 */
+		get: operations['relayer_hub_state_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_payout_configs': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current payout configuration per lease (KV)
+		 * @description Defines destination chain, settlement token, and beneficiary for newly created claims under each lease.
+		 */
+		get: operations['hub_payout_configs_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/stream_ingest_summary': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Per-stream ingestion/projection summary for relayers.
+		 * @description This view is intentionally minimal:
+		 *     - It does NOT attempt to query RPC head (that stays in the relayer).
+		 *     - It DOES let relayers detect when projections are behind ingestion (`is_projection_caught_up = false`),
+		 *       which would make derived "current state" views stale.
+		 */
+		get: operations['stream_ingest_summary_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_owner': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Current controller owner (singleton) */
+		get: operations['controller_owner_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_swap_rates': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current swap rates for settlement tokens (KV)
+		 * @description Rates are used by fillers to swap USDT into the target token during claim settlement.
+		 */
+		get: operations['hub_swap_rates_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/health': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Health check endpoint
+		 * @description Always returns a single row with `status = 'ok'` if PostgREST can query the database.
+		 */
+		get: operations['health_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/realtor_effective_config': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Realtor effective config
+		 * @description (protocol floors + realtor overrides + rate remaining).
+		 *
+		 *     This view merges the protocol-wide floor limits with the current realtor row and returns:
+		 *     - `allowed`
+		 *     - `min_fee_ppm`, `min_flat_fee`, `max_duration_seconds` (effective minima/maxima)
+		 *     - `lease_rate_*` and `lease_rate_remaining` (best-effort, computed from current leases within the window)
+		 */
+		get: operations['realtor_effective_config_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_lp_tokens_withdrawn': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Controller LP token withdrawal ledger (append-only) */
+		get: operations['controller_lp_tokens_withdrawn_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_protocol_config': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current hub protocol configuration (singleton)
+		 * @description Derived from a set of hub config events (USDT, Tron reader, fee floors, rate limits).
+		 */
+		get: operations['hub_protocol_config_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_lp_balances': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current derived LP principal balances (KV)
+		 * @description Derived deterministically from hub `LpDeposited`/`LpWithdrawn` events.
+		 */
+		get: operations['hub_lp_balances_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_lease_nonces': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current per-lease nonces (KV)
+		 * @description Used for replay protection on EIP-712 signature-based payout config updates.
+		 */
+		get: operations['hub_lease_nonces_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_usdt': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Current controller canonical USDT token (singleton) */
+		get: operations['controller_usdt_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_ownership': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current hub owner (singleton)
+		 * @description Derived from `OwnershipTransferred` events emitted via `UntronV3Index`.
+		 */
+		get: operations['hub_ownership_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_leases': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current lease registry (KV)
+		 * @description Leases define who controls payouts (lessee), which receiver salt they apply to, and fee schedule parameters.
+		 */
+		get: operations['hub_leases_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_executor': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Current controller executor (singleton) */
+		get: operations['controller_executor_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_lp_exchange_rates': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current LP exchange rates for non-USDT tokens (KV)
+		 * @description Used by controller sweeps to compute USDT-equivalent amounts.
+		 */
+		get: operations['controller_lp_exchange_rates_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/event_appended': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Canonical raw EventAppended stream (both hub + controller)
+		 * @description This is the canonical ordered stream of Untron "semantic events", as emitted by the onchain index contracts.
+		 *     Each row corresponds to one onchain `EventAppended` log and includes:
+		 *     - hash-chain linkage (prev_tip/new_tip/event_seq)
+		 *     - the semantic event name (`event_type`) and decoded arguments (`args`)
+		 *     - block/tx metadata for auditability
+		 *
+		 *     This view filters to `canonical=true` only.
+		 */
+		get: operations['event_appended_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/stream_cursor': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Projection cursors (per stream)
+		 * @description Shows how far the database has applied canonical events to derived state tables.
+		 *
+		 *     Fields:
+		 *     - `applied_through_seq`: highest contiguous canonical event_seq applied
+		 *     - `tip`: expected prev_tip for the next event
+		 *     - `updated_at`: last time the cursor advanced/rolled back
+		 */
+		get: operations['stream_cursor_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_protocol_pnl': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current protocol PnL snapshot (singleton)
+		 * @description Tracks fee revenue and rebalance/withdrawal deltas as emitted by the hub contract.
+		 */
+		get: operations['hub_protocol_pnl_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_bridgers': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current bridger routing table (KV)
+		 * @description If a claim targets a different chain than the hub chain, the configured bridger is used to deliver funds.
+		 */
+		get: operations['hub_bridgers_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/lease_view': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Aggregated lease view (single-row per lease_id).
+		 * @description This view joins:
+		 *     - current hub lease (hub.lease_versions)
+		 *     - current payout config (hub.payout_config_versions)
+		 *     - payout config history (hub.payout_config_versions, all versions)
+		 *     - current per-lease nonce (hub.lease_nonce_versions)
+		 *     - current claim states (hub.claim_versions)
+		 *
+		 *     It is intended for clients that want a single PostgREST request to fetch a full
+		 *     lease "detail" payload.
+		 */
+		get: operations['lease_view_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_tokens_rescued': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Hub token rescue ledger (append-only) */
+		get: operations['hub_tokens_rescued_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_tip_proofs': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Controller tip proof logs (IsEventChainTipCalled)
+		 * @description On Tron, the controller exposes `isEventChainTip(bytes32)` which emits `IsEventChainTipCalled`.
+		 *     This event is NOT appended into the controller's hash chain; it is used as a proof-carrying log to
+		 *     anchor controller event sequences.
+		 *
+		 *     This view filters to `canonical=true` only.
+		 */
+		get: operations['controller_tip_proofs_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_realtors': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current realtor allowlist + realtor config (KV)
+		 * @description Realtors are addresses allowed to create leases on the hub (`UntronV3.createLease`).
+		 */
+		get: operations['hub_realtors_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/controller_usdt_rebalanced': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Controller USDT rebalance ledger (append-only) */
+		get: operations['controller_usdt_rebalanced_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_controller_tip_updates': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Hub-side controller tip update ledger (append-only)
+		 * @description Records the raw controller event bytes that were hash-linked into the controller tip as seen by the hub.
+		 */
+		get: operations['hub_controller_tip_updates_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/receiver_salt_candidates': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Receiver salt candidates for realtor selection.
+		 * @description Joins:
+		 *     - `api.controller_receivers` (allowed salts)
+		 *     - `api.receiver_usdt_balances` (cached balance view)
+		 *     - latest hub lease by receiver_salt (for `nukeable_after`)
+		 *
+		 *     Computed fields:
+		 *     - `has_balance`: `balance_amount > 0`
+		 *     - `is_free`: receiver has no current lease or lease is nukeable (based on `nukeable_after <= now`)
+		 */
+		get: operations['receiver_salt_candidates_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_chains': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Current chain deprecation flags (KV)
+		 * @description Deprecated destination chains cannot be selected in new payout configs.
+		 */
+		get: operations['hub_chains_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_lp_vault_events': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Hub LP vault deposit/withdraw ledger (append-only) */
+		get: operations['hub_lp_vault_events_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/active_leases_daily': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily active lease count (running starts minus ends) over a continuous day series. */
+		get: operations['active_leases_daily_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/claim_fill_latency_daily': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily latency stats for filled claims: (ClaimFilled block_time - origin_timestamp). */
+		get: operations['claim_fill_latency_daily_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/claim_usdt_deposit_attribution': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * USDT deposit attribution per claim (best-effort).
+		 * @description Returns a JSON array of deposit attribution entries for each claim:
+		 *     - Pre-entitle origins (0/1): matched by txId to `ctl.receiver_usdt_transfers`.
+		 *     - Receiver-pull origin (2): FIFO allocation of `origin_raw_amount` across receiver USDT transfers since previous pull.
+		 */
+		get: operations['claim_usdt_deposit_attribution_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/claims_created_daily': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily rollup of claims created (first version per claim; timestamp from hub event stream). */
+		get: operations['claims_created_daily_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/claims_filled_daily': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily rollup of filled claims (current rows only; timestamp from ClaimFilled event). */
+		get: operations['claims_filled_daily_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/hub_claim_first_versions': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** First persisted version per (lease_id, claim_id), used for claim-created time-series. */
+		get: operations['hub_claim_first_versions_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/lease_kpis': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Per-lease KPIs: deposits, claims, and last activity timestamps (best-effort). */
+		get: operations['lease_kpis_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/leases_ending_daily': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily count of current leases by nukeable_after (scheduled/expected end time). */
+		get: operations['leases_ending_daily_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/leases_started_daily': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily count of current leases by start_time (not historical versions). */
+		get: operations['leases_started_daily_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/protocol_pnl_timeseries': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Protocol PnL snapshots as a time-series (timestamped by hub event stream). */
+		get: operations['protocol_pnl_timeseries_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/realtor_deposits_daily': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily USDT deposits attributed to realtor (via expected_lease_id -> lease.realtor). */
+		get: operations['realtor_deposits_daily_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/usdt_deposit_backlog_age_buckets': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Deposit backlog grouped into age buckets (relative to now()). */
+		get: operations['usdt_deposit_backlog_age_buckets_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/usdt_deposit_backlog_summary': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Current deposit actionability backlog summary grouped by `recommended_action`. */
+		get: operations['usdt_deposit_backlog_summary_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/usdt_deposit_funnel_daily': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Deposit funnel time-series. `stage` is `recommended_action` plus an `all` row per day. */
+		get: operations['usdt_deposit_funnel_daily_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/usdt_deposit_txs': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/**
+		 * Chronological USDT deposit Transfer logs into deterministic receivers, enriched with lease/claim linkage.
+		 * @description Rows correspond to canonical TRC-20 `Transfer` logs (tx_hash + log_index) into deterministic receivers.
+		 *
+		 *     Linkage fields:
+		 *     - `expected_*` => best-effort attribution by (receiver_salt, timestamp) to the active lease window.
+		 *     - `claim_*`    => direct hub claim match for pre-entitle origins (origin_id == tx_hash), if any.
+		 *     - `linked_claims` => JSON array of best-effort claim attributions from `api.claim_usdt_deposit_attribution`
+		 *       (includes receiver-pull FIFO allocations).
+		 */
+		get: operations['usdt_deposit_txs_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/usdt_deposits_cumulative': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily USDT deposits plus cumulative totals (running sums). */
+		get: operations['usdt_deposits_cumulative_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/usdt_deposits_daily': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily rollup of canonical USDT deposit logs (count + sum + uniques). */
+		get: operations['usdt_deposits_daily_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/usdt_deposits_daily_by_action': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily USDT deposit rollup split by `recommended_action` (operator funnel stage). */
+		get: operations['usdt_deposits_daily_by_action_get'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        CreateLeaseRequest: {
-            /**
-             * @description Beneficiary address (EVM).
-             * @example 0x0000000000000000000000000000000000000003
-             */
-            beneficiary: string;
-            /**
-             * Format: int64
-             * @description Required lease duration in seconds.
-             *
-             *     Must be `<= max_duration_seconds` when `max_duration_seconds != 0`.
-             * @example 2592000
-             */
-            duration_seconds: number;
-            /**
-             * @description Optional lessee address.
-             *
-             *     - If omitted, the zero address is used.
-             *     - If provided, `arbitrary_lessee_flat_fee` is added to the flat fee.
-             * @example 0x0000000000000000000000000000000000000001
-             */
-            lessee?: string | null;
-            /**
-             * @description Optional receiver salt (bytes32 hex).
-             *
-             *     - If omitted, server selects an available salt.
-             *     - If provided, must exist in indexer `receiver_salt_candidates`.
-             * @example 0x0000000000000000000000000000000000000000000000000000000000000000
-             */
-            receiver_salt?: string | null;
-            /**
-             * Format: int64
-             * @description Destination EVM chainId.
-             *
-             *     Must have a configured bridger route for `(target_chain_id,target_token)`.
-             * @example 1
-             */
-            target_chain_id: number;
-            /**
-             * @description Target settlement token (EVM address on hub chain).
-             *
-             *     Must have a configured bridger route for `(target_chain_id,target_token)`.
-             * @example 0x0000000000000000000000000000000000000002
-             */
-            target_token: string;
-        };
-        CreateLeaseResponse: {
-            /**
-             * Format: int64
-             * @description Unix timestamp after which the lease is nukeable, computed as `now + duration_seconds`.
-             * @example 1700000000
-             */
-            nukeable_after: number;
-            /**
-             * @description Receiver salt selected/used for the lease (bytes32 hex).
-             * @example 0x0000000000000000000000000000000000000000000000000000000000000000
-             */
-            receiver_salt: string;
-            /**
-             * @description UserOperation hash.
-             * @example 0x0000000000000000000000000000000000000000000000000000000000000000
-             */
-            userop_hash: string;
-        };
-        ErrorResponse: {
-            /**
-             * @description Error message string.
-             * @example bad request
-             */
-            error: string;
-        };
-        LeaseClaimView: {
-            /**
-             * @description USDT-denominated claim amount (uint256, decimal string).
-             * @example 0
-             */
-            amount_usdt: string;
-            /**
-             * @description Best-effort attribution of this claim's underlying USDT deposits.
-             *
-             *     - For pre-entitle origins, this is usually a single entry.
-             *     - For receiver-pull origins, this may contain multiple entries (FIFO approximation) or be empty.
-             */
-            usdt_deposit_attribution: components["schemas"]["UsdtDepositAttributionEntryView"][];
-            /** @example 0x0000000000000000000000000000000000000003 */
-            beneficiary: string;
-            /**
-             * @description Claim id (uint256, decimal string).
-             * @example 0
-             */
-            claim_id: string;
-            /**
-             * Format: int32
-             * @description Origin code (matches `UntronV3Index.ClaimOrigin`).
-             * @example 0
-             */
-            origin: number;
-            /**
-             * @description Origin actor (EVM address).
-             * @example 0x0000000000000000000000000000000000000000
-             */
-            origin_actor: string;
-            /**
-             * @description Origin identifier (txId for pre-entitle, receiver_salt for receiver pull, etc.)
-             * @example 0x
-             */
-            origin_id: string;
-            /**
-             * @description Raw amount before fees (uint256, decimal string).
-             * @example 0
-             */
-            origin_raw_amount: string;
-            /**
-             * Format: int64
-             * @description Origin timestamp (seconds).
-             * @example 0
-             */
-            origin_timestamp: number;
-            /**
-             * @description Origin token/address (string; Tron token for receiver pull; zero address otherwise).
-             * @example 0x0000000000000000000000000000000000000000
-             */
-            origin_token: string;
-            /**
-             * @description Queue index (uint256, decimal string).
-             * @example 0
-             */
-            queue_index: string;
-            /**
-             * @description Fill (payout) transaction hash on the destination chain (0x hex).
-             * @example 0x0000000000000000000000000000000000000000000000000000000000000000
-             */
-            fill_tx_hash?: string | null;
-            /**
-             * @description Claim lifecycle status.
-             * @example created
-             */
-            status: string;
-            /**
-             * Format: int64
-             * @example 1
-             */
-            target_chain_id: number;
-            /** @example 0x0000000000000000000000000000000000000002 */
-            target_token: string;
-            /**
-             * Format: int64
-             * @example 0
-             */
-            valid_from_seq: number;
-            /** Format: int64 */
-            valid_to_seq?: number | null;
-        };
-        LeasePayoutConfigVersionView: {
-            config: components["schemas"]["LeasePayoutConfigView"];
-            /**
-             * Format: int64
-             * @example 0
-             */
-            valid_from_seq: number;
-            /** Format: int64 */
-            valid_to_seq?: number | null;
-        };
-        LeasePayoutConfigView: {
-            /** @example 0x0000000000000000000000000000000000000003 */
-            beneficiary: string;
-            /**
-             * Format: int64
-             * @example 1
-             */
-            target_chain_id: number;
-            /** @example 0x0000000000000000000000000000000000000002 */
-            target_token: string;
-        };
-        /**
-         * @description Realtor-side aggregated view of a lease in the Untron V3 protocol.
-         *
-         *     This response is designed to be stable for clients:
-         *     - Uint256-like values are returned as decimal strings.
-         *     - Source-of-truth data comes from the indexer API (PostgREST views).
-         */
-        LeaseViewResponse: {
-            /** @description Claims emitted by this lease (current state per claim_id). */
-            claims: components["schemas"]["LeaseClaimView"][];
-            /**
-             * Format: int64
-             * @description Number of filled claims.
-             * @example 0
-             */
-            claims_filled: number;
-            /**
-             * Format: int64
-             * @description Total number of claims.
-             * @example 0
-             */
-            claims_total: number;
-            /**
-             * @description Canonical receiver USDT deposits that are still eligible for `preEntitle`
-             *     and have not yet been accounted for by a hub pre-entitle claim.
-             *
-             *     Entries are a minimal, stable subset:
-             *     `{ tx_hash, sender, amount, block_timestamp, log_index }`.
-             */
-            pending_usdt_deposits: components["schemas"]["UsdtDepositAttributionEntryView"][];
-            /**
-             * @description Sum of pending deposit amounts (uint256, decimal string).
-             * @example 0
-             */
-            pending_usdt_deposits_amount: string;
-            /**
-             * Format: int64
-             * @description Latest pending deposit Tron block timestamp (seconds).
-             * @example 0
-             */
-            pending_usdt_deposits_latest_block_timestamp: number;
-            /**
-             * Format: int64
-             * @description Total number of pending deposits.
-             * @example 0
-             */
-            pending_usdt_deposits_total: number;
-            /**
-             * @description Flat fee (USDT units) (uint256, decimal string).
-             * @example 0
-             */
-            flat_fee: string;
-            /**
-             * @description Whether this lease was created by this realtor service instance.
-             * @example true
-             */
-            is_owned_by_this_realtor: boolean;
-            /**
-             * Format: int32
-             * @description Lease fee (ppm).
-             * @example 10000
-             */
-            lease_fee_ppm: number;
-            /**
-             * @description Lease id (uint256, decimal string).
-             * @example 1
-             */
-            lease_id: string;
-            /**
-             * @description Current per-lease nonce used for payout config signatures (uint256, decimal string).
-             * @example 0
-             */
-            lease_nonce: string;
-            /**
-             * @description Current lessee (EVM address) that controls payout config updates.
-             * @example 0x0000000000000000000000000000000000000001
-             */
-            lessee: string;
-            /**
-             * Format: int64
-             * @description Earliest timestamp when the lease is nukeable (unix seconds).
-             * @example 1700000000
-             */
-            nukeable_after: number;
-            payout_config_current?: null | components["schemas"]["LeasePayoutConfigView"];
-            /** @description Payout config history (KV versions ordered by valid_from_seq). */
-            payout_config_history: components["schemas"]["LeasePayoutConfigVersionView"][];
-            /**
-             * @description Realtor (EVM address) that created this lease.
-             * @example 0x0000000000000000000000000000000000000004
-             */
-            realtor: string;
-            /**
-             * @description Receiver address in EVM hex form (0x...).
-             *
-             *     This is the 20-byte address corresponding to the Tron receiver address.
-             * @example 0x0000000000000000000000000000000000000000
-             */
-            receiver_address_evm?: string | null;
-            /**
-             * @description Receiver address on Tron (base58check, T...).
-             *
-             *     Derived from `receiver_salt` using the controller's deterministic receiver scheme.
-             * @example T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb
-             */
-            receiver_address_tron?: string | null;
-            /**
-             * @description Receiver salt (bytes32 hex).
-             * @example 0x0000000000000000000000000000000000000000000000000000000000000000
-             */
-            receiver_salt: string;
-            /**
-             * Format: int64
-             * @description Lease start time on hub chain (unix seconds).
-             * @example 1700000000
-             */
-            start_time: number;
-        };
-        RealtorInfoResponse: {
-            /**
-             * @description Whether this realtor is allowlisted on the hub.
-             *
-             *     When false, `POST /realtor` returns `403`.
-             * @example true
-             */
-            allowed: boolean;
-            /**
-             * Format: int64
-             * @description Additional flat fee added when a non-null `lessee` is provided in `POST /realtor`.
-             * @example 0
-             */
-            arbitrary_lessee_flat_fee: number;
-            /**
-             * Format: int64
-             * @description Default duration seconds from this service's env (used only to compute effective_duration_seconds).
-             * @example 2592000
-             */
-            default_duration_seconds: number;
-            /**
-             * Format: int32
-             * @description Default lease fee PPM from this service's env.
-             * @example 10000
-             */
-            default_fee_ppm: number;
-            /**
-             * Format: int64
-             * @description Default flat fee from this service's env (before min and adders).
-             * @example 0
-             */
-            default_flat_fee: number;
-            /**
-             * Format: int64
-             * @description Effective duration seconds used for informational purposes (currently derived from defaults and max).
-             *
-             *     `POST /realtor` requires `duration_seconds` explicitly.
-             * @example 2592000
-             */
-            effective_duration_seconds: number;
-            /**
-             * Format: int64
-             * @description Rate limit: max leases in window.
-             * @example 0
-             */
-            lease_rate_max_leases: number;
-            /**
-             * Format: int64
-             * @description Rate limit: remaining leases in window (if reported by indexer).
-             */
-            lease_rate_remaining?: number | null;
-            /**
-             * Format: int64
-             * @description Rate limit: window size in seconds.
-             * @example 0
-             */
-            lease_rate_window_seconds: number;
-            /**
-             * Format: int64
-             * @description Maximum allowed lease duration in seconds.
-             *
-             *     If 0, no max is enforced by this service.
-             * @example 2592000
-             */
-            max_duration_seconds: number;
-            /**
-             * Format: int32
-             * @description Minimum lease fee PPM configured on hub for this realtor.
-             * @example 0
-             */
-            min_fee_ppm: number;
-            /**
-             * Format: int64
-             * @description Minimum flat fee configured on hub for this realtor.
-             * @example 0
-             */
-            min_flat_fee: number;
-            /**
-             * @description Address that identifies this realtor (the configured hub Safe).
-             * @example 0x0000000000000000000000000000000000000004
-             */
-            realtor_address: string;
-            /** @description Supported (target_chain_id,target_token) pairs from the current bridger routing table. */
-            supported_pairs: components["schemas"]["RealtorTargetPairResponse"][];
-            /**
-             * @description UntronV3 contract address on hub chain.
-             * @example 0x0000000000000000000000000000000000000005
-             */
-            untron_v3: string;
-            /**
-             * @description Optional upstream principal/user identifier echoed from `x-untron-principal-id`.
-             * @example acct_123
-             */
-            user?: string | null;
-        };
-        RealtorTargetPairResponse: {
-            /**
-             * Format: int32
-             * @description Effective lease fee in PPM for this pair (currently not pair-specific).
-             * @example 10000
-             */
-            effective_fee_ppm: number;
-            /**
-             * Format: int64
-             * @description Effective flat fee for this pair including any env-configured per-pair additional flat fee.
-             *
-             *     Does not include `arbitrary_lessee_flat_fee` (which depends on the request).
-             * @example 0
-             */
-            effective_flat_fee: number;
-            /**
-             * Format: int64
-             * @description Destination EVM chainId.
-             * @example 1
-             */
-            target_chain_id: number;
-            /**
-             * @description Target settlement token (EVM address on hub chain).
-             * @example 0x0000000000000000000000000000000000000002
-             */
-            target_token: string;
-        };
-        SetPayoutConfigRequest: {
-            /**
-             * @description Beneficiary address (EVM).
-             * @example 0x0000000000000000000000000000000000000003
-             */
-            beneficiary: string;
-            /**
-             * Format: int64
-             * @description EIP-712 signature deadline (unix seconds).
-             * @example 1700000000
-             */
-            deadline: number;
-            /**
-             * Format: int64
-             * @description Lease id to update.
-             * @example 1
-             */
-            lease_id: number;
-            /**
-             * @description EIP-712 signature bytes (0x hex).
-             *
-             *     Typically a 65-byte ECDSA signature for EOAs; contract lessees may use ERC-1271 signatures.
-             * @example 0x
-             */
-            signature: string;
-            /**
-             * Format: int64
-             * @description Destination EVM chainId.
-             * @example 1
-             */
-            target_chain_id: number;
-            /**
-             * @description Target settlement token (EVM address on hub chain).
-             * @example 0x0000000000000000000000000000000000000002
-             */
-            target_token: string;
-        };
-        SetPayoutConfigResponse: {
-            /**
-             * @description UserOperation hash.
-             * @example 0x0000000000000000000000000000000000000000000000000000000000000000
-             */
-            userop_hash: string;
-        };
-        /**
-         * @description Controller sweep ledger (append-only)
-         *
-         *     Records each receiver sweep and the computed USDT-equivalent amount.
-         */
-        controller_pulled_from_receiver: {
-            /**
-             * Format: bigint
-             * @description Controller event sequence for this receiver pull
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            event_seq?: number;
-            /**
-             * Format: text
-             * @description Receiver salt identifying which deterministic receiver was swept
-             */
-            receiver_salt?: string;
-            /**
-             * Format: text
-             * @description Token pulled from receiver (Tron address)
-             */
-            token?: string;
-            /** @description Raw token amount pulled (uint256) */
-            token_amount?: components["schemas"]["PgNumeric"];
-            /** @description Exchange rate used (1e18-scaled); 1:1 for USDT sweeps */
-            exchange_rate?: components["schemas"]["PgNumeric"];
-            /** @description USDT-equivalent amount accounted for this pull (uint256) */
-            usdt_amount?: components["schemas"]["PgNumeric"];
-        };
-        /** @description Controller executor USDT transfer ledger (append-only) */
-        controller_usdt_transfers: {
-            /**
-             * Format: bigint
-             * @description Controller event sequence for this executor transfer
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            event_seq?: number;
-            /**
-             * Format: text
-             * @description Recipient of USDT from controller (Tron address)
-             */
-            recipient?: string;
-            /** @description Amount transferred (uint256) */
-            amount?: components["schemas"]["PgNumeric"];
-        };
-        /** @description Current mapping of receiver salts to deployed receiver addresses (KV) */
-        controller_receivers: {
-            /**
-             * Format: text
-             * @description Receiver salt (bytes32) identifying the deterministic receiver
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            receiver_salt?: string;
-            /**
-             * Format: bigint
-             * @description Controller event sequence at which this receiver mapping became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description Receiver contract address on Tron (base58)
-             */
-            receiver?: string;
-        };
-        /**
-         * @description Current LP allowlist (KV)
-         *
-         *     LPs must be allowlisted to deposit principal into the hub fast-fill vault.
-         */
-        hub_lp_allowlist: {
-            /**
-             * Format: text
-             * @description LP address (EVM)
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            lp?: string;
-            /**
-             * Format: bigint
-             * @description Event sequence at which this allowlist entry became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * @description Whether this LP may deposit into the fast-fill vault (withdrawals are always
-             *     allowed)
-             */
-            allowed?: boolean;
-        };
-        /**
-         * @description Unaccounted receiver USDT deposits
-         *
-         *     Tron TRC-20 Transfer logs not yet reflected as hub claims
-         *
-         *     Rows in this view correspond to canonical TRC-20 USDT transfers into
-         *     deterministic receivers that do NOT yet have a hub-side claim with
-         *     `origin in (pre-entitle, subjective pre-entitle)` matching
-         *     `origin_id = tx_hash`.
-         *
-         *     This view is intended for operators to identify deposits that may require
-         *     action (preEntitle or receiver pull).
-         */
-        unaccounted_receiver_usdt_transfers: {
-            /** Format: bigint */
-            chain_id?: number;
-            /** Format: text */
-            token?: string;
-            /** Format: text */
-            receiver_salt?: string;
-            /** Format: text */
-            sender?: string;
-            /** Format: text */
-            recipient?: string;
-            amount?: components["schemas"]["PgNumeric"];
-            /** Format: bigint */
-            block_number?: number;
-            /** Format: bigint */
-            block_timestamp?: number;
-            /** Format: timestamp with time zone */
-            block_time?: string;
-            /** Format: text */
-            block_hash?: string;
-            /** Format: text */
-            tx_hash?: string;
-            /** Format: integer */
-            log_index?: number;
-            expected_lease_id?: components["schemas"]["PgNumeric"];
-        };
-        /**
-         * @description Current claim states (KV)
-         *
-         *     Claims are created by proven Tron deposits / LP-sponsored subjective pre-entitlement / controller profit volume,
-         *     and transition to `filled` when a filler settles them.
-         */
-        hub_claims: {
-            /**
-             * @description Lease id that produced this claim
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            lease_id?: components["schemas"]["PgNumeric"];
-            /**
-             * @description Per-lease claim id (uint256, 0-indexed)
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            claim_id?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: bigint
-             * @description Event sequence at which this claim version became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description Token used for settlement when filling this claim (EVM on hub chain)
-             */
-            target_token?: string;
-            /** @description Index in the FIFO queue (per target_token) where this claim was enqueued */
-            queue_index?: components["schemas"]["PgNumeric"];
-            /** @description USDT-denominated claim amount (uint256) used for accounting */
-            amount_usdt?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: bigint
-             * @description Destination chainId for payout (local if equals hub chainId)
-             */
-            target_chain_id?: number;
-            /**
-             * Format: text
-             * @description Beneficiary address (EVM) receiving payout
-             */
-            beneficiary?: string;
-            /**
-             * Format: smallint
-             * @description Claim origin code (matches `UntronV3Index.ClaimOrigin`)
-             */
-            origin?: number;
-            /**
-             * Format: text
-             * @description Origin identifier (txId for pre-entitle, receiver_salt for receiver pull,
-             *     etc.)
-             */
-            origin_id?: string;
-            /**
-             * Format: text
-             * @description Origin actor (e.g. subjective pre-entitle sponsor; otherwise zero)
-             */
-            origin_actor?: string;
-            /**
-             * Format: text
-             * @description Origin token/address (Tron token for receiver pull; zero address otherwise)
-             */
-            origin_token?: string;
-            /**
-             * Format: bigint
-             * @description Origin timestamp (seconds) (Tron block time or controller dump time; 0 if
-             *     not applicable)
-             */
-            origin_timestamp?: number;
-            /** @description Raw amount before fees (USDT-equivalent units) */
-            origin_raw_amount?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: hub.claim_status
-             * @description Claim lifecycle status (`created` or `filled`)
-             * @enum {string}
-             */
-            status?: "created" | "filled";
-        };
-        /**
-         * @description Receiver USDT transfer indexer status (tail + backfill).
-         *
-         *     The TRC-20 receiver transfer indexer has two moving parts:
-         *     - a single shared tail cursor (`ctl.receiver_usdt_tail_cursor.next_block`), and
-         *     - per-receiver backfill cursors (`ctl.receiver_watchlist.backfill_next_block`).
-         *
-         *     Relayers should generally avoid acting on receiver-transfer-derived state unless:
-         *     - `min_backfill_next_block` is NULL (no pending backfills), and
-         *     - `tail_next_block` is close to the Tron head (with the relayer's own head check).
-         */
-        receiver_usdt_indexer_status: {
-            /**
-             * Format: chain.stream
-             * @description Note:
-             *     This is a Primary Key.<pk/>
-             * @enum {string}
-             */
-            stream?: "hub" | "controller";
-            /** Format: bigint */
-            tail_next_block?: number;
-            /** Format: timestamp with time zone */
-            tail_updated_at?: string;
-            /** Format: bigint */
-            min_backfill_next_block?: number;
-            /** Format: bigint */
-            receiver_count?: number;
-            /** Format: bigint */
-            backfill_pending_receivers?: number;
-            /** Format: timestamp with time zone */
-            watchlist_updated_at?: string;
-        };
-        /**
-         * @description Hub-side controller processed events ledger (append-only)
-         *
-         *     Records that the hub processed a queued controller event during reconciliation.
-         */
-        hub_controller_processed: {
-            /**
-             * Format: bigint
-             * @description Hub event sequence for this controller processing record
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            event_seq?: number;
-            /** @description Index within the hub's controller event queue that was processed */
-            event_index?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: bigint
-             * @description Controller event block number (as embedded in the hub event payload)
-             */
-            block_number?: number;
-            /**
-             * Format: bigint
-             * @description Controller event block timestamp (seconds) (as embedded in the hub event
-             *     payload)
-             */
-            block_timestamp?: number;
-            /**
-             * Format: text
-             * @description Controller event signature hash (bytes32 hex)
-             */
-            event_signature?: string;
-            /**
-             * Format: text
-             * @description Controller ABI-encoded event payload (0x hex)
-             */
-            abi_encoded_event_data?: string;
-        };
-        /**
-         * @description Hub controller sync state (materialized)
-         *
-         *     This single-row view is a DB projection of hub events and is intended to replace hub
-         *     read-RPC calls:
-         *
-         *     - `last_controller_event_tip` == UntronV3Base.lastControllerEventTip()
-         *     - `last_controller_event_seq` == UntronV3Base.lastControllerEventSeq()
-         *     - `next_controller_event_index` == UntronV3Base.nextControllerEventIndex()
-         *
-         *     Values reflect the hub's canonical event stream as applied by the indexer.
-         */
-        hub_controller_state: {
-            /** @description UntronV3Base.lastControllerEventSeq() */
-            last_controller_event_seq?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: text
-             * @description UntronV3Base.lastControllerEventTip() (bytes32 hex)
-             */
-            last_controller_event_tip?: string;
-            /** @description UntronV3Base.nextControllerEventIndex() */
-            next_controller_event_index?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: bigint
-             * @description Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-        };
-        /**
-         * @description Relayer hub state bundle
-         *
-         *     Convenience single-row view combining:
-         *     - api.hub_controller_state
-         *
-         *     Intended for relayer use to minimize HTTP round trips.
-         */
-        relayer_hub_state: {
-            last_controller_event_seq?: components["schemas"]["PgNumeric"];
-            /** Format: text */
-            last_controller_event_tip?: string;
-            next_controller_event_index?: components["schemas"]["PgNumeric"];
-        };
-        /** @description Current controller LP address (singleton) */
-        controller_lp: {
-            /**
-             * Format: bigint
-             * @description Controller event sequence at which this LP became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description Controller LP address (Tron address)
-             */
-            lp?: string;
-        };
-        /**
-         * @description Net receiver USDT balances derived from indexed transfer logs and pull
-         *     ledgers.
-         *
-         *     This is a deterministic approximation of each receiver's USDT balance:
-         *       sum(incoming TRC-20 transfers into the receiver) - sum(controller pulls from that receiver)
-         *
-         *     It assumes receiver addresses do not have other outflows besides controller pulls.
-         */
-        receiver_usdt_balances: {
-            /**
-             * Format: text
-             * @description Note:
-             *     This is a Primary Key.<pk/>
-             */
-            receiver_salt?: string;
-            /** Format: text */
-            receiver?: string;
-            /** Format: text */
-            receiver_evm?: string;
-            /** Format: text */
-            token?: string;
-            incoming_amount?: components["schemas"]["PgNumeric"];
-            pulled_amount?: components["schemas"]["PgNumeric"];
-            balance_amount?: components["schemas"]["PgNumeric"];
-        };
-        /**
-         * @description Current controller rebalancer payloads (KV)
-         *
-         *     Payloads configure how USDT is bridged out of Tron for each rebalancer implementation.
-         */
-        controller_payloads: {
-            /**
-             * Format: text
-             * @description Rebalancer address (Tron)
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            rebalancer?: string;
-            /**
-             * Format: bigint
-             * @description Controller event sequence at which this payload became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description Rebalancer-specific payload bytes (0x hex) used for delegatecall bridging
-             */
-            payload?: string;
-        };
-        /**
-         * @description Receiver USDT deposits + actionability hints (preEntitle vs pull)
-         *
-         *     For each canonical TRC-20 USDT transfer into a deterministic receiver, this view shows:
-         *     - whether the hub has already accounted for it (matching claim origin_id == tx_hash),
-         *     - the latest observed receiver pull timestamp for (receiver_salt, token), and
-         *     - whether `preEntitle` is still time-eligible (`transfer_ts > last_pull_ts`).
-         *
-         *     `recommended_action` is a best-effort operator hint:
-         *     - 'already_accounted' => hub claim exists (origin pre-entitle or subjective pre-entitle)
-         *     - 'pre_entitle'        => no claim yet and pre-entitle timing is still allowed
-         *     - 'pull'               => no claim yet and a later pull timestamp suggests pre-entitle would revert
-         */
-        receiver_usdt_transfer_actionability: {
-            /** Format: bigint */
-            chain_id?: number;
-            /** Format: text */
-            token?: string;
-            /** Format: text */
-            receiver_salt?: string;
-            /** Format: text */
-            sender?: string;
-            /** Format: text */
-            recipient?: string;
-            amount?: components["schemas"]["PgNumeric"];
-            /** Format: bigint */
-            block_number?: number;
-            /** Format: bigint */
-            block_timestamp?: number;
-            /** Format: timestamp with time zone */
-            block_time?: string;
-            /** Format: text */
-            block_hash?: string;
-            /** Format: text */
-            tx_hash?: string;
-            /** Format: integer */
-            log_index?: number;
-            /** Format: smallint */
-            claim_origin?: number;
-            claim_lease_id?: components["schemas"]["PgNumeric"];
-            claim_id?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: hub.claim_status
-             * @enum {string}
-             */
-            claim_status?: "created" | "filled";
-            claim_amount_usdt?: components["schemas"]["PgNumeric"];
-            expected_lease_id?: components["schemas"]["PgNumeric"];
-            /** Format: bigint */
-            last_pull_timestamp?: number;
-            preentitle_time_ok?: boolean;
-            /** Format: text */
-            recommended_action?: string;
-        };
-        /**
-         * @description Current payout configuration per lease (KV)
-         *
-         *     Defines destination chain, settlement token, and beneficiary for newly created claims under each lease.
-         */
-        hub_payout_configs: {
-            /**
-             * @description Lease id this payout config applies to
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            lease_id?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: bigint
-             * @description Event sequence at which this payout config became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: bigint
-             * @description Destination chainId for payouts created under this config
-             */
-            target_chain_id?: number;
-            /**
-             * Format: text
-             * @description Settlement token on the hub chain used for fills (USDT or swapped
-             *     token)
-             */
-            target_token?: string;
-            /**
-             * Format: text
-             * @description Recipient (EVM) for payouts / bridged delivery
-             */
-            beneficiary?: string;
-        };
-        /**
-         * @description Per-stream ingestion/projection summary for relayers.
-         *
-         *     This view is intentionally minimal:
-         *     - It does NOT attempt to query RPC head (that stays in the relayer).
-         *     - It DOES let relayers detect when projections are behind ingestion (`is_projection_caught_up = false`),
-         *       which would make derived "current state" views stale.
-         */
-        stream_ingest_summary: {
-            /**
-             * Format: chain.stream
-             * @description Note:
-             *     This is a Primary Key.<pk/>
-             * @enum {string}
-             */
-            stream?: "hub" | "controller";
-            /** Format: bigint */
-            applied_through_seq?: number;
-            /** Format: text */
-            tip?: string;
-            /** Format: timestamp with time zone */
-            updated_at?: string;
-            /** Format: bigint */
-            max_event_seq?: number;
-            /** Format: bigint */
-            max_block_number?: number;
-            /** Format: bigint */
-            max_block_timestamp?: number;
-            /** Format: timestamp with time zone */
-            max_block_time?: string;
-            is_projection_caught_up?: boolean;
-        };
-        /** @description Current controller owner (singleton) */
-        controller_owner: {
-            /**
-             * Format: bigint
-             * @description Controller event sequence at which this owner became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description Controller owner (Tron address)
-             */
-            owner?: string;
-        };
-        /**
-         * @description Current swap rates for settlement tokens (KV)
-         *
-         *     Rates are used by fillers to swap USDT into the target token during claim settlement.
-         */
-        hub_swap_rates: {
-            /**
-             * Format: text
-             * @description Settlement token (EVM) on the hub chain
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            target_token?: string;
-            /**
-             * Format: bigint
-             * @description Event sequence at which this rate became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: bigint
-             * @description Expected output rate: targetToken units per 1e6 USDT units
-             */
-            rate_ppm?: number;
-        };
-        /**
-         * @description Health check endpoint
-         *
-         *     Always returns a single row with `status = 'ok'` if PostgREST can query the database.
-         */
-        health: {
-            /** Format: text */
-            status?: string;
-        };
-        /**
-         * @description Realtor effective config
-         *     (protocol floors + realtor overrides + rate remaining).
-         *
-         *     This view merges the protocol-wide floor limits with the current realtor row and returns:
-         *     - `allowed`
-         *     - `min_fee_ppm`, `min_flat_fee`, `max_duration_seconds` (effective minima/maxima)
-         *     - `lease_rate_*` and `lease_rate_remaining` (best-effort, computed from current leases within the window)
-         */
-        realtor_effective_config: {
-            /** Format: text */
-            realtor?: string;
-            allowed?: boolean;
-            /** Format: bigint */
-            min_fee_ppm?: number;
-            min_flat_fee?: components["schemas"]["PgNumeric"];
-            /** Format: bigint */
-            max_duration_seconds?: number;
-            lease_rate_max_leases?: components["schemas"]["PgNumeric"];
-            lease_rate_window_seconds?: components["schemas"]["PgNumeric"];
-            lease_rate_remaining?: components["schemas"]["PgNumeric"];
-        };
-        /** @description Controller LP token withdrawal ledger (append-only) */
-        controller_lp_tokens_withdrawn: {
-            /**
-             * Format: bigint
-             * @description Controller event sequence for this LP withdrawal
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            event_seq?: number;
-            /**
-             * Format: text
-             * @description Token withdrawn by LP (Tron address)
-             */
-            token?: string;
-            /** @description Amount withdrawn (uint256) */
-            amount?: components["schemas"]["PgNumeric"];
-        };
-        /**
-         * @description Current hub protocol configuration (singleton)
-         *
-         *     Derived from a set of hub config events (USDT, Tron reader, fee floors, rate limits).
-         */
-        hub_protocol_config: {
-            /**
-             * Format: bigint
-             * @description Event sequence at which this config snapshot became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description EVM USDT accounting token address on the hub chain
-             */
-            usdt?: string;
-            /**
-             * Format: text
-             * @description Tron USDT TRC-20 contract address (base58) accepted by `preEntitle`
-             */
-            tron_usdt?: string;
-            /**
-             * Format: text
-             * @description EVM address (on the hub chain) of the trusted Tron transaction reader contract
-             *     used to verify + decode Tron transactions
-             */
-            tron_reader?: string;
-            /**
-             * Format: bigint
-             * @description Protocol-wide minimum percentage fee floor (ppm)
-             */
-            floor_ppm?: number;
-            /** @description Protocol-wide minimum flat fee floor (USDT units) */
-            floor_flat_fee?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: bigint
-             * @description Protocol-wide maximum lease duration in seconds (NULL/0 means disabled)
-             */
-            max_lease_duration_seconds?: number;
-            /**
-             * @description Max payout config updates allowed per window per lessee (NULL/0 means
-             *     disabled)
-             */
-            lessee_rate_max_updates?: components["schemas"]["PgNumeric"];
-            /**
-             * @description Window size (seconds) for payout config update rate limiting (NULL/0 means
-             *     disabled)
-             */
-            lessee_rate_window_seconds?: components["schemas"]["PgNumeric"];
-        };
-        /**
-         * @description Current derived LP principal balances (KV)
-         *
-         *     Derived deterministically from hub `LpDeposited`/`LpWithdrawn` events.
-         */
-        hub_lp_balances: {
-            /**
-             * Format: text
-             * @description LP address (EVM)
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            lp?: string;
-            /**
-             * Format: bigint
-             * @description Event sequence at which this balance snapshot became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /** @description Derived LP principal balance (uint256), based on deposits/withdrawals */
-            balance?: components["schemas"]["PgNumeric"];
-        };
-        /**
-         * @description Current per-lease nonces (KV)
-         *
-         *     Used for replay protection on EIP-712 signature-based payout config updates.
-         */
-        hub_lease_nonces: {
-            /**
-             * @description Lease id
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            lease_id?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: bigint
-             * @description Event sequence at which this nonce became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /** @description Current nonce value used for EIP-712 signature replay protection */
-            nonce?: components["schemas"]["PgNumeric"];
-        };
-        /** @description Current controller canonical USDT token (singleton) */
-        controller_usdt: {
-            /**
-             * Format: bigint
-             * @description Controller event sequence at which this canonical USDT became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description Controller canonical USDT token contract (Tron address)
-             */
-            usdt?: string;
-        };
-        /**
-         * @description Current hub owner (singleton)
-         *
-         *     Derived from `OwnershipTransferred` events emitted via `UntronV3Index`.
-         */
-        hub_ownership: {
-            /**
-             * Format: bigint
-             * @description Event sequence at which this owner transition became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /**
-             * Format: text
-             * @description Previous hub owner (EVM address)
-             */
-            old_owner?: string;
-            /**
-             * Format: text
-             * @description New hub owner (EVM address)
-             */
-            new_owner?: string;
-        };
-        /**
-         * @description Current lease registry (KV)
-         *
-         *     Leases define who controls payouts (lessee), which receiver salt they apply to, and fee schedule parameters.
-         */
-        hub_leases: {
-            /**
-             * @description Global lease id (uint256)
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            lease_id?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: bigint
-             * @description Event sequence at which this lease became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description Receiver salt (bytes32) used to derive deterministic Tron receiver
-             *     addresses
-             */
-            receiver_salt?: string;
-            /** @description Per-receiver lease index (0-based) for timeline ordering */
-            lease_number?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: text
-             * @description Realtor (EVM) that created this lease
-             */
-            realtor?: string;
-            /**
-             * Format: text
-             * @description Lessee (EVM) who controls payout configuration
-             */
-            lessee?: string;
-            /**
-             * Format: bigint
-             * @description Lease start time on the hub chain (seconds)
-             */
-            start_time?: number;
-            /**
-             * Format: bigint
-             * @description Earliest timestamp when the lease can be replaced by a new one for this
-             *     receiver_salt
-             */
-            nukeable_after?: number;
-            /**
-             * Format: bigint
-             * @description Percentage fee (ppm) applied to recognized raw volume
-             */
-            lease_fee_ppm?: number;
-            /** @description Flat fee (USDT units) applied after percentage fee */
-            flat_fee?: components["schemas"]["PgNumeric"];
-        };
-        /** @description Current controller executor (singleton) */
-        controller_executor: {
-            /**
-             * Format: bigint
-             * @description Controller event sequence at which this executor became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description Controller executor (Tron address)
-             */
-            executor?: string;
-        };
-        /**
-         * @description Current LP exchange rates for non-USDT tokens (KV)
-         *
-         *     Used by controller sweeps to compute USDT-equivalent amounts.
-         */
-        controller_lp_exchange_rates: {
-            /**
-             * Format: text
-             * @description Token address on Tron whose exchange rate is configured
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            token?: string;
-            /**
-             * Format: bigint
-             * @description Controller event sequence at which this exchange rate became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * @description Scaled exchange rate used to convert token amounts into USDT-equivalent
-             *     amounts
-             */
-            exchange_rate?: components["schemas"]["PgNumeric"];
-        };
-        /**
-         * @description Canonical raw EventAppended stream (both hub + controller)
-         *
-         *     This is the canonical ordered stream of Untron "semantic events", as emitted by the onchain index contracts.
-         *     Each row corresponds to one onchain `EventAppended` log and includes:
-         *     - hash-chain linkage (prev_tip/new_tip/event_seq)
-         *     - the semantic event name (`event_type`) and decoded arguments (`args`)
-         *     - block/tx metadata for auditability
-         *
-         *     This view filters to `canonical=true` only.
-         */
-        event_appended: {
-            /**
-             * Format: chain.stream
-             * @description Which stream emitted this EventAppended log (`hub` or `controller`)
-             * @enum {string}
-             */
-            stream?: "hub" | "controller";
-            /**
-             * Format: bigint
-             * @description Monotonic sequence number in the stream's onchain event hash-chain
-             */
-            event_seq?: number;
-            /**
-             * Format: text
-             * @description Previous onchain event hash-chain tip before this event
-             */
-            prev_tip?: string;
-            /**
-             * Format: text
-             * @description New onchain event hash-chain tip after this event
-             */
-            new_tip?: string;
-            /**
-             * Format: text
-             * @description Keccak256 hash of the semantic event signature string (bytes32 hex)
-             */
-            event_signature?: string;
-            /**
-             * Format: text
-             * @description Exact ABI-encoded event payload bytes that were hashed onchain (0x hex)
-             */
-            abi_encoded_event_data?: string;
-            /**
-             * Format: text
-             * @description Worker-decoded semantic event name (e.g. `LeaseCreated`, `ClaimCreated`)
-             */
-            event_type?: string;
-            /**
-             * @description Worker-decoded event arguments as JSON (snake_case keys; values as
-             *     strings/hex)
-             */
-            args?: components["schemas"]["PgJson"];
-            /**
-             * Format: bigint
-             * @description Block number containing the EventAppended log
-             */
-            block_number?: number;
-            /**
-             * Format: bigint
-             * @description Block timestamp (seconds since epoch) containing the EventAppended log
-             */
-            block_timestamp?: number;
-            /**
-             * Format: timestamp with time zone
-             * @description Convenience timestamp (block_timestamp converted to timestamptz)
-             */
-            block_time?: string;
-            /**
-             * Format: text
-             * @description Block hash of the log's block (bytes32 hex)
-             */
-            block_hash?: string;
-            /**
-             * Format: text
-             * @description Transaction hash of the log's transaction (bytes32 hex)
-             */
-            tx_hash?: string;
-            /**
-             * Format: integer
-             * @description Log index within the transaction receipt (0-based)
-             */
-            log_index?: number;
-        };
-        /**
-         * @description Projection cursors (per stream)
-         *
-         *     Shows how far the database has applied canonical events to derived state tables.
-         *
-         *     Fields:
-         *     - `applied_through_seq`: highest contiguous canonical event_seq applied
-         *     - `tip`: expected prev_tip for the next event
-         *     - `updated_at`: last time the cursor advanced/rolled back
-         */
-        stream_cursor: {
-            /**
-             * Format: chain.stream
-             * @description Stream name (`hub` or `controller`)
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             * @enum {string}
-             */
-            stream?: "hub" | "controller";
-            /**
-             * Format: bigint
-             * @description Highest contiguous canonical event sequence already applied to derived
-             *     tables
-             */
-            applied_through_seq?: number;
-            /**
-             * Format: text
-             * @description Expected `prev_tip` for the next event to apply (hash-chain continuity
-             *     check)
-             */
-            tip?: string;
-            /**
-             * Format: timestamp with time zone
-             * @description Timestamp when the cursor last advanced or rolled back
-             */
-            updated_at?: string;
-        };
-        /**
-         * @description Current protocol PnL snapshot (singleton)
-         *
-         *     Tracks fee revenue and rebalance/withdrawal deltas as emitted by the hub contract.
-         */
-        hub_protocol_pnl: {
-            /**
-             * Format: bigint
-             * @description Event sequence at which this PnL snapshot became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /** @description Current protocol PnL value (int256) */
-            pnl?: components["schemas"]["PgNumeric"];
-            /** @description Delta applied at this event (int256) */
-            delta?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: smallint
-             * @description PnL reason code (matches `UntronV3Index.PnlReason`)
-             */
-            reason?: number;
-        };
-        /**
-         * @description Current bridger routing table (KV)
-         *
-         *     If a claim targets a different chain than the hub chain, the configured bridger is used to deliver funds.
-         */
-        hub_bridgers: {
-            /**
-             * Format: text
-             * @description Token being bridged (EVM on hub chain)
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            target_token?: string;
-            /**
-             * Format: bigint
-             * @description Destination EVM chainId
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            target_chain_id?: number;
-            /**
-             * Format: bigint
-             * @description Event sequence at which this bridger route became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /**
-             * Format: text
-             * @description Bridger adapter contract address (EVM)
-             */
-            bridger?: string;
-        };
-        /**
-         * @description Aggregated lease view (single-row per lease_id).
-         *
-         *     This view joins:
-         *     - current hub lease (hub.lease_versions)
-         *     - current payout config (hub.payout_config_versions)
-         *     - payout config history (hub.payout_config_versions, all versions)
-         *     - current per-lease nonce (hub.lease_nonce_versions)
-         *     - current claim states (hub.claim_versions)
-         *
-         *     It is intended for clients that want a single PostgREST request to fetch a full
-         *     lease "detail" payload.
-         */
-        lease_view: {
-            lease_id?: components["schemas"]["PgNumeric"];
-            /** Format: text */
-            receiver_salt?: string;
-            /**
-             * @description Receiver address on Tron (base58check, T...).
-             *
-             *     Derived from `receiver_salt` using the controller's deterministic receiver scheme.
-             * @example T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb
-             */
-            receiver_address_tron?: string | null;
-            /**
-             * @description Receiver address in EVM hex form (0x...).
-             *
-             *     This is the 20-byte address corresponding to the Tron receiver address.
-             * @example 0x0000000000000000000000000000000000000000
-             */
-            receiver_address_evm?: string | null;
-            lease_number?: components["schemas"]["PgNumeric"];
-            /** Format: text */
-            realtor?: string;
-            /** Format: text */
-            lessee?: string;
-            /** Format: bigint */
-            start_time?: number;
-            /** Format: bigint */
-            nukeable_after?: number;
-            /** Format: bigint */
-            lease_fee_ppm?: number;
-            flat_fee?: components["schemas"]["PgNumeric"];
-            lease_nonce?: components["schemas"]["PgNumeric"];
-            /** Format: bigint */
-            payout_target_chain_id?: number;
-            /** Format: text */
-            payout_target_token?: string;
-            /** Format: text */
-            payout_beneficiary?: string;
-            payout_config_history?: components["schemas"]["PgJson"];
-            claims?: components["schemas"]["PgJson"];
-            /** Format: bigint */
-            claims_total?: number;
-            /** Format: bigint */
-            claims_filled?: number;
-        };
-        /** @description Hub token rescue ledger (append-only) */
-        hub_tokens_rescued: {
-            /**
-             * Format: bigint
-             * @description Hub event sequence for this rescue
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            event_seq?: number;
-            /**
-             * Format: text
-             * @description Token rescued (EVM address on hub chain; must not be USDT)
-             */
-            token?: string;
-            /** @description Amount rescued (uint256) */
-            amount?: components["schemas"]["PgNumeric"];
-        };
-        /**
-         * @description Controller tip proof logs (IsEventChainTipCalled)
-         *
-         *     On Tron, the controller exposes `isEventChainTip(bytes32)` which emits `IsEventChainTipCalled`.
-         *     This event is NOT appended into the controller's hash chain; it is used as a proof-carrying log to
-         *     anchor controller event sequences.
-         *
-         *     This view filters to `canonical=true` only.
-         */
-        controller_tip_proofs: {
-            /**
-             * Format: bigint
-             * @description Block number containing the controller `IsEventChainTipCalled` log
-             */
-            block_number?: number;
-            /**
-             * Format: bigint
-             * @description Block timestamp (seconds since epoch) containing the log
-             */
-            block_timestamp?: number;
-            /**
-             * Format: text
-             * @description Block hash of the log's block (bytes32 hex)
-             */
-            block_hash?: string;
-            /**
-             * Format: timestamp with time zone
-             * @description Convenience timestamp (block_timestamp converted to timestamptz)
-             */
-            block_time?: string;
-            /**
-             * Format: text
-             * @description Transaction hash of the transaction containing the log (bytes32 hex)
-             */
-            tx_hash?: string;
-            /**
-             * Format: integer
-             * @description Log index within the transaction receipt (0-based)
-             */
-            log_index?: number;
-            /**
-             * Format: text
-             * @description Tron address that called `isEventChainTip(bytes32)`
-             */
-            caller?: string;
-            /**
-             * Format: text
-             * @description Hash-chain tip value that the caller asserted as the controller's current
-             *     tip
-             */
-            proved_tip?: string;
-        };
-        /**
-         * @description Current realtor allowlist + realtor config (KV)
-         *
-         *     Realtors are addresses allowed to create leases on the hub (`UntronV3.createLease`).
-         */
-        hub_realtors: {
-            /**
-             * Format: text
-             * @description Realtor address (EVM)
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            realtor?: string;
-            /**
-             * Format: bigint
-             * @description Event sequence at which this realtor snapshot became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /** @description Whether this address is currently allowlisted to create leases */
-            allowed?: boolean;
-            /**
-             * Format: bigint
-             * @description Realtor-specific minimum percentage fee floor (ppm)
-             */
-            min_fee_ppm?: number;
-            /** @description Realtor-specific minimum flat fee floor (USDT units) */
-            min_flat_fee?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: bigint
-             * @description Realtor-specific maximum lease duration in seconds (NULL means no override)
-             */
-            max_lease_duration_seconds?: number;
-            /** @description Max lease creations allowed per window (NULL/0 means disabled) */
-            lease_rate_max_leases?: components["schemas"]["PgNumeric"];
-            /**
-             * @description Window size (seconds) for lease creation rate limiting (NULL/0 means
-             *     disabled)
-             */
-            lease_rate_window_seconds?: components["schemas"]["PgNumeric"];
-        };
-        /** @description Controller USDT rebalance ledger (append-only) */
-        controller_usdt_rebalanced: {
-            /**
-             * Format: bigint
-             * @description Controller event sequence for this rebalance
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            event_seq?: number;
-            /** @description USDT amount bridged in (uint256) */
-            in_amount?: components["schemas"]["PgNumeric"];
-            /** @description Expected USDT amount out on destination (uint256) */
-            out_amount?: components["schemas"]["PgNumeric"];
-            /**
-             * Format: text
-             * @description Rebalancer used (Tron address)
-             */
-            rebalancer?: string;
-        };
-        /**
-         * @description Hub-side controller tip update ledger (append-only)
-         *
-         *     Records the raw controller event bytes that were hash-linked into the controller tip as seen by the hub.
-         */
-        hub_controller_tip_updates: {
-            /**
-             * Format: bigint
-             * @description Hub event sequence for this controller tip update record
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            event_seq?: number;
-            /**
-             * Format: text
-             * @description Controller tip that this hop links from
-             */
-            previous_tip?: string;
-            /**
-             * Format: bigint
-             * @description Controller event block number (as embedded in the hub event payload)
-             */
-            block_number?: number;
-            /**
-             * Format: bigint
-             * @description Controller event block timestamp (seconds) (as embedded in the hub event
-             *     payload)
-             */
-            block_timestamp?: number;
-            /**
-             * Format: text
-             * @description Controller event signature hash (bytes32 hex)
-             */
-            event_signature?: string;
-            /**
-             * Format: text
-             * @description Controller ABI-encoded event payload (0x hex)
-             */
-            abi_encoded_event_data?: string;
-        };
-        /**
-         * @description Receiver salt candidates for realtor selection.
-         *
-         *     Joins:
-         *     - `api.controller_receivers` (allowed salts)
-         *     - `api.receiver_usdt_balances` (cached balance view)
-         *     - latest hub lease by receiver_salt (for `nukeable_after`)
-         *
-         *     Computed fields:
-         *     - `has_balance`: `balance_amount > 0`
-         *     - `is_free`: receiver has no current lease or lease is nukeable (based on `nukeable_after <= now`)
-         */
-        receiver_salt_candidates: {
-            /** Format: text */
-            receiver_salt?: string;
-            /** Format: text */
-            receiver?: string;
-            /** Format: text */
-            receiver_evm?: string;
-            balance_amount?: components["schemas"]["PgNumeric"];
-            has_balance?: boolean;
-            /** Format: bigint */
-            nukeable_after?: number;
-            is_free?: boolean;
-        };
-        /**
-         * @description Current chain deprecation flags (KV)
-         *
-         *     Deprecated destination chains cannot be selected in new payout configs.
-         */
-        hub_chains: {
-            /**
-             * Format: bigint
-             * @description Destination EVM chainId
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            target_chain_id?: number;
-            /**
-             * Format: bigint
-             * @description Event sequence at which this deprecation flag became current
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            valid_from_seq?: number;
-            /** Format: bigint */
-            valid_to_seq?: number;
-            /** @description Whether this destination chain is deprecated for new payout configs */
-            deprecated?: boolean;
-        };
-        /** @description Hub LP vault deposit/withdraw ledger (append-only) */
-        hub_lp_vault_events: {
-            /**
-             * Format: bigint
-             * @description Hub event sequence for this vault event
-             *
-             *     Note:
-             *     This is a Primary Key.<pk/>
-             */
-            event_seq?: number;
-            /**
-             * Format: text
-             * @description `deposit` or `withdraw`
-             */
-            kind?: string;
-            /**
-             * Format: text
-             * @description LP address (EVM)
-             */
-            lp?: string;
-            /** @description Amount deposited/withdrawn (uint256, USDT units) */
-            amount?: components["schemas"]["PgNumeric"];
-        };
-        /**
-         * @description Minimal USDT deposit attribution entry.
-         *
-         *     Stable subset:
-         *     `{ tx_hash, sender, amount, block_timestamp, log_index }`.
-         */
-        UsdtDepositAttributionEntryView: {
-            /** @description Tron transaction hash (0x hex). */
-            tx_hash: string;
-            /** @description Sender address (Tron, base58check). */
-            sender: string;
-            /** @description Transfer amount (uint256, decimal string). */
-            amount: string;
-            /**
-             * Format: int64
-             * @description Tron block timestamp (seconds).
-             */
-            block_timestamp: number;
-            /**
-             * Format: int64
-             * @description Log index within the transaction.
-             */
-            log_index: number;
-        };
-        /** @description Arbitrary JSON value. */
-        JsonValue: {
-            [key: string]: unknown;
-        } | unknown[] | string | number | boolean | null;
-        /** @description Numeric value represented as a JSON number. */
-        NumericValue: number;
-        /** @description Postgres JSON/JSONB encoded as raw JSON. */
-        PgJson: {
-            [key: string]: unknown;
-        };
-        /** @description Postgres NUMERIC encoded as a JSON number. */
-        PgNumeric: number;
-    };
-    responses: never;
-    parameters: {
-        /** @description Preference */
-        preferParams: string;
-        /** @description Preference */
-        preferReturn: "return=representation" | "return=minimal" | "return=none";
-        /** @description Preference */
-        preferCount: "count=none" | "count=exact" | "count=planned" | "count=estimated";
-        /** @description Preference */
-        preferPost: "return=representation" | "return=minimal" | "return=none" | "resolution=ignore-duplicates" | "resolution=merge-duplicates";
-        /** @description Filtering Columns */
-        select: string;
-        /** @description On Conflict */
-        on_conflict: string;
-        /** @description Ordering */
-        order: string;
-        /** @description Limiting and Pagination */
-        range: string;
-        /** @description Limiting and Pagination */
-        rangeUnit: string;
-        /** @description Limiting and Pagination */
-        offset: string;
-        /** @description Limiting and Pagination */
-        limit: string;
-        /** @description Controller event sequence for this receiver pull */
-        "rowFilter.controller_pulled_from_receiver.event_seq": string;
-        /** @description Receiver salt identifying which deterministic receiver was swept */
-        "rowFilter.controller_pulled_from_receiver.receiver_salt": string;
-        /** @description Token pulled from receiver (Tron address) */
-        "rowFilter.controller_pulled_from_receiver.token": string;
-        /** @description Raw token amount pulled (uint256) */
-        "rowFilter.controller_pulled_from_receiver.token_amount": string;
-        /** @description Exchange rate used (1e18-scaled); 1:1 for USDT sweeps */
-        "rowFilter.controller_pulled_from_receiver.exchange_rate": string;
-        /** @description USDT-equivalent amount accounted for this pull (uint256) */
-        "rowFilter.controller_pulled_from_receiver.usdt_amount": string;
-        /** @description Controller event sequence for this executor transfer */
-        "rowFilter.controller_usdt_transfers.event_seq": string;
-        /** @description Recipient of USDT from controller (Tron address) */
-        "rowFilter.controller_usdt_transfers.recipient": string;
-        /** @description Amount transferred (uint256) */
-        "rowFilter.controller_usdt_transfers.amount": string;
-        /** @description Receiver salt (bytes32) identifying the deterministic receiver */
-        "rowFilter.controller_receivers.receiver_salt": string;
-        /** @description Controller event sequence at which this receiver mapping became current */
-        "rowFilter.controller_receivers.valid_from_seq": string;
-        "rowFilter.controller_receivers.valid_to_seq": string;
-        /** @description Receiver contract address on Tron (base58) */
-        "rowFilter.controller_receivers.receiver": string;
-        /** @description LP address (EVM) */
-        "rowFilter.hub_lp_allowlist.lp": string;
-        /** @description Event sequence at which this allowlist entry became current */
-        "rowFilter.hub_lp_allowlist.valid_from_seq": string;
-        "rowFilter.hub_lp_allowlist.valid_to_seq": string;
-        /**
-         * @description Whether this LP may deposit into the fast-fill vault (withdrawals are always
-         *     allowed)
-         */
-        "rowFilter.hub_lp_allowlist.allowed": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.chain_id": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.token": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.receiver_salt": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.sender": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.recipient": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.amount": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.block_number": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.block_timestamp": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.block_time": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.block_hash": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.tx_hash": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.log_index": string;
-        "rowFilter.unaccounted_receiver_usdt_transfers.expected_lease_id": string;
-        /** @description Lease id that produced this claim */
-        "rowFilter.hub_claims.lease_id": string;
-        /** @description Per-lease claim id (uint256, 0-indexed) */
-        "rowFilter.hub_claims.claim_id": string;
-        /** @description Event sequence at which this claim version became current */
-        "rowFilter.hub_claims.valid_from_seq": string;
-        "rowFilter.hub_claims.valid_to_seq": string;
-        /** @description Token used for settlement when filling this claim (EVM on hub chain) */
-        "rowFilter.hub_claims.target_token": string;
-        /** @description Index in the FIFO queue (per target_token) where this claim was enqueued */
-        "rowFilter.hub_claims.queue_index": string;
-        /** @description USDT-denominated claim amount (uint256) used for accounting */
-        "rowFilter.hub_claims.amount_usdt": string;
-        /** @description Destination chainId for payout (local if equals hub chainId) */
-        "rowFilter.hub_claims.target_chain_id": string;
-        /** @description Beneficiary address (EVM) receiving payout */
-        "rowFilter.hub_claims.beneficiary": string;
-        /** @description Claim origin code (matches `UntronV3Index.ClaimOrigin`) */
-        "rowFilter.hub_claims.origin": string;
-        /**
-         * @description Origin identifier (txId for pre-entitle, receiver_salt for receiver pull,
-         *     etc.)
-         */
-        "rowFilter.hub_claims.origin_id": string;
-        /** @description Origin actor (e.g. subjective pre-entitle sponsor; otherwise zero) */
-        "rowFilter.hub_claims.origin_actor": string;
-        /** @description Origin token/address (Tron token for receiver pull; zero address otherwise) */
-        "rowFilter.hub_claims.origin_token": string;
-        /**
-         * @description Origin timestamp (seconds) (Tron block time or controller dump time; 0 if
-         *     not applicable)
-         */
-        "rowFilter.hub_claims.origin_timestamp": string;
-        /** @description Raw amount before fees (USDT-equivalent units) */
-        "rowFilter.hub_claims.origin_raw_amount": string;
-        /** @description Claim lifecycle status (`created` or `filled`) */
-        "rowFilter.hub_claims.status": string;
-        "rowFilter.receiver_usdt_indexer_status.stream": string;
-        "rowFilter.receiver_usdt_indexer_status.tail_next_block": string;
-        "rowFilter.receiver_usdt_indexer_status.tail_updated_at": string;
-        "rowFilter.receiver_usdt_indexer_status.min_backfill_next_block": string;
-        "rowFilter.receiver_usdt_indexer_status.receiver_count": string;
-        "rowFilter.receiver_usdt_indexer_status.backfill_pending_receivers": string;
-        "rowFilter.receiver_usdt_indexer_status.watchlist_updated_at": string;
-        /** @description Hub event sequence for this controller processing record */
-        "rowFilter.hub_controller_processed.event_seq": string;
-        /** @description Index within the hub's controller event queue that was processed */
-        "rowFilter.hub_controller_processed.event_index": string;
-        /** @description Controller event block number (as embedded in the hub event payload) */
-        "rowFilter.hub_controller_processed.block_number": string;
-        /**
-         * @description Controller event block timestamp (seconds) (as embedded in the hub event
-         *     payload)
-         */
-        "rowFilter.hub_controller_processed.block_timestamp": string;
-        /** @description Controller event signature hash (bytes32 hex) */
-        "rowFilter.hub_controller_processed.event_signature": string;
-        /** @description Controller ABI-encoded event payload (0x hex) */
-        "rowFilter.hub_controller_processed.abi_encoded_event_data": string;
-        /** @description Event sequence at which this state snapshot became current */
-        "rowFilter.hub_controller_state.valid_from_seq": string;
-        "rowFilter.hub_controller_state.valid_to_seq": string;
-        /** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
-        "rowFilter.hub_controller_state.last_controller_event_tip": string;
-        /** @description UntronV3Base.lastControllerEventSeq() */
-        "rowFilter.hub_controller_state.last_controller_event_seq": string;
-        /** @description UntronV3Base.nextControllerEventIndex() */
-        "rowFilter.hub_controller_state.next_controller_event_index": string;
-        /** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
-        "rowFilter.relayer_hub_state.last_controller_event_tip": string;
-        /** @description UntronV3Base.lastControllerEventSeq() */
-        "rowFilter.relayer_hub_state.last_controller_event_seq": string;
-        /** @description UntronV3Base.nextControllerEventIndex() */
-        "rowFilter.relayer_hub_state.next_controller_event_index": string;
-        /** @description Controller event sequence at which this LP became current */
-        "rowFilter.controller_lp.valid_from_seq": string;
-        "rowFilter.controller_lp.valid_to_seq": string;
-        /** @description Controller LP address (Tron address) */
-        "rowFilter.controller_lp.lp": string;
-        "rowFilter.receiver_usdt_balances.receiver_salt": string;
-        "rowFilter.receiver_usdt_balances.receiver": string;
-        "rowFilter.receiver_usdt_balances.receiver_evm": string;
-        "rowFilter.receiver_usdt_balances.token": string;
-        "rowFilter.receiver_usdt_balances.incoming_amount": string;
-        "rowFilter.receiver_usdt_balances.pulled_amount": string;
-        "rowFilter.receiver_usdt_balances.balance_amount": string;
-        /** @description Rebalancer address (Tron) */
-        "rowFilter.controller_payloads.rebalancer": string;
-        /** @description Controller event sequence at which this payload became current */
-        "rowFilter.controller_payloads.valid_from_seq": string;
-        "rowFilter.controller_payloads.valid_to_seq": string;
-        /** @description Rebalancer-specific payload bytes (0x hex) used for delegatecall bridging */
-        "rowFilter.controller_payloads.payload": string;
-        "rowFilter.receiver_usdt_transfer_actionability.chain_id": string;
-        "rowFilter.receiver_usdt_transfer_actionability.token": string;
-        "rowFilter.receiver_usdt_transfer_actionability.receiver_salt": string;
-        "rowFilter.receiver_usdt_transfer_actionability.sender": string;
-        "rowFilter.receiver_usdt_transfer_actionability.recipient": string;
-        "rowFilter.receiver_usdt_transfer_actionability.amount": string;
-        "rowFilter.receiver_usdt_transfer_actionability.block_number": string;
-        "rowFilter.receiver_usdt_transfer_actionability.block_timestamp": string;
-        "rowFilter.receiver_usdt_transfer_actionability.block_time": string;
-        "rowFilter.receiver_usdt_transfer_actionability.block_hash": string;
-        "rowFilter.receiver_usdt_transfer_actionability.tx_hash": string;
-        "rowFilter.receiver_usdt_transfer_actionability.log_index": string;
-        "rowFilter.receiver_usdt_transfer_actionability.claim_origin": string;
-        "rowFilter.receiver_usdt_transfer_actionability.claim_lease_id": string;
-        "rowFilter.receiver_usdt_transfer_actionability.claim_id": string;
-        "rowFilter.receiver_usdt_transfer_actionability.claim_status": string;
-        "rowFilter.receiver_usdt_transfer_actionability.claim_amount_usdt": string;
-        "rowFilter.receiver_usdt_transfer_actionability.expected_lease_id": string;
-        "rowFilter.receiver_usdt_transfer_actionability.last_pull_timestamp": string;
-        "rowFilter.receiver_usdt_transfer_actionability.preentitle_time_ok": string;
-        "rowFilter.receiver_usdt_transfer_actionability.recommended_action": string;
-        /** @description Lease id this payout config applies to */
-        "rowFilter.hub_payout_configs.lease_id": string;
-        /** @description Event sequence at which this payout config became current */
-        "rowFilter.hub_payout_configs.valid_from_seq": string;
-        "rowFilter.hub_payout_configs.valid_to_seq": string;
-        /** @description Destination chainId for payouts created under this config */
-        "rowFilter.hub_payout_configs.target_chain_id": string;
-        /**
-         * @description Settlement token on the hub chain used for fills (USDT or swapped
-         *     token)
-         */
-        "rowFilter.hub_payout_configs.target_token": string;
-        /** @description Recipient (EVM) for payouts / bridged delivery */
-        "rowFilter.hub_payout_configs.beneficiary": string;
-        "rowFilter.stream_ingest_summary.stream": string;
-        "rowFilter.stream_ingest_summary.applied_through_seq": string;
-        "rowFilter.stream_ingest_summary.tip": string;
-        "rowFilter.stream_ingest_summary.updated_at": string;
-        "rowFilter.stream_ingest_summary.max_event_seq": string;
-        "rowFilter.stream_ingest_summary.max_block_number": string;
-        "rowFilter.stream_ingest_summary.max_block_timestamp": string;
-        "rowFilter.stream_ingest_summary.max_block_time": string;
-        "rowFilter.stream_ingest_summary.is_projection_caught_up": string;
-        /** @description Controller event sequence at which this owner became current */
-        "rowFilter.controller_owner.valid_from_seq": string;
-        "rowFilter.controller_owner.valid_to_seq": string;
-        /** @description Controller owner (Tron address) */
-        "rowFilter.controller_owner.owner": string;
-        /** @description Settlement token (EVM) on the hub chain */
-        "rowFilter.hub_swap_rates.target_token": string;
-        /** @description Event sequence at which this rate became current */
-        "rowFilter.hub_swap_rates.valid_from_seq": string;
-        "rowFilter.hub_swap_rates.valid_to_seq": string;
-        /** @description Expected output rate: targetToken units per 1e6 USDT units */
-        "rowFilter.hub_swap_rates.rate_ppm": string;
-        "rowFilter.health.status": string;
-        "rowFilter.realtor_effective_config.realtor": string;
-        "rowFilter.realtor_effective_config.allowed": string;
-        "rowFilter.realtor_effective_config.min_fee_ppm": string;
-        "rowFilter.realtor_effective_config.min_flat_fee": string;
-        "rowFilter.realtor_effective_config.max_duration_seconds": string;
-        "rowFilter.realtor_effective_config.lease_rate_max_leases": string;
-        "rowFilter.realtor_effective_config.lease_rate_window_seconds": string;
-        "rowFilter.realtor_effective_config.lease_rate_remaining": string;
-        /** @description Controller event sequence for this LP withdrawal */
-        "rowFilter.controller_lp_tokens_withdrawn.event_seq": string;
-        /** @description Token withdrawn by LP (Tron address) */
-        "rowFilter.controller_lp_tokens_withdrawn.token": string;
-        /** @description Amount withdrawn (uint256) */
-        "rowFilter.controller_lp_tokens_withdrawn.amount": string;
-        /** @description Event sequence at which this config snapshot became current */
-        "rowFilter.hub_protocol_config.valid_from_seq": string;
-        "rowFilter.hub_protocol_config.valid_to_seq": string;
-        /** @description EVM USDT accounting token address on the hub chain */
-        "rowFilter.hub_protocol_config.usdt": string;
-        /** @description Tron USDT TRC-20 contract address (base58) accepted by `preEntitle` */
-        "rowFilter.hub_protocol_config.tron_usdt": string;
-        /**
-         * @description EVM address (on the hub chain) of the trusted Tron transaction reader contract
-         *     used to verify + decode Tron transactions
-         */
-        "rowFilter.hub_protocol_config.tron_reader": string;
-        /** @description Protocol-wide minimum percentage fee floor (ppm) */
-        "rowFilter.hub_protocol_config.floor_ppm": string;
-        /** @description Protocol-wide minimum flat fee floor (USDT units) */
-        "rowFilter.hub_protocol_config.floor_flat_fee": string;
-        /** @description Protocol-wide maximum lease duration in seconds (NULL/0 means disabled) */
-        "rowFilter.hub_protocol_config.max_lease_duration_seconds": string;
-        /**
-         * @description Max payout config updates allowed per window per lessee (NULL/0 means
-         *     disabled)
-         */
-        "rowFilter.hub_protocol_config.lessee_rate_max_updates": string;
-        /**
-         * @description Window size (seconds) for payout config update rate limiting (NULL/0 means
-         *     disabled)
-         */
-        "rowFilter.hub_protocol_config.lessee_rate_window_seconds": string;
-        /** @description LP address (EVM) */
-        "rowFilter.hub_lp_balances.lp": string;
-        /** @description Event sequence at which this balance snapshot became current */
-        "rowFilter.hub_lp_balances.valid_from_seq": string;
-        "rowFilter.hub_lp_balances.valid_to_seq": string;
-        /** @description Derived LP principal balance (uint256), based on deposits/withdrawals */
-        "rowFilter.hub_lp_balances.balance": string;
-        /** @description Lease id */
-        "rowFilter.hub_lease_nonces.lease_id": string;
-        /** @description Event sequence at which this nonce became current */
-        "rowFilter.hub_lease_nonces.valid_from_seq": string;
-        "rowFilter.hub_lease_nonces.valid_to_seq": string;
-        /** @description Current nonce value used for EIP-712 signature replay protection */
-        "rowFilter.hub_lease_nonces.nonce": string;
-        /** @description Controller event sequence at which this canonical USDT became current */
-        "rowFilter.controller_usdt.valid_from_seq": string;
-        "rowFilter.controller_usdt.valid_to_seq": string;
-        /** @description Controller canonical USDT token contract (Tron address) */
-        "rowFilter.controller_usdt.usdt": string;
-        /** @description Event sequence at which this owner transition became current */
-        "rowFilter.hub_ownership.valid_from_seq": string;
-        /** @description Previous hub owner (EVM address) */
-        "rowFilter.hub_ownership.old_owner": string;
-        /** @description New hub owner (EVM address) */
-        "rowFilter.hub_ownership.new_owner": string;
-        /** @description Global lease id (uint256) */
-        "rowFilter.hub_leases.lease_id": string;
-        /** @description Event sequence at which this lease became current */
-        "rowFilter.hub_leases.valid_from_seq": string;
-        "rowFilter.hub_leases.valid_to_seq": string;
-        /**
-         * @description Receiver salt (bytes32) used to derive deterministic Tron receiver
-         *     addresses
-         */
-        "rowFilter.hub_leases.receiver_salt": string;
-        /** @description Per-receiver lease index (0-based) for timeline ordering */
-        "rowFilter.hub_leases.lease_number": string;
-        /** @description Realtor (EVM) that created this lease */
-        "rowFilter.hub_leases.realtor": string;
-        /** @description Lessee (EVM) who controls payout configuration */
-        "rowFilter.hub_leases.lessee": string;
-        /** @description Lease start time on the hub chain (seconds) */
-        "rowFilter.hub_leases.start_time": string;
-        /**
-         * @description Earliest timestamp when the lease can be replaced by a new one for this
-         *     receiver_salt
-         */
-        "rowFilter.hub_leases.nukeable_after": string;
-        /** @description Percentage fee (ppm) applied to recognized raw volume */
-        "rowFilter.hub_leases.lease_fee_ppm": string;
-        /** @description Flat fee (USDT units) applied after percentage fee */
-        "rowFilter.hub_leases.flat_fee": string;
-        /** @description Controller event sequence at which this executor became current */
-        "rowFilter.controller_executor.valid_from_seq": string;
-        "rowFilter.controller_executor.valid_to_seq": string;
-        /** @description Controller executor (Tron address) */
-        "rowFilter.controller_executor.executor": string;
-        /** @description Token address on Tron whose exchange rate is configured */
-        "rowFilter.controller_lp_exchange_rates.token": string;
-        /** @description Controller event sequence at which this exchange rate became current */
-        "rowFilter.controller_lp_exchange_rates.valid_from_seq": string;
-        "rowFilter.controller_lp_exchange_rates.valid_to_seq": string;
-        /**
-         * @description Scaled exchange rate used to convert token amounts into USDT-equivalent
-         *     amounts
-         */
-        "rowFilter.controller_lp_exchange_rates.exchange_rate": string;
-        /** @description Which stream emitted this EventAppended log (`hub` or `controller`) */
-        "rowFilter.event_appended.stream": string;
-        /** @description Monotonic sequence number in the stream's onchain event hash-chain */
-        "rowFilter.event_appended.event_seq": string;
-        /** @description Previous onchain event hash-chain tip before this event */
-        "rowFilter.event_appended.prev_tip": string;
-        /** @description New onchain event hash-chain tip after this event */
-        "rowFilter.event_appended.new_tip": string;
-        /** @description Keccak256 hash of the semantic event signature string (bytes32 hex) */
-        "rowFilter.event_appended.event_signature": string;
-        /** @description Exact ABI-encoded event payload bytes that were hashed onchain (0x hex) */
-        "rowFilter.event_appended.abi_encoded_event_data": string;
-        /** @description Worker-decoded semantic event name (e.g. `LeaseCreated`, `ClaimCreated`) */
-        "rowFilter.event_appended.event_type": string;
-        /**
-         * @description Worker-decoded event arguments as JSON (snake_case keys; values as
-         *     strings/hex)
-         */
-        "rowFilter.event_appended.args": string;
-        /** @description Block number containing the EventAppended log */
-        "rowFilter.event_appended.block_number": string;
-        /** @description Block timestamp (seconds since epoch) containing the EventAppended log */
-        "rowFilter.event_appended.block_timestamp": string;
-        /** @description Convenience timestamp (block_timestamp converted to timestamptz) */
-        "rowFilter.event_appended.block_time": string;
-        /** @description Block hash of the log's block (bytes32 hex) */
-        "rowFilter.event_appended.block_hash": string;
-        /** @description Transaction hash of the log's transaction (bytes32 hex) */
-        "rowFilter.event_appended.tx_hash": string;
-        /** @description Log index within the transaction receipt (0-based) */
-        "rowFilter.event_appended.log_index": string;
-        /** @description Stream name (`hub` or `controller`) */
-        "rowFilter.stream_cursor.stream": string;
-        /**
-         * @description Highest contiguous canonical event sequence already applied to derived
-         *     tables
-         */
-        "rowFilter.stream_cursor.applied_through_seq": string;
-        /**
-         * @description Expected `prev_tip` for the next event to apply (hash-chain continuity
-         *     check)
-         */
-        "rowFilter.stream_cursor.tip": string;
-        /** @description Timestamp when the cursor last advanced or rolled back */
-        "rowFilter.stream_cursor.updated_at": string;
-        /** @description Event sequence at which this PnL snapshot became current */
-        "rowFilter.hub_protocol_pnl.valid_from_seq": string;
-        "rowFilter.hub_protocol_pnl.valid_to_seq": string;
-        /** @description Current protocol PnL value (int256) */
-        "rowFilter.hub_protocol_pnl.pnl": string;
-        /** @description Delta applied at this event (int256) */
-        "rowFilter.hub_protocol_pnl.delta": string;
-        /** @description PnL reason code (matches `UntronV3Index.PnlReason`) */
-        "rowFilter.hub_protocol_pnl.reason": string;
-        /** @description Token being bridged (EVM on hub chain) */
-        "rowFilter.hub_bridgers.target_token": string;
-        /** @description Destination EVM chainId */
-        "rowFilter.hub_bridgers.target_chain_id": string;
-        /** @description Event sequence at which this bridger route became current */
-        "rowFilter.hub_bridgers.valid_from_seq": string;
-        "rowFilter.hub_bridgers.valid_to_seq": string;
-        /** @description Bridger adapter contract address (EVM) */
-        "rowFilter.hub_bridgers.bridger": string;
-        "rowFilter.lease_view.lease_id": string;
-        "rowFilter.lease_view.receiver_salt": string;
-        "rowFilter.lease_view.lease_number": string;
-        "rowFilter.lease_view.realtor": string;
-        "rowFilter.lease_view.lessee": string;
-        "rowFilter.lease_view.start_time": string;
-        "rowFilter.lease_view.nukeable_after": string;
-        "rowFilter.lease_view.lease_fee_ppm": string;
-        "rowFilter.lease_view.flat_fee": string;
-        "rowFilter.lease_view.lease_nonce": string;
-        "rowFilter.lease_view.payout_target_chain_id": string;
-        "rowFilter.lease_view.payout_target_token": string;
-        "rowFilter.lease_view.payout_beneficiary": string;
-        "rowFilter.lease_view.payout_config_history": string;
-        "rowFilter.lease_view.claims": string;
-        "rowFilter.lease_view.claims_total": string;
-        "rowFilter.lease_view.claims_filled": string;
-        /** @description Hub event sequence for this rescue */
-        "rowFilter.hub_tokens_rescued.event_seq": string;
-        /** @description Token rescued (EVM address on hub chain; must not be USDT) */
-        "rowFilter.hub_tokens_rescued.token": string;
-        /** @description Amount rescued (uint256) */
-        "rowFilter.hub_tokens_rescued.amount": string;
-        /** @description Block number containing the controller `IsEventChainTipCalled` log */
-        "rowFilter.controller_tip_proofs.block_number": string;
-        /** @description Block timestamp (seconds since epoch) containing the log */
-        "rowFilter.controller_tip_proofs.block_timestamp": string;
-        /** @description Block hash of the log's block (bytes32 hex) */
-        "rowFilter.controller_tip_proofs.block_hash": string;
-        /** @description Convenience timestamp (block_timestamp converted to timestamptz) */
-        "rowFilter.controller_tip_proofs.block_time": string;
-        /** @description Transaction hash of the transaction containing the log (bytes32 hex) */
-        "rowFilter.controller_tip_proofs.tx_hash": string;
-        /** @description Log index within the transaction receipt (0-based) */
-        "rowFilter.controller_tip_proofs.log_index": string;
-        /** @description Tron address that called `isEventChainTip(bytes32)` */
-        "rowFilter.controller_tip_proofs.caller": string;
-        /**
-         * @description Hash-chain tip value that the caller asserted as the controller's current
-         *     tip
-         */
-        "rowFilter.controller_tip_proofs.proved_tip": string;
-        /** @description Realtor address (EVM) */
-        "rowFilter.hub_realtors.realtor": string;
-        /** @description Event sequence at which this realtor snapshot became current */
-        "rowFilter.hub_realtors.valid_from_seq": string;
-        "rowFilter.hub_realtors.valid_to_seq": string;
-        /** @description Whether this address is currently allowlisted to create leases */
-        "rowFilter.hub_realtors.allowed": string;
-        /** @description Realtor-specific minimum percentage fee floor (ppm) */
-        "rowFilter.hub_realtors.min_fee_ppm": string;
-        /** @description Realtor-specific minimum flat fee floor (USDT units) */
-        "rowFilter.hub_realtors.min_flat_fee": string;
-        /** @description Realtor-specific maximum lease duration in seconds (NULL means no override) */
-        "rowFilter.hub_realtors.max_lease_duration_seconds": string;
-        /** @description Max lease creations allowed per window (NULL/0 means disabled) */
-        "rowFilter.hub_realtors.lease_rate_max_leases": string;
-        /**
-         * @description Window size (seconds) for lease creation rate limiting (NULL/0 means
-         *     disabled)
-         */
-        "rowFilter.hub_realtors.lease_rate_window_seconds": string;
-        /** @description Controller event sequence for this rebalance */
-        "rowFilter.controller_usdt_rebalanced.event_seq": string;
-        /** @description USDT amount bridged in (uint256) */
-        "rowFilter.controller_usdt_rebalanced.in_amount": string;
-        /** @description Expected USDT amount out on destination (uint256) */
-        "rowFilter.controller_usdt_rebalanced.out_amount": string;
-        /** @description Rebalancer used (Tron address) */
-        "rowFilter.controller_usdt_rebalanced.rebalancer": string;
-        /** @description Hub event sequence for this controller tip update record */
-        "rowFilter.hub_controller_tip_updates.event_seq": string;
-        /** @description Controller tip that this hop links from */
-        "rowFilter.hub_controller_tip_updates.previous_tip": string;
-        /** @description Controller event block number (as embedded in the hub event payload) */
-        "rowFilter.hub_controller_tip_updates.block_number": string;
-        /**
-         * @description Controller event block timestamp (seconds) (as embedded in the hub event
-         *     payload)
-         */
-        "rowFilter.hub_controller_tip_updates.block_timestamp": string;
-        /** @description Controller event signature hash (bytes32 hex) */
-        "rowFilter.hub_controller_tip_updates.event_signature": string;
-        /** @description Controller ABI-encoded event payload (0x hex) */
-        "rowFilter.hub_controller_tip_updates.abi_encoded_event_data": string;
-        "rowFilter.receiver_salt_candidates.receiver_salt": string;
-        "rowFilter.receiver_salt_candidates.receiver": string;
-        "rowFilter.receiver_salt_candidates.receiver_evm": string;
-        "rowFilter.receiver_salt_candidates.balance_amount": string;
-        "rowFilter.receiver_salt_candidates.has_balance": string;
-        "rowFilter.receiver_salt_candidates.nukeable_after": string;
-        "rowFilter.receiver_salt_candidates.is_free": string;
-        /** @description Destination EVM chainId */
-        "rowFilter.hub_chains.target_chain_id": string;
-        /** @description Event sequence at which this deprecation flag became current */
-        "rowFilter.hub_chains.valid_from_seq": string;
-        "rowFilter.hub_chains.valid_to_seq": string;
-        /** @description Whether this destination chain is deprecated for new payout configs */
-        "rowFilter.hub_chains.deprecated": string;
-        /** @description Hub event sequence for this vault event */
-        "rowFilter.hub_lp_vault_events.event_seq": string;
-        /** @description `deposit` or `withdraw` */
-        "rowFilter.hub_lp_vault_events.kind": string;
-        /** @description LP address (EVM) */
-        "rowFilter.hub_lp_vault_events.lp": string;
-        /** @description Amount deposited/withdrawn (uint256, USDT units) */
-        "rowFilter.hub_lp_vault_events.amount": string;
-    };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+	schemas: {
+		CreateLeaseRequest: {
+			/**
+			 * @description Beneficiary address (EVM).
+			 * @example 0x0000000000000000000000000000000000000003
+			 */
+			beneficiary: string;
+			/**
+			 * Format: int64
+			 * @description Required lease duration in seconds.
+			 *
+			 *     Must be `<= max_duration_seconds` when `max_duration_seconds != 0`.
+			 * @example 2592000
+			 */
+			duration_seconds: number;
+			/**
+			 * @description Optional lessee address.
+			 *
+			 *     - If omitted, the zero address is used.
+			 *     - If provided, `arbitrary_lessee_flat_fee` is added to the flat fee.
+			 * @example 0x0000000000000000000000000000000000000001
+			 */
+			lessee?: string | null;
+			/**
+			 * @description Optional receiver salt (bytes32 hex).
+			 *
+			 *     - If omitted, server selects an available salt.
+			 *     - If provided, must exist in indexer `receiver_salt_candidates`.
+			 * @example 0x0000000000000000000000000000000000000000000000000000000000000000
+			 */
+			receiver_salt?: string | null;
+			/**
+			 * Format: int64
+			 * @description Destination EVM chainId.
+			 *
+			 *     Must have a configured bridger route for `(target_chain_id,target_token)`.
+			 * @example 1
+			 */
+			target_chain_id: number;
+			/**
+			 * @description Target settlement token (EVM address on hub chain).
+			 *
+			 *     Must have a configured bridger route for `(target_chain_id,target_token)`.
+			 * @example 0x0000000000000000000000000000000000000002
+			 */
+			target_token: string;
+		};
+		CreateLeaseResponse: {
+			/**
+			 * Format: int64
+			 * @description Unix timestamp after which the lease is nukeable, computed as `now + duration_seconds`.
+			 * @example 1700000000
+			 */
+			nukeable_after: number;
+			/**
+			 * @description Receiver salt selected/used for the lease (bytes32 hex).
+			 * @example 0x0000000000000000000000000000000000000000000000000000000000000000
+			 */
+			receiver_salt: string;
+			/**
+			 * @description UserOperation hash.
+			 * @example 0x0000000000000000000000000000000000000000000000000000000000000000
+			 */
+			userop_hash: string;
+		};
+		ErrorResponse: {
+			/**
+			 * @description Error message string.
+			 * @example bad request
+			 */
+			error: string;
+		};
+		LeaseClaimView: {
+			/**
+			 * @description USDT-denominated claim amount (uint256, decimal string).
+			 * @example 0
+			 */
+			amount_usdt: string;
+			/**
+			 * @description Best-effort attribution of this claim's underlying USDT deposits.
+			 *
+			 *     - For pre-entitle origins, this is usually a single entry.
+			 *     - For receiver-pull origins, this may contain multiple entries (FIFO approximation) or be empty.
+			 */
+			usdt_deposit_attribution: components['schemas']['UsdtDepositAttributionEntryView'][];
+			/** @example 0x0000000000000000000000000000000000000003 */
+			beneficiary: string;
+			/**
+			 * @description Claim id (uint256, decimal string).
+			 * @example 0
+			 */
+			claim_id: string;
+			/**
+			 * Format: int32
+			 * @description Origin code (matches `UntronV3Index.ClaimOrigin`).
+			 * @example 0
+			 */
+			origin: number;
+			/**
+			 * @description Origin actor (EVM address).
+			 * @example 0x0000000000000000000000000000000000000000
+			 */
+			origin_actor: string;
+			/**
+			 * @description Origin identifier (txId for pre-entitle, receiver_salt for receiver pull, etc.)
+			 * @example 0x
+			 */
+			origin_id: string;
+			/**
+			 * @description Raw amount before fees (uint256, decimal string).
+			 * @example 0
+			 */
+			origin_raw_amount: string;
+			/**
+			 * Format: int64
+			 * @description Origin timestamp (seconds).
+			 * @example 0
+			 */
+			origin_timestamp: number;
+			/**
+			 * @description Origin token/address (string; Tron token for receiver pull; zero address otherwise).
+			 * @example 0x0000000000000000000000000000000000000000
+			 */
+			origin_token: string;
+			/**
+			 * @description Queue index (uint256, decimal string).
+			 * @example 0
+			 */
+			queue_index: string;
+			/**
+			 * @description Fill (payout) transaction hash on the destination chain (0x hex).
+			 * @example 0x0000000000000000000000000000000000000000000000000000000000000000
+			 */
+			fill_tx_hash?: string | null;
+			/**
+			 * @description Claim lifecycle status.
+			 * @example created
+			 */
+			status: string;
+			/**
+			 * Format: int64
+			 * @example 1
+			 */
+			target_chain_id: number;
+			/** @example 0x0000000000000000000000000000000000000002 */
+			target_token: string;
+			/**
+			 * Format: int64
+			 * @example 0
+			 */
+			valid_from_seq: number;
+			/** Format: int64 */
+			valid_to_seq?: number | null;
+		};
+		LeasePayoutConfigVersionView: {
+			config: components['schemas']['LeasePayoutConfigView'];
+			/**
+			 * Format: int64
+			 * @example 0
+			 */
+			valid_from_seq: number;
+			/** Format: int64 */
+			valid_to_seq?: number | null;
+		};
+		LeasePayoutConfigView: {
+			/** @example 0x0000000000000000000000000000000000000003 */
+			beneficiary: string;
+			/**
+			 * Format: int64
+			 * @example 1
+			 */
+			target_chain_id: number;
+			/** @example 0x0000000000000000000000000000000000000002 */
+			target_token: string;
+		};
+		/**
+		 * @description Realtor-side aggregated view of a lease in the Untron V3 protocol.
+		 *
+		 *     This response is designed to be stable for clients:
+		 *     - Uint256-like values are returned as decimal strings.
+		 *     - Source-of-truth data comes from the indexer API (PostgREST views).
+		 */
+		LeaseViewResponse: {
+			/** @description Claims emitted by this lease (current state per claim_id). */
+			claims: components['schemas']['LeaseClaimView'][];
+			/**
+			 * Format: int64
+			 * @description Number of filled claims.
+			 * @example 0
+			 */
+			claims_filled: number;
+			/**
+			 * Format: int64
+			 * @description Total number of claims.
+			 * @example 0
+			 */
+			claims_total: number;
+			/**
+			 * @description Canonical receiver USDT deposits that are still eligible for `preEntitle`
+			 *     and have not yet been accounted for by a hub pre-entitle claim.
+			 *
+			 *     Entries are a minimal, stable subset:
+			 *     `{ tx_hash, sender, amount, block_timestamp, log_index }`.
+			 */
+			pending_usdt_deposits: components['schemas']['UsdtDepositAttributionEntryView'][];
+			/**
+			 * @description Sum of pending deposit amounts (uint256, decimal string).
+			 * @example 0
+			 */
+			pending_usdt_deposits_amount: string;
+			/**
+			 * Format: int64
+			 * @description Latest pending deposit Tron block timestamp (seconds).
+			 * @example 0
+			 */
+			pending_usdt_deposits_latest_block_timestamp: number;
+			/**
+			 * Format: int64
+			 * @description Total number of pending deposits.
+			 * @example 0
+			 */
+			pending_usdt_deposits_total: number;
+			/**
+			 * @description Flat fee (USDT units) (uint256, decimal string).
+			 * @example 0
+			 */
+			flat_fee: string;
+			/**
+			 * @description Whether this lease was created by this realtor service instance.
+			 * @example true
+			 */
+			is_owned_by_this_realtor: boolean;
+			/**
+			 * Format: int32
+			 * @description Lease fee (ppm).
+			 * @example 10000
+			 */
+			lease_fee_ppm: number;
+			/**
+			 * @description Lease id (uint256, decimal string).
+			 * @example 1
+			 */
+			lease_id: string;
+			/**
+			 * @description Current per-lease nonce used for payout config signatures (uint256, decimal string).
+			 * @example 0
+			 */
+			lease_nonce: string;
+			/**
+			 * @description Current lessee (EVM address) that controls payout config updates.
+			 * @example 0x0000000000000000000000000000000000000001
+			 */
+			lessee: string;
+			/**
+			 * Format: int64
+			 * @description Earliest timestamp when the lease is nukeable (unix seconds).
+			 * @example 1700000000
+			 */
+			nukeable_after: number;
+			payout_config_current?: null | components['schemas']['LeasePayoutConfigView'];
+			/** @description Payout config history (KV versions ordered by valid_from_seq). */
+			payout_config_history: components['schemas']['LeasePayoutConfigVersionView'][];
+			/**
+			 * @description Realtor (EVM address) that created this lease.
+			 * @example 0x0000000000000000000000000000000000000004
+			 */
+			realtor: string;
+			/**
+			 * @description Receiver address in EVM hex form (0x...).
+			 *
+			 *     This is the 20-byte address corresponding to the Tron receiver address.
+			 * @example 0x0000000000000000000000000000000000000000
+			 */
+			receiver_address_evm?: string | null;
+			/**
+			 * @description Receiver address on Tron (base58check, T...).
+			 *
+			 *     Derived from `receiver_salt` using the controller's deterministic receiver scheme.
+			 * @example T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb
+			 */
+			receiver_address_tron?: string | null;
+			/**
+			 * @description Receiver salt (bytes32 hex).
+			 * @example 0x0000000000000000000000000000000000000000000000000000000000000000
+			 */
+			receiver_salt: string;
+			/**
+			 * Format: int64
+			 * @description Lease start time on hub chain (unix seconds).
+			 * @example 1700000000
+			 */
+			start_time: number;
+		};
+		RealtorInfoResponse: {
+			/**
+			 * @description Whether this realtor is allowlisted on the hub.
+			 *
+			 *     When false, `POST /realtor` returns `403`.
+			 * @example true
+			 */
+			allowed: boolean;
+			/**
+			 * Format: int64
+			 * @description Additional flat fee added when a non-null `lessee` is provided in `POST /realtor`.
+			 * @example 0
+			 */
+			arbitrary_lessee_flat_fee: number;
+			/**
+			 * Format: int64
+			 * @description Default duration seconds from this service's env (used only to compute effective_duration_seconds).
+			 * @example 2592000
+			 */
+			default_duration_seconds: number;
+			/**
+			 * Format: int32
+			 * @description Default lease fee PPM from this service's env.
+			 * @example 10000
+			 */
+			default_fee_ppm: number;
+			/**
+			 * Format: int64
+			 * @description Default flat fee from this service's env (before min and adders).
+			 * @example 0
+			 */
+			default_flat_fee: number;
+			/**
+			 * Format: int64
+			 * @description Effective duration seconds used for informational purposes (currently derived from defaults and max).
+			 *
+			 *     `POST /realtor` requires `duration_seconds` explicitly.
+			 * @example 2592000
+			 */
+			effective_duration_seconds: number;
+			/**
+			 * Format: int64
+			 * @description Rate limit: max leases in window.
+			 * @example 0
+			 */
+			lease_rate_max_leases: number;
+			/**
+			 * Format: int64
+			 * @description Rate limit: remaining leases in window (if reported by indexer).
+			 */
+			lease_rate_remaining?: number | null;
+			/**
+			 * Format: int64
+			 * @description Rate limit: window size in seconds.
+			 * @example 0
+			 */
+			lease_rate_window_seconds: number;
+			/**
+			 * Format: int64
+			 * @description Maximum allowed lease duration in seconds.
+			 *
+			 *     If 0, no max is enforced by this service.
+			 * @example 2592000
+			 */
+			max_duration_seconds: number;
+			/**
+			 * Format: int32
+			 * @description Minimum lease fee PPM configured on hub for this realtor.
+			 * @example 0
+			 */
+			min_fee_ppm: number;
+			/**
+			 * Format: int64
+			 * @description Minimum flat fee configured on hub for this realtor.
+			 * @example 0
+			 */
+			min_flat_fee: number;
+			/**
+			 * @description Address that identifies this realtor (the configured hub Safe).
+			 * @example 0x0000000000000000000000000000000000000004
+			 */
+			realtor_address: string;
+			/** @description Supported (target_chain_id,target_token) pairs from the current bridger routing table. */
+			supported_pairs: components['schemas']['RealtorTargetPairResponse'][];
+			/**
+			 * @description UntronV3 contract address on hub chain.
+			 * @example 0x0000000000000000000000000000000000000005
+			 */
+			untron_v3: string;
+			/**
+			 * @description Optional upstream principal/user identifier echoed from `x-untron-principal-id`.
+			 * @example acct_123
+			 */
+			user?: string | null;
+		};
+		RealtorTargetPairResponse: {
+			/**
+			 * Format: int32
+			 * @description Effective lease fee in PPM for this pair (currently not pair-specific).
+			 * @example 10000
+			 */
+			effective_fee_ppm: number;
+			/**
+			 * Format: int64
+			 * @description Effective flat fee for this pair including any env-configured per-pair additional flat fee.
+			 *
+			 *     Does not include `arbitrary_lessee_flat_fee` (which depends on the request).
+			 * @example 0
+			 */
+			effective_flat_fee: number;
+			/**
+			 * Format: int64
+			 * @description Destination EVM chainId.
+			 * @example 1
+			 */
+			target_chain_id: number;
+			/**
+			 * @description Target settlement token (EVM address on hub chain).
+			 * @example 0x0000000000000000000000000000000000000002
+			 */
+			target_token: string;
+		};
+		SetPayoutConfigRequest: {
+			/**
+			 * @description Beneficiary address (EVM).
+			 * @example 0x0000000000000000000000000000000000000003
+			 */
+			beneficiary: string;
+			/**
+			 * Format: int64
+			 * @description EIP-712 signature deadline (unix seconds).
+			 * @example 1700000000
+			 */
+			deadline: number;
+			/**
+			 * Format: int64
+			 * @description Lease id to update.
+			 * @example 1
+			 */
+			lease_id: number;
+			/**
+			 * @description EIP-712 signature bytes (0x hex).
+			 *
+			 *     Typically a 65-byte ECDSA signature for EOAs; contract lessees may use ERC-1271 signatures.
+			 * @example 0x
+			 */
+			signature: string;
+			/**
+			 * Format: int64
+			 * @description Destination EVM chainId.
+			 * @example 1
+			 */
+			target_chain_id: number;
+			/**
+			 * @description Target settlement token (EVM address on hub chain).
+			 * @example 0x0000000000000000000000000000000000000002
+			 */
+			target_token: string;
+		};
+		SetPayoutConfigResponse: {
+			/**
+			 * @description UserOperation hash.
+			 * @example 0x0000000000000000000000000000000000000000000000000000000000000000
+			 */
+			userop_hash: string;
+		};
+		/**
+		 * @description Controller sweep ledger (append-only)
+		 *
+		 *     Records each receiver sweep and the computed USDT-equivalent amount.
+		 */
+		controller_pulled_from_receiver: {
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence for this receiver pull
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			event_seq?: number;
+			/**
+			 * Format: text
+			 * @description Receiver salt identifying which deterministic receiver was swept
+			 */
+			receiver_salt?: string;
+			/**
+			 * Format: text
+			 * @description Token pulled from receiver (Tron address)
+			 */
+			token?: string;
+			/** @description Raw token amount pulled (uint256) */
+			token_amount?: components['schemas']['PgNumeric'];
+			/** @description Exchange rate used (1e18-scaled); 1:1 for USDT sweeps */
+			exchange_rate?: components['schemas']['PgNumeric'];
+			/** @description USDT-equivalent amount accounted for this pull (uint256) */
+			usdt_amount?: components['schemas']['PgNumeric'];
+		};
+		/** @description Controller executor USDT transfer ledger (append-only) */
+		controller_usdt_transfers: {
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence for this executor transfer
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			event_seq?: number;
+			/**
+			 * Format: text
+			 * @description Recipient of USDT from controller (Tron address)
+			 */
+			recipient?: string;
+			/** @description Amount transferred (uint256) */
+			amount?: components['schemas']['PgNumeric'];
+		};
+		/** @description Current mapping of receiver salts to deployed receiver addresses (KV) */
+		controller_receivers: {
+			/**
+			 * Format: text
+			 * @description Receiver salt (bytes32) identifying the deterministic receiver
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			receiver_salt?: string;
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence at which this receiver mapping became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description Receiver contract address on Tron (base58)
+			 */
+			receiver?: string;
+		};
+		/**
+		 * @description Current LP allowlist (KV)
+		 *
+		 *     LPs must be allowlisted to deposit principal into the hub fast-fill vault.
+		 */
+		hub_lp_allowlist: {
+			/**
+			 * Format: text
+			 * @description LP address (EVM)
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			lp?: string;
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this allowlist entry became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * @description Whether this LP may deposit into the fast-fill vault (withdrawals are always
+			 *     allowed)
+			 */
+			allowed?: boolean;
+		};
+		/**
+		 * @description Unaccounted receiver USDT deposits
+		 *
+		 *     Tron TRC-20 Transfer logs not yet reflected as hub claims
+		 *
+		 *     Rows in this view correspond to canonical TRC-20 USDT transfers into
+		 *     deterministic receivers that do NOT yet have a hub-side claim with
+		 *     `origin in (pre-entitle, subjective pre-entitle)` matching
+		 *     `origin_id = tx_hash`.
+		 *
+		 *     This view is intended for operators to identify deposits that may require
+		 *     action (preEntitle or receiver pull).
+		 */
+		unaccounted_receiver_usdt_transfers: {
+			/** Format: bigint */
+			chain_id?: number;
+			/** Format: text */
+			token?: string;
+			/** Format: text */
+			receiver_salt?: string;
+			/** Format: text */
+			sender?: string;
+			/** Format: text */
+			recipient?: string;
+			amount?: components['schemas']['PgNumeric'];
+			/** Format: bigint */
+			block_number?: number;
+			/** Format: bigint */
+			block_timestamp?: number;
+			/** Format: timestamp with time zone */
+			block_time?: string;
+			/** Format: text */
+			block_hash?: string;
+			/** Format: text */
+			tx_hash?: string;
+			/** Format: integer */
+			log_index?: number;
+			expected_lease_id?: components['schemas']['PgNumeric'];
+		};
+		/**
+		 * @description Current claim states (KV)
+		 *
+		 *     Claims are created by proven Tron deposits / LP-sponsored subjective pre-entitlement / controller profit volume,
+		 *     and transition to `filled` when a filler settles them.
+		 */
+		hub_claims: {
+			/**
+			 * @description Lease id that produced this claim
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			lease_id?: components['schemas']['PgNumeric'];
+			/**
+			 * @description Per-lease claim id (uint256, 0-indexed)
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			claim_id?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this claim version became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description Token used for settlement when filling this claim (EVM on hub chain)
+			 */
+			target_token?: string;
+			/** @description Index in the FIFO queue (per target_token) where this claim was enqueued */
+			queue_index?: components['schemas']['PgNumeric'];
+			/** @description USDT-denominated claim amount (uint256) used for accounting */
+			amount_usdt?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Destination chainId for payout (local if equals hub chainId)
+			 */
+			target_chain_id?: number;
+			/**
+			 * Format: text
+			 * @description Beneficiary address (EVM) receiving payout
+			 */
+			beneficiary?: string;
+			/**
+			 * Format: smallint
+			 * @description Claim origin code (matches `UntronV3Index.ClaimOrigin`)
+			 */
+			origin?: number;
+			/**
+			 * Format: text
+			 * @description Origin identifier (txId for pre-entitle, receiver_salt for receiver pull,
+			 *     etc.)
+			 */
+			origin_id?: string;
+			/**
+			 * Format: text
+			 * @description Origin actor (e.g. subjective pre-entitle sponsor; otherwise zero)
+			 */
+			origin_actor?: string;
+			/**
+			 * Format: text
+			 * @description Origin token/address (Tron token for receiver pull; zero address otherwise)
+			 */
+			origin_token?: string;
+			/**
+			 * Format: bigint
+			 * @description Origin timestamp (seconds) (Tron block time or controller dump time; 0 if
+			 *     not applicable)
+			 */
+			origin_timestamp?: number;
+			/** @description Raw amount before fees (USDT-equivalent units) */
+			origin_raw_amount?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: hub.claim_status
+			 * @description Claim lifecycle status (`created` or `filled`)
+			 * @enum {string}
+			 */
+			status?: 'created' | 'filled';
+		};
+		/**
+		 * @description Receiver USDT transfer indexer status (tail + backfill).
+		 *
+		 *     The TRC-20 receiver transfer indexer has two moving parts:
+		 *     - a single shared tail cursor (`ctl.receiver_usdt_tail_cursor.next_block`), and
+		 *     - per-receiver backfill cursors (`ctl.receiver_watchlist.backfill_next_block`).
+		 *
+		 *     Relayers should generally avoid acting on receiver-transfer-derived state unless:
+		 *     - `min_backfill_next_block` is NULL (no pending backfills), and
+		 *     - `tail_next_block` is close to the Tron head (with the relayer's own head check).
+		 */
+		receiver_usdt_indexer_status: {
+			/**
+			 * Format: chain.stream
+			 * @description Note:
+			 *     This is a Primary Key.<pk/>
+			 * @enum {string}
+			 */
+			stream?: 'hub' | 'controller';
+			/** Format: bigint */
+			tail_next_block?: number;
+			/** Format: timestamp with time zone */
+			tail_updated_at?: string;
+			/** Format: bigint */
+			min_backfill_next_block?: number;
+			/** Format: bigint */
+			receiver_count?: number;
+			/** Format: bigint */
+			backfill_pending_receivers?: number;
+			/** Format: timestamp with time zone */
+			watchlist_updated_at?: string;
+		};
+		/**
+		 * @description Hub-side controller processed events ledger (append-only)
+		 *
+		 *     Records that the hub processed a queued controller event during reconciliation.
+		 */
+		hub_controller_processed: {
+			/**
+			 * Format: bigint
+			 * @description Hub event sequence for this controller processing record
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			event_seq?: number;
+			/** @description Index within the hub's controller event queue that was processed */
+			event_index?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Controller event block number (as embedded in the hub event payload)
+			 */
+			block_number?: number;
+			/**
+			 * Format: bigint
+			 * @description Controller event block timestamp (seconds) (as embedded in the hub event
+			 *     payload)
+			 */
+			block_timestamp?: number;
+			/**
+			 * Format: text
+			 * @description Controller event signature hash (bytes32 hex)
+			 */
+			event_signature?: string;
+			/**
+			 * Format: text
+			 * @description Controller ABI-encoded event payload (0x hex)
+			 */
+			abi_encoded_event_data?: string;
+		};
+		/**
+		 * @description Hub controller sync state (materialized)
+		 *
+		 *     This single-row view is a DB projection of hub events and is intended to replace hub
+		 *     read-RPC calls:
+		 *
+		 *     - `last_controller_event_tip` == UntronV3Base.lastControllerEventTip()
+		 *     - `last_controller_event_seq` == UntronV3Base.lastControllerEventSeq()
+		 *     - `next_controller_event_index` == UntronV3Base.nextControllerEventIndex()
+		 *
+		 *     Values reflect the hub's canonical event stream as applied by the indexer.
+		 */
+		hub_controller_state: {
+			/** @description UntronV3Base.lastControllerEventSeq() */
+			last_controller_event_seq?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: text
+			 * @description UntronV3Base.lastControllerEventTip() (bytes32 hex)
+			 */
+			last_controller_event_tip?: string;
+			/** @description UntronV3Base.nextControllerEventIndex() */
+			next_controller_event_index?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+		};
+		/**
+		 * @description Relayer hub state bundle
+		 *
+		 *     Convenience single-row view combining:
+		 *     - api.hub_controller_state
+		 *
+		 *     Intended for relayer use to minimize HTTP round trips.
+		 */
+		relayer_hub_state: {
+			last_controller_event_seq?: components['schemas']['PgNumeric'];
+			/** Format: text */
+			last_controller_event_tip?: string;
+			next_controller_event_index?: components['schemas']['PgNumeric'];
+		};
+		/** @description Current controller LP address (singleton) */
+		controller_lp: {
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence at which this LP became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description Controller LP address (Tron address)
+			 */
+			lp?: string;
+		};
+		/**
+		 * @description Net receiver USDT balances derived from indexed transfer logs and pull
+		 *     ledgers.
+		 *
+		 *     This is a deterministic approximation of each receiver's USDT balance:
+		 *       sum(incoming TRC-20 transfers into the receiver) - sum(controller pulls from that receiver)
+		 *
+		 *     It assumes receiver addresses do not have other outflows besides controller pulls.
+		 */
+		receiver_usdt_balances: {
+			/**
+			 * Format: text
+			 * @description Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			receiver_salt?: string;
+			/** Format: text */
+			receiver?: string;
+			/** Format: text */
+			receiver_evm?: string;
+			/** Format: text */
+			token?: string;
+			incoming_amount?: components['schemas']['PgNumeric'];
+			pulled_amount?: components['schemas']['PgNumeric'];
+			balance_amount?: components['schemas']['PgNumeric'];
+		};
+		/**
+		 * @description Current controller rebalancer payloads (KV)
+		 *
+		 *     Payloads configure how USDT is bridged out of Tron for each rebalancer implementation.
+		 */
+		controller_payloads: {
+			/**
+			 * Format: text
+			 * @description Rebalancer address (Tron)
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			rebalancer?: string;
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence at which this payload became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description Rebalancer-specific payload bytes (0x hex) used for delegatecall bridging
+			 */
+			payload?: string;
+		};
+		/**
+		 * @description Receiver USDT deposits + actionability hints (preEntitle vs pull)
+		 *
+		 *     For each canonical TRC-20 USDT transfer into a deterministic receiver, this view shows:
+		 *     - whether the hub has already accounted for it (matching claim origin_id == tx_hash),
+		 *     - the latest observed receiver pull timestamp for (receiver_salt, token), and
+		 *     - whether `preEntitle` is still time-eligible (`transfer_ts > last_pull_ts`).
+		 *
+		 *     `recommended_action` is a best-effort operator hint:
+		 *     - 'already_accounted' => hub claim exists (origin pre-entitle or subjective pre-entitle)
+		 *     - 'pre_entitle'        => no claim yet and pre-entitle timing is still allowed
+		 *     - 'pull'               => no claim yet and a later pull timestamp suggests pre-entitle would revert
+		 */
+		receiver_usdt_transfer_actionability: {
+			/** Format: bigint */
+			chain_id?: number;
+			/** Format: text */
+			token?: string;
+			/** Format: text */
+			receiver_salt?: string;
+			/** Format: text */
+			sender?: string;
+			/** Format: text */
+			recipient?: string;
+			amount?: components['schemas']['PgNumeric'];
+			/** Format: bigint */
+			block_number?: number;
+			/** Format: bigint */
+			block_timestamp?: number;
+			/** Format: timestamp with time zone */
+			block_time?: string;
+			/** Format: text */
+			block_hash?: string;
+			/** Format: text */
+			tx_hash?: string;
+			/** Format: integer */
+			log_index?: number;
+			/** Format: smallint */
+			claim_origin?: number;
+			claim_lease_id?: components['schemas']['PgNumeric'];
+			claim_id?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: hub.claim_status
+			 * @enum {string}
+			 */
+			claim_status?: 'created' | 'filled';
+			claim_amount_usdt?: components['schemas']['PgNumeric'];
+			expected_lease_id?: components['schemas']['PgNumeric'];
+			/** Format: bigint */
+			last_pull_timestamp?: number;
+			preentitle_time_ok?: boolean;
+			/** Format: text */
+			recommended_action?: string;
+		};
+		/**
+		 * @description Current payout configuration per lease (KV)
+		 *
+		 *     Defines destination chain, settlement token, and beneficiary for newly created claims under each lease.
+		 */
+		hub_payout_configs: {
+			/**
+			 * @description Lease id this payout config applies to
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			lease_id?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this payout config became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: bigint
+			 * @description Destination chainId for payouts created under this config
+			 */
+			target_chain_id?: number;
+			/**
+			 * Format: text
+			 * @description Settlement token on the hub chain used for fills (USDT or swapped
+			 *     token)
+			 */
+			target_token?: string;
+			/**
+			 * Format: text
+			 * @description Recipient (EVM) for payouts / bridged delivery
+			 */
+			beneficiary?: string;
+		};
+		/**
+		 * @description Per-stream ingestion/projection summary for relayers.
+		 *
+		 *     This view is intentionally minimal:
+		 *     - It does NOT attempt to query RPC head (that stays in the relayer).
+		 *     - It DOES let relayers detect when projections are behind ingestion (`is_projection_caught_up = false`),
+		 *       which would make derived "current state" views stale.
+		 */
+		stream_ingest_summary: {
+			/**
+			 * Format: chain.stream
+			 * @description Note:
+			 *     This is a Primary Key.<pk/>
+			 * @enum {string}
+			 */
+			stream?: 'hub' | 'controller';
+			/** Format: bigint */
+			applied_through_seq?: number;
+			/** Format: text */
+			tip?: string;
+			/** Format: timestamp with time zone */
+			updated_at?: string;
+			/** Format: bigint */
+			max_event_seq?: number;
+			/** Format: bigint */
+			max_block_number?: number;
+			/** Format: bigint */
+			max_block_timestamp?: number;
+			/** Format: timestamp with time zone */
+			max_block_time?: string;
+			is_projection_caught_up?: boolean;
+		};
+		/** @description Current controller owner (singleton) */
+		controller_owner: {
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence at which this owner became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description Controller owner (Tron address)
+			 */
+			owner?: string;
+		};
+		/**
+		 * @description Current swap rates for settlement tokens (KV)
+		 *
+		 *     Rates are used by fillers to swap USDT into the target token during claim settlement.
+		 */
+		hub_swap_rates: {
+			/**
+			 * Format: text
+			 * @description Settlement token (EVM) on the hub chain
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			target_token?: string;
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this rate became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: bigint
+			 * @description Expected output rate: targetToken units per 1e6 USDT units
+			 */
+			rate_ppm?: number;
+		};
+		/**
+		 * @description Health check endpoint
+		 *
+		 *     Always returns a single row with `status = 'ok'` if PostgREST can query the database.
+		 */
+		health: {
+			/** Format: text */
+			status?: string;
+		};
+		/**
+		 * @description Realtor effective config
+		 *     (protocol floors + realtor overrides + rate remaining).
+		 *
+		 *     This view merges the protocol-wide floor limits with the current realtor row and returns:
+		 *     - `allowed`
+		 *     - `min_fee_ppm`, `min_flat_fee`, `max_duration_seconds` (effective minima/maxima)
+		 *     - `lease_rate_*` and `lease_rate_remaining` (best-effort, computed from current leases within the window)
+		 */
+		realtor_effective_config: {
+			/** Format: text */
+			realtor?: string;
+			allowed?: boolean;
+			/** Format: bigint */
+			min_fee_ppm?: number;
+			min_flat_fee?: components['schemas']['PgNumeric'];
+			/** Format: bigint */
+			max_duration_seconds?: number;
+			lease_rate_max_leases?: components['schemas']['PgNumeric'];
+			lease_rate_window_seconds?: components['schemas']['PgNumeric'];
+			lease_rate_remaining?: components['schemas']['PgNumeric'];
+		};
+		/** @description Controller LP token withdrawal ledger (append-only) */
+		controller_lp_tokens_withdrawn: {
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence for this LP withdrawal
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			event_seq?: number;
+			/**
+			 * Format: text
+			 * @description Token withdrawn by LP (Tron address)
+			 */
+			token?: string;
+			/** @description Amount withdrawn (uint256) */
+			amount?: components['schemas']['PgNumeric'];
+		};
+		/**
+		 * @description Current hub protocol configuration (singleton)
+		 *
+		 *     Derived from a set of hub config events (USDT, Tron reader, fee floors, rate limits).
+		 */
+		hub_protocol_config: {
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this config snapshot became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description EVM USDT accounting token address on the hub chain
+			 */
+			usdt?: string;
+			/**
+			 * Format: text
+			 * @description Tron USDT TRC-20 contract address (base58) accepted by `preEntitle`
+			 */
+			tron_usdt?: string;
+			/**
+			 * Format: text
+			 * @description EVM address (on the hub chain) of the trusted Tron transaction reader contract
+			 *     used to verify + decode Tron transactions
+			 */
+			tron_reader?: string;
+			/**
+			 * Format: bigint
+			 * @description Protocol-wide minimum percentage fee floor (ppm)
+			 */
+			floor_ppm?: number;
+			/** @description Protocol-wide minimum flat fee floor (USDT units) */
+			floor_flat_fee?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Protocol-wide maximum lease duration in seconds (NULL/0 means disabled)
+			 */
+			max_lease_duration_seconds?: number;
+			/**
+			 * @description Max payout config updates allowed per window per lessee (NULL/0 means
+			 *     disabled)
+			 */
+			lessee_rate_max_updates?: components['schemas']['PgNumeric'];
+			/**
+			 * @description Window size (seconds) for payout config update rate limiting (NULL/0 means
+			 *     disabled)
+			 */
+			lessee_rate_window_seconds?: components['schemas']['PgNumeric'];
+		};
+		/**
+		 * @description Current derived LP principal balances (KV)
+		 *
+		 *     Derived deterministically from hub `LpDeposited`/`LpWithdrawn` events.
+		 */
+		hub_lp_balances: {
+			/**
+			 * Format: text
+			 * @description LP address (EVM)
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			lp?: string;
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this balance snapshot became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/** @description Derived LP principal balance (uint256), based on deposits/withdrawals */
+			balance?: components['schemas']['PgNumeric'];
+		};
+		/**
+		 * @description Current per-lease nonces (KV)
+		 *
+		 *     Used for replay protection on EIP-712 signature-based payout config updates.
+		 */
+		hub_lease_nonces: {
+			/**
+			 * @description Lease id
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			lease_id?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this nonce became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/** @description Current nonce value used for EIP-712 signature replay protection */
+			nonce?: components['schemas']['PgNumeric'];
+		};
+		/** @description Current controller canonical USDT token (singleton) */
+		controller_usdt: {
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence at which this canonical USDT became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description Controller canonical USDT token contract (Tron address)
+			 */
+			usdt?: string;
+		};
+		/**
+		 * @description Current hub owner (singleton)
+		 *
+		 *     Derived from `OwnershipTransferred` events emitted via `UntronV3Index`.
+		 */
+		hub_ownership: {
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this owner transition became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/**
+			 * Format: text
+			 * @description Previous hub owner (EVM address)
+			 */
+			old_owner?: string;
+			/**
+			 * Format: text
+			 * @description New hub owner (EVM address)
+			 */
+			new_owner?: string;
+		};
+		/**
+		 * @description Current lease registry (KV)
+		 *
+		 *     Leases define who controls payouts (lessee), which receiver salt they apply to, and fee schedule parameters.
+		 */
+		hub_leases: {
+			/**
+			 * @description Global lease id (uint256)
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			lease_id?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this lease became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description Receiver salt (bytes32) used to derive deterministic Tron receiver
+			 *     addresses
+			 */
+			receiver_salt?: string;
+			/** @description Per-receiver lease index (0-based) for timeline ordering */
+			lease_number?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: text
+			 * @description Realtor (EVM) that created this lease
+			 */
+			realtor?: string;
+			/**
+			 * Format: text
+			 * @description Lessee (EVM) who controls payout configuration
+			 */
+			lessee?: string;
+			/**
+			 * Format: bigint
+			 * @description Lease start time on the hub chain (seconds)
+			 */
+			start_time?: number;
+			/**
+			 * Format: bigint
+			 * @description Earliest timestamp when the lease can be replaced by a new one for this
+			 *     receiver_salt
+			 */
+			nukeable_after?: number;
+			/**
+			 * Format: bigint
+			 * @description Percentage fee (ppm) applied to recognized raw volume
+			 */
+			lease_fee_ppm?: number;
+			/** @description Flat fee (USDT units) applied after percentage fee */
+			flat_fee?: components['schemas']['PgNumeric'];
+		};
+		/** @description Current controller executor (singleton) */
+		controller_executor: {
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence at which this executor became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description Controller executor (Tron address)
+			 */
+			executor?: string;
+		};
+		/**
+		 * @description Current LP exchange rates for non-USDT tokens (KV)
+		 *
+		 *     Used by controller sweeps to compute USDT-equivalent amounts.
+		 */
+		controller_lp_exchange_rates: {
+			/**
+			 * Format: text
+			 * @description Token address on Tron whose exchange rate is configured
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			token?: string;
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence at which this exchange rate became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * @description Scaled exchange rate used to convert token amounts into USDT-equivalent
+			 *     amounts
+			 */
+			exchange_rate?: components['schemas']['PgNumeric'];
+		};
+		/**
+		 * @description Canonical raw EventAppended stream (both hub + controller)
+		 *
+		 *     This is the canonical ordered stream of Untron "semantic events", as emitted by the onchain index contracts.
+		 *     Each row corresponds to one onchain `EventAppended` log and includes:
+		 *     - hash-chain linkage (prev_tip/new_tip/event_seq)
+		 *     - the semantic event name (`event_type`) and decoded arguments (`args`)
+		 *     - block/tx metadata for auditability
+		 *
+		 *     This view filters to `canonical=true` only.
+		 */
+		event_appended: {
+			/**
+			 * Format: chain.stream
+			 * @description Which stream emitted this EventAppended log (`hub` or `controller`)
+			 * @enum {string}
+			 */
+			stream?: 'hub' | 'controller';
+			/**
+			 * Format: bigint
+			 * @description Monotonic sequence number in the stream's onchain event hash-chain
+			 */
+			event_seq?: number;
+			/**
+			 * Format: text
+			 * @description Previous onchain event hash-chain tip before this event
+			 */
+			prev_tip?: string;
+			/**
+			 * Format: text
+			 * @description New onchain event hash-chain tip after this event
+			 */
+			new_tip?: string;
+			/**
+			 * Format: text
+			 * @description Keccak256 hash of the semantic event signature string (bytes32 hex)
+			 */
+			event_signature?: string;
+			/**
+			 * Format: text
+			 * @description Exact ABI-encoded event payload bytes that were hashed onchain (0x hex)
+			 */
+			abi_encoded_event_data?: string;
+			/**
+			 * Format: text
+			 * @description Worker-decoded semantic event name (e.g. `LeaseCreated`, `ClaimCreated`)
+			 */
+			event_type?: string;
+			/**
+			 * @description Worker-decoded event arguments as JSON (snake_case keys; values as
+			 *     strings/hex)
+			 */
+			args?: components['schemas']['PgJson'];
+			/**
+			 * Format: bigint
+			 * @description Block number containing the EventAppended log
+			 */
+			block_number?: number;
+			/**
+			 * Format: bigint
+			 * @description Block timestamp (seconds since epoch) containing the EventAppended log
+			 */
+			block_timestamp?: number;
+			/**
+			 * Format: timestamp with time zone
+			 * @description Convenience timestamp (block_timestamp converted to timestamptz)
+			 */
+			block_time?: string;
+			/**
+			 * Format: text
+			 * @description Block hash of the log's block (bytes32 hex)
+			 */
+			block_hash?: string;
+			/**
+			 * Format: text
+			 * @description Transaction hash of the log's transaction (bytes32 hex)
+			 */
+			tx_hash?: string;
+			/**
+			 * Format: integer
+			 * @description Log index within the transaction receipt (0-based)
+			 */
+			log_index?: number;
+		};
+		/**
+		 * @description Projection cursors (per stream)
+		 *
+		 *     Shows how far the database has applied canonical events to derived state tables.
+		 *
+		 *     Fields:
+		 *     - `applied_through_seq`: highest contiguous canonical event_seq applied
+		 *     - `tip`: expected prev_tip for the next event
+		 *     - `updated_at`: last time the cursor advanced/rolled back
+		 */
+		stream_cursor: {
+			/**
+			 * Format: chain.stream
+			 * @description Stream name (`hub` or `controller`)
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 * @enum {string}
+			 */
+			stream?: 'hub' | 'controller';
+			/**
+			 * Format: bigint
+			 * @description Highest contiguous canonical event sequence already applied to derived
+			 *     tables
+			 */
+			applied_through_seq?: number;
+			/**
+			 * Format: text
+			 * @description Expected `prev_tip` for the next event to apply (hash-chain continuity
+			 *     check)
+			 */
+			tip?: string;
+			/**
+			 * Format: timestamp with time zone
+			 * @description Timestamp when the cursor last advanced or rolled back
+			 */
+			updated_at?: string;
+		};
+		/**
+		 * @description Current protocol PnL snapshot (singleton)
+		 *
+		 *     Tracks fee revenue and rebalance/withdrawal deltas as emitted by the hub contract.
+		 */
+		hub_protocol_pnl: {
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this PnL snapshot became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/** @description Current protocol PnL value (int256) */
+			pnl?: components['schemas']['PgNumeric'];
+			/** @description Delta applied at this event (int256) */
+			delta?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: smallint
+			 * @description PnL reason code (matches `UntronV3Index.PnlReason`)
+			 */
+			reason?: number;
+		};
+		/**
+		 * @description Current bridger routing table (KV)
+		 *
+		 *     If a claim targets a different chain than the hub chain, the configured bridger is used to deliver funds.
+		 */
+		hub_bridgers: {
+			/**
+			 * Format: text
+			 * @description Token being bridged (EVM on hub chain)
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			target_token?: string;
+			/**
+			 * Format: bigint
+			 * @description Destination EVM chainId
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			target_chain_id?: number;
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this bridger route became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/**
+			 * Format: text
+			 * @description Bridger adapter contract address (EVM)
+			 */
+			bridger?: string;
+		};
+		/**
+		 * @description Aggregated lease view (single-row per lease_id).
+		 *
+		 *     This view joins:
+		 *     - current hub lease (hub.lease_versions)
+		 *     - current payout config (hub.payout_config_versions)
+		 *     - payout config history (hub.payout_config_versions, all versions)
+		 *     - current per-lease nonce (hub.lease_nonce_versions)
+		 *     - current claim states (hub.claim_versions)
+		 *
+		 *     It is intended for clients that want a single PostgREST request to fetch a full
+		 *     lease "detail" payload.
+		 */
+		lease_view: {
+			lease_id?: components['schemas']['PgNumeric'];
+			/** Format: text */
+			receiver_salt?: string;
+			/**
+			 * @description Receiver address on Tron (base58check, T...).
+			 *
+			 *     Derived from `receiver_salt` using the controller's deterministic receiver scheme.
+			 * @example T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb
+			 */
+			receiver_address_tron?: string | null;
+			/**
+			 * @description Receiver address in EVM hex form (0x...).
+			 *
+			 *     This is the 20-byte address corresponding to the Tron receiver address.
+			 * @example 0x0000000000000000000000000000000000000000
+			 */
+			receiver_address_evm?: string | null;
+			lease_number?: components['schemas']['PgNumeric'];
+			/** Format: text */
+			realtor?: string;
+			/** Format: text */
+			lessee?: string;
+			/** Format: bigint */
+			start_time?: number;
+			/** Format: bigint */
+			nukeable_after?: number;
+			/** Format: bigint */
+			lease_fee_ppm?: number;
+			flat_fee?: components['schemas']['PgNumeric'];
+			lease_nonce?: components['schemas']['PgNumeric'];
+			/** Format: bigint */
+			payout_target_chain_id?: number;
+			/** Format: text */
+			payout_target_token?: string;
+			/** Format: text */
+			payout_beneficiary?: string;
+			payout_config_history?: components['schemas']['PgJson'];
+			claims?: components['schemas']['PgJson'];
+			/** Format: bigint */
+			claims_total?: number;
+			/** Format: bigint */
+			claims_filled?: number;
+		};
+		/** @description Hub token rescue ledger (append-only) */
+		hub_tokens_rescued: {
+			/**
+			 * Format: bigint
+			 * @description Hub event sequence for this rescue
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			event_seq?: number;
+			/**
+			 * Format: text
+			 * @description Token rescued (EVM address on hub chain; must not be USDT)
+			 */
+			token?: string;
+			/** @description Amount rescued (uint256) */
+			amount?: components['schemas']['PgNumeric'];
+		};
+		/**
+		 * @description Controller tip proof logs (IsEventChainTipCalled)
+		 *
+		 *     On Tron, the controller exposes `isEventChainTip(bytes32)` which emits `IsEventChainTipCalled`.
+		 *     This event is NOT appended into the controller's hash chain; it is used as a proof-carrying log to
+		 *     anchor controller event sequences.
+		 *
+		 *     This view filters to `canonical=true` only.
+		 */
+		controller_tip_proofs: {
+			/**
+			 * Format: bigint
+			 * @description Block number containing the controller `IsEventChainTipCalled` log
+			 */
+			block_number?: number;
+			/**
+			 * Format: bigint
+			 * @description Block timestamp (seconds since epoch) containing the log
+			 */
+			block_timestamp?: number;
+			/**
+			 * Format: text
+			 * @description Block hash of the log's block (bytes32 hex)
+			 */
+			block_hash?: string;
+			/**
+			 * Format: timestamp with time zone
+			 * @description Convenience timestamp (block_timestamp converted to timestamptz)
+			 */
+			block_time?: string;
+			/**
+			 * Format: text
+			 * @description Transaction hash of the transaction containing the log (bytes32 hex)
+			 */
+			tx_hash?: string;
+			/**
+			 * Format: integer
+			 * @description Log index within the transaction receipt (0-based)
+			 */
+			log_index?: number;
+			/**
+			 * Format: text
+			 * @description Tron address that called `isEventChainTip(bytes32)`
+			 */
+			caller?: string;
+			/**
+			 * Format: text
+			 * @description Hash-chain tip value that the caller asserted as the controller's current
+			 *     tip
+			 */
+			proved_tip?: string;
+		};
+		/**
+		 * @description Current realtor allowlist + realtor config (KV)
+		 *
+		 *     Realtors are addresses allowed to create leases on the hub (`UntronV3.createLease`).
+		 */
+		hub_realtors: {
+			/**
+			 * Format: text
+			 * @description Realtor address (EVM)
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			realtor?: string;
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this realtor snapshot became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/** @description Whether this address is currently allowlisted to create leases */
+			allowed?: boolean;
+			/**
+			 * Format: bigint
+			 * @description Realtor-specific minimum percentage fee floor (ppm)
+			 */
+			min_fee_ppm?: number;
+			/** @description Realtor-specific minimum flat fee floor (USDT units) */
+			min_flat_fee?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: bigint
+			 * @description Realtor-specific maximum lease duration in seconds (NULL means no override)
+			 */
+			max_lease_duration_seconds?: number;
+			/** @description Max lease creations allowed per window (NULL/0 means disabled) */
+			lease_rate_max_leases?: components['schemas']['PgNumeric'];
+			/**
+			 * @description Window size (seconds) for lease creation rate limiting (NULL/0 means
+			 *     disabled)
+			 */
+			lease_rate_window_seconds?: components['schemas']['PgNumeric'];
+		};
+		/** @description Controller USDT rebalance ledger (append-only) */
+		controller_usdt_rebalanced: {
+			/**
+			 * Format: bigint
+			 * @description Controller event sequence for this rebalance
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			event_seq?: number;
+			/** @description USDT amount bridged in (uint256) */
+			in_amount?: components['schemas']['PgNumeric'];
+			/** @description Expected USDT amount out on destination (uint256) */
+			out_amount?: components['schemas']['PgNumeric'];
+			/**
+			 * Format: text
+			 * @description Rebalancer used (Tron address)
+			 */
+			rebalancer?: string;
+		};
+		/**
+		 * @description Hub-side controller tip update ledger (append-only)
+		 *
+		 *     Records the raw controller event bytes that were hash-linked into the controller tip as seen by the hub.
+		 */
+		hub_controller_tip_updates: {
+			/**
+			 * Format: bigint
+			 * @description Hub event sequence for this controller tip update record
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			event_seq?: number;
+			/**
+			 * Format: text
+			 * @description Controller tip that this hop links from
+			 */
+			previous_tip?: string;
+			/**
+			 * Format: bigint
+			 * @description Controller event block number (as embedded in the hub event payload)
+			 */
+			block_number?: number;
+			/**
+			 * Format: bigint
+			 * @description Controller event block timestamp (seconds) (as embedded in the hub event
+			 *     payload)
+			 */
+			block_timestamp?: number;
+			/**
+			 * Format: text
+			 * @description Controller event signature hash (bytes32 hex)
+			 */
+			event_signature?: string;
+			/**
+			 * Format: text
+			 * @description Controller ABI-encoded event payload (0x hex)
+			 */
+			abi_encoded_event_data?: string;
+		};
+		/**
+		 * @description Receiver salt candidates for realtor selection.
+		 *
+		 *     Joins:
+		 *     - `api.controller_receivers` (allowed salts)
+		 *     - `api.receiver_usdt_balances` (cached balance view)
+		 *     - latest hub lease by receiver_salt (for `nukeable_after`)
+		 *
+		 *     Computed fields:
+		 *     - `has_balance`: `balance_amount > 0`
+		 *     - `is_free`: receiver has no current lease or lease is nukeable (based on `nukeable_after <= now`)
+		 */
+		receiver_salt_candidates: {
+			/** Format: text */
+			receiver_salt?: string;
+			/** Format: text */
+			receiver?: string;
+			/** Format: text */
+			receiver_evm?: string;
+			balance_amount?: components['schemas']['PgNumeric'];
+			has_balance?: boolean;
+			/** Format: bigint */
+			nukeable_after?: number;
+			is_free?: boolean;
+		};
+		/**
+		 * @description Current chain deprecation flags (KV)
+		 *
+		 *     Deprecated destination chains cannot be selected in new payout configs.
+		 */
+		hub_chains: {
+			/**
+			 * Format: bigint
+			 * @description Destination EVM chainId
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			target_chain_id?: number;
+			/**
+			 * Format: bigint
+			 * @description Event sequence at which this deprecation flag became current
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+			/** Format: bigint */
+			valid_to_seq?: number;
+			/** @description Whether this destination chain is deprecated for new payout configs */
+			deprecated?: boolean;
+		};
+		/** @description Hub LP vault deposit/withdraw ledger (append-only) */
+		hub_lp_vault_events: {
+			/**
+			 * Format: bigint
+			 * @description Hub event sequence for this vault event
+			 *
+			 *     Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			event_seq?: number;
+			/**
+			 * Format: text
+			 * @description `deposit` or `withdraw`
+			 */
+			kind?: string;
+			/**
+			 * Format: text
+			 * @description LP address (EVM)
+			 */
+			lp?: string;
+			/** @description Amount deposited/withdrawn (uint256, USDT units) */
+			amount?: components['schemas']['PgNumeric'];
+		};
+		/**
+		 * @description Minimal USDT deposit attribution entry.
+		 *
+		 *     Stable subset:
+		 *     `{ tx_hash, sender, amount, block_timestamp, log_index }`.
+		 */
+		UsdtDepositAttributionEntryView: {
+			/** @description Tron transaction hash (0x hex). */
+			tx_hash: string;
+			/** @description Sender address (Tron, base58check). */
+			sender: string;
+			/** @description Transfer amount (uint256, decimal string). */
+			amount: string;
+			/**
+			 * Format: int64
+			 * @description Tron block timestamp (seconds).
+			 */
+			block_timestamp: number;
+			/**
+			 * Format: int64
+			 * @description Log index within the transaction.
+			 */
+			log_index: number;
+		};
+		/** @description Arbitrary JSON value. */
+		JsonValue:
+			| {
+					[key: string]: unknown;
+			  }
+			| unknown[]
+			| string
+			| number
+			| boolean
+			| null;
+		/** @description Numeric value represented as a JSON number. */
+		NumericValue: number;
+		/** @description Postgres JSON/JSONB encoded as raw JSON. */
+		PgJson: {
+			[key: string]: unknown;
+		};
+		/** @description Postgres NUMERIC encoded as a JSON number. */
+		PgNumeric: number;
+		/** @description Daily active lease count (running starts minus ends) over a continuous day series. */
+		active_leases_daily: {
+			/** Format: timestamp with time zone */
+			day?: string;
+			/** Format: bigint */
+			leases_active?: number;
+			/** Format: bigint */
+			leases_ended?: number;
+			/** Format: bigint */
+			leases_started?: number;
+		};
+		/** @description Daily latency stats for filled claims: (ClaimFilled block_time - origin_timestamp). */
+		claim_fill_latency_daily: {
+			avg_seconds?: components['schemas']['NumericValue'];
+			/** Format: timestamp with time zone */
+			day?: string;
+			/** Format: bigint */
+			filled_claims_total?: number;
+			/** Format: double precision */
+			p50_seconds?: number;
+			/** Format: double precision */
+			p90_seconds?: number;
+		};
+		/**
+		 * @description USDT deposit attribution per claim (best-effort).
+		 *
+		 *     Returns a JSON array of deposit attribution entries for each claim:
+		 *     - Pre-entitle origins (0/1): matched by txId to `ctl.receiver_usdt_transfers`.
+		 *     - Receiver-pull origin (2): FIFO allocation of `origin_raw_amount` across receiver USDT transfers since previous pull.
+		 */
+		claim_usdt_deposit_attribution: {
+			claim_id?: components['schemas']['NumericValue'];
+			lease_id?: components['schemas']['NumericValue'];
+			usdt_deposit_attribution?: Record<string, never>;
+		};
+		/** @description Daily rollup of claims created (first version per claim; timestamp from hub event stream). */
+		claims_created_daily: {
+			/** Format: text */
+			amount_usdt_total?: string;
+			/** Format: bigint */
+			claims_created_pre_entitle?: number;
+			/** Format: bigint */
+			claims_created_receiver_pull?: number;
+			/** Format: bigint */
+			claims_created_subjective_pre_entitle?: number;
+			/** Format: bigint */
+			claims_created_total?: number;
+			/** Format: timestamp with time zone */
+			day?: string;
+		};
+		/** @description Daily rollup of filled claims (current rows only; timestamp from ClaimFilled event). */
+		claims_filled_daily: {
+			/** Format: text */
+			amount_usdt_total?: string;
+			/** Format: bigint */
+			claims_filled_total?: number;
+			/** Format: timestamp with time zone */
+			day?: string;
+		};
+		/** @description First persisted version per (lease_id, claim_id), used for claim-created time-series. */
+		hub_claim_first_versions: {
+			amount_usdt?: components['schemas']['NumericValue'];
+			/** Format: text */
+			beneficiary?: string;
+			/**
+			 * @description Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			claim_id?: components['schemas']['NumericValue'];
+			/**
+			 * Format: bigint
+			 * @description Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			created_from_seq?: number;
+			/**
+			 * @description Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			lease_id?: components['schemas']['NumericValue'];
+			/** Format: smallint */
+			origin?: number;
+			/** Format: bigint */
+			origin_timestamp?: number;
+			/** Format: bigint */
+			target_chain_id?: number;
+			/** Format: text */
+			target_token?: string;
+		};
+		/** @description Per-lease KPIs: deposits, claims, and last activity timestamps (best-effort). */
+		lease_kpis: {
+			/** Format: text */
+			claims_amount_total?: string;
+			/** Format: bigint */
+			claims_filled?: number;
+			/** Format: bigint */
+			claims_latest_origin_timestamp?: number;
+			/** Format: bigint */
+			claims_total?: number;
+			/** Format: text */
+			deposits_amount_total?: string;
+			/** Format: bigint */
+			deposits_latest_block_timestamp?: number;
+			/** Format: bigint */
+			deposits_total?: number;
+			lease_id?: components['schemas']['NumericValue'];
+			lease_number?: components['schemas']['NumericValue'];
+			/** Format: text */
+			lessee?: string;
+			/** Format: bigint */
+			nukeable_after?: number;
+			/** Format: timestamp with time zone */
+			nukeable_after_utc?: string;
+			/** Format: text */
+			realtor?: string;
+			/** Format: text */
+			receiver_salt?: string;
+			/** Format: bigint */
+			start_time?: number;
+			/** Format: timestamp with time zone */
+			start_time_utc?: string;
+		};
+		/** @description Daily count of current leases by nukeable_after (scheduled/expected end time). */
+		leases_ending_daily: {
+			/** Format: timestamp with time zone */
+			day?: string;
+			/** Format: bigint */
+			leases_ending_total?: number;
+		};
+		/** @description Daily count of current leases by start_time (not historical versions). */
+		leases_started_daily: {
+			/** Format: timestamp with time zone */
+			day?: string;
+			/** Format: bigint */
+			leases_started_total?: number;
+		};
+		/** @description Protocol PnL snapshots as a time-series (timestamped by hub event stream). */
+		protocol_pnl_timeseries: {
+			/** Format: timestamp with time zone */
+			block_time?: string;
+			/** Format: bigint */
+			block_timestamp?: number;
+			delta?: components['schemas']['NumericValue'];
+			pnl?: components['schemas']['NumericValue'];
+			/** Format: smallint */
+			reason?: number;
+			/**
+			 * Format: bigint
+			 * @description Note:
+			 *     This is a Primary Key.<pk/>
+			 */
+			valid_from_seq?: number;
+		};
+		/** @description Daily USDT deposits attributed to realtor (via expected_lease_id -> lease.realtor). */
+		realtor_deposits_daily: {
+			/** Format: text */
+			amount_total?: string;
+			/** Format: timestamp with time zone */
+			day?: string;
+			/** Format: bigint */
+			deposits_total?: number;
+			/** Format: bigint */
+			leases_touched?: number;
+			/** Format: text */
+			realtor?: string;
+		};
+		/** @description Deposit backlog grouped into age buckets (relative to now()). */
+		usdt_deposit_backlog_age_buckets: {
+			/** Format: text */
+			age_bucket?: string;
+			/** Format: text */
+			amount_total?: string;
+			/** Format: bigint */
+			deposits_total?: number;
+			/** Format: text */
+			recommended_action?: string;
+		};
+		/** @description Current deposit actionability backlog summary grouped by `recommended_action`. */
+		usdt_deposit_backlog_summary: {
+			/** Format: text */
+			amount_total?: string;
+			/** Format: bigint */
+			deposits_total?: number;
+			/** Format: bigint */
+			newest_block_timestamp?: number;
+			/** Format: bigint */
+			oldest_block_timestamp?: number;
+			/** Format: text */
+			recommended_action?: string;
+		};
+		/** @description Deposit funnel time-series. `stage` is `recommended_action` plus an `all` row per day. */
+		usdt_deposit_funnel_daily: {
+			/** Format: text */
+			amount_total?: string;
+			/** Format: timestamp with time zone */
+			day?: string;
+			/** Format: bigint */
+			deposits_total?: number;
+			/** Format: text */
+			stage?: string;
+		};
+		/**
+		 * @description Chronological USDT deposit Transfer logs into deterministic receivers, enriched with lease/claim linkage.
+		 *
+		 *     Rows correspond to canonical TRC-20 `Transfer` logs (tx_hash + log_index) into deterministic receivers.
+		 *
+		 *     Linkage fields:
+		 *     - `expected_*` => best-effort attribution by (receiver_salt, timestamp) to the active lease window.
+		 *     - `claim_*`    => direct hub claim match for pre-entitle origins (origin_id == tx_hash), if any.
+		 *     - `linked_claims` => JSON array of best-effort claim attributions from `api.claim_usdt_deposit_attribution`
+		 *       (includes receiver-pull FIFO allocations).
+		 */
+		usdt_deposit_txs: {
+			amount?: components['schemas']['NumericValue'];
+			/** Format: text */
+			block_hash?: string;
+			/** Format: bigint */
+			block_number?: number;
+			/** Format: timestamp with time zone */
+			block_time?: string;
+			/** Format: bigint */
+			block_timestamp?: number;
+			/** Format: bigint */
+			chain_id?: number;
+			claim_amount_usdt?: components['schemas']['NumericValue'];
+			claim_id?: components['schemas']['NumericValue'];
+			claim_lease_id?: components['schemas']['NumericValue'];
+			claim_lease_number?: components['schemas']['NumericValue'];
+			/** Format: text */
+			claim_lessee?: string;
+			/** Format: smallint */
+			claim_origin?: number;
+			/** Format: text */
+			claim_realtor?: string;
+			/**
+			 * Format: hub.claim_status
+			 * @enum {string}
+			 */
+			claim_status?: 'created' | 'filled';
+			deposit_processed?: boolean;
+			/** Format: timestamp with time zone */
+			deposit_processed_last_checked_at?: string;
+			expected_lease_id?: components['schemas']['NumericValue'];
+			expected_lease_number?: components['schemas']['NumericValue'];
+			/** Format: text */
+			expected_lessee?: string;
+			/** Format: text */
+			expected_realtor?: string;
+			/** Format: timestamp with time zone */
+			inserted_at?: string;
+			linked_claims?: Record<string, never>;
+			/** Format: text */
+			linked_claims_amount?: string;
+			/** Format: bigint */
+			linked_claims_total?: number;
+			/** Format: integer */
+			log_index?: number;
+			/** Format: text */
+			receiver_salt?: string;
+			/** Format: text */
+			recipient?: string;
+			/** Format: text */
+			recommended_action?: string;
+			/** Format: text */
+			sender?: string;
+			/** Format: text */
+			token?: string;
+			/** Format: text */
+			tx_hash?: string;
+		};
+		/** @description Daily USDT deposits plus cumulative totals (running sums). */
+		usdt_deposits_cumulative: {
+			/** Format: text */
+			amount_total?: string;
+			/** Format: text */
+			amount_total_cum?: string;
+			/** Format: timestamp with time zone */
+			day?: string;
+			/** Format: bigint */
+			deposits_total?: number;
+			/** Format: bigint */
+			deposits_total_cum?: number;
+		};
+		/** @description Daily rollup of canonical USDT deposit logs (count + sum + uniques). */
+		usdt_deposits_daily: {
+			/** Format: text */
+			amount_total?: string;
+			/** Format: timestamp with time zone */
+			day?: string;
+			/** Format: bigint */
+			deposits_total?: number;
+			/** Format: bigint */
+			leases_touched?: number;
+			/** Format: bigint */
+			unique_receivers?: number;
+			/** Format: bigint */
+			unique_senders?: number;
+		};
+		/** @description Daily USDT deposit rollup split by `recommended_action` (operator funnel stage). */
+		usdt_deposits_daily_by_action: {
+			/** Format: text */
+			amount_total?: string;
+			/** Format: timestamp with time zone */
+			day?: string;
+			/** Format: bigint */
+			deposits_total?: number;
+			/** Format: text */
+			recommended_action?: string;
+		};
+	};
+	responses: never;
+	parameters: {
+		/** @description Preference */
+		preferParams: string;
+		/** @description Preference */
+		preferReturn: 'return=representation' | 'return=minimal' | 'return=none';
+		/** @description Preference */
+		preferCount: 'count=none' | 'count=exact' | 'count=planned' | 'count=estimated';
+		/** @description Preference */
+		preferPost:
+			| 'return=representation'
+			| 'return=minimal'
+			| 'return=none'
+			| 'resolution=ignore-duplicates'
+			| 'resolution=merge-duplicates';
+		/** @description Filtering Columns */
+		select: string;
+		/** @description On Conflict */
+		on_conflict: string;
+		/** @description Ordering */
+		order: string;
+		/** @description Limiting and Pagination */
+		range: string;
+		/** @description Limiting and Pagination */
+		rangeUnit: string;
+		/** @description Limiting and Pagination */
+		offset: string;
+		/** @description Limiting and Pagination */
+		limit: string;
+		/** @description Controller event sequence for this receiver pull */
+		'rowFilter.controller_pulled_from_receiver.event_seq': string;
+		/** @description Receiver salt identifying which deterministic receiver was swept */
+		'rowFilter.controller_pulled_from_receiver.receiver_salt': string;
+		/** @description Token pulled from receiver (Tron address) */
+		'rowFilter.controller_pulled_from_receiver.token': string;
+		/** @description Raw token amount pulled (uint256) */
+		'rowFilter.controller_pulled_from_receiver.token_amount': string;
+		/** @description Exchange rate used (1e18-scaled); 1:1 for USDT sweeps */
+		'rowFilter.controller_pulled_from_receiver.exchange_rate': string;
+		/** @description USDT-equivalent amount accounted for this pull (uint256) */
+		'rowFilter.controller_pulled_from_receiver.usdt_amount': string;
+		/** @description Controller event sequence for this executor transfer */
+		'rowFilter.controller_usdt_transfers.event_seq': string;
+		/** @description Recipient of USDT from controller (Tron address) */
+		'rowFilter.controller_usdt_transfers.recipient': string;
+		/** @description Amount transferred (uint256) */
+		'rowFilter.controller_usdt_transfers.amount': string;
+		/** @description Receiver salt (bytes32) identifying the deterministic receiver */
+		'rowFilter.controller_receivers.receiver_salt': string;
+		/** @description Controller event sequence at which this receiver mapping became current */
+		'rowFilter.controller_receivers.valid_from_seq': string;
+		'rowFilter.controller_receivers.valid_to_seq': string;
+		/** @description Receiver contract address on Tron (base58) */
+		'rowFilter.controller_receivers.receiver': string;
+		/** @description LP address (EVM) */
+		'rowFilter.hub_lp_allowlist.lp': string;
+		/** @description Event sequence at which this allowlist entry became current */
+		'rowFilter.hub_lp_allowlist.valid_from_seq': string;
+		'rowFilter.hub_lp_allowlist.valid_to_seq': string;
+		/**
+		 * @description Whether this LP may deposit into the fast-fill vault (withdrawals are always
+		 *     allowed)
+		 */
+		'rowFilter.hub_lp_allowlist.allowed': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.chain_id': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.token': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.receiver_salt': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.sender': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.recipient': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.amount': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.block_number': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.block_timestamp': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.block_time': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.block_hash': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.tx_hash': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.log_index': string;
+		'rowFilter.unaccounted_receiver_usdt_transfers.expected_lease_id': string;
+		/** @description Lease id that produced this claim */
+		'rowFilter.hub_claims.lease_id': string;
+		/** @description Per-lease claim id (uint256, 0-indexed) */
+		'rowFilter.hub_claims.claim_id': string;
+		/** @description Event sequence at which this claim version became current */
+		'rowFilter.hub_claims.valid_from_seq': string;
+		'rowFilter.hub_claims.valid_to_seq': string;
+		/** @description Token used for settlement when filling this claim (EVM on hub chain) */
+		'rowFilter.hub_claims.target_token': string;
+		/** @description Index in the FIFO queue (per target_token) where this claim was enqueued */
+		'rowFilter.hub_claims.queue_index': string;
+		/** @description USDT-denominated claim amount (uint256) used for accounting */
+		'rowFilter.hub_claims.amount_usdt': string;
+		/** @description Destination chainId for payout (local if equals hub chainId) */
+		'rowFilter.hub_claims.target_chain_id': string;
+		/** @description Beneficiary address (EVM) receiving payout */
+		'rowFilter.hub_claims.beneficiary': string;
+		/** @description Claim origin code (matches `UntronV3Index.ClaimOrigin`) */
+		'rowFilter.hub_claims.origin': string;
+		/**
+		 * @description Origin identifier (txId for pre-entitle, receiver_salt for receiver pull,
+		 *     etc.)
+		 */
+		'rowFilter.hub_claims.origin_id': string;
+		/** @description Origin actor (e.g. subjective pre-entitle sponsor; otherwise zero) */
+		'rowFilter.hub_claims.origin_actor': string;
+		/** @description Origin token/address (Tron token for receiver pull; zero address otherwise) */
+		'rowFilter.hub_claims.origin_token': string;
+		/**
+		 * @description Origin timestamp (seconds) (Tron block time or controller dump time; 0 if
+		 *     not applicable)
+		 */
+		'rowFilter.hub_claims.origin_timestamp': string;
+		/** @description Raw amount before fees (USDT-equivalent units) */
+		'rowFilter.hub_claims.origin_raw_amount': string;
+		/** @description Claim lifecycle status (`created` or `filled`) */
+		'rowFilter.hub_claims.status': string;
+		'rowFilter.receiver_usdt_indexer_status.stream': string;
+		'rowFilter.receiver_usdt_indexer_status.tail_next_block': string;
+		'rowFilter.receiver_usdt_indexer_status.tail_updated_at': string;
+		'rowFilter.receiver_usdt_indexer_status.min_backfill_next_block': string;
+		'rowFilter.receiver_usdt_indexer_status.receiver_count': string;
+		'rowFilter.receiver_usdt_indexer_status.backfill_pending_receivers': string;
+		'rowFilter.receiver_usdt_indexer_status.watchlist_updated_at': string;
+		/** @description Hub event sequence for this controller processing record */
+		'rowFilter.hub_controller_processed.event_seq': string;
+		/** @description Index within the hub's controller event queue that was processed */
+		'rowFilter.hub_controller_processed.event_index': string;
+		/** @description Controller event block number (as embedded in the hub event payload) */
+		'rowFilter.hub_controller_processed.block_number': string;
+		/**
+		 * @description Controller event block timestamp (seconds) (as embedded in the hub event
+		 *     payload)
+		 */
+		'rowFilter.hub_controller_processed.block_timestamp': string;
+		/** @description Controller event signature hash (bytes32 hex) */
+		'rowFilter.hub_controller_processed.event_signature': string;
+		/** @description Controller ABI-encoded event payload (0x hex) */
+		'rowFilter.hub_controller_processed.abi_encoded_event_data': string;
+		/** @description Event sequence at which this state snapshot became current */
+		'rowFilter.hub_controller_state.valid_from_seq': string;
+		'rowFilter.hub_controller_state.valid_to_seq': string;
+		/** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
+		'rowFilter.hub_controller_state.last_controller_event_tip': string;
+		/** @description UntronV3Base.lastControllerEventSeq() */
+		'rowFilter.hub_controller_state.last_controller_event_seq': string;
+		/** @description UntronV3Base.nextControllerEventIndex() */
+		'rowFilter.hub_controller_state.next_controller_event_index': string;
+		/** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
+		'rowFilter.relayer_hub_state.last_controller_event_tip': string;
+		/** @description UntronV3Base.lastControllerEventSeq() */
+		'rowFilter.relayer_hub_state.last_controller_event_seq': string;
+		/** @description UntronV3Base.nextControllerEventIndex() */
+		'rowFilter.relayer_hub_state.next_controller_event_index': string;
+		/** @description Controller event sequence at which this LP became current */
+		'rowFilter.controller_lp.valid_from_seq': string;
+		'rowFilter.controller_lp.valid_to_seq': string;
+		/** @description Controller LP address (Tron address) */
+		'rowFilter.controller_lp.lp': string;
+		'rowFilter.receiver_usdt_balances.receiver_salt': string;
+		'rowFilter.receiver_usdt_balances.receiver': string;
+		'rowFilter.receiver_usdt_balances.receiver_evm': string;
+		'rowFilter.receiver_usdt_balances.token': string;
+		'rowFilter.receiver_usdt_balances.incoming_amount': string;
+		'rowFilter.receiver_usdt_balances.pulled_amount': string;
+		'rowFilter.receiver_usdt_balances.balance_amount': string;
+		/** @description Rebalancer address (Tron) */
+		'rowFilter.controller_payloads.rebalancer': string;
+		/** @description Controller event sequence at which this payload became current */
+		'rowFilter.controller_payloads.valid_from_seq': string;
+		'rowFilter.controller_payloads.valid_to_seq': string;
+		/** @description Rebalancer-specific payload bytes (0x hex) used for delegatecall bridging */
+		'rowFilter.controller_payloads.payload': string;
+		'rowFilter.receiver_usdt_transfer_actionability.chain_id': string;
+		'rowFilter.receiver_usdt_transfer_actionability.token': string;
+		'rowFilter.receiver_usdt_transfer_actionability.receiver_salt': string;
+		'rowFilter.receiver_usdt_transfer_actionability.sender': string;
+		'rowFilter.receiver_usdt_transfer_actionability.recipient': string;
+		'rowFilter.receiver_usdt_transfer_actionability.amount': string;
+		'rowFilter.receiver_usdt_transfer_actionability.block_number': string;
+		'rowFilter.receiver_usdt_transfer_actionability.block_timestamp': string;
+		'rowFilter.receiver_usdt_transfer_actionability.block_time': string;
+		'rowFilter.receiver_usdt_transfer_actionability.block_hash': string;
+		'rowFilter.receiver_usdt_transfer_actionability.tx_hash': string;
+		'rowFilter.receiver_usdt_transfer_actionability.log_index': string;
+		'rowFilter.receiver_usdt_transfer_actionability.claim_origin': string;
+		'rowFilter.receiver_usdt_transfer_actionability.claim_lease_id': string;
+		'rowFilter.receiver_usdt_transfer_actionability.claim_id': string;
+		'rowFilter.receiver_usdt_transfer_actionability.claim_status': string;
+		'rowFilter.receiver_usdt_transfer_actionability.claim_amount_usdt': string;
+		'rowFilter.receiver_usdt_transfer_actionability.expected_lease_id': string;
+		'rowFilter.receiver_usdt_transfer_actionability.last_pull_timestamp': string;
+		'rowFilter.receiver_usdt_transfer_actionability.preentitle_time_ok': string;
+		'rowFilter.receiver_usdt_transfer_actionability.recommended_action': string;
+		/** @description Lease id this payout config applies to */
+		'rowFilter.hub_payout_configs.lease_id': string;
+		/** @description Event sequence at which this payout config became current */
+		'rowFilter.hub_payout_configs.valid_from_seq': string;
+		'rowFilter.hub_payout_configs.valid_to_seq': string;
+		/** @description Destination chainId for payouts created under this config */
+		'rowFilter.hub_payout_configs.target_chain_id': string;
+		/**
+		 * @description Settlement token on the hub chain used for fills (USDT or swapped
+		 *     token)
+		 */
+		'rowFilter.hub_payout_configs.target_token': string;
+		/** @description Recipient (EVM) for payouts / bridged delivery */
+		'rowFilter.hub_payout_configs.beneficiary': string;
+		'rowFilter.stream_ingest_summary.stream': string;
+		'rowFilter.stream_ingest_summary.applied_through_seq': string;
+		'rowFilter.stream_ingest_summary.tip': string;
+		'rowFilter.stream_ingest_summary.updated_at': string;
+		'rowFilter.stream_ingest_summary.max_event_seq': string;
+		'rowFilter.stream_ingest_summary.max_block_number': string;
+		'rowFilter.stream_ingest_summary.max_block_timestamp': string;
+		'rowFilter.stream_ingest_summary.max_block_time': string;
+		'rowFilter.stream_ingest_summary.is_projection_caught_up': string;
+		/** @description Controller event sequence at which this owner became current */
+		'rowFilter.controller_owner.valid_from_seq': string;
+		'rowFilter.controller_owner.valid_to_seq': string;
+		/** @description Controller owner (Tron address) */
+		'rowFilter.controller_owner.owner': string;
+		/** @description Settlement token (EVM) on the hub chain */
+		'rowFilter.hub_swap_rates.target_token': string;
+		/** @description Event sequence at which this rate became current */
+		'rowFilter.hub_swap_rates.valid_from_seq': string;
+		'rowFilter.hub_swap_rates.valid_to_seq': string;
+		/** @description Expected output rate: targetToken units per 1e6 USDT units */
+		'rowFilter.hub_swap_rates.rate_ppm': string;
+		'rowFilter.health.status': string;
+		'rowFilter.realtor_effective_config.realtor': string;
+		'rowFilter.realtor_effective_config.allowed': string;
+		'rowFilter.realtor_effective_config.min_fee_ppm': string;
+		'rowFilter.realtor_effective_config.min_flat_fee': string;
+		'rowFilter.realtor_effective_config.max_duration_seconds': string;
+		'rowFilter.realtor_effective_config.lease_rate_max_leases': string;
+		'rowFilter.realtor_effective_config.lease_rate_window_seconds': string;
+		'rowFilter.realtor_effective_config.lease_rate_remaining': string;
+		/** @description Controller event sequence for this LP withdrawal */
+		'rowFilter.controller_lp_tokens_withdrawn.event_seq': string;
+		/** @description Token withdrawn by LP (Tron address) */
+		'rowFilter.controller_lp_tokens_withdrawn.token': string;
+		/** @description Amount withdrawn (uint256) */
+		'rowFilter.controller_lp_tokens_withdrawn.amount': string;
+		/** @description Event sequence at which this config snapshot became current */
+		'rowFilter.hub_protocol_config.valid_from_seq': string;
+		'rowFilter.hub_protocol_config.valid_to_seq': string;
+		/** @description EVM USDT accounting token address on the hub chain */
+		'rowFilter.hub_protocol_config.usdt': string;
+		/** @description Tron USDT TRC-20 contract address (base58) accepted by `preEntitle` */
+		'rowFilter.hub_protocol_config.tron_usdt': string;
+		/**
+		 * @description EVM address (on the hub chain) of the trusted Tron transaction reader contract
+		 *     used to verify + decode Tron transactions
+		 */
+		'rowFilter.hub_protocol_config.tron_reader': string;
+		/** @description Protocol-wide minimum percentage fee floor (ppm) */
+		'rowFilter.hub_protocol_config.floor_ppm': string;
+		/** @description Protocol-wide minimum flat fee floor (USDT units) */
+		'rowFilter.hub_protocol_config.floor_flat_fee': string;
+		/** @description Protocol-wide maximum lease duration in seconds (NULL/0 means disabled) */
+		'rowFilter.hub_protocol_config.max_lease_duration_seconds': string;
+		/**
+		 * @description Max payout config updates allowed per window per lessee (NULL/0 means
+		 *     disabled)
+		 */
+		'rowFilter.hub_protocol_config.lessee_rate_max_updates': string;
+		/**
+		 * @description Window size (seconds) for payout config update rate limiting (NULL/0 means
+		 *     disabled)
+		 */
+		'rowFilter.hub_protocol_config.lessee_rate_window_seconds': string;
+		/** @description LP address (EVM) */
+		'rowFilter.hub_lp_balances.lp': string;
+		/** @description Event sequence at which this balance snapshot became current */
+		'rowFilter.hub_lp_balances.valid_from_seq': string;
+		'rowFilter.hub_lp_balances.valid_to_seq': string;
+		/** @description Derived LP principal balance (uint256), based on deposits/withdrawals */
+		'rowFilter.hub_lp_balances.balance': string;
+		/** @description Lease id */
+		'rowFilter.hub_lease_nonces.lease_id': string;
+		/** @description Event sequence at which this nonce became current */
+		'rowFilter.hub_lease_nonces.valid_from_seq': string;
+		'rowFilter.hub_lease_nonces.valid_to_seq': string;
+		/** @description Current nonce value used for EIP-712 signature replay protection */
+		'rowFilter.hub_lease_nonces.nonce': string;
+		/** @description Controller event sequence at which this canonical USDT became current */
+		'rowFilter.controller_usdt.valid_from_seq': string;
+		'rowFilter.controller_usdt.valid_to_seq': string;
+		/** @description Controller canonical USDT token contract (Tron address) */
+		'rowFilter.controller_usdt.usdt': string;
+		/** @description Event sequence at which this owner transition became current */
+		'rowFilter.hub_ownership.valid_from_seq': string;
+		/** @description Previous hub owner (EVM address) */
+		'rowFilter.hub_ownership.old_owner': string;
+		/** @description New hub owner (EVM address) */
+		'rowFilter.hub_ownership.new_owner': string;
+		/** @description Global lease id (uint256) */
+		'rowFilter.hub_leases.lease_id': string;
+		/** @description Event sequence at which this lease became current */
+		'rowFilter.hub_leases.valid_from_seq': string;
+		'rowFilter.hub_leases.valid_to_seq': string;
+		/**
+		 * @description Receiver salt (bytes32) used to derive deterministic Tron receiver
+		 *     addresses
+		 */
+		'rowFilter.hub_leases.receiver_salt': string;
+		/** @description Per-receiver lease index (0-based) for timeline ordering */
+		'rowFilter.hub_leases.lease_number': string;
+		/** @description Realtor (EVM) that created this lease */
+		'rowFilter.hub_leases.realtor': string;
+		/** @description Lessee (EVM) who controls payout configuration */
+		'rowFilter.hub_leases.lessee': string;
+		/** @description Lease start time on the hub chain (seconds) */
+		'rowFilter.hub_leases.start_time': string;
+		/**
+		 * @description Earliest timestamp when the lease can be replaced by a new one for this
+		 *     receiver_salt
+		 */
+		'rowFilter.hub_leases.nukeable_after': string;
+		/** @description Percentage fee (ppm) applied to recognized raw volume */
+		'rowFilter.hub_leases.lease_fee_ppm': string;
+		/** @description Flat fee (USDT units) applied after percentage fee */
+		'rowFilter.hub_leases.flat_fee': string;
+		/** @description Controller event sequence at which this executor became current */
+		'rowFilter.controller_executor.valid_from_seq': string;
+		'rowFilter.controller_executor.valid_to_seq': string;
+		/** @description Controller executor (Tron address) */
+		'rowFilter.controller_executor.executor': string;
+		/** @description Token address on Tron whose exchange rate is configured */
+		'rowFilter.controller_lp_exchange_rates.token': string;
+		/** @description Controller event sequence at which this exchange rate became current */
+		'rowFilter.controller_lp_exchange_rates.valid_from_seq': string;
+		'rowFilter.controller_lp_exchange_rates.valid_to_seq': string;
+		/**
+		 * @description Scaled exchange rate used to convert token amounts into USDT-equivalent
+		 *     amounts
+		 */
+		'rowFilter.controller_lp_exchange_rates.exchange_rate': string;
+		/** @description Which stream emitted this EventAppended log (`hub` or `controller`) */
+		'rowFilter.event_appended.stream': string;
+		/** @description Monotonic sequence number in the stream's onchain event hash-chain */
+		'rowFilter.event_appended.event_seq': string;
+		/** @description Previous onchain event hash-chain tip before this event */
+		'rowFilter.event_appended.prev_tip': string;
+		/** @description New onchain event hash-chain tip after this event */
+		'rowFilter.event_appended.new_tip': string;
+		/** @description Keccak256 hash of the semantic event signature string (bytes32 hex) */
+		'rowFilter.event_appended.event_signature': string;
+		/** @description Exact ABI-encoded event payload bytes that were hashed onchain (0x hex) */
+		'rowFilter.event_appended.abi_encoded_event_data': string;
+		/** @description Worker-decoded semantic event name (e.g. `LeaseCreated`, `ClaimCreated`) */
+		'rowFilter.event_appended.event_type': string;
+		/**
+		 * @description Worker-decoded event arguments as JSON (snake_case keys; values as
+		 *     strings/hex)
+		 */
+		'rowFilter.event_appended.args': string;
+		/** @description Block number containing the EventAppended log */
+		'rowFilter.event_appended.block_number': string;
+		/** @description Block timestamp (seconds since epoch) containing the EventAppended log */
+		'rowFilter.event_appended.block_timestamp': string;
+		/** @description Convenience timestamp (block_timestamp converted to timestamptz) */
+		'rowFilter.event_appended.block_time': string;
+		/** @description Block hash of the log's block (bytes32 hex) */
+		'rowFilter.event_appended.block_hash': string;
+		/** @description Transaction hash of the log's transaction (bytes32 hex) */
+		'rowFilter.event_appended.tx_hash': string;
+		/** @description Log index within the transaction receipt (0-based) */
+		'rowFilter.event_appended.log_index': string;
+		/** @description Stream name (`hub` or `controller`) */
+		'rowFilter.stream_cursor.stream': string;
+		/**
+		 * @description Highest contiguous canonical event sequence already applied to derived
+		 *     tables
+		 */
+		'rowFilter.stream_cursor.applied_through_seq': string;
+		/**
+		 * @description Expected `prev_tip` for the next event to apply (hash-chain continuity
+		 *     check)
+		 */
+		'rowFilter.stream_cursor.tip': string;
+		/** @description Timestamp when the cursor last advanced or rolled back */
+		'rowFilter.stream_cursor.updated_at': string;
+		/** @description Event sequence at which this PnL snapshot became current */
+		'rowFilter.hub_protocol_pnl.valid_from_seq': string;
+		'rowFilter.hub_protocol_pnl.valid_to_seq': string;
+		/** @description Current protocol PnL value (int256) */
+		'rowFilter.hub_protocol_pnl.pnl': string;
+		/** @description Delta applied at this event (int256) */
+		'rowFilter.hub_protocol_pnl.delta': string;
+		/** @description PnL reason code (matches `UntronV3Index.PnlReason`) */
+		'rowFilter.hub_protocol_pnl.reason': string;
+		/** @description Token being bridged (EVM on hub chain) */
+		'rowFilter.hub_bridgers.target_token': string;
+		/** @description Destination EVM chainId */
+		'rowFilter.hub_bridgers.target_chain_id': string;
+		/** @description Event sequence at which this bridger route became current */
+		'rowFilter.hub_bridgers.valid_from_seq': string;
+		'rowFilter.hub_bridgers.valid_to_seq': string;
+		/** @description Bridger adapter contract address (EVM) */
+		'rowFilter.hub_bridgers.bridger': string;
+		'rowFilter.lease_view.lease_id': string;
+		'rowFilter.lease_view.receiver_salt': string;
+		'rowFilter.lease_view.lease_number': string;
+		'rowFilter.lease_view.realtor': string;
+		'rowFilter.lease_view.lessee': string;
+		'rowFilter.lease_view.start_time': string;
+		'rowFilter.lease_view.nukeable_after': string;
+		'rowFilter.lease_view.lease_fee_ppm': string;
+		'rowFilter.lease_view.flat_fee': string;
+		'rowFilter.lease_view.lease_nonce': string;
+		'rowFilter.lease_view.payout_target_chain_id': string;
+		'rowFilter.lease_view.payout_target_token': string;
+		'rowFilter.lease_view.payout_beneficiary': string;
+		'rowFilter.lease_view.payout_config_history': string;
+		'rowFilter.lease_view.claims': string;
+		'rowFilter.lease_view.claims_total': string;
+		'rowFilter.lease_view.claims_filled': string;
+		/** @description Hub event sequence for this rescue */
+		'rowFilter.hub_tokens_rescued.event_seq': string;
+		/** @description Token rescued (EVM address on hub chain; must not be USDT) */
+		'rowFilter.hub_tokens_rescued.token': string;
+		/** @description Amount rescued (uint256) */
+		'rowFilter.hub_tokens_rescued.amount': string;
+		/** @description Block number containing the controller `IsEventChainTipCalled` log */
+		'rowFilter.controller_tip_proofs.block_number': string;
+		/** @description Block timestamp (seconds since epoch) containing the log */
+		'rowFilter.controller_tip_proofs.block_timestamp': string;
+		/** @description Block hash of the log's block (bytes32 hex) */
+		'rowFilter.controller_tip_proofs.block_hash': string;
+		/** @description Convenience timestamp (block_timestamp converted to timestamptz) */
+		'rowFilter.controller_tip_proofs.block_time': string;
+		/** @description Transaction hash of the transaction containing the log (bytes32 hex) */
+		'rowFilter.controller_tip_proofs.tx_hash': string;
+		/** @description Log index within the transaction receipt (0-based) */
+		'rowFilter.controller_tip_proofs.log_index': string;
+		/** @description Tron address that called `isEventChainTip(bytes32)` */
+		'rowFilter.controller_tip_proofs.caller': string;
+		/**
+		 * @description Hash-chain tip value that the caller asserted as the controller's current
+		 *     tip
+		 */
+		'rowFilter.controller_tip_proofs.proved_tip': string;
+		/** @description Realtor address (EVM) */
+		'rowFilter.hub_realtors.realtor': string;
+		/** @description Event sequence at which this realtor snapshot became current */
+		'rowFilter.hub_realtors.valid_from_seq': string;
+		'rowFilter.hub_realtors.valid_to_seq': string;
+		/** @description Whether this address is currently allowlisted to create leases */
+		'rowFilter.hub_realtors.allowed': string;
+		/** @description Realtor-specific minimum percentage fee floor (ppm) */
+		'rowFilter.hub_realtors.min_fee_ppm': string;
+		/** @description Realtor-specific minimum flat fee floor (USDT units) */
+		'rowFilter.hub_realtors.min_flat_fee': string;
+		/** @description Realtor-specific maximum lease duration in seconds (NULL means no override) */
+		'rowFilter.hub_realtors.max_lease_duration_seconds': string;
+		/** @description Max lease creations allowed per window (NULL/0 means disabled) */
+		'rowFilter.hub_realtors.lease_rate_max_leases': string;
+		/**
+		 * @description Window size (seconds) for lease creation rate limiting (NULL/0 means
+		 *     disabled)
+		 */
+		'rowFilter.hub_realtors.lease_rate_window_seconds': string;
+		/** @description Controller event sequence for this rebalance */
+		'rowFilter.controller_usdt_rebalanced.event_seq': string;
+		/** @description USDT amount bridged in (uint256) */
+		'rowFilter.controller_usdt_rebalanced.in_amount': string;
+		/** @description Expected USDT amount out on destination (uint256) */
+		'rowFilter.controller_usdt_rebalanced.out_amount': string;
+		/** @description Rebalancer used (Tron address) */
+		'rowFilter.controller_usdt_rebalanced.rebalancer': string;
+		/** @description Hub event sequence for this controller tip update record */
+		'rowFilter.hub_controller_tip_updates.event_seq': string;
+		/** @description Controller tip that this hop links from */
+		'rowFilter.hub_controller_tip_updates.previous_tip': string;
+		/** @description Controller event block number (as embedded in the hub event payload) */
+		'rowFilter.hub_controller_tip_updates.block_number': string;
+		/**
+		 * @description Controller event block timestamp (seconds) (as embedded in the hub event
+		 *     payload)
+		 */
+		'rowFilter.hub_controller_tip_updates.block_timestamp': string;
+		/** @description Controller event signature hash (bytes32 hex) */
+		'rowFilter.hub_controller_tip_updates.event_signature': string;
+		/** @description Controller ABI-encoded event payload (0x hex) */
+		'rowFilter.hub_controller_tip_updates.abi_encoded_event_data': string;
+		'rowFilter.receiver_salt_candidates.receiver_salt': string;
+		'rowFilter.receiver_salt_candidates.receiver': string;
+		'rowFilter.receiver_salt_candidates.receiver_evm': string;
+		'rowFilter.receiver_salt_candidates.balance_amount': string;
+		'rowFilter.receiver_salt_candidates.has_balance': string;
+		'rowFilter.receiver_salt_candidates.nukeable_after': string;
+		'rowFilter.receiver_salt_candidates.is_free': string;
+		/** @description Destination EVM chainId */
+		'rowFilter.hub_chains.target_chain_id': string;
+		/** @description Event sequence at which this deprecation flag became current */
+		'rowFilter.hub_chains.valid_from_seq': string;
+		'rowFilter.hub_chains.valid_to_seq': string;
+		/** @description Whether this destination chain is deprecated for new payout configs */
+		'rowFilter.hub_chains.deprecated': string;
+		/** @description Hub event sequence for this vault event */
+		'rowFilter.hub_lp_vault_events.event_seq': string;
+		/** @description `deposit` or `withdraw` */
+		'rowFilter.hub_lp_vault_events.kind': string;
+		/** @description LP address (EVM) */
+		'rowFilter.hub_lp_vault_events.lp': string;
+		/** @description Amount deposited/withdrawn (uint256, USDT units) */
+		'rowFilter.hub_lp_vault_events.amount': string;
+		'rowFilter.active_leases_daily.day': string;
+		'rowFilter.active_leases_daily.leases_active': string;
+		'rowFilter.active_leases_daily.leases_ended': string;
+		'rowFilter.active_leases_daily.leases_started': string;
+		'rowFilter.claim_fill_latency_daily.avg_seconds': string;
+		'rowFilter.claim_fill_latency_daily.day': string;
+		'rowFilter.claim_fill_latency_daily.filled_claims_total': string;
+		'rowFilter.claim_fill_latency_daily.p50_seconds': string;
+		'rowFilter.claim_fill_latency_daily.p90_seconds': string;
+		'rowFilter.claim_usdt_deposit_attribution.claim_id': string;
+		'rowFilter.claim_usdt_deposit_attribution.lease_id': string;
+		'rowFilter.claim_usdt_deposit_attribution.usdt_deposit_attribution': string;
+		'rowFilter.claims_created_daily.amount_usdt_total': string;
+		'rowFilter.claims_created_daily.claims_created_pre_entitle': string;
+		'rowFilter.claims_created_daily.claims_created_receiver_pull': string;
+		'rowFilter.claims_created_daily.claims_created_subjective_pre_entitle': string;
+		'rowFilter.claims_created_daily.claims_created_total': string;
+		'rowFilter.claims_created_daily.day': string;
+		'rowFilter.claims_filled_daily.amount_usdt_total': string;
+		'rowFilter.claims_filled_daily.claims_filled_total': string;
+		'rowFilter.claims_filled_daily.day': string;
+		'rowFilter.hub_claim_first_versions.amount_usdt': string;
+		'rowFilter.hub_claim_first_versions.beneficiary': string;
+		'rowFilter.hub_claim_first_versions.claim_id': string;
+		'rowFilter.hub_claim_first_versions.created_from_seq': string;
+		'rowFilter.hub_claim_first_versions.lease_id': string;
+		'rowFilter.hub_claim_first_versions.origin': string;
+		'rowFilter.hub_claim_first_versions.origin_timestamp': string;
+		'rowFilter.hub_claim_first_versions.target_chain_id': string;
+		'rowFilter.hub_claim_first_versions.target_token': string;
+		'rowFilter.lease_kpis.claims_amount_total': string;
+		'rowFilter.lease_kpis.claims_filled': string;
+		'rowFilter.lease_kpis.claims_latest_origin_timestamp': string;
+		'rowFilter.lease_kpis.claims_total': string;
+		'rowFilter.lease_kpis.deposits_amount_total': string;
+		'rowFilter.lease_kpis.deposits_latest_block_timestamp': string;
+		'rowFilter.lease_kpis.deposits_total': string;
+		'rowFilter.lease_kpis.lease_id': string;
+		'rowFilter.lease_kpis.lease_number': string;
+		'rowFilter.lease_kpis.lessee': string;
+		'rowFilter.lease_kpis.nukeable_after': string;
+		'rowFilter.lease_kpis.nukeable_after_utc': string;
+		'rowFilter.lease_kpis.realtor': string;
+		'rowFilter.lease_kpis.receiver_salt': string;
+		'rowFilter.lease_kpis.start_time': string;
+		'rowFilter.lease_kpis.start_time_utc': string;
+		'rowFilter.lease_view.pending_usdt_deposits': string;
+		'rowFilter.lease_view.pending_usdt_deposits_amount': string;
+		'rowFilter.lease_view.pending_usdt_deposits_latest_block_timestamp': string;
+		'rowFilter.lease_view.pending_usdt_deposits_total': string;
+		'rowFilter.lease_view.receiver_address_evm': string;
+		'rowFilter.lease_view.receiver_address_tron': string;
+		'rowFilter.leases_ending_daily.day': string;
+		'rowFilter.leases_ending_daily.leases_ending_total': string;
+		'rowFilter.leases_started_daily.day': string;
+		'rowFilter.leases_started_daily.leases_started_total': string;
+		'rowFilter.protocol_pnl_timeseries.block_time': string;
+		'rowFilter.protocol_pnl_timeseries.block_timestamp': string;
+		'rowFilter.protocol_pnl_timeseries.delta': string;
+		'rowFilter.protocol_pnl_timeseries.pnl': string;
+		'rowFilter.protocol_pnl_timeseries.reason': string;
+		'rowFilter.protocol_pnl_timeseries.valid_from_seq': string;
+		'rowFilter.realtor_deposits_daily.amount_total': string;
+		'rowFilter.realtor_deposits_daily.day': string;
+		'rowFilter.realtor_deposits_daily.deposits_total': string;
+		'rowFilter.realtor_deposits_daily.leases_touched': string;
+		'rowFilter.realtor_deposits_daily.realtor': string;
+		'rowFilter.usdt_deposit_backlog_age_buckets.age_bucket': string;
+		'rowFilter.usdt_deposit_backlog_age_buckets.amount_total': string;
+		'rowFilter.usdt_deposit_backlog_age_buckets.deposits_total': string;
+		'rowFilter.usdt_deposit_backlog_age_buckets.recommended_action': string;
+		'rowFilter.usdt_deposit_backlog_summary.amount_total': string;
+		'rowFilter.usdt_deposit_backlog_summary.deposits_total': string;
+		'rowFilter.usdt_deposit_backlog_summary.newest_block_timestamp': string;
+		'rowFilter.usdt_deposit_backlog_summary.oldest_block_timestamp': string;
+		'rowFilter.usdt_deposit_backlog_summary.recommended_action': string;
+		'rowFilter.usdt_deposit_funnel_daily.amount_total': string;
+		'rowFilter.usdt_deposit_funnel_daily.day': string;
+		'rowFilter.usdt_deposit_funnel_daily.deposits_total': string;
+		'rowFilter.usdt_deposit_funnel_daily.stage': string;
+		'rowFilter.usdt_deposit_txs.amount': string;
+		'rowFilter.usdt_deposit_txs.block_hash': string;
+		'rowFilter.usdt_deposit_txs.block_number': string;
+		'rowFilter.usdt_deposit_txs.block_time': string;
+		'rowFilter.usdt_deposit_txs.block_timestamp': string;
+		'rowFilter.usdt_deposit_txs.chain_id': string;
+		'rowFilter.usdt_deposit_txs.claim_amount_usdt': string;
+		'rowFilter.usdt_deposit_txs.claim_id': string;
+		'rowFilter.usdt_deposit_txs.claim_lease_id': string;
+		'rowFilter.usdt_deposit_txs.claim_lease_number': string;
+		'rowFilter.usdt_deposit_txs.claim_lessee': string;
+		'rowFilter.usdt_deposit_txs.claim_origin': string;
+		'rowFilter.usdt_deposit_txs.claim_realtor': string;
+		'rowFilter.usdt_deposit_txs.claim_status': string;
+		'rowFilter.usdt_deposit_txs.deposit_processed': string;
+		'rowFilter.usdt_deposit_txs.deposit_processed_last_checked_at': string;
+		'rowFilter.usdt_deposit_txs.expected_lease_id': string;
+		'rowFilter.usdt_deposit_txs.expected_lease_number': string;
+		'rowFilter.usdt_deposit_txs.expected_lessee': string;
+		'rowFilter.usdt_deposit_txs.expected_realtor': string;
+		'rowFilter.usdt_deposit_txs.inserted_at': string;
+		'rowFilter.usdt_deposit_txs.linked_claims': string;
+		'rowFilter.usdt_deposit_txs.linked_claims_amount': string;
+		'rowFilter.usdt_deposit_txs.linked_claims_total': string;
+		'rowFilter.usdt_deposit_txs.log_index': string;
+		'rowFilter.usdt_deposit_txs.receiver_salt': string;
+		'rowFilter.usdt_deposit_txs.recipient': string;
+		'rowFilter.usdt_deposit_txs.recommended_action': string;
+		'rowFilter.usdt_deposit_txs.sender': string;
+		'rowFilter.usdt_deposit_txs.token': string;
+		'rowFilter.usdt_deposit_txs.tx_hash': string;
+		'rowFilter.usdt_deposits_cumulative.amount_total': string;
+		'rowFilter.usdt_deposits_cumulative.amount_total_cum': string;
+		'rowFilter.usdt_deposits_cumulative.day': string;
+		'rowFilter.usdt_deposits_cumulative.deposits_total': string;
+		'rowFilter.usdt_deposits_cumulative.deposits_total_cum': string;
+		'rowFilter.usdt_deposits_daily.amount_total': string;
+		'rowFilter.usdt_deposits_daily.day': string;
+		'rowFilter.usdt_deposits_daily.deposits_total': string;
+		'rowFilter.usdt_deposits_daily.leases_touched': string;
+		'rowFilter.usdt_deposits_daily.unique_receivers': string;
+		'rowFilter.usdt_deposits_daily.unique_senders': string;
+		'rowFilter.usdt_deposits_daily_by_action.amount_total': string;
+		'rowFilter.usdt_deposits_daily_by_action.day': string;
+		'rowFilter.usdt_deposits_daily_by_action.deposits_total': string;
+		'rowFilter.usdt_deposits_daily_by_action.recommended_action': string;
+	};
+	requestBodies: never;
+	headers: never;
+	pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    get_lease: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Global lease ID */
-                lease_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LeaseViewResponse"];
-                };
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Upstream error */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    post_payout_config: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetPayoutConfigRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SetPayoutConfigResponse"];
-                };
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Too many requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Upstream error */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_realtor: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RealtorInfoResponse"];
-                };
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Too many requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Upstream error */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    post_realtor: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateLeaseRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateLeaseResponse"];
-                };
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Too many requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Upstream error */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    root_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    controller_pulled_from_receiver_get: {
-        parameters: {
-            query?: {
-                /** @description Controller event sequence for this receiver pull */
-                event_seq?: components["parameters"]["rowFilter.controller_pulled_from_receiver.event_seq"];
-                /** @description Receiver salt identifying which deterministic receiver was swept */
-                receiver_salt?: components["parameters"]["rowFilter.controller_pulled_from_receiver.receiver_salt"];
-                /** @description Token pulled from receiver (Tron address) */
-                token?: components["parameters"]["rowFilter.controller_pulled_from_receiver.token"];
-                /** @description Raw token amount pulled (uint256) */
-                token_amount?: components["parameters"]["rowFilter.controller_pulled_from_receiver.token_amount"];
-                /** @description Exchange rate used (1e18-scaled); 1:1 for USDT sweeps */
-                exchange_rate?: components["parameters"]["rowFilter.controller_pulled_from_receiver.exchange_rate"];
-                /** @description USDT-equivalent amount accounted for this pull (uint256) */
-                usdt_amount?: components["parameters"]["rowFilter.controller_pulled_from_receiver.usdt_amount"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_pulled_from_receiver"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_pulled_from_receiver"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_pulled_from_receiver"][];
-                    "text/csv": components["schemas"]["controller_pulled_from_receiver"][];
-                };
-            };
-        };
-    };
-    controller_usdt_transfers_get: {
-        parameters: {
-            query?: {
-                /** @description Controller event sequence for this executor transfer */
-                event_seq?: components["parameters"]["rowFilter.controller_usdt_transfers.event_seq"];
-                /** @description Recipient of USDT from controller (Tron address) */
-                recipient?: components["parameters"]["rowFilter.controller_usdt_transfers.recipient"];
-                /** @description Amount transferred (uint256) */
-                amount?: components["parameters"]["rowFilter.controller_usdt_transfers.amount"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_usdt_transfers"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_usdt_transfers"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_usdt_transfers"][];
-                    "text/csv": components["schemas"]["controller_usdt_transfers"][];
-                };
-            };
-        };
-    };
-    controller_receivers_get: {
-        parameters: {
-            query?: {
-                /** @description Receiver salt (bytes32) identifying the deterministic receiver */
-                receiver_salt?: components["parameters"]["rowFilter.controller_receivers.receiver_salt"];
-                /** @description Controller event sequence at which this receiver mapping became current */
-                valid_from_seq?: components["parameters"]["rowFilter.controller_receivers.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.controller_receivers.valid_to_seq"];
-                /** @description Receiver contract address on Tron (base58) */
-                receiver?: components["parameters"]["rowFilter.controller_receivers.receiver"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_receivers"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_receivers"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_receivers"][];
-                    "text/csv": components["schemas"]["controller_receivers"][];
-                };
-            };
-        };
-    };
-    hub_lp_allowlist_get: {
-        parameters: {
-            query?: {
-                /** @description LP address (EVM) */
-                lp?: components["parameters"]["rowFilter.hub_lp_allowlist.lp"];
-                /** @description Event sequence at which this allowlist entry became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_lp_allowlist.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_lp_allowlist.valid_to_seq"];
-                /**
-                 * @description Whether this LP may deposit into the fast-fill vault (withdrawals are always
-                 *     allowed)
-                 */
-                allowed?: components["parameters"]["rowFilter.hub_lp_allowlist.allowed"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_lp_allowlist"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_lp_allowlist"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_lp_allowlist"][];
-                    "text/csv": components["schemas"]["hub_lp_allowlist"][];
-                };
-            };
-        };
-    };
-    unaccounted_receiver_usdt_transfers_get: {
-        parameters: {
-            query?: {
-                chain_id?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.chain_id"];
-                token?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.token"];
-                receiver_salt?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.receiver_salt"];
-                sender?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.sender"];
-                recipient?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.recipient"];
-                amount?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.amount"];
-                block_number?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.block_number"];
-                block_timestamp?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.block_timestamp"];
-                block_time?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.block_time"];
-                block_hash?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.block_hash"];
-                tx_hash?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.tx_hash"];
-                log_index?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.log_index"];
-                expected_lease_id?: components["parameters"]["rowFilter.unaccounted_receiver_usdt_transfers.expected_lease_id"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["unaccounted_receiver_usdt_transfers"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["unaccounted_receiver_usdt_transfers"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["unaccounted_receiver_usdt_transfers"][];
-                    "text/csv": components["schemas"]["unaccounted_receiver_usdt_transfers"][];
-                };
-            };
-        };
-    };
-    hub_claims_get: {
-        parameters: {
-            query?: {
-                /** @description Lease id that produced this claim */
-                lease_id?: components["parameters"]["rowFilter.hub_claims.lease_id"];
-                /** @description Per-lease claim id (uint256, 0-indexed) */
-                claim_id?: components["parameters"]["rowFilter.hub_claims.claim_id"];
-                /** @description Event sequence at which this claim version became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_claims.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_claims.valid_to_seq"];
-                /** @description Token used for settlement when filling this claim (EVM on hub chain) */
-                target_token?: components["parameters"]["rowFilter.hub_claims.target_token"];
-                /** @description Index in the FIFO queue (per target_token) where this claim was enqueued */
-                queue_index?: components["parameters"]["rowFilter.hub_claims.queue_index"];
-                /** @description USDT-denominated claim amount (uint256) used for accounting */
-                amount_usdt?: components["parameters"]["rowFilter.hub_claims.amount_usdt"];
-                /** @description Destination chainId for payout (local if equals hub chainId) */
-                target_chain_id?: components["parameters"]["rowFilter.hub_claims.target_chain_id"];
-                /** @description Beneficiary address (EVM) receiving payout */
-                beneficiary?: components["parameters"]["rowFilter.hub_claims.beneficiary"];
-                /** @description Claim origin code (matches `UntronV3Index.ClaimOrigin`) */
-                origin?: components["parameters"]["rowFilter.hub_claims.origin"];
-                /**
-                 * @description Origin identifier (txId for pre-entitle, receiver_salt for receiver pull,
-                 *     etc.)
-                 */
-                origin_id?: components["parameters"]["rowFilter.hub_claims.origin_id"];
-                /** @description Origin actor (e.g. subjective pre-entitle sponsor; otherwise zero) */
-                origin_actor?: components["parameters"]["rowFilter.hub_claims.origin_actor"];
-                /** @description Origin token/address (Tron token for receiver pull; zero address otherwise) */
-                origin_token?: components["parameters"]["rowFilter.hub_claims.origin_token"];
-                /**
-                 * @description Origin timestamp (seconds) (Tron block time or controller dump time; 0 if
-                 *     not applicable)
-                 */
-                origin_timestamp?: components["parameters"]["rowFilter.hub_claims.origin_timestamp"];
-                /** @description Raw amount before fees (USDT-equivalent units) */
-                origin_raw_amount?: components["parameters"]["rowFilter.hub_claims.origin_raw_amount"];
-                /** @description Claim lifecycle status (`created` or `filled`) */
-                status?: components["parameters"]["rowFilter.hub_claims.status"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_claims"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_claims"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_claims"][];
-                    "text/csv": components["schemas"]["hub_claims"][];
-                };
-            };
-        };
-    };
-    receiver_usdt_indexer_status_get: {
-        parameters: {
-            query?: {
-                stream?: components["parameters"]["rowFilter.receiver_usdt_indexer_status.stream"];
-                tail_next_block?: components["parameters"]["rowFilter.receiver_usdt_indexer_status.tail_next_block"];
-                tail_updated_at?: components["parameters"]["rowFilter.receiver_usdt_indexer_status.tail_updated_at"];
-                min_backfill_next_block?: components["parameters"]["rowFilter.receiver_usdt_indexer_status.min_backfill_next_block"];
-                receiver_count?: components["parameters"]["rowFilter.receiver_usdt_indexer_status.receiver_count"];
-                backfill_pending_receivers?: components["parameters"]["rowFilter.receiver_usdt_indexer_status.backfill_pending_receivers"];
-                watchlist_updated_at?: components["parameters"]["rowFilter.receiver_usdt_indexer_status.watchlist_updated_at"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["receiver_usdt_indexer_status"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["receiver_usdt_indexer_status"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["receiver_usdt_indexer_status"][];
-                    "text/csv": components["schemas"]["receiver_usdt_indexer_status"][];
-                };
-            };
-        };
-    };
-    hub_controller_processed_get: {
-        parameters: {
-            query?: {
-                /** @description Hub event sequence for this controller processing record */
-                event_seq?: components["parameters"]["rowFilter.hub_controller_processed.event_seq"];
-                /** @description Index within the hub's controller event queue that was processed */
-                event_index?: components["parameters"]["rowFilter.hub_controller_processed.event_index"];
-                /** @description Controller event block number (as embedded in the hub event payload) */
-                block_number?: components["parameters"]["rowFilter.hub_controller_processed.block_number"];
-                /**
-                 * @description Controller event block timestamp (seconds) (as embedded in the hub event
-                 *     payload)
-                 */
-                block_timestamp?: components["parameters"]["rowFilter.hub_controller_processed.block_timestamp"];
-                /** @description Controller event signature hash (bytes32 hex) */
-                event_signature?: components["parameters"]["rowFilter.hub_controller_processed.event_signature"];
-                /** @description Controller ABI-encoded event payload (0x hex) */
-                abi_encoded_event_data?: components["parameters"]["rowFilter.hub_controller_processed.abi_encoded_event_data"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_controller_processed"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_controller_processed"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_controller_processed"][];
-                    "text/csv": components["schemas"]["hub_controller_processed"][];
-                };
-            };
-        };
-    };
-    hub_controller_state_get: {
-        parameters: {
-            query?: {
-                /** @description Event sequence at which this state snapshot became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_controller_state.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_controller_state.valid_to_seq"];
-                /** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
-                last_controller_event_tip?: components["parameters"]["rowFilter.hub_controller_state.last_controller_event_tip"];
-                /** @description UntronV3Base.lastControllerEventSeq() */
-                last_controller_event_seq?: components["parameters"]["rowFilter.hub_controller_state.last_controller_event_seq"];
-                /** @description UntronV3Base.nextControllerEventIndex() */
-                next_controller_event_index?: components["parameters"]["rowFilter.hub_controller_state.next_controller_event_index"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_controller_state"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_controller_state"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_controller_state"][];
-                    "text/csv": components["schemas"]["hub_controller_state"][];
-                };
-            };
-        };
-    };
-    controller_lp_get: {
-        parameters: {
-            query?: {
-                /** @description Controller event sequence at which this LP became current */
-                valid_from_seq?: components["parameters"]["rowFilter.controller_lp.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.controller_lp.valid_to_seq"];
-                /** @description Controller LP address (Tron address) */
-                lp?: components["parameters"]["rowFilter.controller_lp.lp"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_lp"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_lp"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_lp"][];
-                    "text/csv": components["schemas"]["controller_lp"][];
-                };
-            };
-        };
-    };
-    receiver_usdt_balances_get: {
-        parameters: {
-            query?: {
-                receiver_salt?: components["parameters"]["rowFilter.receiver_usdt_balances.receiver_salt"];
-                receiver?: components["parameters"]["rowFilter.receiver_usdt_balances.receiver"];
-                receiver_evm?: components["parameters"]["rowFilter.receiver_usdt_balances.receiver_evm"];
-                token?: components["parameters"]["rowFilter.receiver_usdt_balances.token"];
-                incoming_amount?: components["parameters"]["rowFilter.receiver_usdt_balances.incoming_amount"];
-                pulled_amount?: components["parameters"]["rowFilter.receiver_usdt_balances.pulled_amount"];
-                balance_amount?: components["parameters"]["rowFilter.receiver_usdt_balances.balance_amount"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["receiver_usdt_balances"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["receiver_usdt_balances"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["receiver_usdt_balances"][];
-                    "text/csv": components["schemas"]["receiver_usdt_balances"][];
-                };
-            };
-        };
-    };
-    controller_payloads_get: {
-        parameters: {
-            query?: {
-                /** @description Rebalancer address (Tron) */
-                rebalancer?: components["parameters"]["rowFilter.controller_payloads.rebalancer"];
-                /** @description Controller event sequence at which this payload became current */
-                valid_from_seq?: components["parameters"]["rowFilter.controller_payloads.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.controller_payloads.valid_to_seq"];
-                /** @description Rebalancer-specific payload bytes (0x hex) used for delegatecall bridging */
-                payload?: components["parameters"]["rowFilter.controller_payloads.payload"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_payloads"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_payloads"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_payloads"][];
-                    "text/csv": components["schemas"]["controller_payloads"][];
-                };
-            };
-        };
-    };
-    receiver_usdt_transfer_actionability_get: {
-        parameters: {
-            query?: {
-                chain_id?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.chain_id"];
-                token?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.token"];
-                receiver_salt?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.receiver_salt"];
-                sender?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.sender"];
-                recipient?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.recipient"];
-                amount?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.amount"];
-                block_number?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.block_number"];
-                block_timestamp?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.block_timestamp"];
-                block_time?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.block_time"];
-                block_hash?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.block_hash"];
-                tx_hash?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.tx_hash"];
-                log_index?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.log_index"];
-                claim_origin?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.claim_origin"];
-                claim_lease_id?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.claim_lease_id"];
-                claim_id?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.claim_id"];
-                claim_status?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.claim_status"];
-                claim_amount_usdt?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.claim_amount_usdt"];
-                expected_lease_id?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.expected_lease_id"];
-                last_pull_timestamp?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.last_pull_timestamp"];
-                preentitle_time_ok?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.preentitle_time_ok"];
-                recommended_action?: components["parameters"]["rowFilter.receiver_usdt_transfer_actionability.recommended_action"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["receiver_usdt_transfer_actionability"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["receiver_usdt_transfer_actionability"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["receiver_usdt_transfer_actionability"][];
-                    "text/csv": components["schemas"]["receiver_usdt_transfer_actionability"][];
-                };
-            };
-        };
-    };
-    relayer_hub_state_get: {
-        parameters: {
-            query?: {
-                /** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
-                last_controller_event_tip?: components["parameters"]["rowFilter.relayer_hub_state.last_controller_event_tip"];
-                /** @description UntronV3Base.lastControllerEventSeq() */
-                last_controller_event_seq?: components["parameters"]["rowFilter.relayer_hub_state.last_controller_event_seq"];
-                /** @description UntronV3Base.nextControllerEventIndex() */
-                next_controller_event_index?: components["parameters"]["rowFilter.relayer_hub_state.next_controller_event_index"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["relayer_hub_state"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["relayer_hub_state"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["relayer_hub_state"][];
-                    "text/csv": components["schemas"]["relayer_hub_state"][];
-                };
-            };
-        };
-    };
-    hub_payout_configs_get: {
-        parameters: {
-            query?: {
-                /** @description Lease id this payout config applies to */
-                lease_id?: components["parameters"]["rowFilter.hub_payout_configs.lease_id"];
-                /** @description Event sequence at which this payout config became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_payout_configs.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_payout_configs.valid_to_seq"];
-                /** @description Destination chainId for payouts created under this config */
-                target_chain_id?: components["parameters"]["rowFilter.hub_payout_configs.target_chain_id"];
-                /**
-                 * @description Settlement token on the hub chain used for fills (USDT or swapped
-                 *     token)
-                 */
-                target_token?: components["parameters"]["rowFilter.hub_payout_configs.target_token"];
-                /** @description Recipient (EVM) for payouts / bridged delivery */
-                beneficiary?: components["parameters"]["rowFilter.hub_payout_configs.beneficiary"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_payout_configs"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_payout_configs"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_payout_configs"][];
-                    "text/csv": components["schemas"]["hub_payout_configs"][];
-                };
-            };
-        };
-    };
-    stream_ingest_summary_get: {
-        parameters: {
-            query?: {
-                stream?: components["parameters"]["rowFilter.stream_ingest_summary.stream"];
-                applied_through_seq?: components["parameters"]["rowFilter.stream_ingest_summary.applied_through_seq"];
-                tip?: components["parameters"]["rowFilter.stream_ingest_summary.tip"];
-                updated_at?: components["parameters"]["rowFilter.stream_ingest_summary.updated_at"];
-                max_event_seq?: components["parameters"]["rowFilter.stream_ingest_summary.max_event_seq"];
-                max_block_number?: components["parameters"]["rowFilter.stream_ingest_summary.max_block_number"];
-                max_block_timestamp?: components["parameters"]["rowFilter.stream_ingest_summary.max_block_timestamp"];
-                max_block_time?: components["parameters"]["rowFilter.stream_ingest_summary.max_block_time"];
-                is_projection_caught_up?: components["parameters"]["rowFilter.stream_ingest_summary.is_projection_caught_up"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["stream_ingest_summary"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["stream_ingest_summary"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["stream_ingest_summary"][];
-                    "text/csv": components["schemas"]["stream_ingest_summary"][];
-                };
-            };
-        };
-    };
-    controller_owner_get: {
-        parameters: {
-            query?: {
-                /** @description Controller event sequence at which this owner became current */
-                valid_from_seq?: components["parameters"]["rowFilter.controller_owner.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.controller_owner.valid_to_seq"];
-                /** @description Controller owner (Tron address) */
-                owner?: components["parameters"]["rowFilter.controller_owner.owner"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_owner"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_owner"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_owner"][];
-                    "text/csv": components["schemas"]["controller_owner"][];
-                };
-            };
-        };
-    };
-    hub_swap_rates_get: {
-        parameters: {
-            query?: {
-                /** @description Settlement token (EVM) on the hub chain */
-                target_token?: components["parameters"]["rowFilter.hub_swap_rates.target_token"];
-                /** @description Event sequence at which this rate became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_swap_rates.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_swap_rates.valid_to_seq"];
-                /** @description Expected output rate: targetToken units per 1e6 USDT units */
-                rate_ppm?: components["parameters"]["rowFilter.hub_swap_rates.rate_ppm"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_swap_rates"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_swap_rates"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_swap_rates"][];
-                    "text/csv": components["schemas"]["hub_swap_rates"][];
-                };
-            };
-        };
-    };
-    health_get: {
-        parameters: {
-            query?: {
-                status?: components["parameters"]["rowFilter.health.status"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["health"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["health"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["health"][];
-                    "text/csv": components["schemas"]["health"][];
-                };
-            };
-        };
-    };
-    realtor_effective_config_get: {
-        parameters: {
-            query?: {
-                realtor?: components["parameters"]["rowFilter.realtor_effective_config.realtor"];
-                allowed?: components["parameters"]["rowFilter.realtor_effective_config.allowed"];
-                min_fee_ppm?: components["parameters"]["rowFilter.realtor_effective_config.min_fee_ppm"];
-                min_flat_fee?: components["parameters"]["rowFilter.realtor_effective_config.min_flat_fee"];
-                max_duration_seconds?: components["parameters"]["rowFilter.realtor_effective_config.max_duration_seconds"];
-                lease_rate_max_leases?: components["parameters"]["rowFilter.realtor_effective_config.lease_rate_max_leases"];
-                lease_rate_window_seconds?: components["parameters"]["rowFilter.realtor_effective_config.lease_rate_window_seconds"];
-                lease_rate_remaining?: components["parameters"]["rowFilter.realtor_effective_config.lease_rate_remaining"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["realtor_effective_config"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["realtor_effective_config"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["realtor_effective_config"][];
-                    "text/csv": components["schemas"]["realtor_effective_config"][];
-                };
-            };
-        };
-    };
-    controller_lp_tokens_withdrawn_get: {
-        parameters: {
-            query?: {
-                /** @description Controller event sequence for this LP withdrawal */
-                event_seq?: components["parameters"]["rowFilter.controller_lp_tokens_withdrawn.event_seq"];
-                /** @description Token withdrawn by LP (Tron address) */
-                token?: components["parameters"]["rowFilter.controller_lp_tokens_withdrawn.token"];
-                /** @description Amount withdrawn (uint256) */
-                amount?: components["parameters"]["rowFilter.controller_lp_tokens_withdrawn.amount"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_lp_tokens_withdrawn"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_lp_tokens_withdrawn"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_lp_tokens_withdrawn"][];
-                    "text/csv": components["schemas"]["controller_lp_tokens_withdrawn"][];
-                };
-            };
-        };
-    };
-    hub_protocol_config_get: {
-        parameters: {
-            query?: {
-                /** @description Event sequence at which this config snapshot became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_protocol_config.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_protocol_config.valid_to_seq"];
-                /** @description EVM USDT accounting token address on the hub chain */
-                usdt?: components["parameters"]["rowFilter.hub_protocol_config.usdt"];
-                /** @description Tron USDT TRC-20 contract address (base58) accepted by `preEntitle` */
-                tron_usdt?: components["parameters"]["rowFilter.hub_protocol_config.tron_usdt"];
-                /**
-                 * @description EVM address (on the hub chain) of the trusted Tron transaction reader contract
-                 *     used to verify + decode Tron transactions
-                 */
-                tron_reader?: components["parameters"]["rowFilter.hub_protocol_config.tron_reader"];
-                /** @description Protocol-wide minimum percentage fee floor (ppm) */
-                floor_ppm?: components["parameters"]["rowFilter.hub_protocol_config.floor_ppm"];
-                /** @description Protocol-wide minimum flat fee floor (USDT units) */
-                floor_flat_fee?: components["parameters"]["rowFilter.hub_protocol_config.floor_flat_fee"];
-                /** @description Protocol-wide maximum lease duration in seconds (NULL/0 means disabled) */
-                max_lease_duration_seconds?: components["parameters"]["rowFilter.hub_protocol_config.max_lease_duration_seconds"];
-                /**
-                 * @description Max payout config updates allowed per window per lessee (NULL/0 means
-                 *     disabled)
-                 */
-                lessee_rate_max_updates?: components["parameters"]["rowFilter.hub_protocol_config.lessee_rate_max_updates"];
-                /**
-                 * @description Window size (seconds) for payout config update rate limiting (NULL/0 means
-                 *     disabled)
-                 */
-                lessee_rate_window_seconds?: components["parameters"]["rowFilter.hub_protocol_config.lessee_rate_window_seconds"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_protocol_config"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_protocol_config"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_protocol_config"][];
-                    "text/csv": components["schemas"]["hub_protocol_config"][];
-                };
-            };
-        };
-    };
-    hub_lp_balances_get: {
-        parameters: {
-            query?: {
-                /** @description LP address (EVM) */
-                lp?: components["parameters"]["rowFilter.hub_lp_balances.lp"];
-                /** @description Event sequence at which this balance snapshot became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_lp_balances.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_lp_balances.valid_to_seq"];
-                /** @description Derived LP principal balance (uint256), based on deposits/withdrawals */
-                balance?: components["parameters"]["rowFilter.hub_lp_balances.balance"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_lp_balances"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_lp_balances"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_lp_balances"][];
-                    "text/csv": components["schemas"]["hub_lp_balances"][];
-                };
-            };
-        };
-    };
-    hub_lease_nonces_get: {
-        parameters: {
-            query?: {
-                /** @description Lease id */
-                lease_id?: components["parameters"]["rowFilter.hub_lease_nonces.lease_id"];
-                /** @description Event sequence at which this nonce became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_lease_nonces.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_lease_nonces.valid_to_seq"];
-                /** @description Current nonce value used for EIP-712 signature replay protection */
-                nonce?: components["parameters"]["rowFilter.hub_lease_nonces.nonce"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_lease_nonces"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_lease_nonces"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_lease_nonces"][];
-                    "text/csv": components["schemas"]["hub_lease_nonces"][];
-                };
-            };
-        };
-    };
-    controller_usdt_get: {
-        parameters: {
-            query?: {
-                /** @description Controller event sequence at which this canonical USDT became current */
-                valid_from_seq?: components["parameters"]["rowFilter.controller_usdt.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.controller_usdt.valid_to_seq"];
-                /** @description Controller canonical USDT token contract (Tron address) */
-                usdt?: components["parameters"]["rowFilter.controller_usdt.usdt"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_usdt"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_usdt"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_usdt"][];
-                    "text/csv": components["schemas"]["controller_usdt"][];
-                };
-            };
-        };
-    };
-    hub_ownership_get: {
-        parameters: {
-            query?: {
-                /** @description Event sequence at which this owner transition became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_ownership.valid_from_seq"];
-                /** @description Previous hub owner (EVM address) */
-                old_owner?: components["parameters"]["rowFilter.hub_ownership.old_owner"];
-                /** @description New hub owner (EVM address) */
-                new_owner?: components["parameters"]["rowFilter.hub_ownership.new_owner"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_ownership"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_ownership"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_ownership"][];
-                    "text/csv": components["schemas"]["hub_ownership"][];
-                };
-            };
-        };
-    };
-    hub_leases_get: {
-        parameters: {
-            query?: {
-                /** @description Global lease id (uint256) */
-                lease_id?: components["parameters"]["rowFilter.hub_leases.lease_id"];
-                /** @description Event sequence at which this lease became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_leases.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_leases.valid_to_seq"];
-                /**
-                 * @description Receiver salt (bytes32) used to derive deterministic Tron receiver
-                 *     addresses
-                 */
-                receiver_salt?: components["parameters"]["rowFilter.hub_leases.receiver_salt"];
-                /** @description Per-receiver lease index (0-based) for timeline ordering */
-                lease_number?: components["parameters"]["rowFilter.hub_leases.lease_number"];
-                /** @description Realtor (EVM) that created this lease */
-                realtor?: components["parameters"]["rowFilter.hub_leases.realtor"];
-                /** @description Lessee (EVM) who controls payout configuration */
-                lessee?: components["parameters"]["rowFilter.hub_leases.lessee"];
-                /** @description Lease start time on the hub chain (seconds) */
-                start_time?: components["parameters"]["rowFilter.hub_leases.start_time"];
-                /**
-                 * @description Earliest timestamp when the lease can be replaced by a new one for this
-                 *     receiver_salt
-                 */
-                nukeable_after?: components["parameters"]["rowFilter.hub_leases.nukeable_after"];
-                /** @description Percentage fee (ppm) applied to recognized raw volume */
-                lease_fee_ppm?: components["parameters"]["rowFilter.hub_leases.lease_fee_ppm"];
-                /** @description Flat fee (USDT units) applied after percentage fee */
-                flat_fee?: components["parameters"]["rowFilter.hub_leases.flat_fee"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_leases"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_leases"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_leases"][];
-                    "text/csv": components["schemas"]["hub_leases"][];
-                };
-            };
-        };
-    };
-    controller_executor_get: {
-        parameters: {
-            query?: {
-                /** @description Controller event sequence at which this executor became current */
-                valid_from_seq?: components["parameters"]["rowFilter.controller_executor.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.controller_executor.valid_to_seq"];
-                /** @description Controller executor (Tron address) */
-                executor?: components["parameters"]["rowFilter.controller_executor.executor"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_executor"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_executor"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_executor"][];
-                    "text/csv": components["schemas"]["controller_executor"][];
-                };
-            };
-        };
-    };
-    controller_lp_exchange_rates_get: {
-        parameters: {
-            query?: {
-                /** @description Token address on Tron whose exchange rate is configured */
-                token?: components["parameters"]["rowFilter.controller_lp_exchange_rates.token"];
-                /** @description Controller event sequence at which this exchange rate became current */
-                valid_from_seq?: components["parameters"]["rowFilter.controller_lp_exchange_rates.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.controller_lp_exchange_rates.valid_to_seq"];
-                /**
-                 * @description Scaled exchange rate used to convert token amounts into USDT-equivalent
-                 *     amounts
-                 */
-                exchange_rate?: components["parameters"]["rowFilter.controller_lp_exchange_rates.exchange_rate"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_lp_exchange_rates"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_lp_exchange_rates"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_lp_exchange_rates"][];
-                    "text/csv": components["schemas"]["controller_lp_exchange_rates"][];
-                };
-            };
-        };
-    };
-    event_appended_get: {
-        parameters: {
-            query?: {
-                /** @description Which stream emitted this EventAppended log (`hub` or `controller`) */
-                stream?: components["parameters"]["rowFilter.event_appended.stream"];
-                /** @description Monotonic sequence number in the stream's onchain event hash-chain */
-                event_seq?: components["parameters"]["rowFilter.event_appended.event_seq"];
-                /** @description Previous onchain event hash-chain tip before this event */
-                prev_tip?: components["parameters"]["rowFilter.event_appended.prev_tip"];
-                /** @description New onchain event hash-chain tip after this event */
-                new_tip?: components["parameters"]["rowFilter.event_appended.new_tip"];
-                /** @description Keccak256 hash of the semantic event signature string (bytes32 hex) */
-                event_signature?: components["parameters"]["rowFilter.event_appended.event_signature"];
-                /** @description Exact ABI-encoded event payload bytes that were hashed onchain (0x hex) */
-                abi_encoded_event_data?: components["parameters"]["rowFilter.event_appended.abi_encoded_event_data"];
-                /** @description Worker-decoded semantic event name (e.g. `LeaseCreated`, `ClaimCreated`) */
-                event_type?: components["parameters"]["rowFilter.event_appended.event_type"];
-                /**
-                 * @description Worker-decoded event arguments as JSON (snake_case keys; values as
-                 *     strings/hex)
-                 */
-                args?: components["parameters"]["rowFilter.event_appended.args"];
-                /** @description Block number containing the EventAppended log */
-                block_number?: components["parameters"]["rowFilter.event_appended.block_number"];
-                /** @description Block timestamp (seconds since epoch) containing the EventAppended log */
-                block_timestamp?: components["parameters"]["rowFilter.event_appended.block_timestamp"];
-                /** @description Convenience timestamp (block_timestamp converted to timestamptz) */
-                block_time?: components["parameters"]["rowFilter.event_appended.block_time"];
-                /** @description Block hash of the log's block (bytes32 hex) */
-                block_hash?: components["parameters"]["rowFilter.event_appended.block_hash"];
-                /** @description Transaction hash of the log's transaction (bytes32 hex) */
-                tx_hash?: components["parameters"]["rowFilter.event_appended.tx_hash"];
-                /** @description Log index within the transaction receipt (0-based) */
-                log_index?: components["parameters"]["rowFilter.event_appended.log_index"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["event_appended"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["event_appended"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["event_appended"][];
-                    "text/csv": components["schemas"]["event_appended"][];
-                };
-            };
-        };
-    };
-    stream_cursor_get: {
-        parameters: {
-            query?: {
-                /** @description Stream name (`hub` or `controller`) */
-                stream?: components["parameters"]["rowFilter.stream_cursor.stream"];
-                /**
-                 * @description Highest contiguous canonical event sequence already applied to derived
-                 *     tables
-                 */
-                applied_through_seq?: components["parameters"]["rowFilter.stream_cursor.applied_through_seq"];
-                /**
-                 * @description Expected `prev_tip` for the next event to apply (hash-chain continuity
-                 *     check)
-                 */
-                tip?: components["parameters"]["rowFilter.stream_cursor.tip"];
-                /** @description Timestamp when the cursor last advanced or rolled back */
-                updated_at?: components["parameters"]["rowFilter.stream_cursor.updated_at"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["stream_cursor"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["stream_cursor"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["stream_cursor"][];
-                    "text/csv": components["schemas"]["stream_cursor"][];
-                };
-            };
-        };
-    };
-    hub_protocol_pnl_get: {
-        parameters: {
-            query?: {
-                /** @description Event sequence at which this PnL snapshot became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_protocol_pnl.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_protocol_pnl.valid_to_seq"];
-                /** @description Current protocol PnL value (int256) */
-                pnl?: components["parameters"]["rowFilter.hub_protocol_pnl.pnl"];
-                /** @description Delta applied at this event (int256) */
-                delta?: components["parameters"]["rowFilter.hub_protocol_pnl.delta"];
-                /** @description PnL reason code (matches `UntronV3Index.PnlReason`) */
-                reason?: components["parameters"]["rowFilter.hub_protocol_pnl.reason"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_protocol_pnl"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_protocol_pnl"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_protocol_pnl"][];
-                    "text/csv": components["schemas"]["hub_protocol_pnl"][];
-                };
-            };
-        };
-    };
-    hub_bridgers_get: {
-        parameters: {
-            query?: {
-                /** @description Token being bridged (EVM on hub chain) */
-                target_token?: components["parameters"]["rowFilter.hub_bridgers.target_token"];
-                /** @description Destination EVM chainId */
-                target_chain_id?: components["parameters"]["rowFilter.hub_bridgers.target_chain_id"];
-                /** @description Event sequence at which this bridger route became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_bridgers.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_bridgers.valid_to_seq"];
-                /** @description Bridger adapter contract address (EVM) */
-                bridger?: components["parameters"]["rowFilter.hub_bridgers.bridger"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_bridgers"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_bridgers"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_bridgers"][];
-                    "text/csv": components["schemas"]["hub_bridgers"][];
-                };
-            };
-        };
-    };
-    lease_view_get: {
-        parameters: {
-            query?: {
-                lease_id?: components["parameters"]["rowFilter.lease_view.lease_id"];
-                receiver_salt?: components["parameters"]["rowFilter.lease_view.receiver_salt"];
-                lease_number?: components["parameters"]["rowFilter.lease_view.lease_number"];
-                realtor?: components["parameters"]["rowFilter.lease_view.realtor"];
-                lessee?: components["parameters"]["rowFilter.lease_view.lessee"];
-                start_time?: components["parameters"]["rowFilter.lease_view.start_time"];
-                nukeable_after?: components["parameters"]["rowFilter.lease_view.nukeable_after"];
-                lease_fee_ppm?: components["parameters"]["rowFilter.lease_view.lease_fee_ppm"];
-                flat_fee?: components["parameters"]["rowFilter.lease_view.flat_fee"];
-                lease_nonce?: components["parameters"]["rowFilter.lease_view.lease_nonce"];
-                payout_target_chain_id?: components["parameters"]["rowFilter.lease_view.payout_target_chain_id"];
-                payout_target_token?: components["parameters"]["rowFilter.lease_view.payout_target_token"];
-                payout_beneficiary?: components["parameters"]["rowFilter.lease_view.payout_beneficiary"];
-                payout_config_history?: components["parameters"]["rowFilter.lease_view.payout_config_history"];
-                claims?: components["parameters"]["rowFilter.lease_view.claims"];
-                claims_total?: components["parameters"]["rowFilter.lease_view.claims_total"];
-                claims_filled?: components["parameters"]["rowFilter.lease_view.claims_filled"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["lease_view"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["lease_view"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["lease_view"][];
-                    "text/csv": components["schemas"]["lease_view"][];
-                };
-            };
-        };
-    };
-    hub_tokens_rescued_get: {
-        parameters: {
-            query?: {
-                /** @description Hub event sequence for this rescue */
-                event_seq?: components["parameters"]["rowFilter.hub_tokens_rescued.event_seq"];
-                /** @description Token rescued (EVM address on hub chain; must not be USDT) */
-                token?: components["parameters"]["rowFilter.hub_tokens_rescued.token"];
-                /** @description Amount rescued (uint256) */
-                amount?: components["parameters"]["rowFilter.hub_tokens_rescued.amount"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_tokens_rescued"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_tokens_rescued"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_tokens_rescued"][];
-                    "text/csv": components["schemas"]["hub_tokens_rescued"][];
-                };
-            };
-        };
-    };
-    controller_tip_proofs_get: {
-        parameters: {
-            query?: {
-                /** @description Block number containing the controller `IsEventChainTipCalled` log */
-                block_number?: components["parameters"]["rowFilter.controller_tip_proofs.block_number"];
-                /** @description Block timestamp (seconds since epoch) containing the log */
-                block_timestamp?: components["parameters"]["rowFilter.controller_tip_proofs.block_timestamp"];
-                /** @description Block hash of the log's block (bytes32 hex) */
-                block_hash?: components["parameters"]["rowFilter.controller_tip_proofs.block_hash"];
-                /** @description Convenience timestamp (block_timestamp converted to timestamptz) */
-                block_time?: components["parameters"]["rowFilter.controller_tip_proofs.block_time"];
-                /** @description Transaction hash of the transaction containing the log (bytes32 hex) */
-                tx_hash?: components["parameters"]["rowFilter.controller_tip_proofs.tx_hash"];
-                /** @description Log index within the transaction receipt (0-based) */
-                log_index?: components["parameters"]["rowFilter.controller_tip_proofs.log_index"];
-                /** @description Tron address that called `isEventChainTip(bytes32)` */
-                caller?: components["parameters"]["rowFilter.controller_tip_proofs.caller"];
-                /**
-                 * @description Hash-chain tip value that the caller asserted as the controller's current
-                 *     tip
-                 */
-                proved_tip?: components["parameters"]["rowFilter.controller_tip_proofs.proved_tip"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_tip_proofs"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_tip_proofs"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_tip_proofs"][];
-                    "text/csv": components["schemas"]["controller_tip_proofs"][];
-                };
-            };
-        };
-    };
-    hub_realtors_get: {
-        parameters: {
-            query?: {
-                /** @description Realtor address (EVM) */
-                realtor?: components["parameters"]["rowFilter.hub_realtors.realtor"];
-                /** @description Event sequence at which this realtor snapshot became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_realtors.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_realtors.valid_to_seq"];
-                /** @description Whether this address is currently allowlisted to create leases */
-                allowed?: components["parameters"]["rowFilter.hub_realtors.allowed"];
-                /** @description Realtor-specific minimum percentage fee floor (ppm) */
-                min_fee_ppm?: components["parameters"]["rowFilter.hub_realtors.min_fee_ppm"];
-                /** @description Realtor-specific minimum flat fee floor (USDT units) */
-                min_flat_fee?: components["parameters"]["rowFilter.hub_realtors.min_flat_fee"];
-                /** @description Realtor-specific maximum lease duration in seconds (NULL means no override) */
-                max_lease_duration_seconds?: components["parameters"]["rowFilter.hub_realtors.max_lease_duration_seconds"];
-                /** @description Max lease creations allowed per window (NULL/0 means disabled) */
-                lease_rate_max_leases?: components["parameters"]["rowFilter.hub_realtors.lease_rate_max_leases"];
-                /**
-                 * @description Window size (seconds) for lease creation rate limiting (NULL/0 means
-                 *     disabled)
-                 */
-                lease_rate_window_seconds?: components["parameters"]["rowFilter.hub_realtors.lease_rate_window_seconds"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_realtors"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_realtors"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_realtors"][];
-                    "text/csv": components["schemas"]["hub_realtors"][];
-                };
-            };
-        };
-    };
-    controller_usdt_rebalanced_get: {
-        parameters: {
-            query?: {
-                /** @description Controller event sequence for this rebalance */
-                event_seq?: components["parameters"]["rowFilter.controller_usdt_rebalanced.event_seq"];
-                /** @description USDT amount bridged in (uint256) */
-                in_amount?: components["parameters"]["rowFilter.controller_usdt_rebalanced.in_amount"];
-                /** @description Expected USDT amount out on destination (uint256) */
-                out_amount?: components["parameters"]["rowFilter.controller_usdt_rebalanced.out_amount"];
-                /** @description Rebalancer used (Tron address) */
-                rebalancer?: components["parameters"]["rowFilter.controller_usdt_rebalanced.rebalancer"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["controller_usdt_rebalanced"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["controller_usdt_rebalanced"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["controller_usdt_rebalanced"][];
-                    "text/csv": components["schemas"]["controller_usdt_rebalanced"][];
-                };
-            };
-        };
-    };
-    hub_controller_tip_updates_get: {
-        parameters: {
-            query?: {
-                /** @description Hub event sequence for this controller tip update record */
-                event_seq?: components["parameters"]["rowFilter.hub_controller_tip_updates.event_seq"];
-                /** @description Controller tip that this hop links from */
-                previous_tip?: components["parameters"]["rowFilter.hub_controller_tip_updates.previous_tip"];
-                /** @description Controller event block number (as embedded in the hub event payload) */
-                block_number?: components["parameters"]["rowFilter.hub_controller_tip_updates.block_number"];
-                /**
-                 * @description Controller event block timestamp (seconds) (as embedded in the hub event
-                 *     payload)
-                 */
-                block_timestamp?: components["parameters"]["rowFilter.hub_controller_tip_updates.block_timestamp"];
-                /** @description Controller event signature hash (bytes32 hex) */
-                event_signature?: components["parameters"]["rowFilter.hub_controller_tip_updates.event_signature"];
-                /** @description Controller ABI-encoded event payload (0x hex) */
-                abi_encoded_event_data?: components["parameters"]["rowFilter.hub_controller_tip_updates.abi_encoded_event_data"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_controller_tip_updates"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_controller_tip_updates"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_controller_tip_updates"][];
-                    "text/csv": components["schemas"]["hub_controller_tip_updates"][];
-                };
-            };
-        };
-    };
-    receiver_salt_candidates_get: {
-        parameters: {
-            query?: {
-                receiver_salt?: components["parameters"]["rowFilter.receiver_salt_candidates.receiver_salt"];
-                receiver?: components["parameters"]["rowFilter.receiver_salt_candidates.receiver"];
-                receiver_evm?: components["parameters"]["rowFilter.receiver_salt_candidates.receiver_evm"];
-                balance_amount?: components["parameters"]["rowFilter.receiver_salt_candidates.balance_amount"];
-                has_balance?: components["parameters"]["rowFilter.receiver_salt_candidates.has_balance"];
-                nukeable_after?: components["parameters"]["rowFilter.receiver_salt_candidates.nukeable_after"];
-                is_free?: components["parameters"]["rowFilter.receiver_salt_candidates.is_free"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["receiver_salt_candidates"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["receiver_salt_candidates"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["receiver_salt_candidates"][];
-                    "text/csv": components["schemas"]["receiver_salt_candidates"][];
-                };
-            };
-        };
-    };
-    hub_chains_get: {
-        parameters: {
-            query?: {
-                /** @description Destination EVM chainId */
-                target_chain_id?: components["parameters"]["rowFilter.hub_chains.target_chain_id"];
-                /** @description Event sequence at which this deprecation flag became current */
-                valid_from_seq?: components["parameters"]["rowFilter.hub_chains.valid_from_seq"];
-                valid_to_seq?: components["parameters"]["rowFilter.hub_chains.valid_to_seq"];
-                /** @description Whether this destination chain is deprecated for new payout configs */
-                deprecated?: components["parameters"]["rowFilter.hub_chains.deprecated"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_chains"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_chains"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_chains"][];
-                    "text/csv": components["schemas"]["hub_chains"][];
-                };
-            };
-        };
-    };
-    hub_lp_vault_events_get: {
-        parameters: {
-            query?: {
-                /** @description Hub event sequence for this vault event */
-                event_seq?: components["parameters"]["rowFilter.hub_lp_vault_events.event_seq"];
-                /** @description `deposit` or `withdraw` */
-                kind?: components["parameters"]["rowFilter.hub_lp_vault_events.kind"];
-                /** @description LP address (EVM) */
-                lp?: components["parameters"]["rowFilter.hub_lp_vault_events.lp"];
-                /** @description Amount deposited/withdrawn (uint256, USDT units) */
-                amount?: components["parameters"]["rowFilter.hub_lp_vault_events.amount"];
-                /** @description Filtering Columns */
-                select?: components["parameters"]["select"];
-                /** @description Ordering */
-                order?: components["parameters"]["order"];
-                /** @description Limiting and Pagination */
-                offset?: components["parameters"]["offset"];
-                /** @description Limiting and Pagination */
-                limit?: components["parameters"]["limit"];
-            };
-            header?: {
-                /** @description Limiting and Pagination */
-                Range?: components["parameters"]["range"];
-                /** @description Limiting and Pagination */
-                "Range-Unit"?: components["parameters"]["rangeUnit"];
-                /** @description Preference */
-                Prefer?: components["parameters"]["preferCount"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["hub_lp_vault_events"][];
-                    "application/vnd.pgrst.object+json;nulls=stripped": components["schemas"]["hub_lp_vault_events"][];
-                    "application/vnd.pgrst.object+json": components["schemas"]["hub_lp_vault_events"][];
-                    "text/csv": components["schemas"]["hub_lp_vault_events"][];
-                };
-            };
-        };
-    };
+	get_lease: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Global lease ID */
+				lease_id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['LeaseViewResponse'];
+				};
+			};
+			/** @description Bad request */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Internal error */
+			500: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Upstream error */
+			502: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	post_payout_config: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SetPayoutConfigRequest'];
+			};
+		};
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['SetPayoutConfigResponse'];
+				};
+			};
+			/** @description Bad request */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Conflict */
+			409: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Too many requests */
+			429: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Internal error */
+			500: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Upstream error */
+			502: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	get_realtor: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['RealtorInfoResponse'];
+				};
+			};
+			/** @description Bad request */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Conflict */
+			409: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Too many requests */
+			429: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Internal error */
+			500: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Upstream error */
+			502: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	post_realtor: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateLeaseRequest'];
+			};
+		};
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['CreateLeaseResponse'];
+				};
+			};
+			/** @description Bad request */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Forbidden */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Conflict */
+			409: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Too many requests */
+			429: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Internal error */
+			500: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Upstream error */
+			502: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	root_get: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	controller_pulled_from_receiver_get: {
+		parameters: {
+			query?: {
+				/** @description Controller event sequence for this receiver pull */
+				event_seq?: components['parameters']['rowFilter.controller_pulled_from_receiver.event_seq'];
+				/** @description Receiver salt identifying which deterministic receiver was swept */
+				receiver_salt?: components['parameters']['rowFilter.controller_pulled_from_receiver.receiver_salt'];
+				/** @description Token pulled from receiver (Tron address) */
+				token?: components['parameters']['rowFilter.controller_pulled_from_receiver.token'];
+				/** @description Raw token amount pulled (uint256) */
+				token_amount?: components['parameters']['rowFilter.controller_pulled_from_receiver.token_amount'];
+				/** @description Exchange rate used (1e18-scaled); 1:1 for USDT sweeps */
+				exchange_rate?: components['parameters']['rowFilter.controller_pulled_from_receiver.exchange_rate'];
+				/** @description USDT-equivalent amount accounted for this pull (uint256) */
+				usdt_amount?: components['parameters']['rowFilter.controller_pulled_from_receiver.usdt_amount'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_pulled_from_receiver'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_pulled_from_receiver'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_pulled_from_receiver'][];
+					'text/csv': components['schemas']['controller_pulled_from_receiver'][];
+				};
+			};
+		};
+	};
+	controller_usdt_transfers_get: {
+		parameters: {
+			query?: {
+				/** @description Controller event sequence for this executor transfer */
+				event_seq?: components['parameters']['rowFilter.controller_usdt_transfers.event_seq'];
+				/** @description Recipient of USDT from controller (Tron address) */
+				recipient?: components['parameters']['rowFilter.controller_usdt_transfers.recipient'];
+				/** @description Amount transferred (uint256) */
+				amount?: components['parameters']['rowFilter.controller_usdt_transfers.amount'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_usdt_transfers'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_usdt_transfers'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_usdt_transfers'][];
+					'text/csv': components['schemas']['controller_usdt_transfers'][];
+				};
+			};
+		};
+	};
+	controller_receivers_get: {
+		parameters: {
+			query?: {
+				/** @description Receiver salt (bytes32) identifying the deterministic receiver */
+				receiver_salt?: components['parameters']['rowFilter.controller_receivers.receiver_salt'];
+				/** @description Controller event sequence at which this receiver mapping became current */
+				valid_from_seq?: components['parameters']['rowFilter.controller_receivers.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.controller_receivers.valid_to_seq'];
+				/** @description Receiver contract address on Tron (base58) */
+				receiver?: components['parameters']['rowFilter.controller_receivers.receiver'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_receivers'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_receivers'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_receivers'][];
+					'text/csv': components['schemas']['controller_receivers'][];
+				};
+			};
+		};
+	};
+	hub_lp_allowlist_get: {
+		parameters: {
+			query?: {
+				/** @description LP address (EVM) */
+				lp?: components['parameters']['rowFilter.hub_lp_allowlist.lp'];
+				/** @description Event sequence at which this allowlist entry became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_lp_allowlist.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_lp_allowlist.valid_to_seq'];
+				/**
+				 * @description Whether this LP may deposit into the fast-fill vault (withdrawals are always
+				 *     allowed)
+				 */
+				allowed?: components['parameters']['rowFilter.hub_lp_allowlist.allowed'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_lp_allowlist'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_lp_allowlist'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_lp_allowlist'][];
+					'text/csv': components['schemas']['hub_lp_allowlist'][];
+				};
+			};
+		};
+	};
+	unaccounted_receiver_usdt_transfers_get: {
+		parameters: {
+			query?: {
+				chain_id?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.chain_id'];
+				token?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.token'];
+				receiver_salt?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.receiver_salt'];
+				sender?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.sender'];
+				recipient?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.recipient'];
+				amount?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.amount'];
+				block_number?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.block_number'];
+				block_timestamp?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.block_timestamp'];
+				block_time?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.block_time'];
+				block_hash?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.block_hash'];
+				tx_hash?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.tx_hash'];
+				log_index?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.log_index'];
+				expected_lease_id?: components['parameters']['rowFilter.unaccounted_receiver_usdt_transfers.expected_lease_id'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['unaccounted_receiver_usdt_transfers'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['unaccounted_receiver_usdt_transfers'][];
+					'application/vnd.pgrst.object+json': components['schemas']['unaccounted_receiver_usdt_transfers'][];
+					'text/csv': components['schemas']['unaccounted_receiver_usdt_transfers'][];
+				};
+			};
+		};
+	};
+	hub_claims_get: {
+		parameters: {
+			query?: {
+				/** @description Lease id that produced this claim */
+				lease_id?: components['parameters']['rowFilter.hub_claims.lease_id'];
+				/** @description Per-lease claim id (uint256, 0-indexed) */
+				claim_id?: components['parameters']['rowFilter.hub_claims.claim_id'];
+				/** @description Event sequence at which this claim version became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_claims.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_claims.valid_to_seq'];
+				/** @description Token used for settlement when filling this claim (EVM on hub chain) */
+				target_token?: components['parameters']['rowFilter.hub_claims.target_token'];
+				/** @description Index in the FIFO queue (per target_token) where this claim was enqueued */
+				queue_index?: components['parameters']['rowFilter.hub_claims.queue_index'];
+				/** @description USDT-denominated claim amount (uint256) used for accounting */
+				amount_usdt?: components['parameters']['rowFilter.hub_claims.amount_usdt'];
+				/** @description Destination chainId for payout (local if equals hub chainId) */
+				target_chain_id?: components['parameters']['rowFilter.hub_claims.target_chain_id'];
+				/** @description Beneficiary address (EVM) receiving payout */
+				beneficiary?: components['parameters']['rowFilter.hub_claims.beneficiary'];
+				/** @description Claim origin code (matches `UntronV3Index.ClaimOrigin`) */
+				origin?: components['parameters']['rowFilter.hub_claims.origin'];
+				/**
+				 * @description Origin identifier (txId for pre-entitle, receiver_salt for receiver pull,
+				 *     etc.)
+				 */
+				origin_id?: components['parameters']['rowFilter.hub_claims.origin_id'];
+				/** @description Origin actor (e.g. subjective pre-entitle sponsor; otherwise zero) */
+				origin_actor?: components['parameters']['rowFilter.hub_claims.origin_actor'];
+				/** @description Origin token/address (Tron token for receiver pull; zero address otherwise) */
+				origin_token?: components['parameters']['rowFilter.hub_claims.origin_token'];
+				/**
+				 * @description Origin timestamp (seconds) (Tron block time or controller dump time; 0 if
+				 *     not applicable)
+				 */
+				origin_timestamp?: components['parameters']['rowFilter.hub_claims.origin_timestamp'];
+				/** @description Raw amount before fees (USDT-equivalent units) */
+				origin_raw_amount?: components['parameters']['rowFilter.hub_claims.origin_raw_amount'];
+				/** @description Claim lifecycle status (`created` or `filled`) */
+				status?: components['parameters']['rowFilter.hub_claims.status'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_claims'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_claims'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_claims'][];
+					'text/csv': components['schemas']['hub_claims'][];
+				};
+			};
+		};
+	};
+	receiver_usdt_indexer_status_get: {
+		parameters: {
+			query?: {
+				stream?: components['parameters']['rowFilter.receiver_usdt_indexer_status.stream'];
+				tail_next_block?: components['parameters']['rowFilter.receiver_usdt_indexer_status.tail_next_block'];
+				tail_updated_at?: components['parameters']['rowFilter.receiver_usdt_indexer_status.tail_updated_at'];
+				min_backfill_next_block?: components['parameters']['rowFilter.receiver_usdt_indexer_status.min_backfill_next_block'];
+				receiver_count?: components['parameters']['rowFilter.receiver_usdt_indexer_status.receiver_count'];
+				backfill_pending_receivers?: components['parameters']['rowFilter.receiver_usdt_indexer_status.backfill_pending_receivers'];
+				watchlist_updated_at?: components['parameters']['rowFilter.receiver_usdt_indexer_status.watchlist_updated_at'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['receiver_usdt_indexer_status'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['receiver_usdt_indexer_status'][];
+					'application/vnd.pgrst.object+json': components['schemas']['receiver_usdt_indexer_status'][];
+					'text/csv': components['schemas']['receiver_usdt_indexer_status'][];
+				};
+			};
+		};
+	};
+	hub_controller_processed_get: {
+		parameters: {
+			query?: {
+				/** @description Hub event sequence for this controller processing record */
+				event_seq?: components['parameters']['rowFilter.hub_controller_processed.event_seq'];
+				/** @description Index within the hub's controller event queue that was processed */
+				event_index?: components['parameters']['rowFilter.hub_controller_processed.event_index'];
+				/** @description Controller event block number (as embedded in the hub event payload) */
+				block_number?: components['parameters']['rowFilter.hub_controller_processed.block_number'];
+				/**
+				 * @description Controller event block timestamp (seconds) (as embedded in the hub event
+				 *     payload)
+				 */
+				block_timestamp?: components['parameters']['rowFilter.hub_controller_processed.block_timestamp'];
+				/** @description Controller event signature hash (bytes32 hex) */
+				event_signature?: components['parameters']['rowFilter.hub_controller_processed.event_signature'];
+				/** @description Controller ABI-encoded event payload (0x hex) */
+				abi_encoded_event_data?: components['parameters']['rowFilter.hub_controller_processed.abi_encoded_event_data'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_controller_processed'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_controller_processed'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_controller_processed'][];
+					'text/csv': components['schemas']['hub_controller_processed'][];
+				};
+			};
+		};
+	};
+	hub_controller_state_get: {
+		parameters: {
+			query?: {
+				/** @description Event sequence at which this state snapshot became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_controller_state.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_controller_state.valid_to_seq'];
+				/** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
+				last_controller_event_tip?: components['parameters']['rowFilter.hub_controller_state.last_controller_event_tip'];
+				/** @description UntronV3Base.lastControllerEventSeq() */
+				last_controller_event_seq?: components['parameters']['rowFilter.hub_controller_state.last_controller_event_seq'];
+				/** @description UntronV3Base.nextControllerEventIndex() */
+				next_controller_event_index?: components['parameters']['rowFilter.hub_controller_state.next_controller_event_index'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_controller_state'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_controller_state'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_controller_state'][];
+					'text/csv': components['schemas']['hub_controller_state'][];
+				};
+			};
+		};
+	};
+	controller_lp_get: {
+		parameters: {
+			query?: {
+				/** @description Controller event sequence at which this LP became current */
+				valid_from_seq?: components['parameters']['rowFilter.controller_lp.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.controller_lp.valid_to_seq'];
+				/** @description Controller LP address (Tron address) */
+				lp?: components['parameters']['rowFilter.controller_lp.lp'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_lp'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_lp'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_lp'][];
+					'text/csv': components['schemas']['controller_lp'][];
+				};
+			};
+		};
+	};
+	receiver_usdt_balances_get: {
+		parameters: {
+			query?: {
+				receiver_salt?: components['parameters']['rowFilter.receiver_usdt_balances.receiver_salt'];
+				receiver?: components['parameters']['rowFilter.receiver_usdt_balances.receiver'];
+				receiver_evm?: components['parameters']['rowFilter.receiver_usdt_balances.receiver_evm'];
+				token?: components['parameters']['rowFilter.receiver_usdt_balances.token'];
+				incoming_amount?: components['parameters']['rowFilter.receiver_usdt_balances.incoming_amount'];
+				pulled_amount?: components['parameters']['rowFilter.receiver_usdt_balances.pulled_amount'];
+				balance_amount?: components['parameters']['rowFilter.receiver_usdt_balances.balance_amount'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['receiver_usdt_balances'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['receiver_usdt_balances'][];
+					'application/vnd.pgrst.object+json': components['schemas']['receiver_usdt_balances'][];
+					'text/csv': components['schemas']['receiver_usdt_balances'][];
+				};
+			};
+		};
+	};
+	controller_payloads_get: {
+		parameters: {
+			query?: {
+				/** @description Rebalancer address (Tron) */
+				rebalancer?: components['parameters']['rowFilter.controller_payloads.rebalancer'];
+				/** @description Controller event sequence at which this payload became current */
+				valid_from_seq?: components['parameters']['rowFilter.controller_payloads.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.controller_payloads.valid_to_seq'];
+				/** @description Rebalancer-specific payload bytes (0x hex) used for delegatecall bridging */
+				payload?: components['parameters']['rowFilter.controller_payloads.payload'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_payloads'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_payloads'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_payloads'][];
+					'text/csv': components['schemas']['controller_payloads'][];
+				};
+			};
+		};
+	};
+	receiver_usdt_transfer_actionability_get: {
+		parameters: {
+			query?: {
+				chain_id?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.chain_id'];
+				token?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.token'];
+				receiver_salt?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.receiver_salt'];
+				sender?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.sender'];
+				recipient?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.recipient'];
+				amount?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.amount'];
+				block_number?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.block_number'];
+				block_timestamp?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.block_timestamp'];
+				block_time?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.block_time'];
+				block_hash?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.block_hash'];
+				tx_hash?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.tx_hash'];
+				log_index?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.log_index'];
+				claim_origin?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.claim_origin'];
+				claim_lease_id?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.claim_lease_id'];
+				claim_id?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.claim_id'];
+				claim_status?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.claim_status'];
+				claim_amount_usdt?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.claim_amount_usdt'];
+				expected_lease_id?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.expected_lease_id'];
+				last_pull_timestamp?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.last_pull_timestamp'];
+				preentitle_time_ok?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.preentitle_time_ok'];
+				recommended_action?: components['parameters']['rowFilter.receiver_usdt_transfer_actionability.recommended_action'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['receiver_usdt_transfer_actionability'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['receiver_usdt_transfer_actionability'][];
+					'application/vnd.pgrst.object+json': components['schemas']['receiver_usdt_transfer_actionability'][];
+					'text/csv': components['schemas']['receiver_usdt_transfer_actionability'][];
+				};
+			};
+		};
+	};
+	relayer_hub_state_get: {
+		parameters: {
+			query?: {
+				/** @description UntronV3Base.lastControllerEventTip() (bytes32 hex) */
+				last_controller_event_tip?: components['parameters']['rowFilter.relayer_hub_state.last_controller_event_tip'];
+				/** @description UntronV3Base.lastControllerEventSeq() */
+				last_controller_event_seq?: components['parameters']['rowFilter.relayer_hub_state.last_controller_event_seq'];
+				/** @description UntronV3Base.nextControllerEventIndex() */
+				next_controller_event_index?: components['parameters']['rowFilter.relayer_hub_state.next_controller_event_index'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['relayer_hub_state'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['relayer_hub_state'][];
+					'application/vnd.pgrst.object+json': components['schemas']['relayer_hub_state'][];
+					'text/csv': components['schemas']['relayer_hub_state'][];
+				};
+			};
+		};
+	};
+	hub_payout_configs_get: {
+		parameters: {
+			query?: {
+				/** @description Lease id this payout config applies to */
+				lease_id?: components['parameters']['rowFilter.hub_payout_configs.lease_id'];
+				/** @description Event sequence at which this payout config became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_payout_configs.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_payout_configs.valid_to_seq'];
+				/** @description Destination chainId for payouts created under this config */
+				target_chain_id?: components['parameters']['rowFilter.hub_payout_configs.target_chain_id'];
+				/**
+				 * @description Settlement token on the hub chain used for fills (USDT or swapped
+				 *     token)
+				 */
+				target_token?: components['parameters']['rowFilter.hub_payout_configs.target_token'];
+				/** @description Recipient (EVM) for payouts / bridged delivery */
+				beneficiary?: components['parameters']['rowFilter.hub_payout_configs.beneficiary'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_payout_configs'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_payout_configs'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_payout_configs'][];
+					'text/csv': components['schemas']['hub_payout_configs'][];
+				};
+			};
+		};
+	};
+	stream_ingest_summary_get: {
+		parameters: {
+			query?: {
+				stream?: components['parameters']['rowFilter.stream_ingest_summary.stream'];
+				applied_through_seq?: components['parameters']['rowFilter.stream_ingest_summary.applied_through_seq'];
+				tip?: components['parameters']['rowFilter.stream_ingest_summary.tip'];
+				updated_at?: components['parameters']['rowFilter.stream_ingest_summary.updated_at'];
+				max_event_seq?: components['parameters']['rowFilter.stream_ingest_summary.max_event_seq'];
+				max_block_number?: components['parameters']['rowFilter.stream_ingest_summary.max_block_number'];
+				max_block_timestamp?: components['parameters']['rowFilter.stream_ingest_summary.max_block_timestamp'];
+				max_block_time?: components['parameters']['rowFilter.stream_ingest_summary.max_block_time'];
+				is_projection_caught_up?: components['parameters']['rowFilter.stream_ingest_summary.is_projection_caught_up'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['stream_ingest_summary'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['stream_ingest_summary'][];
+					'application/vnd.pgrst.object+json': components['schemas']['stream_ingest_summary'][];
+					'text/csv': components['schemas']['stream_ingest_summary'][];
+				};
+			};
+		};
+	};
+	controller_owner_get: {
+		parameters: {
+			query?: {
+				/** @description Controller event sequence at which this owner became current */
+				valid_from_seq?: components['parameters']['rowFilter.controller_owner.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.controller_owner.valid_to_seq'];
+				/** @description Controller owner (Tron address) */
+				owner?: components['parameters']['rowFilter.controller_owner.owner'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_owner'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_owner'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_owner'][];
+					'text/csv': components['schemas']['controller_owner'][];
+				};
+			};
+		};
+	};
+	hub_swap_rates_get: {
+		parameters: {
+			query?: {
+				/** @description Settlement token (EVM) on the hub chain */
+				target_token?: components['parameters']['rowFilter.hub_swap_rates.target_token'];
+				/** @description Event sequence at which this rate became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_swap_rates.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_swap_rates.valid_to_seq'];
+				/** @description Expected output rate: targetToken units per 1e6 USDT units */
+				rate_ppm?: components['parameters']['rowFilter.hub_swap_rates.rate_ppm'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_swap_rates'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_swap_rates'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_swap_rates'][];
+					'text/csv': components['schemas']['hub_swap_rates'][];
+				};
+			};
+		};
+	};
+	health_get: {
+		parameters: {
+			query?: {
+				status?: components['parameters']['rowFilter.health.status'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['health'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['health'][];
+					'application/vnd.pgrst.object+json': components['schemas']['health'][];
+					'text/csv': components['schemas']['health'][];
+				};
+			};
+		};
+	};
+	realtor_effective_config_get: {
+		parameters: {
+			query?: {
+				realtor?: components['parameters']['rowFilter.realtor_effective_config.realtor'];
+				allowed?: components['parameters']['rowFilter.realtor_effective_config.allowed'];
+				min_fee_ppm?: components['parameters']['rowFilter.realtor_effective_config.min_fee_ppm'];
+				min_flat_fee?: components['parameters']['rowFilter.realtor_effective_config.min_flat_fee'];
+				max_duration_seconds?: components['parameters']['rowFilter.realtor_effective_config.max_duration_seconds'];
+				lease_rate_max_leases?: components['parameters']['rowFilter.realtor_effective_config.lease_rate_max_leases'];
+				lease_rate_window_seconds?: components['parameters']['rowFilter.realtor_effective_config.lease_rate_window_seconds'];
+				lease_rate_remaining?: components['parameters']['rowFilter.realtor_effective_config.lease_rate_remaining'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['realtor_effective_config'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['realtor_effective_config'][];
+					'application/vnd.pgrst.object+json': components['schemas']['realtor_effective_config'][];
+					'text/csv': components['schemas']['realtor_effective_config'][];
+				};
+			};
+		};
+	};
+	controller_lp_tokens_withdrawn_get: {
+		parameters: {
+			query?: {
+				/** @description Controller event sequence for this LP withdrawal */
+				event_seq?: components['parameters']['rowFilter.controller_lp_tokens_withdrawn.event_seq'];
+				/** @description Token withdrawn by LP (Tron address) */
+				token?: components['parameters']['rowFilter.controller_lp_tokens_withdrawn.token'];
+				/** @description Amount withdrawn (uint256) */
+				amount?: components['parameters']['rowFilter.controller_lp_tokens_withdrawn.amount'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_lp_tokens_withdrawn'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_lp_tokens_withdrawn'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_lp_tokens_withdrawn'][];
+					'text/csv': components['schemas']['controller_lp_tokens_withdrawn'][];
+				};
+			};
+		};
+	};
+	hub_protocol_config_get: {
+		parameters: {
+			query?: {
+				/** @description Event sequence at which this config snapshot became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_protocol_config.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_protocol_config.valid_to_seq'];
+				/** @description EVM USDT accounting token address on the hub chain */
+				usdt?: components['parameters']['rowFilter.hub_protocol_config.usdt'];
+				/** @description Tron USDT TRC-20 contract address (base58) accepted by `preEntitle` */
+				tron_usdt?: components['parameters']['rowFilter.hub_protocol_config.tron_usdt'];
+				/**
+				 * @description EVM address (on the hub chain) of the trusted Tron transaction reader contract
+				 *     used to verify + decode Tron transactions
+				 */
+				tron_reader?: components['parameters']['rowFilter.hub_protocol_config.tron_reader'];
+				/** @description Protocol-wide minimum percentage fee floor (ppm) */
+				floor_ppm?: components['parameters']['rowFilter.hub_protocol_config.floor_ppm'];
+				/** @description Protocol-wide minimum flat fee floor (USDT units) */
+				floor_flat_fee?: components['parameters']['rowFilter.hub_protocol_config.floor_flat_fee'];
+				/** @description Protocol-wide maximum lease duration in seconds (NULL/0 means disabled) */
+				max_lease_duration_seconds?: components['parameters']['rowFilter.hub_protocol_config.max_lease_duration_seconds'];
+				/**
+				 * @description Max payout config updates allowed per window per lessee (NULL/0 means
+				 *     disabled)
+				 */
+				lessee_rate_max_updates?: components['parameters']['rowFilter.hub_protocol_config.lessee_rate_max_updates'];
+				/**
+				 * @description Window size (seconds) for payout config update rate limiting (NULL/0 means
+				 *     disabled)
+				 */
+				lessee_rate_window_seconds?: components['parameters']['rowFilter.hub_protocol_config.lessee_rate_window_seconds'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_protocol_config'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_protocol_config'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_protocol_config'][];
+					'text/csv': components['schemas']['hub_protocol_config'][];
+				};
+			};
+		};
+	};
+	hub_lp_balances_get: {
+		parameters: {
+			query?: {
+				/** @description LP address (EVM) */
+				lp?: components['parameters']['rowFilter.hub_lp_balances.lp'];
+				/** @description Event sequence at which this balance snapshot became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_lp_balances.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_lp_balances.valid_to_seq'];
+				/** @description Derived LP principal balance (uint256), based on deposits/withdrawals */
+				balance?: components['parameters']['rowFilter.hub_lp_balances.balance'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_lp_balances'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_lp_balances'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_lp_balances'][];
+					'text/csv': components['schemas']['hub_lp_balances'][];
+				};
+			};
+		};
+	};
+	hub_lease_nonces_get: {
+		parameters: {
+			query?: {
+				/** @description Lease id */
+				lease_id?: components['parameters']['rowFilter.hub_lease_nonces.lease_id'];
+				/** @description Event sequence at which this nonce became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_lease_nonces.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_lease_nonces.valid_to_seq'];
+				/** @description Current nonce value used for EIP-712 signature replay protection */
+				nonce?: components['parameters']['rowFilter.hub_lease_nonces.nonce'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_lease_nonces'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_lease_nonces'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_lease_nonces'][];
+					'text/csv': components['schemas']['hub_lease_nonces'][];
+				};
+			};
+		};
+	};
+	controller_usdt_get: {
+		parameters: {
+			query?: {
+				/** @description Controller event sequence at which this canonical USDT became current */
+				valid_from_seq?: components['parameters']['rowFilter.controller_usdt.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.controller_usdt.valid_to_seq'];
+				/** @description Controller canonical USDT token contract (Tron address) */
+				usdt?: components['parameters']['rowFilter.controller_usdt.usdt'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_usdt'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_usdt'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_usdt'][];
+					'text/csv': components['schemas']['controller_usdt'][];
+				};
+			};
+		};
+	};
+	hub_ownership_get: {
+		parameters: {
+			query?: {
+				/** @description Event sequence at which this owner transition became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_ownership.valid_from_seq'];
+				/** @description Previous hub owner (EVM address) */
+				old_owner?: components['parameters']['rowFilter.hub_ownership.old_owner'];
+				/** @description New hub owner (EVM address) */
+				new_owner?: components['parameters']['rowFilter.hub_ownership.new_owner'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_ownership'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_ownership'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_ownership'][];
+					'text/csv': components['schemas']['hub_ownership'][];
+				};
+			};
+		};
+	};
+	hub_leases_get: {
+		parameters: {
+			query?: {
+				/** @description Global lease id (uint256) */
+				lease_id?: components['parameters']['rowFilter.hub_leases.lease_id'];
+				/** @description Event sequence at which this lease became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_leases.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_leases.valid_to_seq'];
+				/**
+				 * @description Receiver salt (bytes32) used to derive deterministic Tron receiver
+				 *     addresses
+				 */
+				receiver_salt?: components['parameters']['rowFilter.hub_leases.receiver_salt'];
+				/** @description Per-receiver lease index (0-based) for timeline ordering */
+				lease_number?: components['parameters']['rowFilter.hub_leases.lease_number'];
+				/** @description Realtor (EVM) that created this lease */
+				realtor?: components['parameters']['rowFilter.hub_leases.realtor'];
+				/** @description Lessee (EVM) who controls payout configuration */
+				lessee?: components['parameters']['rowFilter.hub_leases.lessee'];
+				/** @description Lease start time on the hub chain (seconds) */
+				start_time?: components['parameters']['rowFilter.hub_leases.start_time'];
+				/**
+				 * @description Earliest timestamp when the lease can be replaced by a new one for this
+				 *     receiver_salt
+				 */
+				nukeable_after?: components['parameters']['rowFilter.hub_leases.nukeable_after'];
+				/** @description Percentage fee (ppm) applied to recognized raw volume */
+				lease_fee_ppm?: components['parameters']['rowFilter.hub_leases.lease_fee_ppm'];
+				/** @description Flat fee (USDT units) applied after percentage fee */
+				flat_fee?: components['parameters']['rowFilter.hub_leases.flat_fee'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_leases'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_leases'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_leases'][];
+					'text/csv': components['schemas']['hub_leases'][];
+				};
+			};
+		};
+	};
+	controller_executor_get: {
+		parameters: {
+			query?: {
+				/** @description Controller event sequence at which this executor became current */
+				valid_from_seq?: components['parameters']['rowFilter.controller_executor.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.controller_executor.valid_to_seq'];
+				/** @description Controller executor (Tron address) */
+				executor?: components['parameters']['rowFilter.controller_executor.executor'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_executor'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_executor'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_executor'][];
+					'text/csv': components['schemas']['controller_executor'][];
+				};
+			};
+		};
+	};
+	controller_lp_exchange_rates_get: {
+		parameters: {
+			query?: {
+				/** @description Token address on Tron whose exchange rate is configured */
+				token?: components['parameters']['rowFilter.controller_lp_exchange_rates.token'];
+				/** @description Controller event sequence at which this exchange rate became current */
+				valid_from_seq?: components['parameters']['rowFilter.controller_lp_exchange_rates.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.controller_lp_exchange_rates.valid_to_seq'];
+				/**
+				 * @description Scaled exchange rate used to convert token amounts into USDT-equivalent
+				 *     amounts
+				 */
+				exchange_rate?: components['parameters']['rowFilter.controller_lp_exchange_rates.exchange_rate'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_lp_exchange_rates'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_lp_exchange_rates'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_lp_exchange_rates'][];
+					'text/csv': components['schemas']['controller_lp_exchange_rates'][];
+				};
+			};
+		};
+	};
+	event_appended_get: {
+		parameters: {
+			query?: {
+				/** @description Which stream emitted this EventAppended log (`hub` or `controller`) */
+				stream?: components['parameters']['rowFilter.event_appended.stream'];
+				/** @description Monotonic sequence number in the stream's onchain event hash-chain */
+				event_seq?: components['parameters']['rowFilter.event_appended.event_seq'];
+				/** @description Previous onchain event hash-chain tip before this event */
+				prev_tip?: components['parameters']['rowFilter.event_appended.prev_tip'];
+				/** @description New onchain event hash-chain tip after this event */
+				new_tip?: components['parameters']['rowFilter.event_appended.new_tip'];
+				/** @description Keccak256 hash of the semantic event signature string (bytes32 hex) */
+				event_signature?: components['parameters']['rowFilter.event_appended.event_signature'];
+				/** @description Exact ABI-encoded event payload bytes that were hashed onchain (0x hex) */
+				abi_encoded_event_data?: components['parameters']['rowFilter.event_appended.abi_encoded_event_data'];
+				/** @description Worker-decoded semantic event name (e.g. `LeaseCreated`, `ClaimCreated`) */
+				event_type?: components['parameters']['rowFilter.event_appended.event_type'];
+				/**
+				 * @description Worker-decoded event arguments as JSON (snake_case keys; values as
+				 *     strings/hex)
+				 */
+				args?: components['parameters']['rowFilter.event_appended.args'];
+				/** @description Block number containing the EventAppended log */
+				block_number?: components['parameters']['rowFilter.event_appended.block_number'];
+				/** @description Block timestamp (seconds since epoch) containing the EventAppended log */
+				block_timestamp?: components['parameters']['rowFilter.event_appended.block_timestamp'];
+				/** @description Convenience timestamp (block_timestamp converted to timestamptz) */
+				block_time?: components['parameters']['rowFilter.event_appended.block_time'];
+				/** @description Block hash of the log's block (bytes32 hex) */
+				block_hash?: components['parameters']['rowFilter.event_appended.block_hash'];
+				/** @description Transaction hash of the log's transaction (bytes32 hex) */
+				tx_hash?: components['parameters']['rowFilter.event_appended.tx_hash'];
+				/** @description Log index within the transaction receipt (0-based) */
+				log_index?: components['parameters']['rowFilter.event_appended.log_index'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['event_appended'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['event_appended'][];
+					'application/vnd.pgrst.object+json': components['schemas']['event_appended'][];
+					'text/csv': components['schemas']['event_appended'][];
+				};
+			};
+		};
+	};
+	stream_cursor_get: {
+		parameters: {
+			query?: {
+				/** @description Stream name (`hub` or `controller`) */
+				stream?: components['parameters']['rowFilter.stream_cursor.stream'];
+				/**
+				 * @description Highest contiguous canonical event sequence already applied to derived
+				 *     tables
+				 */
+				applied_through_seq?: components['parameters']['rowFilter.stream_cursor.applied_through_seq'];
+				/**
+				 * @description Expected `prev_tip` for the next event to apply (hash-chain continuity
+				 *     check)
+				 */
+				tip?: components['parameters']['rowFilter.stream_cursor.tip'];
+				/** @description Timestamp when the cursor last advanced or rolled back */
+				updated_at?: components['parameters']['rowFilter.stream_cursor.updated_at'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['stream_cursor'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['stream_cursor'][];
+					'application/vnd.pgrst.object+json': components['schemas']['stream_cursor'][];
+					'text/csv': components['schemas']['stream_cursor'][];
+				};
+			};
+		};
+	};
+	hub_protocol_pnl_get: {
+		parameters: {
+			query?: {
+				/** @description Event sequence at which this PnL snapshot became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_protocol_pnl.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_protocol_pnl.valid_to_seq'];
+				/** @description Current protocol PnL value (int256) */
+				pnl?: components['parameters']['rowFilter.hub_protocol_pnl.pnl'];
+				/** @description Delta applied at this event (int256) */
+				delta?: components['parameters']['rowFilter.hub_protocol_pnl.delta'];
+				/** @description PnL reason code (matches `UntronV3Index.PnlReason`) */
+				reason?: components['parameters']['rowFilter.hub_protocol_pnl.reason'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_protocol_pnl'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_protocol_pnl'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_protocol_pnl'][];
+					'text/csv': components['schemas']['hub_protocol_pnl'][];
+				};
+			};
+		};
+	};
+	hub_bridgers_get: {
+		parameters: {
+			query?: {
+				/** @description Token being bridged (EVM on hub chain) */
+				target_token?: components['parameters']['rowFilter.hub_bridgers.target_token'];
+				/** @description Destination EVM chainId */
+				target_chain_id?: components['parameters']['rowFilter.hub_bridgers.target_chain_id'];
+				/** @description Event sequence at which this bridger route became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_bridgers.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_bridgers.valid_to_seq'];
+				/** @description Bridger adapter contract address (EVM) */
+				bridger?: components['parameters']['rowFilter.hub_bridgers.bridger'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_bridgers'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_bridgers'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_bridgers'][];
+					'text/csv': components['schemas']['hub_bridgers'][];
+				};
+			};
+		};
+	};
+	lease_view_get: {
+		parameters: {
+			query?: {
+				lease_id?: components['parameters']['rowFilter.lease_view.lease_id'];
+				receiver_salt?: components['parameters']['rowFilter.lease_view.receiver_salt'];
+				lease_number?: components['parameters']['rowFilter.lease_view.lease_number'];
+				realtor?: components['parameters']['rowFilter.lease_view.realtor'];
+				lessee?: components['parameters']['rowFilter.lease_view.lessee'];
+				start_time?: components['parameters']['rowFilter.lease_view.start_time'];
+				nukeable_after?: components['parameters']['rowFilter.lease_view.nukeable_after'];
+				lease_fee_ppm?: components['parameters']['rowFilter.lease_view.lease_fee_ppm'];
+				flat_fee?: components['parameters']['rowFilter.lease_view.flat_fee'];
+				lease_nonce?: components['parameters']['rowFilter.lease_view.lease_nonce'];
+				payout_target_chain_id?: components['parameters']['rowFilter.lease_view.payout_target_chain_id'];
+				payout_target_token?: components['parameters']['rowFilter.lease_view.payout_target_token'];
+				payout_beneficiary?: components['parameters']['rowFilter.lease_view.payout_beneficiary'];
+				payout_config_history?: components['parameters']['rowFilter.lease_view.payout_config_history'];
+				claims?: components['parameters']['rowFilter.lease_view.claims'];
+				claims_total?: components['parameters']['rowFilter.lease_view.claims_total'];
+				claims_filled?: components['parameters']['rowFilter.lease_view.claims_filled'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['lease_view'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['lease_view'][];
+					'application/vnd.pgrst.object+json': components['schemas']['lease_view'][];
+					'text/csv': components['schemas']['lease_view'][];
+				};
+			};
+		};
+	};
+	hub_tokens_rescued_get: {
+		parameters: {
+			query?: {
+				/** @description Hub event sequence for this rescue */
+				event_seq?: components['parameters']['rowFilter.hub_tokens_rescued.event_seq'];
+				/** @description Token rescued (EVM address on hub chain; must not be USDT) */
+				token?: components['parameters']['rowFilter.hub_tokens_rescued.token'];
+				/** @description Amount rescued (uint256) */
+				amount?: components['parameters']['rowFilter.hub_tokens_rescued.amount'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_tokens_rescued'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_tokens_rescued'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_tokens_rescued'][];
+					'text/csv': components['schemas']['hub_tokens_rescued'][];
+				};
+			};
+		};
+	};
+	controller_tip_proofs_get: {
+		parameters: {
+			query?: {
+				/** @description Block number containing the controller `IsEventChainTipCalled` log */
+				block_number?: components['parameters']['rowFilter.controller_tip_proofs.block_number'];
+				/** @description Block timestamp (seconds since epoch) containing the log */
+				block_timestamp?: components['parameters']['rowFilter.controller_tip_proofs.block_timestamp'];
+				/** @description Block hash of the log's block (bytes32 hex) */
+				block_hash?: components['parameters']['rowFilter.controller_tip_proofs.block_hash'];
+				/** @description Convenience timestamp (block_timestamp converted to timestamptz) */
+				block_time?: components['parameters']['rowFilter.controller_tip_proofs.block_time'];
+				/** @description Transaction hash of the transaction containing the log (bytes32 hex) */
+				tx_hash?: components['parameters']['rowFilter.controller_tip_proofs.tx_hash'];
+				/** @description Log index within the transaction receipt (0-based) */
+				log_index?: components['parameters']['rowFilter.controller_tip_proofs.log_index'];
+				/** @description Tron address that called `isEventChainTip(bytes32)` */
+				caller?: components['parameters']['rowFilter.controller_tip_proofs.caller'];
+				/**
+				 * @description Hash-chain tip value that the caller asserted as the controller's current
+				 *     tip
+				 */
+				proved_tip?: components['parameters']['rowFilter.controller_tip_proofs.proved_tip'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_tip_proofs'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_tip_proofs'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_tip_proofs'][];
+					'text/csv': components['schemas']['controller_tip_proofs'][];
+				};
+			};
+		};
+	};
+	hub_realtors_get: {
+		parameters: {
+			query?: {
+				/** @description Realtor address (EVM) */
+				realtor?: components['parameters']['rowFilter.hub_realtors.realtor'];
+				/** @description Event sequence at which this realtor snapshot became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_realtors.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_realtors.valid_to_seq'];
+				/** @description Whether this address is currently allowlisted to create leases */
+				allowed?: components['parameters']['rowFilter.hub_realtors.allowed'];
+				/** @description Realtor-specific minimum percentage fee floor (ppm) */
+				min_fee_ppm?: components['parameters']['rowFilter.hub_realtors.min_fee_ppm'];
+				/** @description Realtor-specific minimum flat fee floor (USDT units) */
+				min_flat_fee?: components['parameters']['rowFilter.hub_realtors.min_flat_fee'];
+				/** @description Realtor-specific maximum lease duration in seconds (NULL means no override) */
+				max_lease_duration_seconds?: components['parameters']['rowFilter.hub_realtors.max_lease_duration_seconds'];
+				/** @description Max lease creations allowed per window (NULL/0 means disabled) */
+				lease_rate_max_leases?: components['parameters']['rowFilter.hub_realtors.lease_rate_max_leases'];
+				/**
+				 * @description Window size (seconds) for lease creation rate limiting (NULL/0 means
+				 *     disabled)
+				 */
+				lease_rate_window_seconds?: components['parameters']['rowFilter.hub_realtors.lease_rate_window_seconds'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_realtors'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_realtors'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_realtors'][];
+					'text/csv': components['schemas']['hub_realtors'][];
+				};
+			};
+		};
+	};
+	controller_usdt_rebalanced_get: {
+		parameters: {
+			query?: {
+				/** @description Controller event sequence for this rebalance */
+				event_seq?: components['parameters']['rowFilter.controller_usdt_rebalanced.event_seq'];
+				/** @description USDT amount bridged in (uint256) */
+				in_amount?: components['parameters']['rowFilter.controller_usdt_rebalanced.in_amount'];
+				/** @description Expected USDT amount out on destination (uint256) */
+				out_amount?: components['parameters']['rowFilter.controller_usdt_rebalanced.out_amount'];
+				/** @description Rebalancer used (Tron address) */
+				rebalancer?: components['parameters']['rowFilter.controller_usdt_rebalanced.rebalancer'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['controller_usdt_rebalanced'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['controller_usdt_rebalanced'][];
+					'application/vnd.pgrst.object+json': components['schemas']['controller_usdt_rebalanced'][];
+					'text/csv': components['schemas']['controller_usdt_rebalanced'][];
+				};
+			};
+		};
+	};
+	hub_controller_tip_updates_get: {
+		parameters: {
+			query?: {
+				/** @description Hub event sequence for this controller tip update record */
+				event_seq?: components['parameters']['rowFilter.hub_controller_tip_updates.event_seq'];
+				/** @description Controller tip that this hop links from */
+				previous_tip?: components['parameters']['rowFilter.hub_controller_tip_updates.previous_tip'];
+				/** @description Controller event block number (as embedded in the hub event payload) */
+				block_number?: components['parameters']['rowFilter.hub_controller_tip_updates.block_number'];
+				/**
+				 * @description Controller event block timestamp (seconds) (as embedded in the hub event
+				 *     payload)
+				 */
+				block_timestamp?: components['parameters']['rowFilter.hub_controller_tip_updates.block_timestamp'];
+				/** @description Controller event signature hash (bytes32 hex) */
+				event_signature?: components['parameters']['rowFilter.hub_controller_tip_updates.event_signature'];
+				/** @description Controller ABI-encoded event payload (0x hex) */
+				abi_encoded_event_data?: components['parameters']['rowFilter.hub_controller_tip_updates.abi_encoded_event_data'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_controller_tip_updates'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_controller_tip_updates'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_controller_tip_updates'][];
+					'text/csv': components['schemas']['hub_controller_tip_updates'][];
+				};
+			};
+		};
+	};
+	receiver_salt_candidates_get: {
+		parameters: {
+			query?: {
+				receiver_salt?: components['parameters']['rowFilter.receiver_salt_candidates.receiver_salt'];
+				receiver?: components['parameters']['rowFilter.receiver_salt_candidates.receiver'];
+				receiver_evm?: components['parameters']['rowFilter.receiver_salt_candidates.receiver_evm'];
+				balance_amount?: components['parameters']['rowFilter.receiver_salt_candidates.balance_amount'];
+				has_balance?: components['parameters']['rowFilter.receiver_salt_candidates.has_balance'];
+				nukeable_after?: components['parameters']['rowFilter.receiver_salt_candidates.nukeable_after'];
+				is_free?: components['parameters']['rowFilter.receiver_salt_candidates.is_free'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['receiver_salt_candidates'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['receiver_salt_candidates'][];
+					'application/vnd.pgrst.object+json': components['schemas']['receiver_salt_candidates'][];
+					'text/csv': components['schemas']['receiver_salt_candidates'][];
+				};
+			};
+		};
+	};
+	hub_chains_get: {
+		parameters: {
+			query?: {
+				/** @description Destination EVM chainId */
+				target_chain_id?: components['parameters']['rowFilter.hub_chains.target_chain_id'];
+				/** @description Event sequence at which this deprecation flag became current */
+				valid_from_seq?: components['parameters']['rowFilter.hub_chains.valid_from_seq'];
+				valid_to_seq?: components['parameters']['rowFilter.hub_chains.valid_to_seq'];
+				/** @description Whether this destination chain is deprecated for new payout configs */
+				deprecated?: components['parameters']['rowFilter.hub_chains.deprecated'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_chains'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_chains'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_chains'][];
+					'text/csv': components['schemas']['hub_chains'][];
+				};
+			};
+		};
+	};
+	hub_lp_vault_events_get: {
+		parameters: {
+			query?: {
+				/** @description Hub event sequence for this vault event */
+				event_seq?: components['parameters']['rowFilter.hub_lp_vault_events.event_seq'];
+				/** @description `deposit` or `withdraw` */
+				kind?: components['parameters']['rowFilter.hub_lp_vault_events.kind'];
+				/** @description LP address (EVM) */
+				lp?: components['parameters']['rowFilter.hub_lp_vault_events.lp'];
+				/** @description Amount deposited/withdrawn (uint256, USDT units) */
+				amount?: components['parameters']['rowFilter.hub_lp_vault_events.amount'];
+				/** @description Filtering Columns */
+				select?: components['parameters']['select'];
+				/** @description Ordering */
+				order?: components['parameters']['order'];
+				/** @description Limiting and Pagination */
+				offset?: components['parameters']['offset'];
+				/** @description Limiting and Pagination */
+				limit?: components['parameters']['limit'];
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: components['parameters']['range'];
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: components['parameters']['rangeUnit'];
+				/** @description Preference */
+				Prefer?: components['parameters']['preferCount'];
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_lp_vault_events'][];
+					'application/vnd.pgrst.object+json;nulls=stripped': components['schemas']['hub_lp_vault_events'][];
+					'application/vnd.pgrst.object+json': components['schemas']['hub_lp_vault_events'][];
+					'text/csv': components['schemas']['hub_lp_vault_events'][];
+				};
+			};
+		};
+	};
+	active_leases_daily_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				leases_started?: string;
+				leases_ended?: string;
+				leases_active?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['active_leases_daily'][];
+				};
+			};
+		};
+	};
+	claim_fill_latency_daily_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				filled_claims_total?: string;
+				avg_seconds?: string;
+				p50_seconds?: string;
+				p90_seconds?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['claim_fill_latency_daily'][];
+				};
+			};
+		};
+	};
+	claim_usdt_deposit_attribution_get: {
+		parameters: {
+			query?: {
+				lease_id?: string;
+				claim_id?: string;
+				usdt_deposit_attribution?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['claim_usdt_deposit_attribution'][];
+				};
+			};
+		};
+	};
+	claims_created_daily_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				claims_created_total?: string;
+				claims_created_subjective_pre_entitle?: string;
+				claims_created_pre_entitle?: string;
+				claims_created_receiver_pull?: string;
+				amount_usdt_total?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['claims_created_daily'][];
+				};
+			};
+		};
+	};
+	claims_filled_daily_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				claims_filled_total?: string;
+				amount_usdt_total?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['claims_filled_daily'][];
+				};
+			};
+		};
+	};
+	hub_claim_first_versions_get: {
+		parameters: {
+			query?: {
+				lease_id?: string;
+				claim_id?: string;
+				created_from_seq?: string;
+				origin?: string;
+				origin_timestamp?: string;
+				amount_usdt?: string;
+				target_chain_id?: string;
+				target_token?: string;
+				beneficiary?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['hub_claim_first_versions'][];
+				};
+			};
+		};
+	};
+	lease_kpis_get: {
+		parameters: {
+			query?: {
+				lease_id?: string;
+				lease_number?: string;
+				realtor?: string;
+				lessee?: string;
+				receiver_salt?: string;
+				start_time?: string;
+				nukeable_after?: string;
+				start_time_utc?: string;
+				nukeable_after_utc?: string;
+				deposits_total?: string;
+				deposits_amount_total?: string;
+				deposits_latest_block_timestamp?: string;
+				claims_total?: string;
+				claims_filled?: string;
+				claims_amount_total?: string;
+				claims_latest_origin_timestamp?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['lease_kpis'][];
+				};
+			};
+		};
+	};
+	leases_ending_daily_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				leases_ending_total?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['leases_ending_daily'][];
+				};
+			};
+		};
+	};
+	leases_started_daily_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				leases_started_total?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['leases_started_daily'][];
+				};
+			};
+		};
+	};
+	protocol_pnl_timeseries_get: {
+		parameters: {
+			query?: {
+				block_timestamp?: string;
+				block_time?: string;
+				pnl?: string;
+				delta?: string;
+				reason?: string;
+				valid_from_seq?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['protocol_pnl_timeseries'][];
+				};
+			};
+		};
+	};
+	realtor_deposits_daily_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				realtor?: string;
+				deposits_total?: string;
+				amount_total?: string;
+				leases_touched?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['realtor_deposits_daily'][];
+				};
+			};
+		};
+	};
+	usdt_deposit_backlog_age_buckets_get: {
+		parameters: {
+			query?: {
+				recommended_action?: string;
+				age_bucket?: string;
+				deposits_total?: string;
+				amount_total?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['usdt_deposit_backlog_age_buckets'][];
+				};
+			};
+		};
+	};
+	usdt_deposit_backlog_summary_get: {
+		parameters: {
+			query?: {
+				recommended_action?: string;
+				deposits_total?: string;
+				amount_total?: string;
+				oldest_block_timestamp?: string;
+				newest_block_timestamp?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['usdt_deposit_backlog_summary'][];
+				};
+			};
+		};
+	};
+	usdt_deposit_funnel_daily_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				stage?: string;
+				deposits_total?: string;
+				amount_total?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['usdt_deposit_funnel_daily'][];
+				};
+			};
+		};
+	};
+	usdt_deposit_txs_get: {
+		parameters: {
+			query?: {
+				chain_id?: string;
+				token?: string;
+				receiver_salt?: string;
+				sender?: string;
+				recipient?: string;
+				amount?: string;
+				block_number?: string;
+				block_timestamp?: string;
+				block_time?: string;
+				block_hash?: string;
+				tx_hash?: string;
+				log_index?: string;
+				inserted_at?: string;
+				recommended_action?: string;
+				expected_lease_id?: string;
+				expected_lease_number?: string;
+				expected_realtor?: string;
+				expected_lessee?: string;
+				claim_lease_id?: string;
+				claim_id?: string;
+				claim_origin?: string;
+				claim_status?: string;
+				claim_amount_usdt?: string;
+				claim_lease_number?: string;
+				claim_realtor?: string;
+				claim_lessee?: string;
+				deposit_processed?: string;
+				deposit_processed_last_checked_at?: string;
+				linked_claims?: string;
+				linked_claims_total?: string;
+				linked_claims_amount?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['usdt_deposit_txs'][];
+				};
+			};
+		};
+	};
+	usdt_deposits_cumulative_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				deposits_total?: string;
+				amount_total?: string;
+				deposits_total_cum?: string;
+				amount_total_cum?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['usdt_deposits_cumulative'][];
+				};
+			};
+		};
+	};
+	usdt_deposits_daily_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				deposits_total?: string;
+				amount_total?: string;
+				unique_senders?: string;
+				unique_receivers?: string;
+				leases_touched?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['usdt_deposits_daily'][];
+				};
+			};
+		};
+	};
+	usdt_deposits_daily_by_action_get: {
+		parameters: {
+			query?: {
+				day?: string;
+				recommended_action?: string;
+				deposits_total?: string;
+				amount_total?: string;
+				/** @description Filtering Columns */
+				select?: string;
+				/** @description Ordering */
+				order?: string;
+				/** @description Limiting and Pagination */
+				offset?: string;
+				/** @description Limiting and Pagination */
+				limit?: string;
+			};
+			header?: {
+				/** @description Limiting and Pagination */
+				Range?: string;
+				/** @description Limiting and Pagination */
+				'Range-Unit'?: string;
+				/** @description Preference */
+				Prefer?: string;
+			};
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description OK */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['usdt_deposits_daily_by_action'][];
+				};
+			};
+		};
+	};
 }
