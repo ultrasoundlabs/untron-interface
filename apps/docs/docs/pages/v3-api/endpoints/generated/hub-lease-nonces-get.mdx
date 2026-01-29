@@ -1,0 +1,49 @@
+---
+title: "GET /hub_lease_nonces"
+description: "Current per-lease nonces (KV)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Current per-lease nonces (KV)"
+  method="GET"
+  path="/hub_lease_nonces"
+  summary="Current per-lease nonces (KV)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/hub_lease_nonces"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/hub_lease_nonces'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "lease_id": "…",
+    "nonce": "…",
+    "valid_from_seq": 0,
+    "valid_to_seq": 0
+  }
+]
+```
+</EndpointLayout>

@@ -1,0 +1,80 @@
+---
+title: GET /v1/orders/{orderId}
+description: Get an order.
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Get an order"
+  method="GET"
+  path="/v1/orders/{orderId}"
+  summary="Fetch an order by id. This is the single source of truth for status."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/bridge"
+      path="/v1/orders/{orderId}"
+      method="get"
+      specUrl="https://api.untron.finance/bridge/v1/openapi.json"
+    />
+  }
+>
+  ## What it does
+
+  Fetches an order by id.
+
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS 'https://api.untron.finance/bridge/v1/orders/ord_01JEXAMPLE'
+  ```
+
+  :::
+
+  ## Response (200)
+
+  ```json
+  {
+    "orderId": "ord_01JEXAMPLE",
+    "createdAt": "2026-01-29T00:00:10.000Z",
+    "status": "executing",
+    "recipient": "eip155:42161:0xRecipientAddress",
+    "fees": [
+      {
+        "type": "ppm",
+        "ppm": 1500,
+        "chargedIn": "fromAsset",
+        "appliesTo": "acceptedAmount",
+        "proration": "proportional"
+      }
+    ],
+    "refundPolicy": {
+      "mode": "automatic_if_supported",
+      "requiresRefundAddress": false,
+      "supportedRefundDestinations": [
+        {
+          "chainId": "eip155:1",
+          "assetId": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        }
+      ]
+    },
+    "amounts": {
+      "receivedAmount": "1000000",
+      "acceptedAmount": "1000000",
+      "remainingAmount": "0",
+      "excessAmount": "0",
+      "feePreview": { "feeTotal": "1500", "effectiveInputAmount": "1000000" },
+      "estimatedToAmount": "998500"
+    },
+    "pollAfterSeconds": 2
+  }
+  ```
+
+  ## Notes
+
+  - Treat this endpoint as canonical (status, deposit instructions, settlement details).
+  - For long-running routes, poll with backoff.
+</EndpointLayout>

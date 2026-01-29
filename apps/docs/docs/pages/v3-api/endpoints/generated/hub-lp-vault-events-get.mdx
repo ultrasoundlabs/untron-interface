@@ -1,0 +1,49 @@
+---
+title: "GET /hub_lp_vault_events"
+description: "Hub LP vault deposit/withdraw ledger (append-only)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Hub LP vault deposit/withdraw ledger (append-only)"
+  method="GET"
+  path="/hub_lp_vault_events"
+  summary="Hub LP vault deposit/withdraw ledger (append-only)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/hub_lp_vault_events"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/hub_lp_vault_events'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "amount": "…",
+    "event_seq": 0,
+    "kind": "…",
+    "lp": "…"
+  }
+]
+```
+</EndpointLayout>

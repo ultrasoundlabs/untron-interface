@@ -1,0 +1,68 @@
+---
+title: "POST /realtor"
+description: "Create an address lease in Untron V3 protocol."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Create an address lease in Untron V3 protocol."
+  method="POST"
+  path="/realtor"
+  summary="Create an address lease in Untron V3 protocol."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/realtor"
+      method="post"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  Realtor module.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS -X POST 'https://api.untron.finance/v3/realtor' \\
+  -H 'content-type: application/json' \\
+  -d '{
+  "beneficiary": "0x0000000000000000000000000000000000000003",
+  "duration_seconds": 2592000,
+  "lessee": "0x0000000000000000000000000000000000000001",
+  "receiver_salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "target_chain_id": 1,
+  "target_token": "0x0000000000000000000000000000000000000002"
+}'
+```
+
+```json [Body]
+{
+  "beneficiary": "0x0000000000000000000000000000000000000003",
+  "duration_seconds": 2592000,
+  "lessee": "0x0000000000000000000000000000000000000001",
+  "receiver_salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "target_chain_id": 1,
+  "target_token": "0x0000000000000000000000000000000000000002"
+}
+```
+
+:::
+
+  ## Response
+
+```json
+{
+  "nukeable_after": 1700000000,
+  "receiver_address_evm": "0x0000000000000000000000000000000000000000",
+  "receiver_address_tron": "TX9xZ4mV2h4h9qv7q8qXbW1d7m8m1y1y1y",
+  "receiver_salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "userop_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+}
+```
+</EndpointLayout>

@@ -1,0 +1,50 @@
+---
+title: "GET /realtor_deposits_daily"
+description: "Daily USDT deposits attributed to realtor (via expected_lease_id -> lease.realtor)."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Daily USDT deposits attributed to realtor (via expected_lease_id -> lease.realtor)."
+  method="GET"
+  path="/realtor_deposits_daily"
+  summary="Daily USDT deposits attributed to realtor (via expected_lease_id -> lease.realtor)."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/realtor_deposits_daily"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/realtor_deposits_daily'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "amount_total": "…",
+    "day": "…",
+    "deposits_total": 0,
+    "leases_touched": 0,
+    "realtor": "…"
+  }
+]
+```
+</EndpointLayout>

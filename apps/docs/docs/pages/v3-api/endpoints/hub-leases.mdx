@@ -1,0 +1,60 @@
+---
+title: GET /hub_leases
+description: Query leases indexed by the V3 hub.
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Query hub leases"
+  method="GET"
+  path="/hub_leases"
+  summary="Lease records as indexed by the hub (useful for exploration, analytics, and debugging)."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/hub_leases"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  ## What it does
+
+  Returns hub-indexed lease rows (current registry + some metadata).
+
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS 'https://api.untron.finance/v3/hub_leases?order=lease_id.desc&limit=10'
+  ```
+
+  :::
+
+  ## Response (200)
+
+  ```json
+  [
+    {
+      "lease_id": "123",
+      "lease_number": "1",
+      "lessee": "T…",
+      "realtor": "T…",
+      "receiver_salt": "0x…",
+      "start_time": "2026-01-29T00:00:00.000Z",
+      "nukeable_after": "2026-01-29T00:00:00.000Z",
+      "lease_fee_ppm": "1500",
+      "flat_fee": "0",
+      "valid_from_seq": "0",
+      "valid_to_seq": "0"
+    }
+  ]
+  ```
+
+  :::info[Example]
+  Example response. Values shown are illustrative; field names match the API schema.
+  :::
+</EndpointLayout>

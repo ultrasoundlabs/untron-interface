@@ -1,0 +1,92 @@
+.untron-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.untron-aside__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.untron-aside__title {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--vocs-color_heading);
+}
+
+.untron-aside__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.untron-aside__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--vocs-color_text2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.untron-aside__requestLine {
+  border: 1px solid var(--vocs-color_border);
+  background: var(--vocs-color_background2);
+  border-radius: 12px;
+  padding: 10px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.untron-aside__method {
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  color: var(--vocs-color_textAccent);
+  flex: none;
+}
+
+.untron-aside__url {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--vocs-color_text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.untron-aside__copy {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--vocs-color_text3);
+  cursor: pointer;
+}
+
+.untron-aside__copy:hover {
+  color: var(--vocs-color_text2);
+  background: color-mix(in oklab, var(--vocs-color_background3) 70%, transparent);
+  border-color: var(--vocs-color_border);
+}
+
+.untron-aside__link {
+  color: var(--vocs-color_textAccent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.untron-aside__link:hover {
+  color: var(--vocs-color_textAccentHover);
+  text-decoration: underline;
+}

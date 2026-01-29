@@ -9,6 +9,7 @@
     "preview": "vocs preview"
   },
   "dependencies": {
+    "@scalar/api-client-react": "^1.3.0",
     "react": "latest",
     "react-dom": "latest",
     "vocs": "latest"

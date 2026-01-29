@@ -1,0 +1,67 @@
+---
+title: POST /payout_config
+description: Relay a gasless payout config update.
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Set payout config"
+  method="POST"
+  path="/payout_config"
+  summary="Relay a gasless payout config update for a lease. Part of the Realtor module."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/payout_config"
+      method="post"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  ## What it does
+
+  Submits a signed payout config update and returns a `userop_hash` you can track.
+
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS -X POST 'https://api.untron.finance/v3/payout_config' \
+    -H 'content-type: application/json' \
+    -d '{
+      "lease_id": "123",
+      "beneficiary": "T…",
+      "target_chain_id": "eip155:42161",
+      "target_token": "usdc",
+      "deadline": "2026-01-29T00:00:00.000Z",
+      "signature": "0x…"
+    }'
+  ```
+
+  ```json [Body]
+  {
+    "lease_id": "123",
+    "beneficiary": "T…",
+    "target_chain_id": "eip155:42161",
+    "target_token": "usdc",
+    "deadline": "2026-01-29T00:00:00.000Z",
+    "signature": "0x…"
+  }
+  ```
+
+  :::
+
+  ## Response (200)
+
+  ```json
+  { "userop_hash": "0x…" }
+  ```
+
+  :::info[Example]
+  Example response. Values shown are illustrative; field names match the API schema.
+  :::
+</EndpointLayout>
+

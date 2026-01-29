@@ -1,0 +1,44 @@
+---
+title: How V3 Works
+description: A high-level mental model for Untron V3.
+---
+
+# How V3 Works
+
+This page explains the core ideas behind V3 at a high level: the nouns you’ll see in the API, how they relate, and how to reason about system state.
+
+## Mental model
+
+Think in terms of:
+
+- **intent-like actions** (what the user wants)
+- **deterministic settlement** (what the system guarantees)
+- **observability** (what you can prove from data)
+
+## Core entities
+
+- **Lease:** a long-lived “session” that groups activity and state over time.
+- **Claim:** a unit of work/value that is created, tracked, and eventually settled (or expires).
+- **Controller / executor:** the system components responsible for progressing state and performing execution.
+- **Deposits / fills:** events and balances that connect external payment rails to on-chain or protocol settlement.
+
+The exact shapes of these objects are defined by the API schema; the goal of this section is to help you understand how they fit together.
+
+## Lifecycle (conceptual)
+
+At a high level, flows look like:
+
+- **Create:** a lease (and/or claim) is created.
+- **Attribute:** deposits and other inputs are linked to protocol state.
+- **Execute:** controllers/executors progress state and perform the required actions.
+- **Settle:** outcomes are finalized and made observable via the API.
+- **Expire / recover:** timeouts and recovery paths handle incomplete flows.
+
+## Observability
+
+For integrations and analytics, treat the API as the source of truth for the protocol’s current view of state, and prefer querying views/endpoints designed for aggregation (rather than reconstructing state from raw events).
+
+## Next
+
+- Read the V3 API overview: [V3 API](/v3-api)
+- Start with the curated endpoint guides: [V3 API Endpoints](/v3-api/endpoints)

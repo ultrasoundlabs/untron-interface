@@ -1,0 +1,49 @@
+---
+title: "GET /hub_lp_allowlist"
+description: "Current LP allowlist (KV)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Current LP allowlist (KV)"
+  method="GET"
+  path="/hub_lp_allowlist"
+  summary="Current LP allowlist (KV)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/hub_lp_allowlist"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/hub_lp_allowlist'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "allowed": false,
+    "lp": "…",
+    "valid_from_seq": 0,
+    "valid_to_seq": 0
+  }
+]
+```
+</EndpointLayout>

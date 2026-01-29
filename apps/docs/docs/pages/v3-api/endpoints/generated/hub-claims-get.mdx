@@ -1,0 +1,53 @@
+---
+title: "GET /hub_claims"
+description: "Current claim states (KV)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Current claim states (KV)"
+  method="GET"
+  path="/hub_claims"
+  summary="Current claim states (KV)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/hub_claims"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/hub_claims'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "amount_usdt": "…",
+    "beneficiary": "…",
+    "claim_id": "…",
+    "lease_id": "…",
+    "origin": 0,
+    "origin_actor": "…",
+    "origin_id": "…",
+    "origin_raw_amount": "…"
+  }
+]
+```
+</EndpointLayout>

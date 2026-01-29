@@ -1,0 +1,50 @@
+---
+title: "GET /usdt_deposit_backlog_summary"
+description: "Current deposit actionability backlog summary grouped by `recommended_action`."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Current deposit actionability backlog summary grouped by `recommended_action`."
+  method="GET"
+  path="/usdt_deposit_backlog_summary"
+  summary="Current deposit actionability backlog summary grouped by `recommended_action`."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/usdt_deposit_backlog_summary"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/usdt_deposit_backlog_summary'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "amount_total": "…",
+    "deposits_total": 0,
+    "newest_block_timestamp": 0,
+    "oldest_block_timestamp": 0,
+    "recommended_action": "…"
+  }
+]
+```
+</EndpointLayout>

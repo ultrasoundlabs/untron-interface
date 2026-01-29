@@ -1,0 +1,5249 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+
+Additional Info:
+----------------
+
+================================================================
+Directory Structure
+================================================================
+blog/
+  gm.mdx
+  index.mdx
+docs/
+  api/
+    config.mdx
+    frontmatter.mdx
+  guides/
+    blog.mdx
+    code-snippets.mdx
+    components.mdx
+    layouts.mdx
+    markdown-snippets.mdx
+    navigation.mdx
+    og-images.mdx
+    styling.mdx
+    theming.mdx
+    twoslash.mdx
+  index.mdx
+  kitchen-sink.mdx
+  markdown.mdx
+  structure.mdx
+blank.mdx
+index.mdx
+
+================================================================
+Files
+================================================================
+
+================
+File: blog/gm.mdx
+================
+---
+layout: minimal
+date: 2023-11-25
+---
+
+# gm
+
+::authors
+
+we're so back.
+
+================
+File: blog/index.mdx
+================
+---
+layout: minimal
+---
+
+# Blog
+
+::blog-posts
+
+================
+File: docs/api/config.mdx
+================
+# Config [Define global metadata for your documentation]
+
+Vocs uses a [configuration file (`vocs.config.ts`)](/docs/structure#configuration-file) to define global metadata for your documentation. This includes things like the site title, description, logo, sidebar, and more for your project.
+
+## Initialize Config File
+
+The Vocs config can be defined in a `vocs.config.ts` file at the root of your project.
+
+:::code-group
+
+```md [Directory Structure]
+viem/
+├── docs/
+├── node_modules/
+├── src/
+├── package.json
+└── vocs.config.ts # [!code ++]
+```
+
+```ts [vocs.config.ts] twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  title: 'Viem'
+})
+```
+
+:::
+
+## Parameters
+
+### aiCta
+
+- **Type:** `boolean | { query: ((p: { location: string }) => string) }`
+- **Default:** `true`
+
+Whether or not to show the AI call-to-action dropdown (ie. "Open in ChatGPT").
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  aiCta: false, // [!code focus]
+  title: 'Viem'
+})
+```
+
+You can also specify a custom query for the AI.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  aiCta: {  // [!code focus]
+    query({ location }) { // [!code focus]
+      return `Please research and analyze this page: ${location} so I can ask you questions about it.` // [!code focus]
+    } // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+### banner
+
+- **Type:** `Banner`
+
+Configuration for the banner fixed to the top of the page.
+
+Can be a Markdown string, a React Element, or an object with the following properties:
+- `dismissable`: Whether or not the banner can be dismissed.
+- `backgroundColor`: The background color of the banner.
+- `content`: The content of the banner.
+- `height`: The height of the banner.
+- `textColor`: The text color of the banner.
+
+:::tip
+When using JSX, remember to rename the config file extension to `.tsx` or `.jsx`.
+:::
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+// @log:   ↓ as Markdown
+export default defineConfig({
+  banner: 'Head to our new [Discord](https://discord.gg/JUrRkGweXV)!', // [!code focus]
+  title: 'Viem'
+})
+```
+
+```tsx twoslash
+// @noErrors
+import { defineConfig } from 'vocs'
+
+// @log:   ↓ as a React Element
+export default defineConfig({
+  banner: <div>Head to our new <a href="https://discord.gg/JUrRkGweXV">Discord</a></div>, // [!code focus]
+  title: 'Viem'
+})
+```
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+// @log:   ↓ as an object
+export default defineConfig({
+  banner: { // [!code focus]
+    dismissable: false, // [!code focus]
+    backgroundColor: 'red', // [!code focus]
+    content: 'Head to our new [Discord](https://discord.gg/JUrRkGweXV)!', // [!code focus]
+    height: '28px', // [!code focus]
+    textColor: 'white', // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+### basePath
+
+- **Type:** `string`
+
+The base path the documentation will be deployed at. All assets & pages will be prefixed with this path.
+
+For example, this is useful for deploying to GitHub Pages.
+If the target URL is `https://example.github.io/foo`, then the `basePath` should be set to `/foo`.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  basePath: '/docs', // [!code focus]
+})
+```
+
+### baseUrl
+
+- **Type:** `string`
+
+The base URL for your documentation. This is used to populate the `<base>` tag in the `<head>` of the page,
+and is used to form the `%logo` variable for dynamic OG images.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  baseUrl: 'https://vocs.dev', // [!code focus]
+})
+```
+
+### blogDir
+
+- **Type:** `string`
+- **Default:** `"./pages/blog"`
+
+Path to blog pages relative to project root. Used to extract posts from the filesystem.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  blogDir: './pages/writings', // [!code focus]
+  title: 'Viem'
+})
+```
+
+### checkDeadlinks
+
+- **Type:** `boolean | "warn"`
+- **Default:** `true`
+
+Whether or not to check for dead links in the documentation.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+// Disable dead link checking
+export default defineConfig({
+  checkDeadlinks: false, // [!code focus]
+  title: 'Viem'
+})
+```
+
+You can also set it to `"warn"` to only warn about dead links instead of throwing errors during build.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+// Warn about dead links instead of erroring
+export default defineConfig({
+  checkDeadlinks: 'warn', // [!code focus]
+  title: 'Viem'
+})
+```
+
+### description
+
+- **Type:** `string`
+
+General description for the documentation.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  description: 'Build reliable apps & libraries with lightweight, composable, and type-safe modules that interface with Ethereum.', // [!code focus]
+  title: 'Viem'
+})
+```
+
+### editLink
+
+- **Type:** `EditLink`
+
+Edit location for the documentation.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  editLink: { // [!code focus]
+    pattern: 'https://github.com/wevm/viem/edit/main/site/pages/:path', // [!code focus]
+    text: 'Edit on GitHub' // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+#### editLink.pattern
+
+- **Type:** `string | ((pageData: PageData) => string)`
+
+Edit link pattern. Can be a string with `:path` placeholder, or a function that receives a `PageData` object and returns the edit URL.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  editLink: { // [!code focus]
+    pattern: 'https://github.com/wevm/viem/edit/main/site/pages/:path' // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  editLink: { // [!code focus]
+    pattern: (pageData) => { // [!code focus]
+      if (pageData.filePath?.startsWith('foo/')) // [!code focus]
+        return `https://github.com/wevm/vocs/edit/main/src/pages/foo/${pageData.filePath}` // [!code focus]
+      return `https://github.com/wevm/vocs/edit/main/src/pages/${pageData.filePath}` // [!code focus]
+    }, // [!code focus]
+    text: 'Edit on Github' // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+#### editLink.text
+
+- **Type:** `string`
+
+Edit link text.
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  editLink: { // [!code focus]
+    pattern: 'https://github.com/wevm/viem/edit/main/site/pages/:path',
+    text: 'Edit on GitHub' // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+### font
+
+- **Type:** `{ google: string }`
+
+Base font face.
+
+:::warning
+Only Google Fonts are supported at the moment.
+:::
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  font: { // [!code focus]
+    google: 'Inter' // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+You can also define the font family for inline code & code blocks:
+
+```ts twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  font: {
+    default: {
+      google: 'Inter',
+    },
+    mono: { // [!code focus]
+      google: 'Dancing Script', // [!code focus]
+    }, // [!code focus]
+  },
+  title: 'Viem'
+})
+```
+
+### head
+
+- **Type:** `ReactElement | { [path: string]: ReactElement } | ({ path: string }) => ReactElement)`
+
+Additional tags to include in the `<head>` tag of the page HTML.
+
+:::tip
+When using JSX, remember to rename the config file extension to `.tsx` or `.jsx`.
+:::
+
+#### Element
+
+```tsx twoslash
+// @noErrors
+import * as React from 'react'
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  head: ( // [!code focus]
+    <> {/* [!code focus] */}
+      <meta property="og:type" content="website" /> {/* [!code focus] */}
+      <meta property="og:title" content="viem · TypeScript Interface for Ethereum" /> {/* [!code focus] */}
+      <meta property="og:image" content="https://viem.sh/og-image.png" /> {/* [!code focus] */}
+      <meta property="og:url" content="https://viem.sh" /> {/* [!code focus] */}
+      <meta property="og:description" content="Build reliable Ethereum apps & libraries with lightweight, composable, & type-safe modules from viem." /> {/* [!code focus] */}
+    </> // [!code focus]
+  ), // [!code focus]
+  title: 'Viem'
+})
+```
+
+#### Path → Element Object
+
+You can specify a `path` → `ReactElement` object for the `head` with paths as keys.
+
+```tsx twoslash
+// @noErrors
+import * as React from 'react'
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  head: { // [!code focus]
+    '/': /* ... */, // [!code focus]
+    '/docs': /* ... */, // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+#### Function
+
+You can specify a function that returns a `ReactElement`. Useful if you want to have more dynamic control over rendering head tags.
+
+```tsx twoslash
+// @noErrors
+import * as React from 'react'
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  head({ path }) { // [!code focus]
+    if (path === '/docs') return /* ... */ // [!code focus]
+    return /* ... */ // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+:::tip[Tip]
+The `head` function can also be `async`.
+:::
+
+### iconUrl
+
+- **Type:** `string | { light: string; dark: string }`
+
+Icon URL. Used as the website's favicon.
+
+:::info[Note]
+Assets need to be placed in the `public` directory.
+:::
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  iconUrl: '/icon.svg', // [!code focus]
+  title: 'Viem'
+})
+```
+
+You can also specify icons for light and dark mode.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  iconUrl: { // [!code focus]
+    light: '/icon-light.svg', // [!code focus]
+    dark: '/icon-dark.svg' // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+### logoUrl
+
+- **Type:** `string | { light: string; dark: string }`
+
+Logo URL. Used for the sidebar and mobile top nav header image.
+
+:::info[Note]
+Assets need to be placed in the `public` directory.
+:::
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  logoUrl: '/logo.svg', // [!code focus]
+  title: 'Viem'
+})
+```
+
+You can also specify logos for light and dark mode.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  logoUrl: { // [!code focus]
+    light: '/logo-light.svg', // [!code focus]
+    dark: '/logo-dark.svg' // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+### markdown
+
+- **Type:** `Markdown`
+
+Markdown configuration.
+
+#### markdown.code
+
+- **Type:** `{ theme: { light: string; dark: string } }`
+
+Used to configure the syntax highlighting theme of code blocks.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  markdown: { // [!code focus]
+    code: { // [!code focus]
+      themes: { // [!code focus]
+        light: 'github-light', // [!code focus]
+        dark: 'github-dark' // [!code focus]
+      } // [!code focus]
+    } // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+::::note
+:::details[Available Built-in Themes]
+```ts
+"aurora-x"
+"catppuccin-frappe"
+"catppuccin-latte" "catppuccin-macchiato"
+"catppuccin-mocha"
+"dark-plus"
+"dracula"
+"dracula-soft"
+"github-dark"
+"github-dark-dimmed"
+"github-light"
+"light-plus"
+"material-theme"
+"material-theme-darker"
+"material-theme-lighter"
+"material-theme-ocean"
+"material-theme-palenight"
+"min-dark"
+"min-light"
+"monokai"
+"nord"
+"one-dark-pro"
+"poimandres"
+"red"
+"rose-pine"
+"rose-pine-dawn"
+"rose-pine-moon"
+"slack-dark"
+"slack-ochin"
+"solarized-dark"
+"solarized-light"
+"vitesse-black"
+"vitesse-dark"
+"vitesse-light"
+```
+:::
+::::
+
+#### markdown.remarkPlugins
+
+- **Type:** `PluggableList`
+
+Used to configure the remark plugins used to transform Markdown.
+
+[See list of plugins](https://github.com/remarkjs/remark/blob/main/doc/plugins.md#list-of-plugins)
+
+```tsx twoslash
+// @noErrors
+import { defineConfig } from 'vocs'
+import remarkMath from 'remark-math' // [!code focus]
+
+export default defineConfig({
+  markdown: { // [!code focus]
+    remarkPlugins: [ // [!code focus]
+      remarkMath // [!code focus]
+    ] // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+#### markdown.rehypePlugins
+
+- **Type:** `PluggableList`
+
+Used to configure the rehype plugins used to transform generated HTML from Markdown.
+
+[See list of plugins](https://github.com/rehypejs/rehype/blob/main/doc/plugins.md)
+
+```tsx twoslash
+// @noErrors
+import { defineConfig } from 'vocs'
+import rehypeSlots from 'rehype-slots' // [!code focus]
+
+export default defineConfig({
+  markdown: { // [!code focus]
+    rehypePlugins: [ // [!code focus]
+      rehypeSlots // [!code focus]
+    ] // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+### ogImageUrl
+
+- **Type:** `string | { [path: string]: string }`
+
+OG Image URL. `null` to disable.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  ogImageUrl: 'https://vocs.dev/api/og?logo=%logo&title=%title&description=%description', // [!code focus]
+  title: 'Viem'
+})
+```
+
+You can also specify an object for the `ogImageUrl` with paths as keys.
+
+This will render a different OG image depending on the path the user is on.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  ogImageUrl: { // [!code focus]
+    '/': 'https://vocs.dev/og-image.png', // [!code focus]
+    '/docs': 'https://vocs.dev/api/og?logo=%logo&title=%title&description=%description', // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+### rootDir
+
+- **Type:** `string`
+- **Default:** `"docs"`
+
+Documentation root directory. Can be an absolute path, or a path relative from the location of the config file itself.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  rootDir: 'site', // [!code focus]
+  title: 'Viem'
+})
+```
+
+### search
+
+- **Type:** `Search`
+
+Search configuration. Accepts [`MiniSearch` options](https://lucaong.github.io/minisearch/types/MiniSearch.SearchOptions.html).
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  search: { // [!code focus]
+    boostDocument(documentId) { // [!code focus]
+      return documentId === '/core' ? 2 : 1 // [!code focus]
+    } // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+### sidebar
+
+- **Type:** `Sidebar`
+
+Navigation displayed on the sidebar.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  sidebar: [ // [!code focus]
+    { // [!code focus]
+      text: 'Getting Started', // [!code focus]
+      link: '/docs', // [!code focus]
+    }, // [!code focus]
+    { // [!code focus]
+      text: 'API', // [!code focus]
+      collapsed: true, // [!code focus]
+      items: [ // [!code focus]
+        { // [!code focus]
+          text: 'Config', // [!code focus]
+          link: '/docs/api/config', // [!code focus]
+        }, // [!code focus]
+      ], // [!code focus]
+    } // [!code focus]
+  ], // [!code focus]
+  title: 'Viem'
+})
+```
+
+You can also specify an object for the sidebar with paths as keys and sidebar items as values.
+
+This will render a different sidebar depending on the path the user is on.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  sidebar: { // [!code focus]
+    '/guide': [{ // [!code focus]
+      text: 'Getting Started', // [!code focus]
+      link: '/guide', // [!code focus]
+    }], // [!code focus]
+    '/api': [{ // [!code focus]
+      text: 'Config', // [!code focus]
+      link: '/api/config', // [!code focus]
+    }], // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+### socials
+
+- **Type:** `Socials`
+
+Social links displayed in the top navigation.
+
+Supports **Discord**, **GitHub**, **Telegram**, **Bluesky**, **X**, and **Warpcast**.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  socials: [ // [!code focus]
+    { // [!code focus]
+      icon: 'github', // [!code focus]
+      link: 'https://github.com/wevm/viem', // [!code focus]
+    }, // [!code focus]
+    { // [!code focus]
+      icon: 'x', // [!code focus]
+      link: 'https://twitter.com/wevm_dev', // [!code focus]
+    }, // [!code focus]
+  ], // [!code focus]
+  title: 'Viem'
+})
+```
+
+### sponsors
+
+- **Type:** `SponsorSet`
+
+Set of sponsors to display on MDX directives and (optionally) the sidebar.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  sponsors: [ // [!code focus]
+    { // [!code focus]
+      name: 'Collaborator', // [!code focus]
+      height: 120, // [!code focus]
+      items: [ // [!code focus]
+        [ // [!code focus]
+          { // [!code focus]
+            name: 'Paradigm', // [!code focus]
+            link: 'https://paradigm.xyz', // [!code focus]
+            image: // [!code focus]
+              'https://raw.githubusercontent.com/wevm/.github/main/content/sponsors/paradigm-light.svg', // [!code focus]
+          }, // [!code focus]
+        ], // [!code focus]
+      ], // [!code focus]
+    }, // [!code focus]
+    { // [!code focus]
+      name: 'Large Enterprise', // [!code focus]
+      height: 60, // [!code focus]
+      items: [ // [!code focus]
+        [ // [!code focus]
+          { // [!code focus]
+            name: 'WalletConnect', // [!code focus]
+            link: 'https://walletconnect.com', // [!code focus]
+            image: // [!code focus]
+              'https://raw.githubusercontent.com/wevm/.github/main/content/sponsors/walletconnect-light.svg', // [!code focus]
+          }, // [!code focus]
+          { // [!code focus]
+            name: 'Stripe', // [!code focus]
+            link: 'https://www.stripe.com', // [!code focus]
+            image: // [!code focus]
+              'https://raw.githubusercontent.com/wevm/.github/main/content/sponsors/stripe-light.svg', // [!code focus]
+          }, // [!code focus]
+        ], // [!code focus]
+      ], // [!code focus]
+    }, // [!code focus]
+  ], // [!code focus]
+  title: 'Viem'
+})
+```
+
+### theme
+
+- **Type:** `Theme`
+
+Theme configuration.
+
+[Read more about theming](/docs/guides/theming).
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  theme: { // [!code focus]
+    accentColor: '#ff0000', // [!code focus]
+    variables: { // [!code focus]
+      color: { // [!code focus]
+        background: { // [!code focus]
+          light: 'white', // [!code focus]
+          dark: 'black' // [!code focus]
+        } // [!code focus]
+      } // [!code focus]
+    } // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+::::note
+:::details[Theme Reference]
+```ts
+type Theme = {
+  accentColor?: string
+  colorScheme?: 'dark' | 'light' | 'system'
+  variables?: {
+    borderRadius?: {
+      '0': string,
+      '2': string,
+      '4': string,
+      '8': string,
+    },
+    color?: {
+      white: { light: string, dark: string },
+      black: { light: string, dark: string },
+      background: { light: string, dark: string },
+      background2: { light: string, dark: string },
+      background3: { light: string, dark: string },
+      background4: { light: string, dark: string },
+      background5: { light: string, dark: string },
+      backgroundAccent: { light: string, dark: string },
+      backgroundAccentHover: { light: string, dark: string },
+      backgroundAccentText: { light: string, dark: string },
+      backgroundBlueTint: { light: string, dark: string },
+      backgroundDark: { light: string, dark: string },
+      backgroundGreenTint: { light: string, dark: string },
+      backgroundGreenTint2: { light: string, dark: string },
+      backgroundIrisTint: { light: string, dark: string },
+      backgroundRedTint: { light: string, dark: string },
+      backgroundRedTint2: { light: string, dark: string },
+      backgroundYellowTint: { light: string, dark: string },
+      border: { light: string, dark: string },
+      border2: { light: string, dark: string },
+      borderAccent: { light: string, dark: string },
+      borderBlue: { light: string, dark: string },
+      borderGreen: { light: string, dark: string },
+      borderIris: { light: string, dark: string },
+      borderRed: { light: string, dark: string },
+      borderYellow: { light: string, dark: string },
+      heading: { light: string, dark: string },
+      shadow: { light: string, dark: string },
+      text: { light: string, dark: string },
+      text2: { light: string, dark: string },
+      text3: { light: string, dark: string },
+      text4: { light: string, dark: string },
+      textAccent: { light: string, dark: string },
+      textAccentHover: { light: string, dark: string },
+      textBlue: { light: string, dark: string },
+      textBlueHover: { light: string, dark: string },
+      textGreen: { light: string, dark: string },
+      textGreenHover: { light: string, dark: string },
+      textIris: { light: string, dark: string },
+      textIrisHover: { light: string, dark: string },
+      textRed: { light: string, dark: string },
+      textRedHover: { light: string, dark: string },
+      textYellow: { light: string, dark: string },
+      textYellowHover: { light: string, dark: string },
+
+      blockquoteBorder: { light: string, dark: string },
+      blockquoteText: { light: string, dark: string },
+      codeBlockBackground: { light: string, dark: string },
+      codeCharacterHighlightBackground: { light: string, dark: string },
+      codeHighlightBackground: { light: string, dark: string },
+      codeHighlightBorder: { light: string, dark: string },
+      codeInlineBackground: { light: string, dark: string },
+      codeInlineBorder: { light: string, dark: string },
+      codeInlineText: { light: string, dark: string },
+      codeTitleBackground: { light: string, dark: string },
+      dangerBackground: { light: string, dark: string },
+      dangerBorder: { light: string, dark: string },
+      dangerText: { light: string, dark: string },
+      dangerTextHover: { light: string, dark: string },
+      hr: { light: string, dark: string },
+      infoBackground: { light: string, dark: string },
+      infoBorder: { light: string, dark: string },
+      infoText: { light: string, dark: string },
+      infoTextHover: { light: string, dark: string },
+      lineNumber: { light: string, dark: string },
+      link: { light: string, dark: string },
+      linkHover: { light: string, dark: string },
+      noteBackground: { light: string, dark: string },
+      noteBorder: { light: string, dark: string },
+      noteText: { light: string, dark: string },
+      successBackground: { light: string, dark: string },
+      successBorder: { light: string, dark: string },
+      successText: { light: string, dark: string },
+      successTextHover: { light: string, dark: string },
+      tableBorder: { light: string, dark: string },
+      tableHeaderBackground: { light: string, dark: string },
+      tableHeaderText: { light: string, dark: string },
+      tipBackground: { light: string, dark: string },
+      tipBorder: { light: string, dark: string },
+      tipText: { light: string, dark: string },
+      tipTextHover: { light: string, dark: string },
+      warningBackground: { light: string, dark: string },
+      warningBorder: { light: string, dark: string },
+      warningText: { light: string, dark: string },
+      warningTextHover: { light: string, dark: string },
+    },
+    content: {
+      horizontalPadding: string,
+      verticalPadding: string,
+      width: string,
+    },
+    fontFamily: {
+      default: string,
+      mono: string,
+    },
+    fontSize: {
+      root: string,
+      '9': string,
+      '11': string,
+      '12': string,
+      '13': string,
+      '14': string,
+      '15': string,
+      '16': string,
+      '18': string,
+      '20': string,
+      '24': string,
+      '32': string,
+      h1: string,
+      h2: string,
+      h3: string,
+      h4: string,
+      h5: string,
+      h6: string,
+      code: string,
+      codeBlock: string,
+      lineNumber: string,
+      subtitle: string,
+      th: string,
+      td: string,
+    },
+    fontWeight: {
+      regular: string,
+      medium: string,
+      semibold: string,
+    },
+    lineHeight: {
+      code: string,
+      heading: string,
+      listItem: string,
+      outlineItem: string,
+      paragraph: string,
+    },
+    space: {
+      '0': string,
+      '1': string,
+      '2': string,
+      '3': string,
+      '4': string,
+      '6': string,
+      '8': string,
+      '12': string,
+      '14': string,
+      '16': string,
+      '18': string,
+      '20': string,
+      '22': string,
+      '24': string,
+      '28': string,
+      '32': string,
+      '40': string,
+      '44': string,
+      '48': string,
+      '56': string,
+      '64': string,
+      '72': string,
+      '80': string,
+    }
+  }
+}
+```
+:::
+::::
+
+### title
+
+- **Type:** `string`
+- **Default:** `"Docs"`
+
+Documentation title.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  title: 'Viem' // [!code focus]
+})
+```
+
+### titleTemplate
+
+- **Type:** `string`
+- **Default:** `"%s – Docs"`
+
+Template for the page title.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  title: 'Viem',
+  titleTemplate: '%s – Viem' // [!code focus]
+})
+```
+
+### topNav
+
+- **Type:** `TopNav`
+
+Navigation displayed on the top.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  title: 'Viem',
+  topNav: [ // [!code focus]
+    { text: 'Guide & API', link: '/docs/getting-started', match: '/docs' }, // [!code focus]
+    { text: 'Blog', link: '/blog' }, // [!code focus]
+  ] // [!code focus]
+})
+```
+
+### twoslash
+
+- **Type:** `Twoslash`
+
+TwoSlash configuration.
+
+```tsx twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  title: 'Viem',
+  twoslash: { // [!code focus]
+    compilerOptions: { // [!code focus]
+      strict: true, // [!code focus]
+    } // [!code focus]
+  } // [!code focus]
+})
+```
+
+### vite
+
+- **Type:** `Vite.UserConfig`
+
+Vite configuration. [See more.](https://vitejs.dev/config/)
+
+The config you specified will be merged with Vocs's Vite config. [See more.](https://github.com/wevm/vocs/blob/main/src/vite/vite.config.ts)
+
+```tsx twoslash
+// @noErrors
+import { defineConfig } from 'vocs'
+import tsconfigPaths from 'vite-tsconfig-paths' // [!code focus]
+
+export default defineConfig({
+  title: 'Viem',
+  vite: { // [!code focus]
+    build: { // [!code focus]
+      minify: 'terser' // [!code focus]
+    }, // [!code focus]
+    plugins: [tsconfigPaths()] // [!code focus]
+  } // [!code focus]
+})
+```
+
+================
+File: docs/api/frontmatter.mdx
+================
+# Frontmatter [Define page-specific metadata]
+
+You can set page-specific metadata such as the page title and description in the frontmatter of Markdown pages. The frontmatter is a YAML block encapulated in a `---` separator at the top of the page.
+
+```md [example.md]
+---
+title: Example
+description: This is an example page.
+---
+
+# Hello world
+
+This is me.
+```
+
+## authors
+
+- **Type:** `string[]`
+
+Authors of the page. Used by the [`::authors` markdown directive](#TODO).
+
+```md
+---
+authors: # [!code focus]
+  - [jxom](https://x.com/jxom) # [!code focus]
+  - [awkweb](https://x.com/awkweb)  # [!code focus]
+---
+
+# gm
+
+::authors  # [!code focus]
+
+we're so back
+```
+
+## content
+
+- **Type:**
+
+```ts
+{
+  horizontalPadding: string
+  width: string
+  verticalPadding: string
+}
+```
+
+Page content attributes.
+
+- `horizontalPadding`: Horizontal padding of the content.
+- `width`: Width of the content.
+- `verticalPadding`: Vertical padding of the content.
+
+```md
+---
+content:  # [!code focus]
+  horizontalPadding: 0px  # [!code focus]
+  width: 100%  # [!code focus]
+  verticalPadding: 0px  # [!code focus]
+---
+
+# gm
+
+we're so back
+
+```
+
+
+## date
+
+- **Type:** `string`
+
+Authors of the page. Used by the [`::authors` markdown directive](#TODO).
+
+```md
+---
+authors:
+  - [jxom](https://x.com/jxom)
+  - [awkweb](https://x.com/awkweb)
+date: 2023-12-01 # [!code focus]
+---
+
+# gm
+
+::authors
+
+we're so back
+```
+
+## description
+
+- **Type:** `string`
+
+Description of the page. Placed in the `<meta name="description">` tag.
+
+```md
+---
+description: This is an example page.
+---
+```
+
+## layout
+
+- **Type:** `"docs" | "landing" | "minimal"`
+- **Default:** `"docs"`
+
+Layout of the page.
+
+- `docs` - Documentation page layout (default).
+- `landing` - Landing page layout.
+- `minimal` - A minimal layout with no sidebar or header.
+
+```md
+---
+layout: minimal
+---
+```
+
+## searchable
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+Whether or not the page should be included in search results. Set to `false` to exclude the page from the search index.
+
+```md
+---
+searchable: false
+---
+```
+
+## showAiCta
+
+- **Type:** `boolean`
+
+Whether or not to display the AI call-to-action dropdown (ie. "Open in ChatGPT").
+
+```md
+---
+showAiCta: false
+---
+```
+
+## showLogo
+
+- **Type:** `boolean`
+
+Whether or not to display the logo in the header.
+
+```md
+---
+showLogo: false
+---
+```
+
+## showOutline
+
+- **Type:** `number | boolean`
+
+Whether or not to display the outline, or the number of levels deep.
+
+```md
+---
+showOutline: false
+---
+```
+
+```md
+---
+showOutline: 2
+---
+```
+
+## showSidebar
+
+- **Type:** `boolean`
+
+Whether or not to display the sidebar.
+
+```md
+---
+showSidebar: false
+---
+```
+
+## title
+
+- **Type:** `string`
+
+Title of the page. Placed in the `<title>` tag.
+
+```md
+---
+title: Example
+---
+```
+
+================
+File: docs/guides/blog.mdx
+================
+# Blog
+
+Below are the steps to set up a blog using Vocs.
+
+::::steps
+
+## Set up a post list page
+
+First, create a new directory called `blog/`, and inside of it, create an index page (`index.mdx`).
+
+```
+my-project/
+├── docs/
+│   ├── pages/
+│   │   └── blog/ <!-- [!code focus] [!code ++] -->
+|   |       └── index.mdx <!-- [!code focus] [!code ++] -->
+│   └── public/
+│       └── favicon.ico
+├── node_modules/
+│   ...
+```
+
+Inside of `index.mdx`, add the following code:
+
+```md [blog/index.mdx]
+---
+layout: minimal
+---
+
+# Blog
+
+::blog-posts
+```
+
+:::tip[Tip]
+The `"::"` syntax refers to the [Directives Syntax Proposal](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444).
+:::
+
+You have now created a blog post list page. The `::blog-posts` component will automatically generate a list of all blog posts in the `blog/` directory.
+
+## Write a blog post
+
+Now, create a new post in your `blog/` directory named `my-first-post.mdx`.
+
+```
+my-project/
+├── docs/
+│   ├── pages/
+│   │   └── blog/ <!-- [!code focus] -->
+|   |       ├── index.mdx <!-- [!code focus] -->
+|   |       └── my-first-post.mdx <!-- [!code focus] [!code ++] -->
+│   └── public/
+│       └── favicon.ico
+├── node_modules/
+│   ...
+```
+
+Inside of the `my-first-post.mdx` file, you can write your blog content:
+
+```md [blog/my-first-post.mdx]
+---
+layout: minimal
+---
+
+# My First Post
+
+Hello everyone, this is my first post!
+```
+
+You can also add `authors` and a `date` to your frontmatter, and then display it in the post.
+
+```md [blog/my-first-post.mdx]
+---
+layout: minimal
+authors: // [!code focus]
+  - "[jxom](https://twitter.com/_jxom)" // [!code focus]
+  - "[awkweb](https://twitter.com/awkweb)" // [!code focus]
+// [!code focus]
+date: 2023-11-25
+---
+
+# My First Post
+
+// [!code focus]
+::authors
+
+Hello everyone, this is my first post!
+```
+
+::::
+
+================
+File: docs/guides/code-snippets.mdx
+================
+# Code Snippets [Including code snippets in Markdown]
+
+Code Snippets in Vocs come in two forms:
+
+- a virtual file snippet in your Markdown code ([Virtual File Snippets](#virtual-file-snippets)), or
+- a physical file snippet in your file system ([Physical File Snippets](#physical-file-snippets))
+
+We will show you both approaches below.
+
+## Virtual File Snippets
+
+::::steps
+
+### Create the code snippet
+
+We will create a virtual file snippet called `example.ts`. We can define a virtual file in markdown using the `filename="example.ts"{:ts}` meta tag.
+
+````mdx [example.md]
+```ts filename="example.ts" // [!code hl]
+import { http, createPublicClient } from 'viem'
+import { mainnet } from 'viem/chains'
+
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+```
+````
+
+### Import the snippet
+
+Next, we will import the snippet into our Markdown file using the `// [!include ...]` marker.
+
+````mdx [example.md]
+#### Create your Client
+
+```ts filename="example.ts"
+import { http, createPublicClient } from 'viem'
+import { mainnet } from 'viem/chains'
+
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+```
+
+#### Use Actions
+
+```ts // [!code focus]
+// [\!include example.ts] // [!code hl] // [!code focus]
+
+const blockNumber = await client.getBlockNumber() // [\!code focus] // [!code focus]
+``` // [!code focus]
+````
+
+### Output
+
+The resulting output will look like this:
+
+<div>
+#### Create your Client
+
+```ts filename="example.ts"
+import { http, createPublicClient } from 'viem'
+import { mainnet } from 'viem/chains'
+
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+```
+
+#### Use Actions
+
+```ts
+// [!include example.ts]
+
+const blockNumber = await client.getBlockNumber() // [!code focus]
+```
+</div>
+
+::::
+
+
+## Physical File Snippets
+
+::::steps
+
+### Create the code snippet
+
+We will create a physical file snippet called `example.ts`. Let's put this under a `snippets/` directory in your codebase.
+
+```ts [docs/snippets/example.ts]
+// [!include ~/snippets/example.ts:import]
+
+// [!include ~/snippets/example.ts:setup]
+```
+
+### Import the snippet
+
+Next, we will import the snippet into our Markdown file using the `// [!include ...]` marker.
+
+````mdx [example.md]
+#### Create your Client
+
+```ts // [!code focus]
+// [\!include ~/snippets/example.ts] // [!code hl] // [!code focus]
+``` // [!code focus]
+
+#### Use Actions
+
+```ts // [!code focus]
+// [\!include ~/snippets/example.ts] // [!code hl] // [!code focus]
+
+const blockNumber = await client.getBlockNumber() // [\!code focus] // [!code focus]
+``` // [!code focus]
+````
+
+:::info
+The `"~"` in the path refers to the [root (`config.rootDir`) directory](/docs/structure#root-directory) of the project.
+:::
+
+### Output
+
+The resulting output will look like this:
+
+<div>
+#### Create your Client
+
+```ts
+// [!include ~/snippets/example.ts:import]
+
+// [!include ~/snippets/example.ts:setup]
+```
+
+#### Use Actions
+
+```ts
+// [!include ~/snippets/example.ts:import]
+
+// [!include ~/snippets/example.ts:setup]
+
+const blockNumber = await client.getBlockNumber() // [!code focus]
+```
+</div>
+
+::::
+
+## Regions
+
+You can also include a specific region of a code snippet by using the `// [!region]` and `// [!endregion]` markers.
+
+```ts [docs/snippets/example.ts]
+// [\!region import] // [!code focus]
+import { http, createPublicClient } from 'viem'
+import { mainnet } from 'viem/chains'
+// [\!endregion import] // [!code focus]
+
+// [\!region setup] // [!code focus]
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+// [\!endregion setup] // [!code focus]
+
+// [\!region usage] // [!code focus]
+const blockNumber = await client.getBlockNumber()
+// [\!endregion usage] // [!code focus]
+```
+
+Then, we can include the regions in the Markdown with the `// [!include]` marker:
+
+````md [example.md]
+```ts
+import { writeFileSync } from 'node:fs'
+// [\!include ~/snippets/example.ts:import] // [!code focus]
+
+// [\!include ~/snippets/example.ts:setup] // [!code focus]
+
+// [\!include ~/snippets/example.ts:usage] // [!code focus]
+
+writeFileSync('test.txt', blockNumber.toString())
+```
+````
+
+Which will result in the snippet being rendered like this:
+
+```ts
+import { writeFileSync } from 'node:fs'
+// [!include ~/snippets/example.ts:import]
+
+// [!include ~/snippets/example.ts:setup]
+
+// [!include ~/snippets/example.ts:usage-1]
+
+writeFileSync('test.txt', blockNumber.toString())
+```
+
+### Duplicate variable declarations
+
+When writing snippets, you may run into a scenario where you want to define multiple regions that share the same variable name.
+
+To avoid type errors, you can use the `_$` suffix to discriminate the variable name.
+
+The rendered snippet will still use the original variable name (ie. the name before the `_$` suffix).
+
+```ts
+// [!region import]
+import { http, createPublicClient } from 'viem'
+import { mainnet } from 'viem/chains'
+// [!endregion import]
+
+// [!region setup]
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+// [!endregion setup]
+
+// [!region usage-1] // [!code focus]
+const block_$1 = await client.getBlock() // [!code focus]
+// [!endregion usage-1] // [!code focus]
+
+// [!region usage-2] // [!code focus]
+const block_$2 = await client.getBlock({ blockNumber: 42069n }) // [!code focus]
+// [!endregion usage-2] // [!code focus]
+
+// [!region usage-3] // [!code focus]
+const block_$3 = await client.getBlock({ blockTag: 'latest' }) // [!code focus]
+// [!endregion usage-3] // [!code focus]
+```
+
+## Find and Replace
+
+You can use `/(find)/(replace)/` syntax to find and replace text in the snippet.
+
+:::code-group
+
+````md [example.md]
+```ts
+import { writeFileSync } from 'node:fs'
+// [\!include ~/snippets/example.ts /viem/@viem\/core/ /mainnet/sepolia/] // [!code focus]
+
+writeFileSync('test.txt', blockNumber.toString())
+```
+````
+
+```ts [docs/snippets/example.ts]
+import { http, createPublicClient } from 'viem'
+import { mainnet } from 'viem/chains'
+
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+const blockNumber = await client.getBlockNumber()
+```
+
+:::
+
+Which will result in the snippet being rendered like this:
+
+```ts
+import { writeFileSync } from 'node:fs'
+// [!include ~/snippets/example.ts:import /viem/@viem\/core/ /mainnet/sepolia/]
+
+// [!include ~/snippets/example.ts:setup /mainnet/sepolia/]
+
+// [!include ~/snippets/example.ts:usage-1]
+
+writeFileSync('test.txt', blockNumber.toString())
+```
+
+## Tip: Code Block Markers
+
+We can also include markers like [line highlight (`// [!code hl]`)](/docs/markdown#line-highlights) in our code snippets.
+
+:::code-group
+
+```ts [docs/snippets/example.ts]
+// [!include ~/snippets/example.ts:import]
+
+// [!include ~/snippets/example.ts:setup]
+
+// [!include ~/snippets/example.ts:usage-2-docs]
+```
+
+````md [example.md]
+```ts
+import { writeFileSync } from 'node:fs'
+// [\!include ~/snippets/example.ts]
+
+writeFileSync('test.txt', blockNumber.toString())
+```
+````
+
+:::
+
+Which will result in the snippet being rendered like this:
+
+```ts
+import { writeFileSync } from 'node:fs'
+// [!include ~/snippets/example.ts:import]
+
+// [!include ~/snippets/example.ts:setup]
+
+// [!include ~/snippets/example.ts:usage-2]
+
+writeFileSync('test.txt', blockNumber.toString())
+```
+
+## Tip: Twoslash
+
+We can also include Twoslash markers in our code snippets.
+
+:::code-group
+
+```ts [docs/snippets/example.ts]
+// [!include ~/snippets/example.ts:import]
+
+// [!include ~/snippets/example.ts:setup]
+
+// [!include ~/snippets/example.ts:usage-4]
+```
+
+````md [example.md]
+```ts twoslash
+// [\!include ~/snippets/example.ts]
+```
+````
+
+:::
+
+Which will result in the snippet being rendered like this:
+
+```ts twoslash
+// [!include ~/snippets/example.ts:import]
+
+// [!include ~/snippets/example.ts:setup]
+
+// [!include ~/snippets/example.ts:usage-4]
+```
+
+## Tip: Twoslash + Virtual Files
+
+We can also use virtual files with Twoslash code blocks.
+
+````md [Markdown]
+:::code-group
+
+```ts twoslash [example.ts] // [!code hl]
+import { client } from './client.js'
+
+const blockNumber = await client.getBlockNumber()
+```
+
+```ts twoslash [client.ts] filename="client.ts" // [!code hl]
+import { http, createPublicClient } from 'viem'
+import { mainnet } from 'viem/chains'
+
+export const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+```
+
+:::
+````
+
+Which will result in the snippet being rendered like this:
+
+:::code-group
+
+```ts twoslash [example.ts]
+import { client } from './client.js'
+
+const blockNumber = await client.getBlockNumber()
+```
+
+```ts twoslash [client.ts] filename="client.ts"
+import { http, createPublicClient } from 'viem'
+import { mainnet } from 'viem/chains'
+
+export const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+```
+
+:::
+
+================
+File: docs/guides/components.mdx
+================
+import { Authors, BlogPosts, Button, Callout, HomePage, Raw, Sponsors, Steps, Step  } from 'vocs/components'
+import * as MyButton from '../../../components/MyButton';
+
+# Components [How to use Vocs components & build your own]
+
+## Vocs Components
+
+The following are components native to Vocs and that can be used throughout your docs.
+
+### Authors
+
+Displays author or authors in a specific format.
+
+:::code-group
+
+<div data-title="Preview">
+  <Authors authors="codingwithmanny" date="2024-01-01" />
+</div>
+
+```mdx [index.mdx]
+import { Authors } from 'vocs/components'
+
+<Authors authors="codingwithmanny" date="2024-01-01" />
+```
+:::
+
+### BlogPosts
+
+Displays blog posts within the [`blogDir`](/docs/api/config#blogdir).
+
+:::code-group
+
+<div data-title="Preview">
+  <BlogPosts />
+</div>
+
+```mdx [index.mdx]
+import { BlogPosts } from 'vocs/components'
+
+<BlogPosts />
+```
+
+:::
+
+### Button
+
+Display a Vocs-flavored button.
+
+:::code-group
+
+<div data-title="Preview">
+  <div style={{ display: 'flex' }}>
+    <Button>Default Button</Button>
+    <div style={{ width: 8 }} />
+    <Button variant="accent">Accent Button</Button>
+    <div style={{ width: 8 }} />
+    <Button href="https://github.com/wevm">Link Button</Button>
+  </div>
+</div>
+
+```mdx [index.mdx]
+import { Button } from 'vocs/components'
+
+<Button>Default Button</Button>
+<Button className="custom-class">Custom Class Button</Button>
+<Button href="https://github.com/wevm">Ahref Button</Button>
+```
+
+:::
+
+### Callout
+
+Displays a callout with content.
+
+:::code-group
+
+<div data-title="Preview">
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <Callout>
+      Default Callout
+    </Callout>
+    <Callout type="note">
+      Note Callout
+    </Callout>
+    <Callout type="info">
+      Info Callout
+    </Callout>
+    <Callout type="warning">
+      Warning Callout
+    </Callout>
+    <Callout type="danger">
+      Danger Callout
+    </Callout>
+    <Callout type="tip">
+      Tip Callout
+    </Callout>
+    <Callout type="success">
+      Success Callout
+    </Callout>
+  </div>
+</div>
+
+```mdx [index.mdx]
+import { Callout } from 'vocs/components'
+
+<Callout>
+  Default Callout
+</Callout>
+<Callout type="note">
+  Note Callout
+</Callout>
+<Callout type="info">
+  Info Callout
+</Callout>
+<Callout type="warning">
+  Warning Callout
+</Callout>
+<Callout type="danger">
+  Danger Callout
+</Callout>
+<Callout type="tip">
+  Tip Callout
+</Callout>
+<Callout type="success">
+  Success Callout
+</Callout>
+```
+
+:::
+
+### HomePage
+
+Displays a "home page" section.
+
+:::code-group
+
+<div data-title="Preview">
+  <HomePage.Root>
+    <HomePage.Logo />
+    <HomePage.Tagline>Minimal Documentation Framework, powered by React + Vite.</HomePage.Tagline>
+    <HomePage.InstallPackage name="vocs" type="init" />
+    <HomePage.Description>Vocs is a minimal static documentation generator designed to supercharge your documentation workflow, built with modern web technologies.</HomePage.Description>
+    <HomePage.Buttons>
+      <HomePage.Button href="/docs" variant="accent">Get started</HomePage.Button>
+      <HomePage.Button href="https://github.com/wevm/vocs">GitHub</HomePage.Button>
+    </HomePage.Buttons>
+  </HomePage.Root>
+</div>
+
+```mdx [index.mdx]
+import { HomePage } from 'vocs/components'
+
+<HomePage.Root>
+  <HomePage.Logo />
+  <HomePage.Tagline>Minimal Documentation Framework, powered by React + Vite.</HomePage.Tagline>
+  <HomePage.InstallPackage name="vocs" type="init" />
+  <HomePage.Description>Vocs is a minimal static documentation generator designed to supercharge your documentation workflow, built with modern web technologies.</HomePage.Description>
+  <HomePage.Buttons>
+    <HomePage.Button href="/docs" variant="accent">Get started</HomePage.Button>
+    <HomePage.Button href="https://github.com/wevm/vocs">GitHub</HomePage.Button>
+  </HomePage.Buttons>
+</HomePage.Root>
+```
+
+:::
+
+### Sponsors
+
+Renders a list of [sponsors defined in the Vocs config](/docs/api/config#sponsors).
+
+:::code-group
+
+<div data-title="Preview">
+  <Sponsors />
+</div>
+
+```mdx [index.mdx]
+import { Sponsors } from 'vocs/components'
+
+<Sponsors />
+```
+
+:::
+
+## Custom Components
+
+You can also bring your own custom components by importing them in your MDX files.
+
+:::code-group
+
+<div data-title="Preview">
+  <button
+    style={{
+      background: 'var(--vocs-color_backgroundAccent)',
+      paddingLeft: 'var(--vocs-space_16)',
+      paddingRight: 'var(--vocs-space_16)',
+      borderRadius: 'var(--vocs-space_4)',
+      lineHeight: 'var(--vocs-space_32)',
+      fontWeight: 'var(--vocs-fontWeight_medium)',
+      fontSize: 'var(--vocs-fontSize_14)',
+    }}
+    type="button"
+  >
+    Hello world
+  </button>
+</div>
+
+```mdx [pages/index.mdx]
+import Custom from '../components/Custom';
+
+<Custom>Hello world</Custom>
+```
+
+```tsx [components/Custom.tsx]
+import * as React from 'react'
+
+export default function Custom({ children }: { children: React.ReactNode }) {
+  return (
+    <button className="primary">
+      {children}
+    </button>
+  )
+}
+```
+
+```css [styles.css]
+button.primary {
+  background: var(--vocs-color_backgroundAccent);
+  padding-left: var(--vocs-space_16);
+  padding-right: var(--vocs-space_16);
+  border-radius: var(--vocs-space_4);
+  line-height: var(--vocs-space_32);
+  font-weight: var(--vocs-fontWeight_medium);
+  font-size: var(--vocs-fontSize_14);
+}
+```
+
+:::
+
+================
+File: docs/guides/layouts.mdx
+================
+import { HomePage } from '../../../../src/components'
+
+# Layouts [Customizing the page layout in Vocs]
+
+Vocs comes with three built-in layouts: `docs`, `landing`, and `minimal`. Each layout is styled differently, and has its own set of components which are displayed on the page.
+
+You can specify which layout to use by setting the `layout` property in your frontmatter.
+
+## Docs (Default)
+
+The `docs` layout is the default layout for all pages. It includes documentation related components like the "edit page" link, outline, and footer navigation.
+
+```md
+---
+layout: docs # [!code focus]
+---
+
+# A docs page
+
+This is a docs page.
+```
+
+## Landing
+
+The `landing` layout is a special layout that can be used for a homepage. It does not include a sidebar or any documentation related components.
+
+```md
+---
+layout: landing # [!code focus]
+---
+
+This is a landing page.
+```
+
+:::info
+An example of a `landing` layout page can be found on the Vocs home page.
+:::
+
+### `HomePage` component
+
+You can also leverage Vocs' built-in `<HomePage>{:tsx}` components to template a minimal home page.
+
+:::code-group
+
+```mdx [index.mdx]
+---
+layout: landing
+---
+
+import { HomePage } from 'vocs/components'
+
+<HomePage.Root>
+  <HomePage.Logo />
+  <HomePage.Tagline>React Documentation Framework, powered by Vite</HomePage.Tagline>
+  <HomePage.InstallPackage name="vocs" type="init" />
+  <HomePage.Description>Vocs is a minimal static documentation generator designed to supercharge your documentation workflow, built with modern web technologies.</HomePage.Description>
+  <HomePage.Buttons>
+    <HomePage.Button href="/docs" variant="accent">Get started</HomePage.Button>
+    <HomePage.Button href="https://github.com/wevm/vocs">GitHub</HomePage.Button>
+  </HomePage.Buttons>
+</HomePage.Root>
+```
+
+<div data-title="Preview">
+  <HomePage.Root>
+    <HomePage.Logo />
+    <HomePage.Tagline>React Documentation Framework, powered by Vite</HomePage.Tagline>
+    <HomePage.InstallPackage name="vocs" type="init" />
+    <HomePage.Description>Vocs is a minimal static documentation generator designed to supercharge your documentation workflow, built with modern web technologies.</HomePage.Description>
+    <HomePage.Buttons>
+      <HomePage.Button href="/docs" variant="accent">Get started</HomePage.Button>
+      <HomePage.Button href="https://github.com/wevm/vocs">GitHub</HomePage.Button>
+    </HomePage.Buttons>
+  </HomePage.Root>
+</div>
+
+:::
+
+## Minimal
+
+The `minimal` layout is a barebones, blank layout. It does not include any documentation related components, and is useful for pages that don't need them, like a blog.
+
+```md
+---
+layout: minimal # [!code focus]
+---
+
+# A minimal page
+
+This page uses a minimal layout.
+```
+
+:::info
+An example of a `minimal` layout page can be found on the [Blog page](/blog).
+:::
+
+## Frontmatter Options
+
+You can also control the layout of the page through Frontmatter options.
+
+[See here for a list of all Frontmatter options](/docs/api/frontmatter).
+
+### Examples
+
+The example below demonstrates a `docs` layout page with no sidebar, outline or logo:
+
+```md
+---
+showSidebar: false # [!code focus]
+showOutline: false # [!code focus]
+showLogo: false # [!code focus]
+---
+
+This is a page without a sidebar, outline, or logo.
+```
+
+The example below demonstrates a `minimal` layout page with no logo:
+
+```md
+---
+layout: minimal # [!code focus]
+showLogo: false # [!code focus]
+---
+
+This is a minimal layout without the logo.
+```
+
+The example below demonstrates a `landing` layout page with a viewport width that spans the width of the page:
+
+```md
+---
+layout: landing # [!code focus]
+content:
+  horizontalPadding: 0px # [!code focus]
+  width: 100% # [!code focus]
+  verticalPadding: 0px # [!code focus]
+---
+
+This is a minimal layout without the logo.
+```
+
+================
+File: docs/guides/markdown-snippets.mdx
+================
+# Markdown Snippets [Including other Markdown files in Markdown]
+
+You can include other Markdown files in a Markdown file by making use of the `import{:ts}` statement & MDX.
+
+:::warning
+This only works with MDX (`.mdx`) files. If you want to take advantage of this feature and you are using a `.md` file, rename the file extension to `.mdx`.
+:::
+
+## Quick Start
+
+::::steps
+
+### Create a snippet
+
+First, we will create a snippet called `snippet.mdx` that we will import into another Markdown file.
+
+```mdx [snippet.mdx]
+### Hello world
+
+This is my snippet.
+```
+
+### Import the snippet
+
+Next, we will import the snippet into our MDX file using an `import{:ts}` statement. It compiles to a React component, so we can render it with `<Snippet />{:tsx}`.
+
+```mdx [example.mdx]
+import Snippet from './snippet.mdx'
+
+# Example
+
+This is an example of including a snippet in a Markdown file.
+
+<Snippet />
+```
+
+### Output
+
+The resulting output will look like this:
+
+<div className="vocs_Content" style={{ background: 'var(--vocs-color_background2)', borderRadius: '4px' }}>
+# Example
+
+This is an example of including a snippet in a Markdown file.
+
+## Hello world
+
+This is my snippet.
+</div>
+
+::::
+
+## Tip: Passing Props
+
+As we are just rendering a React component, we can also pass props to `<Snippet />{:tsx}`. We can access those props in the MDX file with the `props` global variable.
+
+:::code-group
+```mdx [example.mdx]
+import Snippet from './snippet.mdx'
+
+# Example
+
+This is an example of including a snippet in a Markdown file.
+
+<Snippet title="Hello world" content="This is my snippet." />
+```
+
+```mdx [snippet.mdx]
+## {props.title}
+
+{props.content}
+```
+:::
+
+================
+File: docs/guides/navigation.mdx
+================
+# Sidebar & Top Navigation
+
+The sidebar and top navigation are the main ways to navigate through the documentation.
+
+The sidebar contains the main items to navigate between pages.
+It is always visible on larger desktop viewports, but for smaller viewports, the sidebar collapses into a hamburger menu.
+
+The top navigation contains higher-level navigation for the documentation, as well as miscellaneous items (social, theme toggle, etc).
+Such higher-level navigation could include links to the main website, blog, examples, etc.
+
+## Configuration
+
+You can configure the sidebar and top navigation via your `vocs.config.ts` file.
+
+### Sidebar
+
+The `sidebar` property is an array of sidebar items. Each sidebar item can have the following properties:
+
+- `text`: The text to display for the sidebar item.
+- `collapsed` (optional): Whether the sidebar item should be collapsed by default.
+- `link` (optional): The link to navigate to.
+- `items` (optional): The child sidebar items to display.
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  sidebar: [ // [!code focus]
+    { // [!code focus]
+      text: 'Getting Started', // [!code focus]
+      link: '/docs', // [!code focus]
+    }, // [!code focus]
+    { // [!code focus]
+      text: 'API', // [!code focus]
+      collapsed: true, // [!code focus]
+      items: [ // [!code focus]
+        { // [!code focus]
+          text: 'Config', // [!code focus]
+          link: '/docs/api/config', // [!code focus]
+        }, // [!code focus]
+      ], // [!code focus]
+    } // [!code focus]
+  ], // [!code focus]
+  title: 'Viem'
+})
+```
+
+#### Contextual Sidebars
+
+You can also show a different sidebar for each page. This is useful if you want to show a sidebar for a specific section of the documentation.
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  sidebar: {
+    '/docs/': [ // [!code focus]
+      {
+        text: 'Getting Started',
+        link: '/docs',
+      },
+      {
+        text: 'API',
+        collapsed: true,
+        items: [
+          {
+            text: 'Config',
+            link: '/docs/api/config',
+          },
+        ],
+      }
+    ], // [!code focus]
+    '/examples/': [ // [!code focus]
+      { text: 'React', link: '/examples/react' }
+      { text: 'Vue', link: '/examples/vue' }
+    ] // [!code focus]
+  }
+  title: 'Viem'
+})
+```
+
+### Top Navigation
+
+The `topNav` property is an array of top navigation items. Each top navigation item can have the following properties:
+
+- `text`: The text to display for the top nav item.
+- `link` (optional): The link to navigate to.
+- `items` (optional): The child top nav items to display.
+- `match` (optional): The path to match against. If the current path matches the `match` property, the top nav item will be highlighted.
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  title: 'Viem',
+  topNav: [ // [!code focus]
+    { text: 'Guide & API', link: '/docs/getting-started', match: '/docs' }, // [!code focus]
+    { text: 'Blog', link: '/blog' }, // [!code focus]
+    { // [!code focus]
+      text: version, // [!code focus]
+      items: [ // [!code focus]
+        { // [!code focus]
+          text: 'Changelog', // [!code focus]
+          link: 'https://github.com/wevm/vocs/blob/main/src/CHANGELOG.md', // [!code focus]
+        }, // [!code focus]
+        { // [!code focus]
+          text: 'Contributing', // [!code focus]
+          link: 'https://github.com/wevm/vocs/blob/main/.github/CONTRIBUTING.md', // [!code focus]
+        }, // [!code focus]
+      ], // [!code focus]
+    }, // [!code focus]
+  ], // [!code focus]
+})
+```
+
+================
+File: docs/guides/og-images.mdx
+================
+# Dynamic OG Images [Customizing the Open Graph Image in Vocs]
+
+Vocs has built-in support for dynamic open graph images.
+
+Open graph images are displayed when you share a link on an external platform such as Twitter, Slack, Telegram, etc.
+
+Every page in Vocs can come with a accompanying customized OG image. For example, the image for this page looks like:
+
+<div style={{ backgroundColor: 'var(--vocs-color_background3)', borderRadius: '4px', display: 'flex', justifyContent: 'center', paddingTop: '40px', paddingBottom: '40px' }}><img width="70%" src="https://vocs.dev/api/og?logo=https://vocs.dev/vocs-logo-dark.svg&title=Dynamic OG Images&description=Customizing the Open Graph Image in Vocs" style={{ borderRadius: '4px' }} /></div>
+
+## Quick Start
+
+### Use our OG Image API
+
+We've built an OG Image API that you can use to generate OG images for your Vocs documentation.
+
+To use it, simply set the `ogImageUrl` property in your [Vocs config](/docs/structure#configuration-file) to `https://vocs.dev/api/og?logo=%logo&title=%title&description=%description`.
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  ogImageUrl: 'https://vocs.dev/api/og?logo=%logo&title=%title&description=%description', // [!code focus]
+  title: 'Viem'
+})
+```
+
+:::info
+The `%logo`, `%title`, and `%description` template variables will be replaced with the corresponding `logo`, `title` and `description` values defined in your [Vocs config](/docs/structure#configuration-file).
+:::
+
+### Deploy your own
+
+The easiest way to get up and running with a dynamic OG Image API is to use [Vercel's Edge Functions](https://vercel.com/docs/functions/edge-functions) & [`@vercel/og`](https://vercel.com/docs/functions/edge-functions/og-image-generation).
+
+You can get up-and-running right away by cloning & deploying our OG Image API example repository below:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwevm%2Fvocs-og)
+
+After the project is deployed, change the `ogImageUrl` in your [Vocs config](/docs/structure#configuration-file) to the URL of your deployed OG Image API.
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  ogImageUrl: 'https://<my-project>.vercel.app/api/og?logo=%logo&title=%title&description=%description', // [!code focus]
+  title: 'Viem'
+})
+```
+
+## Configuration
+
+To customize the open graph image for your documentation, you can set the `ogImageUrl` property in your `vocs.config.ts` file.
+
+The following template variables are available:
+
+- `%logo`: The URL of the logo image
+- `%title`: The title of the page
+- `%description`: The description of the page
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  ogImageUrl: 'https://vocs.dev/api/og?logo=%logo&title=%title&description=%description', // [!code focus]
+  title: 'Viem'
+})
+```
+
+### Path-based OG Images
+
+You can also specify an object for the `ogImageUrl` with paths as keys.
+
+This will render a different OG image depending on the path the user is on.
+
+```tsx
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  ogImageUrl: { // [!code focus]
+    '/': 'https://vocs.dev/og-image.png', // [!code focus]
+    '/docs': 'https://vocs.dev/api/og?logo=%logo&title=%title&description=%description', // [!code focus]
+  }, // [!code focus]
+  title: 'Viem'
+})
+```
+
+================
+File: docs/guides/styling.mdx
+================
+# Styling
+
+## Custom CSS & Styles
+
+To add custom CSS, you can create a `styles.css` file in the Vocs root directory.
+This file will be automatically imported into the app.
+
+```
+my-project/
+├── docs/
+│   ├── pages/
+|   |   ├── index.mdx
+|   |   └── about.tsx
+│   └── public/
+│   |   └── favicon.ico
+// [!code focus]
+|   └── styles.css
+├── node_modules/
+│   ...
+```
+
+The `styles.css` file could look like:
+
+```css [styles.css]
+body {
+  background-color: #f3f3f3;
+}
+
+.Vocs_H1 {
+  color: red;
+}
+```
+
+:::tip[Tip]
+You can also utilize the [CSS `@import`](https://vitejs.dev/guide/features.html#import-inlining-and-rebasing) statement to import other CSS files.
+:::
+
+#### Importing CSS into layout Component
+
+Alternatively, you can import CSS files directly into your [layout component](/docs/structure#layout-component).
+
+```tsx [layout.tsx]
+import './global.css' // [!code focus]
+import './theme.css' // [!code focus]
+
+export default function Root({ children }) {
+  return children
+}
+```
+
+#### Importing CSS into Markdown
+
+You can also import CSS files directly into your Markdown files.
+
+```mdx [example.md]
+import './theme.css' // [!code focus]
+
+# Hello world
+
+This is me.
+```
+
+## Tailwind
+
+Vocs comes with built-in support for [Tailwind](https://tailwindcss.com/).
+
+To enable Tailwind, simply import `tailwindcss` in the `styles.css` file of your project.
+
+:::code-group
+
+```css [styles.css]
+@import "tailwindcss";
+```
+
+```txt [Project]
+my-project/
+├── docs/
+│   ├── pages/
+|   |   ├── index.mdx
+|   |   └── about.tsx
+│   └── public/
+│   |   └── favicon.ico
+// [!code focus]
+|   └── styles.css
+├── node_modules/
+│   ...
+```
+
+:::
+
+================
+File: docs/guides/theming.mdx
+================
+# Theming
+
+Theming in Vocs is highly configurable. You can either theme your documentation via **CSS variables** through the [configuration (`vocs.config.ts`)](/docs/api/config), or via [CSS classes](#class-theming).
+
+## Configuration
+
+You can modify the default accent color, color scheme, and other variables via the [`vocs.config.ts` file](/docs/api/config).
+
+### Accent Color
+
+The accent color of your documentation can be modified via the `accentColor` property.
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  theme: {
+    accentColor: '#ff0000', // [!code focus]
+  },
+  title: 'Viem'
+})
+```
+
+#### Light & Dark Accent Colors
+
+You can also chose separate colors for light and dark mode.
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  theme: {
+    accentColor: { // [!code focus]
+      light: 'black', // [!code focus]
+      dark: 'white', // [!code focus]
+    } // [!code focus]
+  },
+  title: 'Viem'
+})
+```
+
+#### Engrained Accent Colors
+
+You can even get more engrained control of the primitive accent colors.
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  theme: {
+    accentColor: {
+      backgroundAccent: { light: 'white', dark: 'black' },
+      backgroundAccentHover: { light: 'whitesmoke', dark: 'gray' },
+      backgroundAccentText: { light: 'black', dark: 'white' },
+      textAccent: { light: 'black', dark: 'white' },
+    }
+  },
+  title: 'Viem'
+})
+```
+
+### Color Scheme
+
+The color scheme is the overall contextual "color mode" for your documentation. It can be
+either a "light mode" or a "dark mode". By default, Vocs detects the system's preferred
+color scheme, and adapts to that.
+
+You can specify and force a color scheme for your documentation. If a `colorScheme` property
+is specified, Vocs will always use that, regardless of the system's preferred
+color scheme.
+
+```ts [vocs.config.ts]
+export default defineConfig({
+  theme: {
+    colorScheme: 'dark' // [!code focus]
+  },
+  title: 'Viem'
+})
+```
+
+### Variables
+
+You can also modify any of the CSS variables used in Vocs. This is useful if you want to
+have more control over the styling of your documentation.
+
+```tsx [vocs.config.ts]
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  theme: {
+    variables: { // [!code focus]
+      color: { // [!code focus]
+        background: { // [!code focus]
+          light: 'white', // [!code focus]
+          dark: 'black' // [!code focus]
+        } // [!code focus]
+      }, // [!code focus]
+      content: { // [!code focus]
+        horizontalPadding: '40px', // [!code focus]
+        verticalPadding: '80px' // [!code focus]
+      } // [!code focus]
+    } // [!code focus]
+  },
+  title: 'Viem'
+})
+```
+
+::::note
+:::details[Theme Reference]
+```ts
+type Theme = {
+  accentColor?: string
+  colorScheme?: 'dark' | 'light' | 'system'
+  variables?: {
+    borderRadius?: {
+      '0': string,
+      '2': string,
+      '4': string,
+      '8': string,
+    },
+    color?: {
+      white: { light: string, dark: string },
+      black: { light: string, dark: string },
+      background: { light: string, dark: string },
+      background2: { light: string, dark: string },
+      background3: { light: string, dark: string },
+      background4: { light: string, dark: string },
+      background5: { light: string, dark: string },
+      backgroundAccent: { light: string, dark: string },
+      backgroundAccentHover: { light: string, dark: string },
+      backgroundAccentText: { light: string, dark: string },
+      backgroundBlueTint: { light: string, dark: string },
+      backgroundDark: { light: string, dark: string },
+      backgroundGreenTint: { light: string, dark: string },
+      backgroundGreenTint2: { light: string, dark: string },
+      backgroundIrisTint: { light: string, dark: string },
+      backgroundRedTint: { light: string, dark: string },
+      backgroundRedTint2: { light: string, dark: string },
+      backgroundYellowTint: { light: string, dark: string },
+      border: { light: string, dark: string },
+      border2: { light: string, dark: string },
+      borderAccent: { light: string, dark: string },
+      borderBlue: { light: string, dark: string },
+      borderGreen: { light: string, dark: string },
+      borderIris: { light: string, dark: string },
+      borderRed: { light: string, dark: string },
+      borderYellow: { light: string, dark: string },
+      heading: { light: string, dark: string },
+      shadow: { light: string, dark: string },
+      text: { light: string, dark: string },
+      text2: { light: string, dark: string },
+      text3: { light: string, dark: string },
+      text4: { light: string, dark: string },
+      textAccent: { light: string, dark: string },
+      textAccentHover: { light: string, dark: string },
+      textBlue: { light: string, dark: string },
+      textBlueHover: { light: string, dark: string },
+      textGreen: { light: string, dark: string },
+      textGreenHover: { light: string, dark: string },
+      textIris: { light: string, dark: string },
+      textIrisHover: { light: string, dark: string },
+      textRed: { light: string, dark: string },
+      textRedHover: { light: string, dark: string },
+      textYellow: { light: string, dark: string },
+      textYellowHover: { light: string, dark: string },
+
+      blockquoteBorder: { light: string, dark: string },
+      blockquoteText: { light: string, dark: string },
+      codeBlockBackground: { light: string, dark: string },
+      codeCharacterHighlightBackground: { light: string, dark: string },
+      codeHighlightBackground: { light: string, dark: string },
+      codeHighlightBorder: { light: string, dark: string },
+      codeInlineBackground: { light: string, dark: string },
+      codeInlineBorder: { light: string, dark: string },
+      codeInlineText: { light: string, dark: string },
+      codeTitleBackground: { light: string, dark: string },
+      dangerBackground: { light: string, dark: string },
+      dangerBorder: { light: string, dark: string },
+      dangerText: { light: string, dark: string },
+      dangerTextHover: { light: string, dark: string },
+      hr: { light: string, dark: string },
+      infoBackground: { light: string, dark: string },
+      infoBorder: { light: string, dark: string },
+      infoText: { light: string, dark: string },
+      infoTextHover: { light: string, dark: string },
+      lineNumber: { light: string, dark: string },
+      link: { light: string, dark: string },
+      linkHover: { light: string, dark: string },
+      noteBackground: { light: string, dark: string },
+      noteBorder: { light: string, dark: string },
+      noteText: { light: string, dark: string },
+      successBackground: { light: string, dark: string },
+      successBorder: { light: string, dark: string },
+      successText: { light: string, dark: string },
+      successTextHover: { light: string, dark: string },
+      tableBorder: { light: string, dark: string },
+      tableHeaderBackground: { light: string, dark: string },
+      tableHeaderText: { light: string, dark: string },
+      tipBackground: { light: string, dark: string },
+      tipBorder: { light: string, dark: string },
+      tipText: { light: string, dark: string },
+      tipTextHover: { light: string, dark: string },
+      warningBackground: { light: string, dark: string },
+      warningBorder: { light: string, dark: string },
+      warningText: { light: string, dark: string },
+      warningTextHover: { light: string, dark: string },
+    },
+    content: {
+      horizontalPadding: string,
+      verticalPadding: string,
+      width: string,
+    },
+    fontFamily: {
+      default: string,
+      mono: string,
+    },
+    fontSize: {
+      root: string,
+      '9': string,
+      '11': string,
+      '12': string,
+      '13': string,
+      '14': string,
+      '15': string,
+      '16': string,
+      '18': string,
+      '20': string,
+      '24': string,
+      '32': string,
+      h1: string,
+      h2: string,
+      h3: string,
+      h4: string,
+      h5: string,
+      h6: string,
+      code: string,
+      codeBlock: string,
+      lineNumber: string,
+      subtitle: string,
+      th: string,
+      td: string,
+    },
+    fontWeight: {
+      regular: string,
+      medium: string,
+      semibold: string,
+    },
+    lineHeight: {
+      code: string,
+      heading: string,
+      listItem: string,
+      outlineItem: string,
+      paragraph: string,
+    },
+    space: {
+      '0': string,
+      '1': string,
+      '2': string,
+      '3': string,
+      '4': string,
+      '6': string,
+      '8': string,
+      '12': string,
+      '14': string,
+      '16': string,
+      '18': string,
+      '20': string,
+      '22': string,
+      '24': string,
+      '28': string,
+      '32': string,
+      '40': string,
+      '44': string,
+      '48': string,
+      '56': string,
+      '64': string,
+      '72': string,
+      '80': string,
+    }
+  }
+}
+```
+:::
+::::
+
+## Class Theming
+
+Every element in Vocs is designed to be customized via CSS classes. You can
+override any of the default styles by modifying the `.Vocs_{element}` class. If you inspect
+your documentation's HTML, you can see the classes that are applied to each element, and it is
+just a matter of overriding those classes in your own CSS.
+
+For example, if you want to change the color of the `h1` headings in your documentation, you can
+override the `.Vocs_H1` class.
+
+```css [styles.css]
+.Vocs_H1 {
+  color: red;
+}
+```
+
+:::tip[Tip]
+If you create a `styles.css` file in your Vocs project root, it will be automatically imported into
+your documentation. This is a great place to put your custom CSS. [Read more](/docs/structure#global-styles)
+:::
+
+================
+File: docs/guides/twoslash.mdx
+================
+# Twoslash
+
+[TypeScript Twoslash](https://www.typescriptlang.org/dev/twoslash/) can be seen as a pre-processor that enhances your code-samples.
+It is a markup language for JavaScript and TypeScript.
+
+It leverages the compiler APIs used by text editors to offer type-driven hover information, precise error messages, and type callouts.
+
+## Queries
+
+One of the key reasons for making Twoslash is the ability to use the TypeScript compiler to pull out type information about your code mechanically. Twoslash comes with two different ways to query your code: `^?` and `^|`.
+
+### Extract Type
+
+Using `^?` you can pull out type information about a particular identifier in the line of code above it.
+
+:::code-group
+
+```ts [Output] twoslash
+import { getSingletonHighlighterCore } from 'shiki/core'
+import { createOnigurumaEngine } from 'shiki/engine/oniguruma'
+
+const shiki = await getSingletonHighlighterCore({
+//    ^?
+
+  engine: createOnigurumaEngine(import('shiki/wasm')),
+})
+```
+
+````md [Markdown]
+```ts twoslash
+import { getSingletonHighlighterCore } from 'shiki/core'
+import { createOnigurumaEngine } from 'shiki/engine/oniguruma'
+
+const shiki = await getSingletonHighlighterCore({
+//    ^?
+
+  engine: createOnigurumaEngine(import('shiki/wasm')),
+})
+```
+````
+
+:::
+
+
+### Completions
+
+Using `^|` you can pull out information about a what the auto-complete looks like at a particular location.
+
+:::code-group
+
+```ts [Output] twoslash
+// @noErrors
+type Example = { apple: 'foo' | 'bar' | 'baz', ant: number, anchovy: string }
+const example: Example = { a: 'foo' }
+
+example.a
+//       ^|
+
+
+
+example.apple === '
+//                 ^|
+
+
+```
+
+````md [Markdown]
+```ts twoslash
+// @noErrors
+console.e
+//       ^|
+```
+````
+
+:::
+
+### Highlighting
+
+You can use `^^^` to highlight a range of the line above it.
+
+:::code-group
+
+```ts twoslash [Output]
+function add(foo: number, bar: number) {
+  //     ^^^
+  return foo + bar
+  //           ^^^
+}
+```
+
+````md [Markdown]
+```ts twoslash [Output]
+function add(foo: number, bar: number) {
+  //     ^^^
+  return foo + bar
+  //           ^^^
+}
+```
+````
+
+:::
+
+## Cutting
+
+Every Twoslash code sample needs to be a complete TypeScript program realistically, basically it needs to compile. Quite often to make it compiler, there is a bunch of code which isn't relevant to the user. This can be extracted out of the code sample via `// ---cut---` which removes all of the code above it from the output.
+
+### `---cut---`
+
+Cut works after TypeScript has generated the project and pulled out all the editor information (like identifiers, queries, highlights etc) and then amends all of their offsets and lines to re-fit the smaller output. What your user sees is everything below the `---cut---`.
+
+The below example only shows a single line.
+
+:::code-group
+
+```ts [Output] twoslash
+const level = "Danger"
+// ---cut---
+console.log(level)
+```
+
+````md [Markdown]
+```ts twoslash
+const level = "Danger"
+// ---cut---
+console.log(level)
+```
+````
+
+:::
+
+The example below shows the last two lines, but to TypeScript it was a program with 2 files and all of the IDE information is hooked up correctly across the files.
+
+This is why `// @filename: [file]` is specifically the only Twoslash command which is not removed, because if it's not relevant it can be `---cut---` away.
+
+:::code-group
+
+```ts [Output] twoslash
+// @filename: a.ts
+export const helloWorld = "Hi"
+
+// @filename: b.ts
+// ---cut---
+import { helloWorld } from "./a"
+console.log(helloWorld)
+```
+
+````md [Markdown]
+```ts twoslash
+// @filename: a.ts
+export const helloWorld = "Hi"
+
+// @filename: b.ts
+// ---cut---
+import { helloWorld } from "./a"
+console.log(helloWorld)
+```
+````
+
+:::
+
+### `---cut-after---`
+
+The sibling to `---cut---` which trims anything after the sigil:
+
+:::code-group
+
+```tsx [Output] twoslash
+// @noErrors
+import { createContext } from 'react'
+
+const Context = createContext('foo')
+
+const Page = () => (
+// ---cut---
+<Context.Provider value="bar">
+  Hello world
+</Context.Provider>
+// ---cut-after---
+)
+```
+
+````md [Markdown]
+```ts twoslash
+// @noErrors
+import { createContext } from 'react'
+
+const Context = createContext('foo')
+
+const Page = () => (
+// ---cut---
+<Context.Provider value="bar">
+  Hello world
+</Context.Provider>
+// ---cut-after---
+)
+```
+````
+
+:::
+
+## Errors
+
+Most of the time, unless you are the TypeScript team, you want to avoid errors in your code samples. Strictly speaking, this usually means setting the right compiler flags and environment in each code sample.
+
+Some times however, you do want to raise a compiler error - to show incorrect states. In those cases, twoslash has a way to mark the compiler errors you expect.
+
+### `@errors: [num]`
+
+All TypeScript compiler errors have a number, this number is relatively arbitrary and can change between TypeScript versions. For our case these numbers are useful in declaring what we expect to see.
+
+Taking this example:
+
+:::code-group
+
+```ts [Output] twoslash
+// @allowErrors
+const a = "123"
+a = 132
+```
+
+````md [Markdown]
+```ts twoslash
+const a = "123"
+a = 132
+```
+````
+
+:::
+
+TypeScript gives the following error: `Cannot assign to 'a' because it is a constant. [2588]`.
+
+Which the code sample does not reference, and thus the codesample has raise the mis-match as an 'exception'. Shiki Twoslash then shows a pretty error, and will set the process exit code to 1 failing any builds. You can use `// @errors: 2588` to tell Shiki Twoslash that you expect this error to occur:
+
+:::code-group
+
+```ts [Output] twoslash
+// @errors: 2588
+const a = "123"
+a = 132
+```
+
+````md [Markdown]
+```ts twoslash
+// @errors: 2588
+const a = "123"
+a = 132
+```
+````
+
+:::
+
+### `@noErrors`
+
+Sometimes you have needs in which a broken TypeScript build is OK, a good example of this is using a completion query `// ^|` which requires a broken TypeScript project to work. You can use `// @noErrors` to supress all errors in a code sample, and not have them show inline.
+
+:::code-group
+
+```ts [Output] twoslash
+// @noErrors
+const a = "123"
+a = 132
+```
+
+````md [Markdown]
+```ts twoslash
+// @noErrors
+const a = "123"
+a = 132
+```
+````
+
+:::
+
+## Multi-file
+
+Twoslash code samples aren't limited to creating a single file, by using `// @filename: [file]` you can write any file to the virtual file system used by TypeScript to power your code samples.
+
+### `@filename: [file]`
+
+After seeing `@filename` Twoslash creates a new virtual file-system file and adds the new lines to that. You can't edit a file after it was created, but you can overwrite it.
+
+For example, if you want to quickly fake a node module:
+
+:::code-group
+
+```tsx [Output] twoslash
+// @filename: node_modules/@types/mylib/index.d.ts
+export function doit(): string
+
+// @filename: index.ts
+import { doit } from "mylib"
+console.log(doit)
+```
+
+````md [Markdown]
+```ts twoslash
+// @filename: node_modules/@types/mylib/index.d.ts
+export function doit(): string
+
+// @filename: index.ts
+import { doit } from "mylib"
+console.log(doit)
+```
+````
+
+:::
+
+This code sample sets up the types for a non-existent npm module, and TypeScript picks it up as the definitions in the same way it would in a non-virtual TypeScript project.
+
+:::code-group
+
+```tsx [Output] twoslash
+// @resolveJsonModule
+// @filename: app.json
+{ "version": "23.2.3" }
+
+// @filename: index.ts
+import appSettings from "./app.json"
+appSettings.version
+//          ^?
+
+```
+
+````md [Markdown]
+```ts twoslash
+// @resolveJsonModule
+// @filename: app.json
+{ "version": "23.2.3" }
+
+// @filename: index.ts
+import appSettings from "./app.json"
+appSettings.version
+//          ^?
+```
+````
+
+:::
+
+This code sets up a JSON object which can be imported in a TypeScript file.
+
+:::code-group
+
+```tsx [Output] twoslash
+// @filename: ambient.d.ts
+declare module '*.mdx' {
+    export default any
+}
+declare module "react"
+
+// @filename: MultiFileDocs.mdx
+## Hello world
+
+// @filename: index.tsx
+// ---cut---
+import React from "react"
+import MultiFileDocs from "./MultiFileDocs.mdx"
+
+export default () => <MultiFileDocs/>
+```
+
+```tsx [Markdown]
+// @filename: ambient.d.ts
+declare module '*.mdx' {
+    export default any
+}
+declare module "react"
+
+// @filename: MultiFileDocs.mdx
+## Hello world
+
+// @filename: index.tsx
+// ---cut---
+import React from "react"
+import MultiFileDocs from "./MultiFileDocs.mdx"
+
+export default () => <MultiFileDocs/>
+```
+
+:::
+
+## External Types
+
+Unless you're teaching TypeScript/JavaScript, you're probably going to want to import libraries into your code samples.
+
+Twoslash works by faking a virtual file system over your existing file system. This means any `@types` or libraries with TypeScript definitions should work out of the box with no config.
+
+### Globals
+
+Setting up globals is a little bit more complex, but not drastically. You need to use the [triple slash reference](https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html#-reference-types-) which adds a particular library to the global scope.
+
+:::code-group
+
+```ts [Output] twoslash
+/// <reference types="node" />
+// ---cut---
+import { writeFileSync } from "fs"
+writeFileSync("myfile.txt", "// TODO")
+```
+
+````md [Markdown]
+```ts twoslash
+/// <reference types="node" />
+// ---cut---
+import { writeFileSync } from "fs"
+writeFileSync("myfile.txt", "// TODO")
+```
+````
+
+:::
+
+## Callouts
+
+:::code-group
+
+```ts [Output] twoslash
+const a = 1
+// @log: Custom log message
+const b = 1
+// @error: Custom error message
+const c = 1
+// @warn: Custom warning message
+const d = 1
+// @annotate: Custom annotation message
+```
+
+````md [Markdown]
+```ts twoslash
+const a = 1
+// @log: Custom log message
+const b = 1
+// @error: Custom error message
+const c = 1
+// @warn: Custom warning message
+const d = 1
+// @annotate: Custom annotation message
+```
+````
+
+:::
+
+## Compiler flags
+
+```md
+// @allowJs
+Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files..
+
+// @allowSyntheticDefaultImports
+Allow 'import x from y' when a module doesn't have a default export..
+
+// @allowUmdGlobalAccess
+Allow accessing UMD globals from modules..
+
+// @allowUnreachableCode
+Disable error reporting for unreachable code..
+
+// @allowUnusedLabels
+Disable error reporting for unused labels..
+
+// @alwaysStrict
+Ensure 'use strict' is always emitted..
+
+// @assumeChangesOnlyAffectDirectDependencies
+Have recompiles in projects that use `incremental` and `watch` mode assume that changes within a file will only affect files directly depending on it..
+
+// @baseUrl
+Specify the base directory to resolve non-relative module names..
+
+// @charset
+No longer supported. In early versions, manually set the text encoding for reading files..
+
+// @checkJs
+Enable error reporting in type-checked JavaScript files..
+
+// @composite
+Enable constraints that allow a TypeScript project to be used with project references..
+
+// @declaration
+Generate .d.ts files from TypeScript and JavaScript files in your project..
+
+// @declarationDir
+Specify the output directory for generated declaration files..
+
+// @declarationMap
+Create sourcemaps for d.ts files..
+
+// @diagnostics
+Output compiler performance information after building..
+
+// @disableReferencedProjectLoad
+Reduce the number of projects loaded automatically by TypeScript..
+
+// @disableSizeLimit
+Remove the 20mb cap on total source code size for JavaScript files in the TypeScript language server..
+
+// @disableSolutionSearching
+Opt a project out of multi-project reference checking when editing..
+
+// @disableSourceOfProjectReferenceRedirect
+Disable preferring source files instead of declaration files when referencing composite projects.
+
+// @downlevelIteration
+Emit more compliant, but verbose and less performant JavaScript for iteration..
+
+// @emitBOM
+Emit a UTF-8 Byte Order Mark (BOM) in the beginning of output files..
+
+// @emitDeclarationOnly
+Only output d.ts files and not JavaScript files..
+
+// @emitDecoratorMetadata
+Emit design-type metadata for decorated declarations in source files..
+
+// @esModuleInterop
+Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility..
+
+// @exactOptionalPropertyTypes
+Interpret optional property types as written, rather than adding 'undefined'..
+
+// @experimentalDecorators
+Enable experimental support for TC39 stage 2 draft decorators..
+
+// @explainFiles
+Print files read during the compilation including why it was included..
+
+// @extendedDiagnostics
+Output more detailed compiler performance information after building..
+
+// @forceConsistentCasingInFileNames
+Ensure that casing is correct in imports..
+
+// @generateCpuProfile
+Emit a v8 CPU profile of the compiler run for debugging..
+
+// @importHelpers
+Allow importing helper functions from tslib once per project, instead of including them per-file..
+
+// @importsNotUsedAsValues
+Specify emit/checking behavior for imports that are only used for types.
+
+// @incremental
+Enable incremental compilation.
+
+// @inlineSourceMap
+Include sourcemap files inside the emitted JavaScript..
+
+// @inlineSources
+Include source code in the sourcemaps inside the emitted JavaScript..
+
+// @isolatedModules
+Ensure that each file can be safely transpiled without relying on other imports..
+
+// @jsx
+Specify what JSX code is generated..
+
+// @jsxFactory
+Specify the JSX factory function used when targeting React JSX emit, e.g. 'React.createElement' or 'h'.
+
+// @jsxFragmentFactory
+Specify the JSX Fragment reference used for fragments when targeting React JSX emit e.g. 'React.Fragment' or 'Fragment'..
+
+// @jsxImportSource
+Specify module specifier used to import the JSX factory functions when using `jsx: react-jsx*`.`.
+
+// @keyofStringsOnly
+Make keyof only return strings instead of string, numbers or symbols. Legacy option..
+
+// @lib
+Specify a set of bundled library declaration files that describe the target runtime environment..
+
+// @listEmittedFiles
+Print the names of emitted files after a compilation..
+
+// @listFiles
+Print all of the files read during the compilation..
+
+// @mapRoot
+Specify the location where debugger should locate map files instead of generated locations..
+
+// @maxNodeModuleJsDepth
+Specify the maximum folder depth used for checking JavaScript files from `node_modules`. Only applicable with `allowJs`..
+
+// @module
+Specify what module code is generated..
+
+// @moduleResolution
+Specify how TypeScript looks up a file from a given module specifier..
+
+// @newLine
+Set the newline character for emitting files..
+
+// @noEmit
+Disable emitting file from a compilation..
+
+// @noEmitHelpers
+Disable generating custom helper functions like `__extends` in compiled output..
+
+// @noEmitOnError
+Disable emitting files if any type checking errors are reported..
+
+// @noErrorTruncation
+Disable truncating types in error messages..
+
+// @noFallthroughCasesInSwitch
+Enable error reporting for fallthrough cases in switch statements..
+
+// @noImplicitAny
+Enable error reporting for expressions and declarations with an implied `any` type...
+
+// @noImplicitOverride
+Add `undefined` to a type when accessed using an index..
+
+// @noImplicitReturns
+Enable error reporting for codepaths that do not explicitly return in a function..
+
+// @noImplicitThis
+Enable error reporting when `this` is given the type `any`..
+
+// @noImplicitUseStrict
+Disable adding 'use strict' directives in emitted JavaScript files..
+
+// @noLib
+Disable including any library files, including the default lib.d.ts..
+
+// @noPropertyAccessFromIndexSignature
+Enforces using indexed accessors for keys declared using an indexed type.
+
+// @noResolve
+Disallow `import`s, `require`s or ``s from expanding the number of files TypeScript should add to a project..
+
+// @noStrictGenericChecks
+Disable strict checking of generic signatures in function types..
+
+// @noUncheckedIndexedAccess
+Include 'undefined' in index signature results.
+
+// @noUnusedLocals
+Enable error reporting when a local variables aren't read..
+
+// @noUnusedParameters
+Raise an error when a function parameter isn't read.
+
+// @out
+Deprecated setting. Use `outFile` instead..
+
+// @outDir
+Specify an output folder for all emitted files..
+
+// @outFile
+Specify a file that bundles all outputs into one JavaScript file. If `declaration` is true, also designates a file that bundles all .d.ts output..
+
+// @paths
+Specify a set of entries that re-map imports to additional lookup locations..
+
+// @plugins
+List of language service plugins..
+
+// @preserveConstEnums
+Disable erasing `const enum` declarations in generated code..
+
+// @preserveSymlinks
+Disable resolving symlinks to their realpath. This correlates to the same flag in node..
+
+// @preserveWatchOutput
+Disable wiping the console in watch mode.
+
+// @pretty
+Enable color and formatting in output to make compiler errors easier to read.
+
+// @reactNamespace
+Specify the object invoked for `createElement`. This only applies when targeting `react` JSX emit..
+
+// @removeComments
+Disable emitting comments..
+
+// @resolveJsonModule
+Enable importing .json files.
+
+// @rootDir
+Specify the root folder within your source files..
+
+// @rootDirs
+Allow multiple folders to be treated as one when resolving modules..
+
+// @skipDefaultLibCheck
+Skip type checking .d.ts files that are included with TypeScript..
+
+// @skipLibCheck
+Skip type checking all .d.ts files..
+
+// @sourceMap
+Create source map files for emitted JavaScript files..
+
+// @sourceRoot
+Specify the root path for debuggers to find the reference source code..
+
+// @strict
+Enable all strict type-checking options..
+
+// @strictBindCallApply
+Check that the arguments for `bind`, `call`, and `apply` methods match the original function..
+
+// @strictFunctionTypes
+When assigning functions, check to ensure parameters and the return values are subtype-compatible..
+
+// @strictNullChecks
+When type checking, take into account `null` and `undefined`..
+
+// @strictPropertyInitialization
+Check for class properties that are declared but not set in the constructor..
+
+// @stripInternal
+Disable emitting declarations that have `@internal` in their JSDoc comments..
+
+// @suppressExcessPropertyErrors
+Disable reporting of excess property errors during the creation of object literals..
+
+// @suppressImplicitAnyIndexErrors
+Suppress `noImplicitAny` errors when indexing objects that lack index signatures..
+
+// @target
+Set the JavaScript language version for emitted JavaScript and include compatible library declarations..
+
+// @traceResolution
+Log paths used during the `moduleResolution` process..
+
+// @tsBuildInfoFile
+Specify the folder for .tsbuildinfo incremental compilation files..
+
+// @typeRoots
+Specify multiple folders that act like `./node_modules/@types`..
+
+// @types
+Specify type package names to be included without being referenced in a source file..
+
+// @useDefineForClassFields
+Emit ECMAScript-standard-compliant class fields..
+
+// @useUnknownInCatchVariables
+Type catch clause variables as 'unknown' instead of 'any'..
+```
+
+================
+File: docs/index.mdx
+================
+# Getting Started
+
+## Overview
+
+Vocs is a [React](https://react.dev)-based static documentation generator, powered by [Vite](https://vitejs.dev).
+
+Write your content in [Markdown](https://en.wikipedia.org/wiki/Markdown) or [MDX](https://mdxjs.com/), and Vocs will generate a static site with a default theme.
+
+## Quick Start
+
+### Bootstrap via CLI
+
+Scaffold a new project with the command line:
+
+:::code-group
+
+```bash [npm]
+npm init vocs
+```
+
+```bash [pnpm]
+pnpm create vocs
+```
+
+```bash [yarn]
+yarn create vocs
+```
+
+```bash [bun]
+bun create vocs
+```
+
+:::
+
+### Bootstrap via Vercel
+
+Scaffold a new project and deploy it instantly with Vercel:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwevm%2Fvocs%2Ftree%2Fmain%2Fcreate-vocs%2Ftemplates%2Fdefault)
+
+## Manual Installation
+
+You can install Vocs in an existing project, or start from scratch, by installing Vocs as a dependency.
+
+::::steps
+
+### Install
+
+First, we will install `vocs` as a dependency in our project.
+
+:::code-group
+
+```bash [npm]
+npm i vocs@next
+```
+
+```bash [pnpm]
+pnpm i vocs@next
+```
+
+```bash [yarn]
+yarn add vocs@next
+```
+
+```bash [bun]
+bun i vocs@next
+```
+
+:::
+
+### Add Scripts to `package.json`
+
+After that, let's add some scripts to our `package.json` for Vocs.
+
+```json [package.json]
+{
+  "name": "example",
+  "version": "0.0.0",
+  "scripts": { // [!code focus]
+    "docs:dev": "vocs dev", // [!code focus]
+    "docs:build": "vocs build", // [!code focus]
+    "docs:preview": "vocs preview" // [!code focus]
+  } // [!code focus]
+}
+```
+
+### Build your First Page
+
+Create a directory called `docs`, and add a file inside of it called `index.mdx` under a `pages` directory:
+
+```md
+my-project/
+├── docs/ <!-- [!code focus] -->
+│   ├── pages/ <!-- [!code focus] -->
+│   │   └── index.mdx <!-- [!code focus] -->
+├── node_modules/
+└── package.json
+```
+
+```markdown [docs/pages/index.mdx]
+# Hello, World! [This is my first page]
+
+Welcome to my docs.
+```
+
+### Run
+
+Next, run the development server:
+
+```bash [Terminal]
+npm run docs:dev
+```
+
+Then open up your browser to `http://localhost:5173`, and you can see your first page!
+
+### Next Steps
+
+Now that you have a basic documentation site up and running, you can learn more about how Vocs projects are structured in [Project Structure](/docs/structure).
+
+::::
+
+================
+File: docs/kitchen-sink.mdx
+================
+import { Example } from '../../components/Example'
+
+# Kitchen Sink [An MDX Playground for Vocs]
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+## Heading 2
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+### Heading 3
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+#### Heading 4
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+##### Heading 5
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+###### Heading 6
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+<span>**Strong Title**</span>
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+## Paragraphs
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero. Suspendisse bibendum placerat enim, vitae iaculis sapien tincidunt vel. Nunc nunc dui, varius eget diam vitae, sagittis rutrum ante. Vestibulum ut nulla in ante tincidunt lacinia. Suspendisse ex orci, elementum vitae enim sed, pellentesque fermentum tortor. In bibendum sapien at nisi pharetra tincidunt. Etiam eleifend lacus dictum lorem ornare euismod. Nunc ullamcorper nunc mi, ut volutpat libero gravida id. Pellentesque cursus mi id tortor convallis eleifend.
+
+## Emphasis
+
+Emphasis, aka italics, with *asterisks* or _underscores_.
+
+Strong emphasis, aka bold, with **asterisks** or __underscores__.
+
+Combined emphasis with **asterisks and _underscores_**.
+
+Strikethrough uses two tildes. ~~Scratch this.~~
+
+## Callouts
+
+:::note
+This is a note callout. [Link](https://google.com)
+:::
+
+:::info
+This is an info callout. [Link](https://google.com)
+:::
+
+:::warning
+This is a warning callout. [Link](https://google.com)
+:::
+
+:::danger
+This is a danger callout. [Link](https://google.com)
+:::
+
+:::tip
+This is a tip callout. [Link](https://google.com)
+:::
+
+:::success
+This is a success callout. [Link](https://google.com)
+:::
+
+## Details
+
+:::details[See more]
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+:::
+
+::::note
+:::details
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+:::
+::::
+
+::::danger[Error]
+
+An error occurred!
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+:::details[Stack trace]
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+:::
+
+::::
+
+## Lists
+
+### Ordered list
+
+1. First ordered list item
+2. Another item
+    - Unordered sub-list.
+      - Unordered sub-list.
+        - Unordered sub-list.
+      - Unordered sub-list.
+    - Unordered sub-list.
+    - Unordered sub-list.
+3. Actual numbers don't matter, just that it's a number
+    1. Ordered sub-list
+        1. Ordered sub-list
+    2. Ordered sub-list
+    3. Ordered sub-list
+4. And another item.
+
+### Unordered list
+
+* First item
+  * Sub list
+    * Sub list
+    * Sub list
+  * Sub list
+* Second item
+  * Sub list
+* Third item
+
+## Links
+
+www.example.com, https://example.com, and contact@example.com.
+
+[I'm an inline-style link](https://www.google.com)
+
+[I'm an inline-style link with title](https://www.google.com "Google's Homepage")
+
+[I'm a reference-style link][Arbitrary case-insensitive reference text]
+
+[You can use numbers for reference-style link definitions][1]
+
+Or leave it empty and use the [link text itself].
+
+Some text to show that the reference links can follow later.
+
+[arbitrary case-insensitive reference text]: https://www.mozilla.org
+[1]: http://slashdot.org
+[link text itself]: http://www.reddit.com
+
+## Images
+
+Inline-style:
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+
+Reference-style:
+![alt text][logo]
+
+[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+
+## `Code` and Syntax Highlighting
+
+Inline `code` has `back-ticks around` it.
+
+Inline [`code`]() with link.
+
+Inline `console.log("hello world"){:js}` highlighted code
+
+```plaintext
+wowee plain text!
+```
+
+```bash [Terminal]
+npm i vocs
+```
+
+```ts [example.ts]
+type Example = string // [!code hl]
+const example: Example = 'example'
+```
+
+```ts [Line Highlight & Numbers] showLineNumbers {2,3,6-9}
+// 1. Import modules.
+import { createPublicClient, http } from 'viem'
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action!
+const blockNumber = await client.getBlockNumber()
+```
+
+```ts [Word Focus] /mainnet/1-2 /client/2-3
+// 1. Import modules.
+import { createPublicClient, http } from 'viem'
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action!
+const blockNumber = await client.getBlockNumber()
+```
+
+```ts [Line Focus]
+// 1. Import modules.
+import { createPublicClient, http } from 'viem'
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action! // [!code focus]
+const blockNumber = await client.getBlockNumber() // [!code focus]
+```
+
+```ts [Diff]
+// 1. Import modules.
+import { createPublicClient } from 'viem' // [!code --]
+import { createPublicClient, http } from 'viem' // [!code ++]
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action!
+const blockNumber = await client.getBlockNumber()
+```
+
+:::tip[Tip]
+Make sure to do the thing that does stuff.
+:::
+
+## Code group
+
+:::code-group
+
+```bash [npm]
+npm i viem
+```
+
+```bash [pnpm]
+pnpm i viem
+```
+
+```bash [bun]
+bun i viem
+```
+
+:::
+
+:::code-group
+
+<div data-title="Preview">
+  <Example />
+</div>
+
+```tsx [example.tsx]
+<div>test</div>
+```
+
+:::
+
+## Steps
+
+::::steps
+### Step one
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero.
+
+### Step two
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero.
+
+:::code-group
+```tsx [console.log]
+console.log('hello world')
+```
+
+```tsx [alert]
+alert('hello world')
+```
+:::
+
+:::info
+test
+:::
+
+### Step three
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero.
+::::
+
+## Blockquote
+
+> Blockquotes are very handy in email to emulate reply text.
+> This line is part of the same quote.
+
+> This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.
+
+## Tables
+
+Colons can be used to align columns.
+
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
+
+There must be at least 3 dashes separating each header cell.
+The outer pipes (|) are optional, and you don't need to make the
+raw Markdown line up prettily. You can also use inline Markdown.
+
+Markdown | Less | Pretty
+--- | --- | ---
+*Still* | `renders` | **nicely**
+1 | 2 | 3
+
+## Footnotes
+
+Here is a simple footnote[^1].
+
+A footnote can also have multiple lines[^2].
+
+You can also use words, to fit your writing style more closely[^note].
+
+[^1]: My reference.
+[^2]: Every new line should be prefixed with 2 spaces.
+  This allows you to have a footnote with multiple lines.
+[^note]:
+    Named footnotes will still render with numbers instead of the text but allow easier identification and linking.
+    This footnote also has been made with a different syntax using 4 spaces for new lines.
+
+## Inline HTML
+
+<dl>
+  <dt>Definition list</dt>
+  <dd>Is something people use sometimes.</dd>
+  <dt>Markdown in HTML</dt>
+  <dd>Does *not* work **very** well. Use HTML <em>tags</em>.</dd>
+</dl>
+
+## Inline React
+
+<Example />
+
+## Horizontal Rule
+
+Three or more...
+
+---
+
+Hyphens
+
+***
+
+Asterisks
+
+___
+
+Underscores
+
+## Tasklist
+
+* [ ] to do
+* [x] done
+
+================
+File: docs/markdown.mdx
+================
+import { Example } from '../../components/Example'
+
+# Markdown Reference [Features and syntax of Markdown in Vocs]
+
+## Blockquote
+
+To create a blockquote, add a `>` in front of a paragraph.
+
+:::code-group
+
+<div data-title="Preview">
+> Blockquotes are very handy in email to emulate reply text.
+> This line is part of the same quote.
+
+> This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.
+</div>
+
+```md [Markdown]
+> Blockquotes are very handy in email to emulate reply text.
+> This line is part of the same quote.
+
+> This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.
+```
+
+:::
+
+## Callouts
+
+Callouts can be rendered using one of the following [directives](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444):
+
+- `:::note`
+- `:::info`
+- `:::warning`
+- `:::danger`
+- `:::tip`
+- `:::success`
+
+::::code-group
+
+<div data-title="Preview">
+:::note
+This is a note callout. [Link](https://google.com)
+:::
+
+:::info
+This is an info callout. [Link](https://google.com)
+:::
+
+:::warning
+This is a warning callout. [Link](https://google.com)
+:::
+
+:::danger
+This is a danger callout. [Link](https://google.com)
+:::
+
+:::tip
+This is a tip callout. [Link](https://google.com)
+:::
+
+:::success
+This is a success callout. [Link](https://google.com)
+:::
+
+:::note
+This is a callout with code.
+
+```tsx
+console.log('hello world')
+```
+:::
+</div>
+
+````md [Markdown]
+:::note
+This is a note callout. [Link](https://google.com)
+:::
+
+:::info
+This is an info callout. [Link](https://google.com)
+:::
+
+:::warning
+This is a warning callout. [Link](https://google.com)
+:::
+
+:::danger
+This is a danger callout. [Link](https://google.com)
+:::
+
+:::tip
+This is a tip callout. [Link](https://google.com)
+:::
+
+:::success
+This is a success callout. [Link](https://google.com)
+:::
+
+````
+
+::::
+
+## Code Blocks
+
+### Default
+
+Code can be formatted into blocks using triple backticks (```). Optionally, you can specify the language of the code block for syntax highlighting.
+
+::::code-group
+
+<div data-title="Preview">
+```js
+console.log("hello world")
+```
+</div>
+
+````md [Markdown]
+```js
+console.log("hello world")
+```
+````
+
+::::
+
+### Titles
+
+Code blocks can have titles. The title can be specified in the code block "meta", after the triple backticks.
+
+#### Preview
+
+```bash [Terminal]
+npm i vocs
+```
+
+#### Markdown
+
+````md
+```bash [Terminal]
+npm i vocs
+```
+````
+
+### Line focus
+
+The `// [!code focus]` marker can be used to focus a line of code.
+
+::::code-group
+
+<div data-title="Preview">
+```ts
+// 1. Import modules.
+import { createPublicClient, http } from 'viem'
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action! // [!code focus]
+const blockNumber = await client.getBlockNumber() // [!code focus]
+```
+</div>
+
+````md [Markdown]
+```ts
+// 1. Import modules.
+import { createPublicClient, http } from 'viem'
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action! // [\!code focus] // [!code hl]
+const blockNumber = await client.getBlockNumber() // [\!code focus] // [!code hl]
+```
+````
+
+::::
+
+### Line highlights
+
+The `// [!code hl]` marker can be used to highlight a line of code.
+
+::::code-group
+
+<div data-title="Preview">
+```ts
+type Example = string // [!code hl]
+const example: Example = 'example'
+```
+</div>
+
+````md [Markdown]
+```ts
+type Example = string // [\!code hl] // [!code hl]
+const example: Example = 'example'
+```
+````
+
+::::
+
+### Line numbers
+
+The `showLineNumbers` meta key can be used to show the lines of code beside the pane.
+
+::::code-group
+
+<div data-title="Preview">
+```ts showLineNumbers
+// 1. Import modules.
+import { createPublicClient, http } from 'viem'
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action!
+const blockNumber = await client.getBlockNumber()
+```
+</div>
+
+````md [Markdown]
+```ts showLineNumbers // [!code hl]
+// 1. Import modules.
+import { createPublicClient, http } from 'viem'
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action!
+const blockNumber = await client.getBlockNumber()
+```
+````
+
+::::
+
+### Twoslash
+
+Vocs supports [TypeScript Twoslash](https://www.typescriptlang.org/dev/twoslash/) syntax. [Read more](/docs/guides/twoslash).
+
+::::code-group
+
+<div data-title="Preview">
+```ts twoslash
+// @errors: 2540
+interface Todo {
+  title: string
+}
+
+const todo: Readonly<Todo> = {
+  title: 'Delete inactive users'.toUpperCase(), // [!code hl]
+//  ^?
+}
+
+todo.title = 'Hello'
+
+Number.parseInt('123', 10)
+//      ^|
+
+
+
+```
+</div>
+
+````md [Markdown]
+```ts twoslash
+// @errors: 2540
+interface Todo {
+  title: string
+}
+
+const todo: Readonly<Todo> = {
+  title: 'Delete inactive users'.toUpperCase(),
+//  ^?
+}
+
+todo.title = 'Hello'
+
+Number.parseInt('123', 10)
+//      ^|
+
+
+
+```
+````
+
+::::
+
+### Word focus
+
+The `// [!code word]` marker can be used to focus words in code.
+
+::::code-group
+
+<div data-title="Preview">
+```ts
+// 1. Import modules.
+import { createPublicClient, http } from 'viem'
+// [!code word:mainnet]
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+// [!code word:client]
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action!
+const blockNumber = await client.getBlockNumber()
+```
+</div>
+
+````md [Markdown]
+```ts
+// 1. Import modules.
+import { createPublicClient, http } from 'viem'
+// [\!code word:mainnet] // [!code hl]
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+// [\!code word:client] // [!code hl]
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action!
+const blockNumber = await client.getBlockNumber()
+```
+````
+
+::::
+
+### Diffs
+
+The `// [!code ++]` and `// [!code --]` markers can be used to show diffs in code.
+
+::::code-group
+
+<div data-title="Preview">
+```ts
+// 1. Import modules.
+import { createPublicClient } from 'viem' // [!code --]
+import { createPublicClient, http } from 'viem' // [!code ++]
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action!
+const blockNumber = await client.getBlockNumber()
+```
+</div>
+
+````md [Markdown]
+```ts
+// 1. Import modules.
+import { createPublicClient } from 'viem' // [\!code --] // [!code hl]
+import { createPublicClient, http } from 'viem' // [\!code ++] // [!code hl]
+import { mainnet } from 'viem/chains'
+
+// 2. Set up your client with desired chain & transport.
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+// 3. Consume an action!
+const blockNumber = await client.getBlockNumber()
+```
+````
+
+::::
+
+## Code Groups
+
+Code groups can be rendered using the `:::code-group` [directive](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444).
+
+#### Preview
+
+:::code-group
+```bash [npm]
+npm i viem
+```
+
+```bash [pnpm]
+pnpm i viem
+```
+
+```bash [bun]
+bun i viem
+```
+:::
+
+#### Markdown
+
+````md
+:::code-group
+
+```bash [npm]
+npm i viem
+```
+
+```bash [pnpm]
+pnpm i viem
+```
+
+```bash [bun]
+bun i viem
+```
+
+:::
+````
+
+:::tip[Tip]
+The `":::"` syntax refers to the [Directives Syntax Proposal](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444).
+:::
+
+### HTML/React Previews
+
+#### Preview
+
+:::code-group
+
+<div data-title="Preview">
+  <Example />
+</div>
+
+```tsx [example.tsx]
+<div>test</div>
+```
+
+:::
+
+
+#### Markdown
+
+````mdx
+import { Example } from './components/Example'
+
+:::code-group
+
+<div data-title="Preview">
+  <Example />
+</div>
+
+```tsx [example.tsx]
+<div>test</div>
+```
+
+:::
+````
+
+## Content Visibility
+
+:::::code-group
+
+<div data-title="Preview">
+
+::::show[md]
+This content is only for Markdown output.
+::::
+
+::::show[html]
+This content is only for HTML output.
+::::
+
+::::hide[md]
+This content is hidden for Markdown output.
+::::
+
+::::hide[html]
+This content is hidden for HTML output.
+::::
+
+</div>
+
+```md [Markdown]
+:::show[md]
+This content is only for Markdown output.
+::::
+
+::::show[html]
+This content is only for HTML output.
+::::
+
+::::hide[md]
+This content is hidden for Markdown output.
+::::
+
+::::hide[html]
+This content is hidden for HTML output.
+::::
+```
+
+
+:::::
+
+## Details
+
+:::::code-group
+
+<div data-title="Preview">
+:::details[See more]
+gotcha!
+:::
+
+<div style={{ height: '16px' }} />
+
+::::note
+:::details
+gotcha!
+:::
+::::
+
+::::danger[Error]
+An error occurred!
+
+:::details[Stack trace]
+gotcha!
+:::
+::::
+</div>
+
+```md [Markdown]
+:::details[See more]
+gotcha!
+:::
+
+::::note
+:::details
+gotcha!
+:::
+::::
+
+::::danger[Error]
+An error occurred!
+
+:::details[Stack trace]
+gotcha!
+:::
+::::
+```
+
+:::::
+
+## Emphasis
+
+:::code-group
+
+<div data-title="Preview">
+<p>Emphasis, aka italics, with *asterisks* or _underscores_.</p>
+
+<p>Strong emphasis, aka bold, with **asterisks** or __underscores__.</p>
+
+<p>Combined emphasis with **asterisks and _underscores_**.</p>
+
+<p>Strikethrough uses two tildes. ~~Scratch this.~~</p>
+</div>
+
+```md [Markdown]
+Emphasis, aka italics, with *asterisks* or _underscores_.
+
+Strong emphasis, aka bold, with **asterisks** or __underscores__.
+
+Combined emphasis with **asterisks and _underscores_**.
+
+Strikethrough uses two tildes. ~~Scratch this.~~
+```
+
+:::
+
+## Headings
+
+Headings are rendered as `<h1>` to `<h6>` tags corresponding to the number of `#` characters in the heading.
+
+```md
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+```
+
+## Images
+
+:::code-group
+
+<div data-title="Preview">
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+</div>
+
+```md [Markdown]
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+```
+
+:::
+
+## Inline Code
+
+:::code-group
+
+<div data-title="Preview">
+<p>Inline `code` has `back-ticks around` it.</p>
+
+<p>Inline [`code`]() with link.</p>
+
+Inline `console.log("hello world"){:js}` highlighted code
+</div>
+
+```md [Markdown]
+Inline `code` has `back-ticks around` it.
+
+Inline [`code`]() with link.
+
+Inline `console.log("hello world"){:js}` highlighted code
+```
+
+:::
+
+## Links
+
+:::code-group
+
+<div data-title="Preview">
+<p>[Internal link](/docs/api/config)</p>
+
+<p>[External link](https://google.com)</p>
+
+<p>www.example.com, https://example.com, and contact@example.com.</p>
+</div>
+
+```md [Markdown]
+[Internal link](/docs/api/config)
+
+[External link](https://google.com)
+
+www.example.com, https://example.com, and contact@example.com.
+```
+
+:::
+
+## Lists
+
+:::code-group
+
+<div data-title="Preview">
+1. First ordered list item
+2. Another item
+    - Unordered sub-list.
+      - Unordered sub-list.
+        - Unordered sub-list.
+      - Unordered sub-list.
+    - Unordered sub-list.
+    - Unordered sub-list.
+3. Actual numbers don't matter, just that it's a number
+    1. Ordered sub-list
+        1. Ordered sub-list
+    2. Ordered sub-list
+    3. Ordered sub-list
+4. And another item.
+</div>
+
+```md [Markdown]
+1. First ordered list item
+2. Another item
+    - Unordered sub-list.
+      - Unordered sub-list.
+        - Unordered sub-list.
+      - Unordered sub-list.
+    - Unordered sub-list.
+    - Unordered sub-list.
+3. Actual numbers don't matter, just that it's a number
+    1. Ordered sub-list
+        1. Ordered sub-list
+    2. Ordered sub-list
+    3. Ordered sub-list
+4. And another item.
+```
+
+:::
+
+## Steps
+
+#### Preview
+
+::::steps
+##### Step one
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero.
+
+##### Step two
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero.
+
+:::code-group
+```tsx [console.log]
+console.log('hello world')
+```
+
+```tsx [alert]
+alert('hello world')
+```
+:::
+
+:::info
+test
+
+```tsx
+console.log('hi')
+```
+:::
+
+##### Step three
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero.
+::::
+
+#### Code
+
+````md
+::::steps
+### Step one
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero.
+
+### Step two
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero.
+
+:::code-group
+```tsx [console.log]
+console.log('hello world')
+```
+
+```tsx [alert]
+alert('hello world')
+```
+:::
+
+:::info
+test
+:::
+
+### Step three
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vestibulum ante non neque convallis tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam a iaculis libero.
+::::
+````
+
+:::tip[Tip]
+The `":::"` syntax refers to the [Directives Syntax Proposal](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444).
+:::
+
+## Tables
+
+#### Preview
+
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
+
+#### Code
+
+```md
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
+```
+
+================
+File: docs/structure.mdx
+================
+# Project Structure [Overview of the structure of a Vocs project]
+
+## Overview
+
+A general overview of the structure of a Vocs project:
+
+```
+my-project/             # Your project's root directory.
+├── docs/               # The root directory of your documentation. <!-- [!code focus] [!code hl] -->
+│   ├── pages/          # Directory for your documentation pages (routes). <!-- [!code focus] [!code hl] -->
+│   │   └── index.mdx   # A documentation page. <!-- [!code focus] [!code hl] -->
+│   └── public/         # Directory for static assets. <!-- [!code focus] [!code hl] -->
+│       └── favicon.ico # A static asset. <!-- [!code focus] [!code hl] -->
+├── node_modules/
+├── src/
+├── .env                # Environment variables. Follows Vite's environment variable API. <!-- [!code focus] [!code hl] -->
+├── .gitignore
+├── package.json
+└── vocs.config.ts      # Vocs configuration file. <!-- [!code focus] [!code hl] -->
+```
+
+Vocs is designed to reside within a [subdirectory](/docs/api/config#rootdir) (default: `"./docs"`) of a larger project (ie. a library). However, it is also possible to use Vocs standalone, and you can [change the root directory](/docs/api/config#rootdir) from `"./docs"` to `"."` if you wish.
+
+## Configuration File
+
+Vocs uses a configuration file (`vocs.config.ts`) to define global metadata for your documentation.
+This includes things like the site title, description, logo, sidebar, and more for your project.
+
+```
+my-project/
+│   ...
+├── .gitignore
+├── package.json
+└── vocs.config.ts <!-- [!code focus] -->
+```
+
+A basic `vocs.config.ts` could look like this:
+
+```ts [vocs.config.ts] twoslash
+import { defineConfig } from 'vocs'
+
+export default defineConfig({
+  description: 'Build reliable apps & libraries with lightweight, \
+    composable, and type-safe modules that interface with Ethereum.',
+  title: 'Viem'
+})
+```
+
+[Read the Config API](/docs/api/config)
+
+
+## Root Directory
+
+The Root Directory contains all of your documentation pages, static assets, components, etc.
+By default, Vocs will look for a directory named `./docs` in your project's root directory.
+You can change this directory by setting the [`rootDir` property](/docs/api/config#rootdir) in your [vocs.config.ts](/docs/api/config).
+
+```
+my-project/
+├── docs/ <!-- [!code focus] -->
+│   ├── pages/
+│   │   └── index.mdx
+│   └── public/
+│       └── favicon.ico
+├── node_modules/
+│   ...
+```
+
+## Routing
+
+Vocs uses file-based routing. This means that each file inside of the `./docs/pages` directory will be treated as a route.
+Files within the pages directory can be: Markdown or MDX files, or React components (for more customizability).
+
+```
+my-project/
+├── docs/
+│   ├── pages/  <!-- [!code focus] -->
+|   |   ├── index.mdx <!-- [!code focus] -->
+|   |   └── about.tsx <!-- [!code focus] -->
+│   └── public/
+│       └── favicon.ico
+├── node_modules/
+│   ...
+```
+
+[Read the Routing Guide](#TODO)
+
+## Static Assets
+
+Static assets (images, fonts, etc.) can be placed in the `public` directory.
+
+```
+my-project/
+├── docs/
+│   ├── pages/
+|   |   ├── index.mdx
+|   |   └── about.tsx
+│   └── public/  <!-- [!code focus] -->
+│       ├── logo.svg <!-- [!code focus] -->
+│       └── favicon.ico <!-- [!code focus] -->
+├── node_modules/
+│   ...
+```
+
+They can be referenced in code like so:
+
+```md [example.mdx]
+![Logo](/logo.svg)
+```
+
+```tsx [Example.tsx]
+<img src="/logo.svg" />
+```
+
+
+## Layout Component
+
+A layout React component can be added to your Vocs root directory.
+The layout component will be used to wrap all of your documentation pages.
+This can be useful for adding static CSS files, or further customizing the layout of your documentation.
+
+```
+my-project/
+├── docs/
+│   ├── pages/
+|   |   ├── index.mdx
+|   |   └── about.tsx
+│   └── public/
+│   |   └── favicon.ico
+|   └── layout.tsx <!-- [!code focus] -->
+├── node_modules/
+│   ...
+```
+
+The `layout.tsx` component could look like:
+
+```tsx [layout.tsx]
+import { CustomLayout } from './Layout'
+
+export default function Layout({ children }) {
+  return <CustomLayout>{children}</CustomLayout>
+}
+```
+
+## Footer Component
+
+A footer React component can be added to your Vocs root directory.
+The footer component will be displayed at the bottom of all documentation pages.
+
+```
+my-project/
+├── docs/
+│   ├── pages/
+|   |   ├── index.mdx
+|   |   └── about.tsx
+│   └── public/
+│   |   └── favicon.ico
+|   └── footer.tsx <!-- [!code focus] -->
+├── node_modules/
+│   ...
+```
+
+The `footer.tsx` component could look like:
+
+```tsx [footer.tsx]
+export default function Footer() {
+  return (
+    <div>
+      <div>Released under the MIT License.</div>
+      <div>Copyright © 2022-present weth, LLC.</div>
+    </div>
+  )
+}
+```
+
+## Global Styles
+
+Global styles can be added under a `styles.css` file.
+
+```
+my-project/
+├── docs/
+│   ├── pages/
+|   |   ├── index.mdx
+|   |   └── about.tsx
+│   └── public/
+│   |   └── favicon.ico
+|   └── styles.css <!-- [!code focus] -->
+├── node_modules/
+│   ...
+```
+
+The `styles.css` file could look like:
+
+```css [styles.css]
+@import "tailwindcss";
+
+:root {
+  --vocs-color_background: white;
+}
+
+:root.dark {
+  --vocs-color_background: #232225;
+}
+```
+
+:::tip[Tip]
+You can also utilize the [CSS `@import`](https://vitejs.dev/guide/features.html#import-inlining-and-rebasing) statement to import other CSS files.
+:::
+
+================
+File: blank.mdx
+================
+---
+showOutline: false
+showSidebar: false
+---
+
+# Blank page
+
+This is a blank page.
+
+```ts
+const a = 1 // [\!code --]
+const b = 2 // [\!code ++]
+const c = 3
+```
+
+================
+File: index.mdx
+================
+---
+title: Vocs – React Documentation Framework
+layout: landing
+showLogo: false
+---
+
+import { HomePage } from '../../src/components'
+
+<HomePage.Root>
+  <HomePage.Logo />
+  <HomePage.Tagline>Minimal Documentation Framework, powered by React + Vite.</HomePage.Tagline>
+  <HomePage.InstallPackage name="vocs" type="init" />
+  <HomePage.Description>Vocs is a minimal static documentation generator designed to supercharge your documentation workflow, built with modern web technologies.</HomePage.Description>
+  <HomePage.Buttons>
+    <HomePage.Button href="/docs" variant="accent">Get started</HomePage.Button>
+    <HomePage.Button href="https://github.com/wevm/vocs">GitHub</HomePage.Button>
+  </HomePage.Buttons>
+</HomePage.Root>
+
+# Sponsors
+
+::sponsors
+
+
+
+================================================================
+End of Codebase
+================================================================

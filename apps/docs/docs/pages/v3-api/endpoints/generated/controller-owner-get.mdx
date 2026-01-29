@@ -1,0 +1,48 @@
+---
+title: "GET /controller_owner"
+description: "Current controller owner (singleton)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Current controller owner (singleton)"
+  method="GET"
+  path="/controller_owner"
+  summary="Current controller owner (singleton)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/controller_owner"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/controller_owner'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "owner": "…",
+    "valid_from_seq": 0,
+    "valid_to_seq": 0
+  }
+]
+```
+</EndpointLayout>

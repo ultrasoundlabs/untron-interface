@@ -1,0 +1,56 @@
+---
+title: GET /usdt_deposit_txs
+description: Chronological USDT deposit transfer logs enriched with linkage.
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="USDT deposit transactions"
+  method="GET"
+  path="/usdt_deposit_txs"
+  summary="Chronological USDT deposit Transfer logs into deterministic receivers, enriched with lease/claim linkage."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/usdt_deposit_txs"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS 'https://api.untron.finance/v3/usdt_deposit_txs?order=block_number.desc&limit=50'
+  ```
+
+  :::
+
+  ## Response (200)
+
+  ```json
+  [
+    {
+      "chain_id": "tron:0x2b6653dc",
+      "block_number": "0",
+      "block_timestamp": "2026-01-29T00:00:00.000Z",
+      "log_index": "0",
+      "sender": "T…",
+      "recipient": "T…",
+      "token": "T…",
+      "amount": "0",
+      "receiver_salt": "0x…",
+      "recommended_action": "pending",
+      "deposit_processed": false
+    }
+  ]
+  ```
+
+  :::info[Example]
+  Example response. Values shown are illustrative; field names match the API schema.
+  :::
+</EndpointLayout>

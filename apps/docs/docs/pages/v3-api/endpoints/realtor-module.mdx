@@ -1,0 +1,29 @@
+---
+title: Realtor endpoints
+description: The Realtor module is the “active” part of the V3 API for managing leases.
+---
+
+# Realtor endpoints
+
+The **Realtor module** is the “active” part of the V3 API — the endpoints you call to **manage leases**.
+
+Unlike most V3 endpoints (which are PostgREST views over the indexer DB), these endpoints behave more like an application API:
+
+- They create/update protocol state (via relayed / gasless operations).
+- They return tracking identifiers (e.g. `userop_hash`) and computed addresses.
+- They are the endpoints most likely to have product-level semantics (and therefore the ones we prioritize in docs).
+
+## Core endpoints
+
+- `GET /realtor` – fetch realtor terms, limits, and supported pairs.
+- `POST /realtor` – create a lease (returns receiver addresses + `userop_hash`).
+- `POST /payout_config` – update payout configuration (gasless relay; returns `userop_hash`).
+- `GET /leases/{lease_id}` – fetch the aggregated lease view for a single lease id.
+
+## Typical flow
+
+1. Call `GET /realtor` to confirm you’re allowed and to read terms.
+2. Call `POST /realtor` to create a lease and get receiver addresses.
+3. Watch the lease/indexer state via `GET /leases/{lease_id}` (and/or indexer views).
+4. Update payout config via `POST /payout_config` when needed.
+

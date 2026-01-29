@@ -1,0 +1,51 @@
+---
+title: "GET /usdt_deposits_daily"
+description: "Daily rollup of canonical USDT deposit logs (count + sum + uniques)."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Daily rollup of canonical USDT deposit logs (count + sum + uniques)."
+  method="GET"
+  path="/usdt_deposits_daily"
+  summary="Daily rollup of canonical USDT deposit logs (count + sum + uniques)."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/usdt_deposits_daily"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/usdt_deposits_daily'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "amount_total": "…",
+    "day": "…",
+    "deposits_total": 0,
+    "leases_touched": 0,
+    "unique_receivers": 0,
+    "unique_senders": 0
+  }
+]
+```
+</EndpointLayout>

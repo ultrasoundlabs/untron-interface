@@ -1,0 +1,48 @@
+---
+title: "GET /controller_lp"
+description: "Current controller LP address (singleton)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Current controller LP address (singleton)"
+  method="GET"
+  path="/controller_lp"
+  summary="Current controller LP address (singleton)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/controller_lp"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/controller_lp'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "lp": "…",
+    "valid_from_seq": 0,
+    "valid_to_seq": 0
+  }
+]
+```
+</EndpointLayout>

@@ -1,0 +1,77 @@
+---
+title: GET /v1/capabilities
+description: Get current capabilities graph.
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Get current capabilities graph"
+  method="GET"
+  path="/v1/capabilities"
+  summary="Returns the live graph of chains, assets, and routes that are possible right now."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/bridge"
+      path="/v1/capabilities"
+      method="get"
+      specUrl="https://api.untron.finance/bridge/v1/openapi.json"
+    />
+  }
+>
+  ## What it does
+
+  Returns the live “graph” of what’s possible right now (chains, assets, routes).
+
+  This endpoint is descriptive only and does not create commitments.
+
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS 'https://api.untron.finance/bridge/v1/capabilities'
+  ```
+
+  :::
+
+  ## Response (200)
+
+  ```json
+  {
+    "capabilitiesVersion": "2026-01-29T00:00:00.000Z",
+    "assetFamilies": [
+      {
+        "assetFamilyId": "usdc",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "currency": "USD",
+        "issuer": "circle",
+        "representations": [
+          {
+            "chainId": "eip155:1",
+            "assetId": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+            "decimals": 6
+          }
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "fromChainId": "eip155:1",
+        "toChainId": "eip155:42161",
+        "pairs": [{ "fromFamily": "usdc", "toFamily": "usdc" }],
+        "features": { "partialFill": false, "overpayRefund": true, "refundDestinations": true }
+      }
+    ],
+    "refundPolicyModes": ["automatic", "automatic_if_supported", "manual_required", "not_supported"]
+  }
+  ```
+
+  ## Common uses
+
+  - Populate chain/asset selectors
+  - Pre-validate a route before quoting
+  - Cache “what’s possible” with a short TTL (ETag supported)
+</EndpointLayout>

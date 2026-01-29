@@ -1,0 +1,50 @@
+---
+title: "GET /claim_fill_latency_daily"
+description: "Daily latency stats for filled claims: (ClaimFilled block_time - origin_timestamp)."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Daily latency stats for filled claims: (ClaimFilled block_time - origin_timestamp)."
+  method="GET"
+  path="/claim_fill_latency_daily"
+  summary="Daily latency stats for filled claims: (ClaimFilled block_time - origin_timestamp)."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/claim_fill_latency_daily"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/claim_fill_latency_daily'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "avg_seconds": "…",
+    "day": "…",
+    "filled_claims_total": 0,
+    "p50_seconds": 0,
+    "p90_seconds": 0
+  }
+]
+```
+</EndpointLayout>

@@ -1,0 +1,49 @@
+---
+title: "GET /stream_cursor"
+description: "Projection cursors (per stream)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Projection cursors (per stream)"
+  method="GET"
+  path="/stream_cursor"
+  summary="Projection cursors (per stream)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/stream_cursor"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/stream_cursor'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "applied_through_seq": 0,
+    "stream": "…",
+    "tip": "…",
+    "updated_at": "…"
+  }
+]
+```
+</EndpointLayout>

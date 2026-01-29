@@ -1,0 +1,35 @@
+:root {
+  /* Scalar API Client theming (best-effort defaults).
+     Your DOM shows Scalar utility classes like `bg-b-1`, `text-c-1`, etc.
+     Those map to Scalar CSS variables; if the vars are unset, everything looks transparent. */
+  --scalar-font: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+
+  /* Backgrounds */
+  --scalar-background-1: var(--vocs-color-background, #0b0f14);
+  --scalar-background-2: color-mix(
+    in oklab,
+    var(--vocs-color-background, #0b0f14) 92%,
+    var(--vocs-color-text, #e5e7eb)
+  );
+  --scalar-background-3: color-mix(
+    in oklab,
+    var(--vocs-color-background, #0b0f14) 86%,
+    var(--vocs-color-text, #e5e7eb)
+  );
+
+  /* Text */
+  --scalar-color-1: var(--vocs-color-text, #e5e7eb);
+  --scalar-color-2: var(--vocs-color-muted, #94a3b8);
+  --scalar-color-3: color-mix(in oklab, var(--vocs-color-muted, #94a3b8) 80%, transparent);
+
+  /* Borders / accents */
+  --scalar-border-color: var(--vocs-color-border, rgba(148, 163, 184, 0.25));
+  --scalar-color-blue: color-mix(in oklab, var(--vocs-color-text, #e5e7eb) 30%, #3b82f6);
+}
+
+/* Make Scalar inherit our font. */
+:where(.scalar, .scalar-app, .scalar-container, .scalar-teleport-root) {
+  font-family: var(--scalar-font) !important;
+}
+
+/* Modal layout overrides live in `docs/components/scalar-overrides.css` (loaded after Scalar CSS). */

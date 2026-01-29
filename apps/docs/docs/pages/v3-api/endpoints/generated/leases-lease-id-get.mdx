@@ -1,0 +1,51 @@
+---
+title: "GET /leases/{lease_id}"
+description: "Fetch an aggregated lease view."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Fetch an aggregated lease view."
+  method="GET"
+  path="/leases/{lease_id}"
+  summary="Fetch an aggregated lease view."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/leases/{lease_id}"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  Realtor module.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/leases/123'
+```
+
+:::
+
+  ## Response
+
+```json
+{
+  "claims": [],
+  "claims_filled": 0,
+  "claims_total": 0,
+  "flat_fee": "0",
+  "is_owned_by_this_realtor": true,
+  "lease_fee_ppm": 10000,
+  "lease_id": "1",
+  "lease_nonce": "0"
+}
+```
+</EndpointLayout>

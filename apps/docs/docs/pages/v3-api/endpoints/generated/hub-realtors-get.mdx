@@ -1,0 +1,53 @@
+---
+title: "GET /hub_realtors"
+description: "Current realtor allowlist + realtor config (KV)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Current realtor allowlist + realtor config (KV)"
+  method="GET"
+  path="/hub_realtors"
+  summary="Current realtor allowlist + realtor config (KV)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/hub_realtors"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/hub_realtors'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "allowed": false,
+    "lease_rate_max_leases": "…",
+    "lease_rate_window_seconds": "…",
+    "max_lease_duration_seconds": 0,
+    "min_fee_ppm": 0,
+    "min_flat_fee": "…",
+    "realtor": "…",
+    "valid_from_seq": 0
+  }
+]
+```
+</EndpointLayout>

@@ -1,0 +1,72 @@
+.untron-endpoint__titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.untron-endpoint__method {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--vocs-color-border);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.untron-endpoint__path {
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--vocs-color-text);
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+.untron-endpoint__title {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.untron-endpoint__summary {
+  margin-top: 10px;
+  margin-bottom: 0;
+  color: var(--vocs-color-muted);
+}
+
+.untron-endpoint__asideInline {
+  margin-top: 16px;
+  border: 1px solid var(--vocs-color_border);
+  border-radius: 16px;
+  padding: 14px;
+  background: var(--vocs-color_background);
+}
+
+/* Prose rhythm inside endpoint pages (content is rendered inside a custom component,
+   so we enforce consistent spacing for lists/paragraphs). */
+.untron-endpoint__content {
+  margin-top: 24px;
+  line-height: var(--vocs-lineHeight_paragraph);
+}
+
+.untron-endpoint__content :where(p) {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.untron-endpoint__content :where(ul, ol) {
+  margin-top: 0;
+  margin-bottom: 14px;
+  padding-left: 20px;
+}
+
+.untron-endpoint__content :where(li) {
+  margin: 6px 0;
+  line-height: var(--vocs-lineHeight_paragraph);
+}
+
+.untron-endpoint__content :where(li > p) {
+  margin: 0;
+}

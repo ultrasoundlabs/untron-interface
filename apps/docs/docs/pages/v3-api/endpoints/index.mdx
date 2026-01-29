@@ -1,0 +1,36 @@
+---
+title: Endpoints
+description: V3 API endpoints with Vocs-native docs and a Scalar “Try it” client.
+---
+
+# V3 API Endpoints
+
+These pages are intentionally “docs-first”: we explain what to query, how filtering works, and what to expect back.
+
+Use the **Try it** panel on each endpoint to open Scalar’s API Client modal.
+
+:::info[Spec source]
+`https://api.untron.finance/v3/openapi.json`
+:::
+
+## Query style (high level)
+
+Many V3 endpoints behave like database views:
+
+- most endpoints are `GET` and return arrays
+- you can filter via query params (and some endpoints support `select`, `order`, `limit`, `offset`)
+
+When in doubt, open the endpoint in the client and let it generate a working request.
+
+## Realtor endpoints
+
+- Overview: [Realtor module](/v3-api/endpoints/realtor-module)
+- [GET /realtor](/v3-api/endpoints/realtor)
+- [POST /realtor](/v3-api/endpoints/create-lease)
+- [POST /payout_config](/v3-api/endpoints/payout-config)
+- [`GET /leases/{lease_id}`](/v3-api/endpoints/lease-by-id)
+
+## Indexer endpoints
+
+- Overview: [Indexer endpoints](/v3-api/endpoints/indexer)
+- Auto-generated coverage for every endpoint: [Generated endpoints](/v3-api/endpoints/generated)

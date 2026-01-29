@@ -1,0 +1,73 @@
+---
+title: POST /realtor
+description: Create a lease (Realtor module).
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Create a lease"
+  method="POST"
+  path="/realtor"
+  summary="Create a new lease via the Realtor module. Returns receiver addresses and a user operation hash."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/realtor"
+      method="post"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  ## What it does
+
+  Creates a lease and returns deterministic receiver addresses to fund, plus a `userop_hash` for tracking.
+
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS -X POST 'https://api.untron.finance/v3/realtor' \
+    -H 'content-type: application/json' \
+    -d '{
+      "lessee": "T…",
+      "beneficiary": "T…",
+      "target_chain_id": "eip155:42161",
+      "target_token": "usdc",
+      "duration_seconds": 86400,
+      "receiver_salt": "0x…"
+    }'
+  ```
+
+  ```json [Body]
+  {
+    "lessee": "T…",
+    "beneficiary": "T…",
+    "target_chain_id": "eip155:42161",
+    "target_token": "usdc",
+    "duration_seconds": 86400,
+    "receiver_salt": "0x…"
+  }
+  ```
+
+  :::
+
+  ## Response (200)
+
+  ```json
+  {
+    "receiver_salt": "0x…",
+    "receiver_address_tron": "T…",
+    "receiver_address_evm": "0x…",
+    "nukeable_after": "2026-01-29T00:00:00.000Z",
+    "userop_hash": "0x…"
+  }
+  ```
+
+  :::info[Example]
+  Example response. Values shown are illustrative; field names match the API schema.
+  :::
+</EndpointLayout>
+
