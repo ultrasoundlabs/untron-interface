@@ -39,6 +39,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.13.0",
 		"globals": "^16.5.0",
+		"layerchart": "2.0.0-next.43",
 		"openapi-typescript": "^7.10.1",
 		"prettier": "3.6.x",
 		"prettier-plugin-svelte": "^3.4.0",
