@@ -16,7 +16,7 @@
 	import WalletStatus from '@untron/stylekit/components/WalletStatus.svelte';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { connectWallet, disconnectWallet } from '$lib/wagmi/wallet';
-	import { WALLETS } from '$lib/config/wallets';
+	import { WALLETS } from '@untron/connectkit/wallets';
 
 	let { children } = $props();
 

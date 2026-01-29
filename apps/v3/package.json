@@ -17,6 +17,7 @@
 		"gen:api": "openapi-typescript ./openapi.json -o ./src/lib/api/schema.d.ts"
 	},
 	"dependencies": {
+		"@untron/connectkit": "workspace:*",
 		"@untron/stylekit": "workspace:*",
 		"@untron/ui": "workspace:*",
 		"@wagmi/connectors": "^7.0.2",

@@ -22,6 +22,12 @@ For instructions per application or package, see the README published for each a
 - [Bridge](apps/bridge/README.md)
 - [Untron V3 Dashboard](apps/v3/README.md)
 
+## Packages
+
+- `@untron/ui`: shared shadcn-svelte component library used by all apps. See [packages/ui](packages/ui/README.md).
+- `@untron/stylekit`: shared theme + layout primitives (header/footer/theme/head). See [packages/stylekit](packages/stylekit/README.md).
+- `@untron/connectkit`: shared wallet connection primitives (wagmi helpers + wallet metadata/icons). See [packages/connectkit](packages/connectkit/README.md).
+
 ## Socials / Contact
 
 - X: [@untronfi](https://x.com/untronfi)
@@ -33,5 +39,4 @@ For instructions per application or package, see the README published for each a
 | Folder      | Contents                                                                       |
 | ----------- | ------------------------------------------------------------------------------ |
 | `apps/`     | The home for each standalone application.                                      |
-| `config/`   | Shared infrastructure packages and configurations.                             |
-| `packages/` | Shared code packages covering UI, shared functionality, and shared utilities.  |
+| `packages/` | Shared code packages (UI, theme, wallet connect, etc.).                        |
