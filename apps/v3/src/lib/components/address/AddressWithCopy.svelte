@@ -15,7 +15,7 @@
 	{/if}
 
 	<div class="flex items-center gap-2">
-		<code class="flex-1 truncate rounded-md border bg-muted/30 px-2 py-1 font-mono text-xs">
+		<code class="flex-1 truncate rounded-md border bg-muted/30 px-2 py-1 font-sans text-xs">
 			{value ?? '—'}
 		</code>
 		<CopyButton {value} label={`Copy ${label ?? 'value'}`} />

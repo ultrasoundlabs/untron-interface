@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
-	import * as Table from '$lib/components/ui/table';
+	import { Badge } from '@untron/ui/badge';
+	import { Button } from '@untron/ui/button';
+	import * as Table from '@untron/ui/table';
 	import type { SqlRow } from '$lib/untron/types';
 	import {
 		formatAddress,
@@ -215,10 +215,10 @@
 			{@const deposits = getDepositEntries(row)}
 			<Table.Row>
 				<Table.Cell class="space-y-0.5">
-					<div class="font-mono">
+					<div class="font-sans tabular-nums">
 						{getClaimId(row) ?? '—'}
 					</div>
-					<div class="font-mono text-xs text-muted-foreground">
+					<div class="font-sans text-xs text-muted-foreground">
 						{#if deposits.length > 0}
 							{@const shown = deposits.slice(0, 2)}
 							<div class="space-y-0.5">
@@ -290,16 +290,16 @@
 					{#if getTargetChainId(row)}
 						{@const chainId = getTargetChainId(row)!}
 						{@const meta = getChainMeta(chainId)}
-						<div class="font-mono">
+						<div class="font-sans tabular-nums">
 							{meta?.name ?? chainId} ({chainId})
 						</div>
 					{:else}
-						<div class="font-mono">—</div>
+						<div class="font-sans">—</div>
 					{/if}
 					{#if getTargetToken(row)}
 						{@const token = getTargetToken(row)!}
 						{@const alias = getTokenAlias(token)}
-						<div class="font-mono text-xs text-muted-foreground">
+						<div class="font-sans text-xs text-muted-foreground">
 							<div class="text-foreground">{alias ?? formatAddress(token)}</div>
 							<!-- {#if alias}
 								<span class="mt-0.5 block">
@@ -314,7 +314,7 @@
 						</div>
 					{/if}
 				</Table.Cell>
-				<Table.Cell class="font-mono">
+				<Table.Cell class="font-sans">
 					{@const amount = getAmountUsdtAtomic(row)}
 					{#if amount}
 						{@const net = formatUsdtAtomic6(amount) ?? amount}
@@ -324,6 +324,7 @@
 								display={`${net} USDT`}
 								copyValue={`${net} USDT`}
 								label="Copy net amount"
+								class="tabular-nums"
 							/>
 						</div>
 						<div class="text-xs text-muted-foreground">
@@ -343,6 +344,7 @@
 										display={`fee ${formatUsdtAtomic6(fee.feeAtomic) ?? fee.feeAtomic.toString(10)} USDT (${formatPpmAsPercent(leaseFeePpm)})`}
 										copyValue={`${formatUsdtAtomic6(fee.feeAtomic) ?? fee.feeAtomic.toString(10)} USDT`}
 										label="Copy fee amount"
+										class="tabular-nums"
 									/>
 								</div>
 							{/if}
@@ -351,7 +353,7 @@
 						—
 					{/if}
 				</Table.Cell>
-				<Table.Cell class="font-mono">
+				<Table.Cell class="font-sans">
 					{@const b = getBeneficiary(row)}
 					<CopyableValue
 						value={b}
@@ -360,7 +362,7 @@
 						label="Copy beneficiary"
 					/>
 				</Table.Cell>
-				<Table.Cell class="font-mono">
+				<Table.Cell class="font-sans">
 					{@const origin = getOriginTimestamp(row)}
 					{#if origin}
 						<CopyableValue
@@ -371,6 +373,7 @@
 								undefined}
 							copyValue={origin}
 							label="Copy origin timestamp"
+							class="tabular-nums"
 						/>
 					{:else}
 						—

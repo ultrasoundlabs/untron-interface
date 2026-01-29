@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as Table from '$lib/components/ui/table';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
+	import * as Table from '@untron/ui/table';
+	import { Badge } from '@untron/ui/badge';
+	import { Button } from '@untron/ui/button';
 	import CopyableValue from '$lib/components/common/CopyableValue.svelte';
 	import type { UsdtDepositTx } from '$lib/untron/api';
 	import {
@@ -100,7 +100,7 @@
 	}
 </script>
 
-<Table.Root>
+<Table.Root class="[&_td]:px-2 [&_th]:px-2">
 	<Table.Header>
 		<Table.Row>
 			<Table.Head>Amount</Table.Head>
@@ -121,7 +121,9 @@
 					<div class="flex items-center gap-2">
 						<img src="/usdt.svg" alt="USDT" class="h-6 w-6 shrink-0" />
 						<div class="space-y-0.5">
-							<div class="font-mono text-base leading-none font-semibold">{amount ?? '—'}</div>
+							<div class="font-sans text-base leading-none font-semibold tabular-nums">
+								{amount ?? '—'}
+							</div>
 							<div class="text-xs text-muted-foreground">USDT</div>
 						</div>
 					</div>
@@ -144,11 +146,11 @@
 					{:else}
 						<div class="text-sm font-medium">—</div>
 					{/if}
-					<div class="font-mono text-xs text-muted-foreground">
+					<div class="font-sans text-xs text-muted-foreground">
 						{tsLabel(row.block_timestamp ?? row.block_time ?? row.inserted_at)}
 					</div>
 				</Table.Cell>
-				<Table.Cell class="max-w-[14rem] font-mono">
+				<Table.Cell class="max-w-[14rem] font-sans">
 					<CopyableValue
 						value={typeof row.sender === 'string' ? row.sender : null}
 						display={senderLabel(row.sender)}
@@ -156,7 +158,7 @@
 						label="Copy sender"
 					/>
 				</Table.Cell>
-				<Table.Cell class="max-w-[14rem] font-mono">
+				<Table.Cell class="max-w-[14rem] font-sans">
 					<CopyableValue
 						value={typeof row.recipient === 'string' ? row.recipient : null}
 						display={receiverLabel(row.recipient)}
@@ -164,14 +166,14 @@
 						label="Copy receiver"
 					/>
 				</Table.Cell>
-				<Table.Cell class="font-mono">
+				<Table.Cell class="font-sans">
 					{@const href = leaseHref(row)}
 					{#if href}
-						<Button variant="ghost" size="sm" {href}>
+						<Button variant="ghost" size="sm" class="tabular-nums" {href}>
 							{leaseLabel(row)}
 						</Button>
 					{:else}
-						{leaseLabel(row)}
+						<span class="tabular-nums">{leaseLabel(row)}</span>
 					{/if}
 				</Table.Cell>
 				<Table.Cell class="space-y-1 whitespace-nowrap">
@@ -195,7 +197,7 @@
 						</div>
 					{/if}
 				</Table.Cell>
-				<Table.Cell class="font-mono">
+				<Table.Cell class="font-sans">
 					<CopyableValue
 						value={typeof row.tx_hash === 'string' ? row.tx_hash : null}
 						display={formatHexShort(row.tx_hash, 12, 10)}

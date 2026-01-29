@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import * as Dialog from '$lib/components/ui/dialog';
+	import * as Card from '@untron/ui/card';
+	import { Button } from '@untron/ui/button';
+	import * as Dialog from '@untron/ui/dialog';
 	import AddressWithCopy from '$lib/components/address/AddressWithCopy.svelte';
 	import type { SqlRow } from '$lib/untron/types';
 	import {
@@ -28,7 +28,7 @@
 	} from '$lib/untron/format';
 	import { getChainMeta } from '$lib/untron/routes';
 	import FileJsonIcon from '@lucide/svelte/icons/file-json';
-	import { Textarea } from '$lib/components/ui/textarea';
+	import { Textarea } from '@untron/ui/textarea';
 	import CopyableValue from '$lib/components/common/CopyableValue.svelte';
 	import CopyButton from '$lib/components/common/CopyButton.svelte';
 
@@ -70,13 +70,13 @@
 		<div class="grid gap-3">
 			<div class="grid grid-cols-2 gap-2 text-sm">
 				<div class="text-muted-foreground">Lease id</div>
-				<div class="font-mono">{getLeaseId(lease) ?? '—'}</div>
+				<div class="font-sans">{getLeaseId(lease) ?? '—'}</div>
 
 				<div class="text-muted-foreground">Receiver salt</div>
-				<div class="font-mono">{formatHexShort(getReceiverSalt(lease)) ?? '—'}</div>
+				<div class="font-sans">{formatHexShort(getReceiverSalt(lease)) ?? '—'}</div>
 
 				<div class="text-muted-foreground">Start time</div>
-				<div class="font-mono">
+				<div class="font-sans">
 					{#if lease.start_time !== undefined}
 						{@const start = formatUnixSeconds(lease.start_time)}
 						<CopyableValue
@@ -94,7 +94,7 @@
 				</div>
 
 				<div class="text-muted-foreground">Nukeable after</div>
-				<div class="font-mono">
+				<div class="font-sans">
 					<CopyableValue
 						value={getNukeableAfter(lease)}
 						display={formatUnixSecondsRelative(getNukeableAfter(lease)) ??
@@ -106,7 +106,7 @@
 				</div>
 
 				<div class="text-muted-foreground">Lease nonce</div>
-				<div class="font-mono">
+				<div class="font-sans">
 					<CopyableValue
 						value={getLeaseNonce(lease)}
 						display={formatNumberish(getLeaseNonce(lease))}
@@ -116,7 +116,7 @@
 				</div>
 
 				<div class="text-muted-foreground">Status</div>
-				<div class="font-mono">
+				<div class="font-sans">
 					{#if getIsNukeableYet(lease) === true}
 						expired
 					{:else if getIsActive(lease) === true}
@@ -129,7 +129,7 @@
 				</div>
 
 				<div class="text-muted-foreground">Fees</div>
-				<div class="font-mono">
+				<div class="font-sans">
 					<CopyableValue
 						value={getLeaseFeePpm(lease)}
 						display={formatFeesPpmAndFlat(getLeaseFeePpm(lease), getFlatFee(lease))}
@@ -146,7 +146,7 @@
 			<AddressWithCopy label="Target token (EVM)" value={getTargetToken(lease)} />
 			<div class="space-y-1">
 				<div class="text-xs font-medium text-muted-foreground">Target</div>
-				<div class="font-mono text-xs">
+				<div class="font-sans text-xs">
 					{#if getTargetChainId(lease)}
 						{@const chainId = getTargetChainId(lease)!}
 						{@const meta = getChainMeta(chainId)}
@@ -177,7 +177,7 @@
 		<div class="flex justify-end">
 			<CopyButton value={rawJson} label="Copy raw JSON" />
 		</div>
-		<Textarea value={rawJson} readonly class="min-h-[360px] font-mono text-xs" />
+		<Textarea value={rawJson} readonly class="min-h-[360px] font-sans text-xs" />
 		<Dialog.Footer>
 			<Button variant="outline" onclick={() => (rawOpen = false)}>Close</Button>
 		</Dialog.Footer>

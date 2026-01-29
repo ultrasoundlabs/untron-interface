@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import * as Alert from '$lib/components/ui/alert';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Skeleton } from '$lib/components/ui/skeleton';
+	import * as Card from '@untron/ui/card';
+	import { Button } from '@untron/ui/button';
+	import * as Alert from '@untron/ui/alert';
+	import { Badge } from '@untron/ui/badge';
+	import { Skeleton } from '@untron/ui/skeleton';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import HourglassIcon from '@lucide/svelte/icons/hourglass';

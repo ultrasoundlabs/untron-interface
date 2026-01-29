@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import * as Dialog from '@untron/ui/dialog';
 	import { m } from '$lib/paraglide/messages.js';
 	import type {
 		SwapDirection,

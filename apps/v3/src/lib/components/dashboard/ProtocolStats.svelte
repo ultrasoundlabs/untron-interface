@@ -1,13 +1,13 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import * as Alert from '$lib/components/ui/alert';
-	import { Skeleton } from '$lib/components/ui/skeleton';
+	import * as Card from '@untron/ui/card';
+	import { Button } from '@untron/ui/button';
+	import * as Alert from '@untron/ui/alert';
+	import { Skeleton } from '@untron/ui/skeleton';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 	import TrendingUpIcon from '@lucide/svelte/icons/trending-up';
 	import ActivityIcon from '@lucide/svelte/icons/activity';
 	import UsersIcon from '@lucide/svelte/icons/users';
-	import * as Chart from '$lib/components/ui/chart';
+	import * as Chart from '@untron/ui/chart';
 	import { startPolling } from '$lib/polling';
 	import { getUsdtDepositsDaily, type UsdtDepositsDaily } from '$lib/untron/api';
 	import { BarChart, LineChart } from 'layerchart';

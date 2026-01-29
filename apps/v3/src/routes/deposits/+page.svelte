@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import * as Alert from '$lib/components/ui/alert';
-	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
-	import { Skeleton } from '$lib/components/ui/skeleton';
-	import * as Select from '$lib/components/ui/select';
+	import * as Alert from '@untron/ui/alert';
+	import { Button } from '@untron/ui/button';
+	import * as Card from '@untron/ui/card';
+	import { Input } from '@untron/ui/input';
+	import { Skeleton } from '@untron/ui/skeleton';
+	import * as Select from '@untron/ui/select';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 	import DepositsTable from '$lib/components/deposits/DepositsTable.svelte';
 	import {
@@ -340,7 +340,7 @@
 					<Skeleton class="h-10" />
 				{:else}
 					<div class="space-y-1">
-						<div class="font-mono text-lg">{today?.deposits_total ?? '—'}</div>
+						<div class="font-sans text-lg">{today?.deposits_total ?? '—'}</div>
 						<div class="text-sm text-muted-foreground">
 							{formatUsdtFromDaily(today?.amount_total)} USDT
 						</div>
@@ -359,7 +359,7 @@
 					<Skeleton class="h-10" />
 				{:else}
 					<div class="space-y-1">
-						<div class="font-mono text-lg">{last7DepositsTotal}</div>
+						<div class="font-sans text-lg">{last7DepositsTotal}</div>
 						<div class="text-sm text-muted-foreground">
 							{formatUsdtSumFixed2(last7AmountTotal)} USDT
 						</div>
@@ -378,7 +378,7 @@
 					<Skeleton class="h-10" />
 				{:else}
 					<div class="space-y-1">
-						<div class="font-mono text-lg">{rows.length}</div>
+						<div class="font-sans text-lg">{rows.length}</div>
 						<div class="text-sm text-muted-foreground">
 							{#if total !== null}
 								total {total}

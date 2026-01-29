@@ -3,7 +3,7 @@
 	import { fade, fly, scale } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button } from '@untron/ui/button';
 	import { m } from '$lib/paraglide/messages.js';
 	import * as swapService from '$lib/services/swapService';
 	import type { BridgeOrder } from '$lib/types/swap';

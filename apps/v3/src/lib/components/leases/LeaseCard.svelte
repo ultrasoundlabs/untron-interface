@@ -1,8 +1,8 @@
 <script lang="ts">
 	import QRCode from '@castlenine/svelte-qrcode';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
+	import { Badge } from '@untron/ui/badge';
+	import { Button } from '@untron/ui/button';
+	import * as Card from '@untron/ui/card';
 	import type { SqlRow } from '$lib/untron/types';
 	import {
 		formatAddress,
@@ -59,7 +59,7 @@
 						display={receiverTron ?? 'Receiver unknown'}
 						copyValue={receiverTron}
 						label="Copy receiver (Tron)"
-						class="font-mono"
+						class="font-sans"
 					/>
 				</Card.Description>
 			</div>
@@ -92,7 +92,7 @@
 			<div class="grid gap-3">
 				<div class="grid grid-cols-2 gap-2 text-sm">
 					<div class="text-muted-foreground">Lessee</div>
-					<div class="font-mono">
+					<div class="font-sans">
 						<CopyableValue
 							value={lessee}
 							display={lessee ? formatAddress(lessee) : '—'}
@@ -102,7 +102,7 @@
 					</div>
 
 					<div class="text-muted-foreground">Beneficiary</div>
-					<div class="font-mono">
+					<div class="font-sans">
 						<CopyableValue
 							value={beneficiary}
 							display={beneficiary ? formatAddress(beneficiary) : '—'}
@@ -113,7 +113,7 @@
 
 					<div class="text-muted-foreground">Target</div>
 					<div class="space-y-0.5">
-						<div class="font-mono">
+						<div class="font-sans">
 							{#if targetChainId}
 								{@const meta = getChainMeta(targetChainId)}
 								<span>{meta?.name ?? targetChainId} ({targetChainId})</span>
@@ -131,7 +131,7 @@
 						{#if targetToken}
 							{@const alias = getTokenAlias(targetToken)}
 							{#if alias}
-								<div class="font-mono text-xs text-muted-foreground">
+								<div class="font-sans text-xs text-muted-foreground">
 									<CopyableValue
 										value={targetToken}
 										display={formatAddress(targetToken)}
@@ -144,7 +144,7 @@
 					</div>
 
 					<div class="text-muted-foreground">Fees</div>
-					<div class="font-mono">
+					<div class="font-sans">
 						<CopyableValue
 							value={leaseFeePpm}
 							display={formatFeesPpmAndFlat(leaseFeePpm, flatFee)}
@@ -154,7 +154,7 @@
 					</div>
 
 					<div class="text-muted-foreground">Nukeable after</div>
-					<div class="font-mono">
+					<div class="font-sans">
 						<CopyableValue
 							value={nukeableAfter}
 							display={formatUnixSecondsRelative(nukeableAfter) ?? formatNumberish(nukeableAfter)}
