@@ -68,5 +68,8 @@
 		"openapi-fetch": "^0.15.0",
 		"viem": "^2.40.0",
 		"zod": "^4.1.13"
+	},
+	"optionalDependencies": {
+		"@rollup/rollup-linux-x64-gnu": "^4.0.0"
 	}
 }
