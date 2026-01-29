@@ -59,9 +59,9 @@
 	},
 	"dependencies": {
 		"@shapeshiftoss/caip": "^8.16.7",
-		"@untron/connectkit": "workspace:*",
-		"@untron/stylekit": "workspace:*",
-		"@untron/ui": "workspace:*",
+		"@untron/connectkit": "file:../../packages/connectkit",
+		"@untron/stylekit": "file:../../packages/stylekit",
+		"@untron/ui": "file:../../packages/ui",
 		"@wagmi/connectors": "^7.0.2",
 		"@wagmi/core": "^3.0.0",
 		"bits-ui": "^2.14.4",
