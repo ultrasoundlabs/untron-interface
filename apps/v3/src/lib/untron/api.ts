@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { env } from '$env/dynamic/public';
+import { PUBLIC_UNTRON_HUB_CHAIN_ID } from '$env/static/public';
 import { api as createApiClient } from '$lib/api/client';
 import type { components } from '$lib/api/schema';
 import { getAddress } from 'viem';
@@ -23,7 +23,7 @@ function requireBrowser() {
 }
 
 function getHubChainId(): number | null {
-	const raw = env.PUBLIC_UNTRON_HUB_CHAIN_ID;
+	const raw = PUBLIC_UNTRON_HUB_CHAIN_ID;
 	if (!raw) return null;
 	const parsed = Number(raw);
 	if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) {

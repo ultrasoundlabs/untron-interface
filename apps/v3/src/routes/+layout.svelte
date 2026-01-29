@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import { page } from '$app/stores';
-	import { env } from '$env/dynamic/public';
+	import { PUBLIC_BRIDGE_URL, PUBLIC_DOCS_URL, PUBLIC_V3_URL } from '$env/static/public';
 	import { Button } from '@untron/ui/button';
 	import { Separator } from '@untron/ui/separator';
 	import LayoutDashboardIcon from '@lucide/svelte/icons/layout-dashboard';
@@ -24,15 +24,15 @@
 		{
 			id: 'bridge',
 			label: 'Bridge',
-			href: env.PUBLIC_BRIDGE_URL ?? '#',
-			disabled: !env.PUBLIC_BRIDGE_URL
+			href: PUBLIC_BRIDGE_URL ?? '#',
+			disabled: !PUBLIC_BRIDGE_URL
 		},
-		{ id: 'v3', label: 'V3', href: env.PUBLIC_V3_URL ?? '/', disabled: false },
+		{ id: 'v3', label: 'V3', href: PUBLIC_V3_URL ?? '/', disabled: false },
 		{
 			id: 'integrate',
 			label: 'Integrate',
-			href: env.PUBLIC_DOCS_URL ?? '#',
-			disabled: !env.PUBLIC_DOCS_URL
+			href: PUBLIC_DOCS_URL ?? '#',
+			disabled: !PUBLIC_DOCS_URL
 		}
 	] as const;
 
