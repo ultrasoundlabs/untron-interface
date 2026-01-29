@@ -12,6 +12,7 @@
 	import NewLeaseDialog from '$lib/components/leases/NewLeaseDialog.svelte';
 	import KeyRoundIcon from '@lucide/svelte/icons/key-round';
 	import { startPolling } from '$lib/polling';
+	import ProtocolStats from '$lib/components/dashboard/ProtocolStats.svelte';
 
 	let leases = $state<SqlRow[] | null>(null);
 	let errorMessage = $state<string | null>(null);
@@ -55,6 +56,8 @@
 </script>
 
 <div class="space-y-6">
+	<ProtocolStats />
+
 	<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 		<div class="space-y-1">
 			<h2 class="flex items-center gap-2 text-xl font-semibold tracking-tight">

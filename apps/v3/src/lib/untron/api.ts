@@ -44,6 +44,7 @@ export type SetPayoutConfigRequest = components['schemas']['SetPayoutConfigReque
 export type SetPayoutConfigResponse = components['schemas']['SetPayoutConfigResponse'];
 export type UsdtDepositTx = components['schemas']['usdt_deposit_txs'];
 export type UsdtDepositsDaily = components['schemas']['usdt_deposits_daily'];
+export type UsdtDepositsDailyByAction = components['schemas']['usdt_deposits_daily_by_action'];
 
 export type ProtocolInfo = {
 	hubChainId: number | null;
@@ -322,6 +323,23 @@ export async function getUsdtDepositsDaily(limit = 30): Promise<UsdtDepositsDail
 			params: {
 				query: {
 					order: 'day.desc',
+					limit: String(Math.max(1, Math.floor(limit)))
+				}
+			}
+		})
+	);
+}
+
+export async function getUsdtDepositsDailyByAction(
+	limit = 90
+): Promise<UsdtDepositsDailyByAction[]> {
+	requireBrowser();
+	const client = createApiClient();
+	return await unwrap<UsdtDepositsDailyByAction[]>(
+		client.GET('/usdt_deposits_daily_by_action', {
+			params: {
+				query: {
+					order: 'day.desc,recommended_action.asc',
 					limit: String(Math.max(1, Math.floor(limit)))
 				}
 			}
