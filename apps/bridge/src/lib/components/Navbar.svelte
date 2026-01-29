@@ -5,7 +5,7 @@
 	import UntronLogo from '@untron/stylekit/components/UntronLogo.svelte';
 	import ProductNav from '@untron/stylekit/components/ProductNav.svelte';
 	import WalletStatus from '@untron/stylekit/components/WalletStatus.svelte';
-	import { env } from '$env/dynamic/public';
+	import { PUBLIC_BRIDGE_URL, PUBLIC_DOCS_URL, PUBLIC_V3_URL } from '$env/static/public';
 	import { page } from '$app/stores';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { connectWallet, disconnectWallet } from '$lib/wagmi/wallet';
@@ -13,13 +13,13 @@
 	import { m } from '$lib/paraglide/messages.js';
 
 	const navItems = [
-		{ id: 'bridge', label: 'Bridge', href: env.PUBLIC_BRIDGE_URL ?? '/' },
-		{ id: 'v3', label: 'V3', href: env.PUBLIC_V3_URL ?? '#', disabled: !env.PUBLIC_V3_URL },
+		{ id: 'bridge', label: 'Bridge', href: PUBLIC_BRIDGE_URL ?? '/' },
+		{ id: 'v3', label: 'V3', href: PUBLIC_V3_URL ?? '#', disabled: !PUBLIC_V3_URL },
 		{
 			id: 'integrate',
 			label: 'Integrate',
-			href: env.PUBLIC_DOCS_URL ?? '#',
-			disabled: !env.PUBLIC_DOCS_URL
+			href: PUBLIC_DOCS_URL ?? '#',
+			disabled: !PUBLIC_DOCS_URL
 		}
 	] as const;
 </script>
