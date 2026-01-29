@@ -1,5 +1,4 @@
-import { createConfig, http } from '@wagmi/core';
-import { injected } from '@wagmi/connectors';
+import { createInjectedWagmiConfig } from '@untron/connectkit/wagmi';
 import { chainList } from '$lib/config/chains';
 
 const wagmiChainsArray = chainList.map((chain) => chain.wagmiChain);
@@ -12,14 +11,4 @@ const wagmiChains = wagmiChainsArray as [
 	...typeof wagmiChainsArray
 ];
 
-const transports = Object.fromEntries(wagmiChains.map((chain) => [chain.id, http()])) as Record<
-	(typeof wagmiChains)[number]['id'],
-	ReturnType<typeof http>
->;
-
-export const config = createConfig({
-	chains: wagmiChains,
-	connectors: [injected()],
-	transports,
-	ssr: false
-});
+export const config = createInjectedWagmiConfig(wagmiChains);
