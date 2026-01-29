@@ -44,9 +44,19 @@
 
 	let inputElement: HTMLInputElement | undefined = $state();
 	let isFocused = $state(false);
+	let draftAddress = $state('');
+
+	$effect(() => {
+		// Keep the input in sync with external updates (e.g. "My Wallet", clearing),
+		// but don't clobber the user's in-progress edits while focused.
+		if (!isFocused && address !== draftAddress) {
+			draftAddress = address;
+		}
+	});
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;
+		draftAddress = target.value;
 		onAddressChange?.(target.value);
 	}
 
@@ -77,6 +87,7 @@
 		try {
 			const text = (await navigator.clipboard.readText())?.trim();
 			if (!text) return;
+			draftAddress = text;
 			onAddressChange?.(text);
 			requestAnimationFrame(() => {
 				inputElement?.focus();
@@ -162,7 +173,7 @@
 				<input
 					bind:this={inputElement}
 					type="text"
-					value={address}
+					bind:value={draftAddress}
 					placeholder={placeholder ?? defaultPlaceholder}
 					oninput={handleInput}
 					onkeydown={handleKeyDown}

@@ -1,0 +1,48 @@
+---
+title: "GET /claim_usdt_deposit_attribution"
+description: "USDT deposit attribution per claim (best-effort)."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="USDT deposit attribution per claim (best-effort)."
+  method="GET"
+  path="/claim_usdt_deposit_attribution"
+  summary="USDT deposit attribution per claim (best-effort)."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/claim_usdt_deposit_attribution"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/claim_usdt_deposit_attribution'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "claim_id": "…",
+    "lease_id": "…",
+    "usdt_deposit_attribution": {}
+  }
+]
+```
+</EndpointLayout>

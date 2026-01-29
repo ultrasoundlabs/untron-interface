@@ -1,0 +1,52 @@
+---
+title: "GET /receiver_usdt_indexer_status"
+description: "Receiver USDT transfer indexer status (tail + backfill)."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Receiver USDT transfer indexer status (tail + backfill)."
+  method="GET"
+  path="/receiver_usdt_indexer_status"
+  summary="Receiver USDT transfer indexer status (tail + backfill)."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/receiver_usdt_indexer_status"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/receiver_usdt_indexer_status'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "backfill_pending_receivers": 0,
+    "min_backfill_next_block": 0,
+    "receiver_count": 0,
+    "stream": "…",
+    "tail_next_block": 0,
+    "tail_updated_at": "…",
+    "watchlist_updated_at": "…"
+  }
+]
+```
+</EndpointLayout>

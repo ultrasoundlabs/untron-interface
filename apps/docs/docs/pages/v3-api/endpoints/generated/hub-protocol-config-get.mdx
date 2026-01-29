@@ -1,0 +1,53 @@
+---
+title: "GET /hub_protocol_config"
+description: "Current hub protocol configuration (singleton)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Current hub protocol configuration (singleton)"
+  method="GET"
+  path="/hub_protocol_config"
+  summary="Current hub protocol configuration (singleton)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/hub_protocol_config"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/hub_protocol_config'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "floor_flat_fee": "…",
+    "floor_ppm": 0,
+    "lessee_rate_max_updates": "…",
+    "lessee_rate_window_seconds": "…",
+    "max_lease_duration_seconds": 0,
+    "tron_reader": "…",
+    "tron_usdt": "…",
+    "usdt": "…"
+  }
+]
+```
+</EndpointLayout>

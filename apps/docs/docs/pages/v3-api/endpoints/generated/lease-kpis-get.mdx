@@ -1,0 +1,53 @@
+---
+title: "GET /lease_kpis"
+description: "Per-lease KPIs: deposits, claims, and last activity timestamps (best-effort)."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Per-lease KPIs: deposits, claims, and last activity timestamps (best-effort)."
+  method="GET"
+  path="/lease_kpis"
+  summary="Per-lease KPIs: deposits, claims, and last activity timestamps (best-effort)."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/lease_kpis"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/lease_kpis'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "claims_amount_total": "…",
+    "claims_filled": 0,
+    "claims_latest_origin_timestamp": 0,
+    "claims_total": 0,
+    "deposits_amount_total": "…",
+    "deposits_latest_block_timestamp": 0,
+    "deposits_total": 0,
+    "lease_id": "…"
+  }
+]
+```
+</EndpointLayout>

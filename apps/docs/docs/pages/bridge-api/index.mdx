@@ -1,0 +1,46 @@
+---
+title: Bridge API
+description: A stable, trusted API for swapping and bridging stablecoins.
+---
+
+# Bridge API
+
+Untron Bridge API is the boring part, done right: a **stable** interface for swapping and bridging stablecoins across chains and ecosystems — even as the underlying protocols, routers, and token standards keep changing.
+
+If you’ve ever shipped with USDT variants, CCTP, chain quirks, or “one-off” bridges, you already know the pattern:
+
+- Integrations break at the worst time.
+- Small differences in token behavior become big production incidents.
+- APIs drift, naming changes, semantics change — your code becomes a museum of exceptions.
+
+The Bridge API is our answer: a **trusted, intent-style API** (NEAR Intents vibes) that lets you build stablecoin experiences without tracking every implementation detail.
+
+:::tip[Think of it like…]
+**Stripe for stablecoins**: you integrate once, Untron absorbs the churn.
+:::
+
+## What you get
+
+::::steps
+### Stable surface area
+
+Endpoints and semantics are designed to remain stable over time.
+
+### Protocol-powered execution
+
+Behind the scenes, routing can use Untron V3, Untron Intents, and other mechanisms as they evolve.
+
+### Stablecoin hygiene
+
+Convenient wrappers over messy realities (e.g. CCTP flows, USDT variants like USDT0), so your app can stay clean.
+::::
+
+## Who should use this
+
+- Apps that want a single integration for “send / swap / bridge stablecoins”
+- Teams optimizing for reliability and long-term maintenance
+- Anyone who’d rather not become an expert in every new stablecoin rail
+
+## Next
+
+- Head to the API reference: [Bridge API Reference](/bridge-api/reference)

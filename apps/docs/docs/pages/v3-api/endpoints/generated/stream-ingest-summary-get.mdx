@@ -1,0 +1,53 @@
+---
+title: "GET /stream_ingest_summary"
+description: "Per-stream ingestion/projection summary for relayers."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Per-stream ingestion/projection summary for relayers."
+  method="GET"
+  path="/stream_ingest_summary"
+  summary="Per-stream ingestion/projection summary for relayers."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/stream_ingest_summary"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/stream_ingest_summary'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "applied_through_seq": 0,
+    "is_projection_caught_up": false,
+    "max_block_number": 0,
+    "max_block_time": "…",
+    "max_block_timestamp": 0,
+    "max_event_seq": 0,
+    "stream": "…",
+    "tip": "…"
+  }
+]
+```
+</EndpointLayout>

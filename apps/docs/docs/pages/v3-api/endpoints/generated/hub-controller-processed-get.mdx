@@ -1,0 +1,51 @@
+---
+title: "GET /hub_controller_processed"
+description: "Hub-side controller processed events ledger (append-only)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Hub-side controller processed events ledger (append-only)"
+  method="GET"
+  path="/hub_controller_processed"
+  summary="Hub-side controller processed events ledger (append-only)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/hub_controller_processed"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/hub_controller_processed'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "abi_encoded_event_data": "…",
+    "block_number": 0,
+    "block_timestamp": 0,
+    "event_index": "…",
+    "event_seq": 0,
+    "event_signature": "…"
+  }
+]
+```
+</EndpointLayout>

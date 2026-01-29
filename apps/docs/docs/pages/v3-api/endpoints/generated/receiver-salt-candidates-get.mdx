@@ -1,0 +1,52 @@
+---
+title: "GET /receiver_salt_candidates"
+description: "Receiver salt candidates for realtor selection."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Receiver salt candidates for realtor selection."
+  method="GET"
+  path="/receiver_salt_candidates"
+  summary="Receiver salt candidates for realtor selection."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/receiver_salt_candidates"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/receiver_salt_candidates'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "balance_amount": "…",
+    "has_balance": false,
+    "is_free": false,
+    "nukeable_after": 0,
+    "receiver": "…",
+    "receiver_evm": "…",
+    "receiver_salt": "…"
+  }
+]
+```
+</EndpointLayout>

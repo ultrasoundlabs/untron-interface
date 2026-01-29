@@ -1,0 +1,35 @@
+/* Loaded AFTER `@scalar/api-client-react/style.css` so it can reliably override layout. */
+
+.scalar-app-exit {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: color-mix(in oklab, black 60%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+/* Center the API Client "modal" (Scalar renders it as a full app shell). */
+.scalar-client[role='dialog'] {
+  position: fixed !important;
+  inset: auto !important;
+  left: 50% !important;
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translate3d(-50%, -50%, 0) !important;
+
+  width: min(1200px, calc(100vw - 32px));
+  height: min(900px, calc(100vh - 32px));
+  margin: 0 !important;
+
+  border: 1px solid var(--scalar-border-color);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--scalar-background-1);
+}
+
+/* Ensure the outer app uses our background token. */
+.scalar-app-layout {
+  background: var(--scalar-background-1);
+}
+

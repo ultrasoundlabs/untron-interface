@@ -1,0 +1,26 @@
+---
+title: Indexer endpoints
+description: PostgREST-style views over the V3 indexer database.
+---
+
+# Indexer endpoints
+
+Most V3 endpoints are **PostgREST-style views** over the indexer database. They’re powerful for analytics and dashboards, but they’re not as “product-stable” as the Bridge API.
+
+## What to expect
+
+- Most endpoints are `GET` and return **arrays**.
+- Filtering is done via query parameters.
+- Many endpoints support common PostgREST-style params like `select`, `order`, `limit`, `offset` (and headers like `Range`).
+
+## Where to start
+
+- Aggregated lease state: [GET /lease_view](/v3-api/endpoints/lease-view)
+- Raw hub registry: [GET /hub_leases](/v3-api/endpoints/hub-leases)
+- USDT deposit timeline: [GET /usdt_deposit_txs](/v3-api/endpoints/usdt-deposit-txs)
+
+## Full coverage
+
+We also ship auto-generated pages for every endpoint, linked in the sidebar under **Indexer endpoints → All endpoints**:
+
+- [Generated endpoints](/v3-api/endpoints/generated)

@@ -1,0 +1,48 @@
+---
+title: "GET /controller_usdt_transfers"
+description: "Controller executor USDT transfer ledger (append-only)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Controller executor USDT transfer ledger (append-only)"
+  method="GET"
+  path="/controller_usdt_transfers"
+  summary="Controller executor USDT transfer ledger (append-only)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/controller_usdt_transfers"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/controller_usdt_transfers'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "amount": "…",
+    "event_seq": 0,
+    "recipient": "…"
+  }
+]
+```
+</EndpointLayout>

@@ -1,0 +1,51 @@
+---
+title: "GET /claims_created_daily"
+description: "Daily rollup of claims created (first version per claim; timestamp from hub event stream)."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Daily rollup of claims created (first version per claim; timestamp from hub event stream)."
+  method="GET"
+  path="/claims_created_daily"
+  summary="Daily rollup of claims created (first version per claim; timestamp from hub event stream)."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/claims_created_daily"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/claims_created_daily'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "amount_usdt_total": "…",
+    "claims_created_pre_entitle": 0,
+    "claims_created_receiver_pull": 0,
+    "claims_created_subjective_pre_entitle": 0,
+    "claims_created_total": 0,
+    "day": "…"
+  }
+]
+```
+</EndpointLayout>

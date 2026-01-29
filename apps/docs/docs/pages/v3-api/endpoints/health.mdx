@@ -1,0 +1,42 @@
+---
+title: GET /health
+description: Health check for the V3 API.
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Health check"
+  method="GET"
+  path="/health"
+  summary="Lightweight health check for the V3 API."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/health"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS 'https://api.untron.finance/v3/health'
+  ```
+
+  :::
+
+  ## Response (200)
+
+  ```json
+  [{ "status": "ok" }]
+  ```
+
+  :::info[Note]
+  Response shape may change over time. This page is a convenience, not a contract.
+  :::
+</EndpointLayout>

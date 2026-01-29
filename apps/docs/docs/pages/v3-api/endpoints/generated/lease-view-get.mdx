@@ -1,0 +1,53 @@
+---
+title: "GET /lease_view"
+description: "Aggregated lease view (single-row per lease_id)."
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Aggregated lease view (single-row per lease_id)."
+  method="GET"
+  path="/lease_view"
+  summary="Aggregated lease view (single-row per lease_id)."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/lease_view"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/lease_view'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "claims": {},
+    "claims_filled": 0,
+    "claims_total": 0,
+    "flat_fee": "…",
+    "lease_fee_ppm": 0,
+    "lease_id": "…",
+    "lease_nonce": "…",
+    "lease_number": "…"
+  }
+]
+```
+</EndpointLayout>

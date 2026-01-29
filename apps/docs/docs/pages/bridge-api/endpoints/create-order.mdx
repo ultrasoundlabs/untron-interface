@@ -1,0 +1,97 @@
+---
+title: POST /v1/orders
+description: Create an order (idempotent).
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Create an order"
+  method="POST"
+  path="/v1/orders"
+  summary="Creates an order from a quote. Use idempotency for safe retries."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/bridge"
+      path="/v1/orders"
+      method="post"
+      specUrl="https://api.untron.finance/bridge/v1/openapi.json"
+    />
+  }
+>
+  ## What it does
+
+  Creates an order from a quote.
+
+  :::tip[Idempotency]
+  Send an `Idempotency-Key` header so retries are safe.
+  :::
+
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS -X POST 'https://api.untron.finance/bridge/v1/orders' \
+    -H 'content-type: application/json' \
+    -H 'idempotency-key: 8b0f3d6b-1d2d-4a0c-9f05-quote-to-order-1' \
+    -d '{
+      "quoteId": "qt_01JEXAMPLE",
+      "recipient": "eip155:42161:0xRecipientAddress"
+    }'
+  ```
+
+  ```json [Body]
+  {
+    "quoteId": "qt_01JEXAMPLE",
+    "recipient": "eip155:42161:0xRecipientAddress"
+  }
+  ```
+
+  :::
+
+  ## Response (201)
+
+  ```json
+  {
+    "orderId": "ord_01JEXAMPLE",
+    "createdAt": "2026-01-29T00:00:10.000Z",
+    "status": "requires_funding",
+    "recipient": "eip155:42161:0xRecipientAddress",
+    "fees": [
+      {
+        "type": "ppm",
+        "ppm": 1500,
+        "chargedIn": "fromAsset",
+        "appliesTo": "acceptedAmount",
+        "proration": "proportional"
+      }
+    ],
+    "refundPolicy": {
+      "mode": "automatic_if_supported",
+      "requiresRefundAddress": false,
+      "supportedRefundDestinations": [
+        {
+          "chainId": "eip155:1",
+          "assetId": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        }
+      ]
+    },
+    "amounts": {
+      "receivedAmount": "0",
+      "acceptedAmount": "0",
+      "remainingAmount": "1000000",
+      "excessAmount": "0",
+      "feePreview": { "feeTotal": "0", "effectiveInputAmount": "0" }
+    },
+    "pollAfterSeconds": 2
+  }
+  ```
+
+  ## Typical flow
+
+  1. `POST /v1/quotes` → get a quote
+  2. `POST /v1/orders` → create the order (idempotent)
+  3. Poll `GET /v1/orders/{orderId}` for status until complete
+</EndpointLayout>

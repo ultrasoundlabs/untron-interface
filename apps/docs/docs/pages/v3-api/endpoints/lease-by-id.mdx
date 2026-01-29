@@ -1,0 +1,60 @@
+---
+title: GET /leases/{lease_id}
+description: Fetch a lease by id.
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Get a lease by id"
+  method="GET"
+  path="/leases/{lease_id}"
+  summary="Fetch a single aggregated lease view by id."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/leases/{lease_id}"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS 'https://api.untron.finance/v3/leases/123'
+  ```
+
+  :::
+
+  ## Response (200)
+
+  ```json
+  {
+    "lease_id": "123",
+    "lease_nonce": "0",
+    "lessee": "T…",
+    "realtor": "T…",
+    "receiver_salt": "0x…",
+    "receiver_address_tron": "T…",
+    "receiver_address_evm": "0x…",
+    "start_time": "2026-01-29T00:00:00.000Z",
+    "nukeable_after": "2026-01-29T00:00:00.000Z",
+    "lease_fee_ppm": "1500",
+    "flat_fee": "0",
+    "claims_total": "0",
+    "claims_filled": "0",
+    "claims": "0",
+    "pending_usdt_deposits_total": "0",
+    "pending_usdt_deposits_amount": "0",
+    "pending_usdt_deposits": "0"
+  }
+  ```
+
+  :::info[Example]
+  Example response. Values shown are illustrative; field names match the API schema.
+  :::
+</EndpointLayout>

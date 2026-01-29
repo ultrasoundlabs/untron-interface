@@ -1,0 +1,107 @@
+---
+title: POST /v1/quotes
+description: Create a quote.
+---
+
+import { EndpointLayout } from '../../../components/EndpointLayout'
+import { EndpointAside } from '../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Create a quote"
+  method="POST"
+  path="/v1/quotes"
+  summary="Creates an ephemeral offer that selects the best route right now, with an expiry and explicit fees."
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/bridge"
+      path="/v1/quotes"
+      method="post"
+      specUrl="https://api.untron.finance/bridge/v1/openapi.json"
+    />
+  }
+>
+  ## What it does
+
+  Creates a quote (“offer”) which:
+
+  - selects the best route right now
+  - has an expiry
+  - fully defines expected fees and deposit expectations
+
+  ## Request
+
+  :::code-group
+
+  ```bash [cURL]
+  curl -sS -X POST 'https://api.untron.finance/bridge/v1/quotes' \
+    -H 'content-type: application/json' \
+    -d '{
+      "fromAssetId": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "toAssetId": "eip155:42161/erc20:0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "fromAmount": "1000000",
+      "recipient": "eip155:42161:0xRecipientAddress",
+      "refundTo": "eip155:1:0xRefundAddress",
+      "slippageBps": 30
+    }'
+  ```
+
+  ```json [Body]
+  {
+    "fromAssetId": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "toAssetId": "eip155:42161/erc20:0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "fromAmount": "1000000",
+    "recipient": "eip155:42161:0xRecipientAddress",
+    "refundTo": "eip155:1:0xRefundAddress",
+    "slippageBps": 30
+  }
+  ```
+
+  :::
+
+  ## Response (200)
+
+  ```json
+  {
+    "quoteId": "qt_01JEXAMPLE",
+    "expiresAt": "2026-01-29T00:10:00.000Z",
+    "fromAssetId": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "toAssetId": "eip155:42161/erc20:0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "fromAmount": "1000000",
+    "estimatedToAmount": "998500",
+    "fees": [
+      {
+        "type": "ppm",
+        "ppm": 1500,
+        "chargedIn": "fromAsset",
+        "appliesTo": "acceptedAmount",
+        "proration": "proportional"
+      }
+    ],
+    "depositDefaults": {
+      "minAcceptedAmount": "1000000",
+      "maxAcceptedAmount": "1000000",
+      "underpayBehavior": "await_remainder",
+      "overpayBehavior": "refund_excess"
+    },
+    "refundPolicyPreview": {
+      "mode": "automatic_if_supported",
+      "supportedRefundDestinations": [
+        {
+          "chainId": "eip155:1",
+          "assetId": "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        }
+      ]
+    },
+    "route": {
+      "kind": "bridge_then_swap",
+      "opaque": "base64/or/whatever"
+    }
+  }
+  ```
+
+  ## Typical flow
+
+  1. Call `POST /v1/quotes`
+  2. Display route + fees + expiry to the user
+  3. When accepted, call `POST /v1/orders` using the quote
+</EndpointLayout>

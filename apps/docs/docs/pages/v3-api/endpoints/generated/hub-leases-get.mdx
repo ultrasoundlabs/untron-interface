@@ -1,0 +1,53 @@
+---
+title: "GET /hub_leases"
+description: "Current lease registry (KV)"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Current lease registry (KV)"
+  method="GET"
+  path="/hub_leases"
+  summary="Current lease registry (KV)"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/hub_leases"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/hub_leases'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "flat_fee": "…",
+    "lease_fee_ppm": 0,
+    "lease_id": "…",
+    "lease_number": "…",
+    "lessee": "…",
+    "nukeable_after": 0,
+    "realtor": "…",
+    "receiver_salt": "…"
+  }
+]
+```
+</EndpointLayout>

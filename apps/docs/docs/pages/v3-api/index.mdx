@@ -1,0 +1,30 @@
+---
+title: V3 API
+description: The raw API surface of Untron V3 for protocol builders.
+---
+
+# V3 API
+
+The **V3 API** is the direct interface to the Untron V3 protocol: more powerful, more granular, and **intentionally not as stable** as the Bridge API.
+
+Use it when you want to build on V3 primitives, run analytics, or integrate deeply with how the protocol actually works — and you’re comfortable tracking schema changes over time.
+
+:::warning[Expect change]
+If you want a stable surface for stablecoin swapping/bridging, use **Bridge API**.
+V3 API is for builders who want the raw protocol surface area.
+:::
+
+## What it is (and isn’t)
+
+- **Is:** the protocol’s evolving API surface (tables, views, endpoints)
+- **Isn’t:** a compatibility layer — breaking changes can happen as V3 evolves
+
+## Endpoint docs
+
+We document a small subset of endpoints as “docs-first” pages (with examples and gotchas), and use Scalar’s API Client for interactive requests.
+
+- Start here: [V3 API Endpoints](/v3-api/endpoints)
+
+## Next
+
+- Head to the API reference: [V3 API Reference](/v3-api/reference)

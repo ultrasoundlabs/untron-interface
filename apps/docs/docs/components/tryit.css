@@ -1,0 +1,37 @@
+.untron-tryit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.untron-tryit_primary {
+  background: var(--vocs-color_backgroundAccent);
+  color: var(--vocs-color_backgroundAccentText);
+}
+
+.untron-tryit_primary:hover {
+  background: var(--vocs-color_backgroundAccentHover);
+}
+
+.untron-tryit_primary:active {
+  transform: translateY(0.5px);
+}
+
+.untron-tryit_ghost {
+  background: color-mix(in oklab, var(--vocs-color_background2) 60%, transparent);
+  color: var(--vocs-color_text);
+  border-color: var(--vocs-color_border);
+}
+
+.untron-tryit_ghost:hover {
+  background: var(--vocs-color_background2);
+}
+

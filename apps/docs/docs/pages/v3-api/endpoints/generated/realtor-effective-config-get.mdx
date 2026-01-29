@@ -1,0 +1,53 @@
+---
+title: "GET /realtor_effective_config"
+description: "Realtor effective config"
+---
+
+import { EndpointLayout } from '../../../../components/EndpointLayout'
+import { EndpointAside } from '../../../../components/EndpointAside'
+
+<EndpointLayout
+  title="Realtor effective config"
+  method="GET"
+  path="/realtor_effective_config"
+  summary="Realtor effective config"
+  aside={
+    <EndpointAside
+      baseUrl="https://api.untron.finance/v3"
+      path="/realtor_effective_config"
+      method="get"
+      specUrl="https://api.untron.finance/v3/openapi.json"
+    />
+  }
+>
+  :::info[Category]
+  PostgREST view.
+  :::
+
+  ## Request
+
+:::code-group
+
+```bash [cURL]
+curl -sS 'https://api.untron.finance/v3/realtor_effective_config'
+```
+
+:::
+
+  ## Response
+
+```json
+[
+  {
+    "allowed": false,
+    "lease_rate_max_leases": "…",
+    "lease_rate_remaining": "…",
+    "lease_rate_window_seconds": "…",
+    "max_duration_seconds": 0,
+    "min_fee_ppm": 0,
+    "min_flat_fee": "…",
+    "realtor": "…"
+  }
+]
+```
+</EndpointLayout>
