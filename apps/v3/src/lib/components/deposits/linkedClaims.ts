@@ -10,6 +10,14 @@ export type LinkedClaim = {
 	realtor?: unknown;
 };
 
+export function getClaimOriginLabel(origin: unknown): string | null {
+	// Matches `UntronV3Index.ClaimOrigin` used by the hub.
+	if (origin === 0) return 'pre-entitle';
+	if (origin === 1) return 'subjective pre-entitle';
+	if (origin === 2) return 'pull';
+	return null;
+}
+
 export function normalizeLinkedClaims(value: unknown): LinkedClaim[] {
 	if (!value) return [];
 	if (Array.isArray(value)) return value as LinkedClaim[];
@@ -42,4 +50,3 @@ export function getBestLinkedClaim(linkedClaims: LinkedClaim[]): LinkedClaim | n
 	}
 	return linkedClaims[0] ?? null;
 }
-

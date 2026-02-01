@@ -15,7 +15,7 @@
 		parseUnixSeconds
 	} from '$lib/untron/format';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
-	import { getBestLinkedClaim, getBestLinkedClaimStatus, normalizeLinkedClaims } from './linkedClaims';
+	import { getBestLinkedClaim, getBestLinkedClaimStatus, getClaimOriginLabel, normalizeLinkedClaims } from './linkedClaims';
 
 	type Props = {
 		deposit: UsdtDepositTx;
@@ -34,12 +34,16 @@
 		label: string;
 		variant: 'default' | 'secondary' | 'outline';
 	} {
+		const linked = normalizeLinkedClaims(d.linked_claims);
+		const linkedStatus = getBestLinkedClaimStatus(linked);
+		if (linkedStatus === 'filled') return { label: 'filled', variant: 'default' };
+		if (linkedStatus === 'created') return { label: 'finalizing', variant: 'secondary' };
+		if (linked.length > 0) return { label: 'accounted', variant: 'secondary' };
+
+		// Fallback (older indexer rows / incomplete attribution).
 		if (d.claim_status === 'filled') return { label: 'filled', variant: 'default' };
 		if (d.claim_origin === 1 && d.claim_status === 'created')
 			return { label: 'finalizing', variant: 'secondary' };
-		const linkedStatus = getBestLinkedClaimStatus(normalizeLinkedClaims(d.linked_claims));
-		if (linkedStatus === 'filled') return { label: 'filled', variant: 'default' };
-		if (linkedStatus === 'created') return { label: 'finalizing', variant: 'secondary' };
 		return { label: 'processing', variant: 'outline' };
 	}
 
@@ -56,19 +60,35 @@
 		return formatUnixSecondsRelativeDetailed(n);
 	}
 
-	function leaseIdForDeposit(d: UsdtDepositTx): number | null {
-		const id = d.expected_lease_id ?? d.claim_lease_id;
-		return typeof id === 'number' && Number.isFinite(id) ? id : null;
-	}
-
-	function leaseHref(d: UsdtDepositTx): string | null {
-		const id = leaseIdForDeposit(d);
-		return id === null ? null : `/leases/${String(id)}`;
-	}
-
 	const status = $derived.by(() => statusForDeposit(deposit));
 	const linkedClaims = $derived.by(() => normalizeLinkedClaims(deposit.linked_claims));
 	const bestLinkedClaim = $derived.by(() => getBestLinkedClaim(linkedClaims));
+
+	function getLeaseIdFromLinkedClaim(c: unknown): number | null {
+		if (!c || typeof c !== 'object') return null;
+		const v = (c as { lease_id?: unknown }).lease_id;
+		if (typeof v === 'number' && Number.isFinite(v) && Number.isInteger(v)) return v;
+		if (typeof v === 'string' && /^\d+$/.test(v)) return Number(v);
+		return null;
+	}
+
+	const leaseId = $derived.by(() => {
+		const linked = bestLinkedClaim ? getLeaseIdFromLinkedClaim(bestLinkedClaim) : null;
+		if (linked !== null) return linked;
+		const expected = deposit.expected_lease_id;
+		if (typeof expected === 'number' && Number.isFinite(expected)) return expected;
+		const claimLeaseId = deposit.claim_lease_id;
+		if (typeof claimLeaseId === 'number' && Number.isFinite(claimLeaseId)) return claimLeaseId;
+		return null;
+	});
+
+	const leaseHref = $derived.by(() => (leaseId === null ? null : `/leases/${String(leaseId)}`));
+
+	function formatUsdtFromAtomicString(value: unknown): string | null {
+		const s = typeof value === 'string' ? value : typeof value === 'number' ? String(value) : null;
+		if (!s) return null;
+		return formatUsdtAtomic6(s);
+	}
 </script>
 
 <div class="space-y-6">
@@ -105,11 +125,11 @@
 				</div>
 			</div>
 
-			{#if leaseHref(deposit)}
+			{#if leaseHref}
 				<div class="flex flex-wrap items-center gap-2">
 					<span class="text-sm text-muted-foreground">Lease</span>
-					<Button variant="outline" size="sm" href={leaseHref(deposit) ?? undefined} class="tabular-nums">
-						{String(leaseIdForDeposit(deposit))}
+					<Button variant="outline" size="sm" href={leaseHref ?? undefined} class="tabular-nums">
+						{String(leaseId)}
 					</Button>
 				</div>
 			{/if}
@@ -209,14 +229,14 @@
 
 	<Card.Root>
 		<Card.Header>
-			<Card.Title class="text-base">Linkage</Card.Title>
-			<Card.Description>Best-effort attribution vs. on-hub linkage.</Card.Description>
+			<Card.Title class="text-base">Accounting</Card.Title>
+			<Card.Description>Status and how this deposit was accounted for.</Card.Description>
 		</Card.Header>
 		<Card.Content class="space-y-4">
 			{#if bestLinkedClaim}
 				<div class="rounded-md border bg-muted/30 px-3 py-2">
 					<div class="flex flex-wrap items-center justify-between gap-2">
-						<div class="text-sm font-medium">Accounted by a linked claim</div>
+						<div class="text-sm font-medium">Accounted by claim activity</div>
 						{#if bestLinkedClaim.claim_status === 'filled'}
 							<Badge>filled</Badge>
 						{:else if bestLinkedClaim.claim_status === 'created'}
@@ -225,59 +245,97 @@
 							<Badge variant="outline">linked</Badge>
 						{/if}
 					</div>
-					<div class="mt-1 text-xs text-muted-foreground">
-						Claim {typeof bestLinkedClaim.claim_id === 'number' || typeof bestLinkedClaim.claim_id === 'string'
-							? String(bestLinkedClaim.claim_id)
-							: '—'}
+					<div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+						<span class="font-sans tabular-nums">
+							claim {typeof bestLinkedClaim.claim_id === 'number' || typeof bestLinkedClaim.claim_id === 'string'
+								? String(bestLinkedClaim.claim_id)
+								: '—'}
+						</span>
 						<span class="opacity-70">·</span>
-						Origin {typeof bestLinkedClaim.claim_origin === 'number' || typeof bestLinkedClaim.claim_origin === 'string'
-							? String(bestLinkedClaim.claim_origin)
-							: '—'}
+						<span>
+							{getClaimOriginLabel(bestLinkedClaim.claim_origin) ??
+								(typeof bestLinkedClaim.claim_origin === 'number' || typeof bestLinkedClaim.claim_origin === 'string'
+									? `origin ${String(bestLinkedClaim.claim_origin)}`
+									: 'unknown origin')}
+						</span>
 						{#if bestLinkedClaim.attributed_amount}
 							<span class="opacity-70">·</span>
-							attributed {String(bestLinkedClaim.attributed_amount)}
+							<span class="font-sans tabular-nums">
+								attributed {formatUsdtFromAtomicString(bestLinkedClaim.attributed_amount) ??
+									String(bestLinkedClaim.attributed_amount)} USDT
+							</span>
 						{/if}
+						{#if bestLinkedClaim.claim_amount_usdt}
+							<span class="opacity-70">·</span>
+							<span class="font-sans tabular-nums">
+								claimed {formatUsdtFromAtomicString(bestLinkedClaim.claim_amount_usdt) ??
+									String(bestLinkedClaim.claim_amount_usdt)} USDT
+							</span>
+						{/if}
+					</div>
+				</div>
+			{:else}
+				<div class="rounded-md border bg-muted/30 px-3 py-2">
+					<div class="flex flex-wrap items-center justify-between gap-2">
+						<div class="text-sm font-medium">Not yet accounted</div>
+						<Badge variant="outline">processing</Badge>
+					</div>
+					<div class="mt-1 text-xs text-muted-foreground">
+						We haven’t attributed this deposit to any claim yet.
 					</div>
 				</div>
 			{/if}
 
-			<div class="grid gap-3 sm:grid-cols-2">
-				<div class="space-y-1">
-					<div class="text-xs text-muted-foreground">Expected lease id</div>
-					<div class="font-sans tabular-nums">
-						{typeof deposit.expected_lease_id === 'number' ? String(deposit.expected_lease_id) : '—'}
-					</div>
-					<div class="text-xs text-muted-foreground">
-						Estimated by receiver salt + deposit time window.
+			<details class="rounded-md border bg-muted/20 px-3 py-2">
+				<summary class="cursor-pointer text-sm font-medium">Attribution (best-effort)</summary>
+				<div class="mt-3 space-y-3">
+					<div class="grid gap-3 sm:grid-cols-2">
+						<div class="space-y-1">
+							<div class="text-xs text-muted-foreground">Expected lease id</div>
+							<div class="font-sans tabular-nums">
+								{typeof deposit.expected_lease_id === 'number' ? String(deposit.expected_lease_id) : '—'}
+							</div>
+							<div class="text-xs text-muted-foreground">
+								Heuristic attribution based on receiver salt and timing.
+							</div>
+						</div>
+						<div class="space-y-1">
+							<div class="text-xs text-muted-foreground">Expected lessee</div>
+							<div class="font-sans tabular-nums">
+								{typeof deposit.expected_lessee === 'string'
+									? formatAddress(deposit.expected_lessee, 10, 8)
+									: '—'}
+							</div>
+							<div class="text-xs text-muted-foreground">Non-authoritative hint for filtering.</div>
+						</div>
 					</div>
 				</div>
-				<div class="space-y-1">
-					<div class="text-xs text-muted-foreground">Claim lease id</div>
-					<div class="font-sans tabular-nums">
-						{typeof deposit.claim_lease_id === 'number' ? String(deposit.claim_lease_id) : '—'}
-					</div>
-					<div class="text-xs text-muted-foreground">Lease id from a matched hub claim (if any).</div>
-				</div>
-			</div>
+			</details>
 
-			<div class="grid gap-3 sm:grid-cols-2">
-				<div class="space-y-1">
-					<div class="text-xs text-muted-foreground">Claim id</div>
-					<div class="font-sans tabular-nums">
-						{typeof deposit.claim_id === 'number' ? String(deposit.claim_id) : '—'}
+			{#if typeof deposit.claim_id === 'number' || typeof deposit.claim_status === 'string'}
+				<details class="rounded-md border bg-muted/20 px-3 py-2">
+					<summary class="cursor-pointer text-sm font-medium">Direct hub match (pre-entitle only)</summary>
+					<div class="mt-3 space-y-3">
+						<div class="grid gap-3 sm:grid-cols-2">
+							<div class="space-y-1">
+								<div class="text-xs text-muted-foreground">Claim id</div>
+								<div class="font-sans tabular-nums">
+									{typeof deposit.claim_id === 'number' ? String(deposit.claim_id) : '—'}
+								</div>
+							</div>
+							<div class="space-y-1">
+								<div class="text-xs text-muted-foreground">Status</div>
+								<div class="font-sans tabular-nums">
+									{typeof deposit.claim_status === 'string' ? deposit.claim_status : '—'}
+								</div>
+							</div>
+						</div>
+						<div class="text-xs text-muted-foreground">
+							This linkage is only populated when the deposit tx hash directly matches a hub claim origin.
+						</div>
 					</div>
-				</div>
-				<div class="space-y-1">
-					<div class="text-xs text-muted-foreground">Linked claims</div>
-					<div class="font-sans tabular-nums">
-						{linkedClaims.length
-							? String(linkedClaims.length)
-							: typeof deposit.linked_claims_total === 'number'
-								? String(deposit.linked_claims_total)
-								: '—'}
-					</div>
-				</div>
-			</div>
+				</details>
+			{/if}
 		</Card.Content>
 	</Card.Root>
 
