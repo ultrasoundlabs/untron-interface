@@ -111,7 +111,9 @@
 	function depositHref(txHash: string, logIndex: unknown): string | null {
 		if (!txHash.trim()) return null;
 		const n = typeof logIndex === 'number' ? logIndex : Number(String(logIndex));
-		if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) return null;
+		if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) {
+			return `/deposits/${encodeURIComponent(txHash)}`;
+		}
 		return `/deposits/${encodeURIComponent(txHash)}/${String(n)}`;
 	}
 
@@ -237,9 +239,15 @@
 									{@const sender = getDepositSender(d)}
 									<span class="inline-flex flex-wrap items-center gap-1">
 										{#if txHash && href}
-											<a href={href} class="inline-flex items-center gap-1 hover:underline">
+											<Button
+												href={href}
+												variant="ghost"
+												size="sm"
+												class="h-7 gap-1 px-2 text-xs"
+												title="View deposit details"
+											>
 												deposit {formatHexShort(txHash, 14, 10)}
-											</a>
+											</Button>
 										{:else if txHash}
 											<span>deposit {formatHexShort(txHash, 14, 10)}</span>
 										{:else}

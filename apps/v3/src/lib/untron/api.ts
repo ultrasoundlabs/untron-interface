@@ -345,6 +345,23 @@ export async function getDepositById(
 	return rows[0] ?? null;
 }
 
+export async function getDepositsByTxHash(txHash: string, limit = 25): Promise<UsdtDepositTx[]> {
+	requireBrowser();
+	const safeTxHash = normalizeTronTxHashForQuery(txHash);
+	const client = createApiClient();
+	return await unwrap<UsdtDepositTx[]>(
+		client.GET('/usdt_deposit_txs', {
+			params: {
+				query: {
+					tx_hash: toEq(safeTxHash),
+					order: 'log_index.asc',
+					limit: String(Math.max(1, Math.floor(limit)))
+				}
+			}
+		})
+	);
+}
+
 export async function getUsdtDepositsDaily(limit = 30): Promise<UsdtDepositsDaily[]> {
 	requireBrowser();
 	const client = createApiClient();
