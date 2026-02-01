@@ -108,6 +108,13 @@
 		return typeof entry.tx_hash === 'string' ? entry.tx_hash : null;
 	}
 
+	function depositHref(txHash: string, logIndex: unknown): string | null {
+		if (!txHash.trim()) return null;
+		const n = typeof logIndex === 'number' ? logIndex : Number(String(logIndex));
+		if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) return null;
+		return `/deposits/${encodeURIComponent(txHash)}/${String(n)}`;
+	}
+
 	function tronScanTxUrl(txHash: string): string | null {
 		const raw = txHash.startsWith('0x') ? txHash.slice(2) : txHash;
 		if (!/^[0-9a-fA-F]{64}$/.test(raw)) return null;
@@ -225,24 +232,29 @@
 								{#each shown as d (getDepositTxHash(d) ?? JSON.stringify(d))}
 									{@const txHash = getDepositTxHash(d)}
 									{@const tronUrl = txHash ? tronScanTxUrl(txHash) : null}
+									{@const href = txHash ? depositHref(txHash, d.log_index) : null}
 									{@const ts = getDepositBlockTimestamp(d)}
 									{@const sender = getDepositSender(d)}
 									<span class="inline-flex flex-wrap items-center gap-1">
+										{#if txHash && href}
+											<a href={href} class="inline-flex items-center gap-1 hover:underline">
+												deposit {formatHexShort(txHash, 14, 10)}
+											</a>
+										{:else if txHash}
+											<span>deposit {formatHexShort(txHash, 14, 10)}</span>
+										{:else}
+											<span>deposit —</span>
+										{/if}
 										{#if txHash && tronUrl}
 											<a
 												href={tronUrl}
 												target="_blank"
 												rel="noreferrer"
-												class="inline-flex items-center gap-1 hover:underline"
+												class="inline-flex items-center gap-1 opacity-70 hover:opacity-100"
 												title="Open on Tronscan"
 											>
-												deposit {formatHexShort(txHash, 14, 10)}
-												<ExternalLinkIcon class="h-3 w-3 opacity-70" />
+												<ExternalLinkIcon class="h-3 w-3" />
 											</a>
-										{:else if txHash}
-											deposit {formatHexShort(txHash, 14, 10)}
-										{:else}
-											deposit —
 										{/if}
 										{#if ts}
 											<span class="opacity-70">·</span>

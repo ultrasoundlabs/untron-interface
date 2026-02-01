@@ -27,6 +27,12 @@
 		return `https://tronscan.org/#/transaction/${hash}`;
 	}
 
+	function depositHref(row: UsdtDepositTx): string | null {
+		if (typeof row.tx_hash !== 'string' || !row.tx_hash.trim()) return null;
+		if (typeof row.log_index !== 'number' || !Number.isFinite(row.log_index)) return null;
+		return `/deposits/${encodeURIComponent(row.tx_hash)}/${String(row.log_index)}`;
+	}
+
 	function leaseHref(row: UsdtDepositTx): string | null {
 		const id = row.expected_lease_id ?? row.claim_lease_id;
 		if (typeof id === 'number' && Number.isFinite(id)) return `/leases/${String(id)}`;
@@ -206,17 +212,27 @@
 					/>
 				</Table.Cell>
 				<Table.Cell class="text-right">
-					<Button
-						variant="ghost"
-						size="sm"
-						href={tronTxUrl(row.tx_hash) ?? undefined}
-						disabled={!tronTxUrl(row.tx_hash)}
-						target="_blank"
-						rel="noreferrer"
-					>
-						<ExternalLinkIcon />
-						View
-					</Button>
+					<div class="flex items-center justify-end gap-1">
+						<Button
+							variant="ghost"
+							size="sm"
+							href={depositHref(row) ?? undefined}
+							disabled={!depositHref(row)}
+						>
+							Details
+						</Button>
+						<Button
+							variant="ghost"
+							size="sm"
+							href={tronTxUrl(row.tx_hash) ?? undefined}
+							disabled={!tronTxUrl(row.tx_hash)}
+							target="_blank"
+							rel="noreferrer"
+						>
+							<ExternalLinkIcon />
+							View
+						</Button>
+					</div>
 				</Table.Cell>
 			</Table.Row>
 		{/each}

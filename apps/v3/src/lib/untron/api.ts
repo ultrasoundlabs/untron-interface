@@ -315,6 +315,36 @@ export async function getDepositsPage(args?: {
 	return { rows, total };
 }
 
+function normalizeTronTxHashForQuery(txHash: string): string {
+	const raw = txHash.trim();
+	if (!raw.length) throw new Error('Invalid tx hash');
+	const hex = raw.startsWith('0x') ? raw.slice(2) : raw;
+	if (!/^[0-9a-fA-F]{64}$/.test(hex)) throw new Error('Invalid tx hash');
+	return `0x${hex.toLowerCase()}`;
+}
+
+export async function getDepositById(
+	txHash: string,
+	logIndex: number
+): Promise<UsdtDepositTx | null> {
+	requireBrowser();
+	const safeTxHash = normalizeTronTxHashForQuery(txHash);
+	const safeLogIndex = toInt(logIndex, 'log index');
+	const client = createApiClient();
+	const rows = await unwrap<UsdtDepositTx[]>(
+		client.GET('/usdt_deposit_txs', {
+			params: {
+				query: {
+					tx_hash: toEq(safeTxHash),
+					log_index: toEq(String(safeLogIndex)),
+					limit: '1'
+				}
+			}
+		})
+	);
+	return rows[0] ?? null;
+}
+
 export async function getUsdtDepositsDaily(limit = 30): Promise<UsdtDepositsDaily[]> {
 	requireBrowser();
 	const client = createApiClient();
