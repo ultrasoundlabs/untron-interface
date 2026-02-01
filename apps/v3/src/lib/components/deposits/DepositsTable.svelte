@@ -13,6 +13,7 @@
 		parseUnixSeconds
 	} from '$lib/untron/format';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
+	import { getBestLinkedClaimStatus, normalizeLinkedClaims } from './linkedClaims';
 
 	type Props = {
 		rows: UsdtDepositTx[];
@@ -82,6 +83,10 @@
 		if (row.claim_status === 'filled') return { label: 'filled', variant: 'default' };
 		if (row.claim_origin === 1 && row.claim_status === 'created')
 			return { label: 'finalizing', variant: 'secondary' };
+
+		const linkedStatus = getBestLinkedClaimStatus(normalizeLinkedClaims(row.linked_claims));
+		if (linkedStatus === 'filled') return { label: 'filled', variant: 'default' };
+		if (linkedStatus === 'created') return { label: 'finalizing', variant: 'secondary' };
 		return { label: 'processing', variant: 'outline' };
 	}
 
