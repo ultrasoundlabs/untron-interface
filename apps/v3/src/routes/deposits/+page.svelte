@@ -266,11 +266,54 @@
 		void refresh('manual');
 	}
 
-	const today = $derived.by(() => (daily && daily.length ? daily[0] : null));
-	const last7 = $derived.by(() => (daily ? daily.slice(0, 7) : []));
+	function getUtcDayKeyFromBucket(day: unknown): string | null {
+		if (typeof day !== 'string' || !day.trim()) return null;
+		const d = new Date(day);
+		if (Number.isNaN(d.valueOf())) return null;
+		return d.toISOString().slice(0, 10);
+	}
+
+	const utcTodayKey = $derived.by(() => new Date().toISOString().slice(0, 10));
+	const latestDaily = $derived.by(() => (daily && daily.length ? daily[0] : null));
+
+	const dailyByKey = $derived.by(() => {
+		const map = new Map<string, UsdtDepositsDaily>();
+		if (!daily) return map;
+		for (const r of daily) {
+			const key = getUtcDayKeyFromBucket(r.day);
+			if (key) map.set(key, r);
+		}
+		return map;
+	});
+
+	const todayDaily = $derived.by(() => dailyByKey.get(utcTodayKey) ?? null);
+
+	const last7Keys = $derived.by(() => {
+		const base = Date.parse(`${utcTodayKey}T00:00:00.000Z`);
+		const keys: string[] = [];
+		for (let i = 0; i < 7; i++) {
+			keys.push(new Date(base - i * 86_400_000).toISOString().slice(0, 10));
+		}
+		return keys;
+	});
+	const last7Daily = $derived.by(() => last7Keys.map((k) => dailyByKey.get(k) ?? null));
+
+	const todayDepositsTotal = $derived.by(() => {
+		if (daily === null) return null;
+		const raw = todayDaily?.deposits_total ?? 0;
+		const n = typeof raw === 'number' ? raw : Number(String(raw ?? '0'));
+		return Number.isFinite(n) ? n : 0;
+	});
+	const todayAmountAtomic = $derived.by(() => {
+		if (daily === null) return null;
+		if (!todayDaily) return 0n;
+		return parseUsdtAtomic6(todayDaily.amount_total) ?? 0n;
+	});
+
 	const last7DepositsTotal = $derived.by(() => {
 		let sum = 0;
-		for (const r of last7) {
+		for (const r of last7Daily) {
+			if (!r) continue;
 			const raw = r.deposits_total;
 			const n = typeof raw === 'number' ? raw : Number(String(raw ?? '0'));
 			sum += Number.isFinite(n) ? n : 0;
@@ -279,7 +322,8 @@
 	});
 	const last7AmountTotal = $derived.by(() => {
 		let sum = 0n;
-		for (const r of last7) {
+		for (const r of last7Daily) {
+			if (!r) continue;
 			const v = parseUsdtAtomic6(r.amount_total);
 			if (v !== null) sum += v;
 		}
@@ -333,16 +377,21 @@
 		<Card.Root>
 			<Card.Header>
 				<Card.Title class="text-base">Today</Card.Title>
-				<Card.Description>{formatDayBucketUtc(today?.day)} (UTC)</Card.Description>
+				<Card.Description>
+					{formatDayBucketUtc(utcTodayKey)} (UTC)
+					{#if latestDaily && getUtcDayKeyFromBucket(latestDaily.day) !== utcTodayKey}
+						· Latest: {formatDayBucketUtc(latestDaily.day)}
+					{/if}
+				</Card.Description>
 			</Card.Header>
 			<Card.Content>
 				{#if daily === null}
 					<Skeleton class="h-10" />
 				{:else}
 					<div class="space-y-1">
-						<div class="font-sans text-lg">{today?.deposits_total ?? '—'}</div>
+						<div class="font-sans text-lg">{todayDepositsTotal ?? '—'}</div>
 						<div class="text-sm text-muted-foreground">
-							{formatUsdtFromDaily(today?.amount_total)} USDT
+							{formatUsdtSumFixed2(todayAmountAtomic)} USDT
 						</div>
 					</div>
 				{/if}
