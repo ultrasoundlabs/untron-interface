@@ -15,6 +15,7 @@
 		parseUnixSeconds
 	} from '$lib/untron/format';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
+	import { getBestLinkedClaim, getBestLinkedClaimStatus, normalizeLinkedClaims } from './linkedClaims';
 
 	type Props = {
 		deposit: UsdtDepositTx;
@@ -36,6 +37,9 @@
 		if (d.claim_status === 'filled') return { label: 'filled', variant: 'default' };
 		if (d.claim_origin === 1 && d.claim_status === 'created')
 			return { label: 'finalizing', variant: 'secondary' };
+		const linkedStatus = getBestLinkedClaimStatus(normalizeLinkedClaims(d.linked_claims));
+		if (linkedStatus === 'filled') return { label: 'filled', variant: 'default' };
+		if (linkedStatus === 'created') return { label: 'finalizing', variant: 'secondary' };
 		return { label: 'processing', variant: 'outline' };
 	}
 
@@ -63,6 +67,8 @@
 	}
 
 	const status = $derived.by(() => statusForDeposit(deposit));
+	const linkedClaims = $derived.by(() => normalizeLinkedClaims(deposit.linked_claims));
+	const bestLinkedClaim = $derived.by(() => getBestLinkedClaim(linkedClaims));
 </script>
 
 <div class="space-y-6">
@@ -207,6 +213,34 @@
 			<Card.Description>Best-effort attribution vs. on-hub linkage.</Card.Description>
 		</Card.Header>
 		<Card.Content class="space-y-4">
+			{#if bestLinkedClaim}
+				<div class="rounded-md border bg-muted/30 px-3 py-2">
+					<div class="flex flex-wrap items-center justify-between gap-2">
+						<div class="text-sm font-medium">Accounted by a linked claim</div>
+						{#if bestLinkedClaim.claim_status === 'filled'}
+							<Badge>filled</Badge>
+						{:else if bestLinkedClaim.claim_status === 'created'}
+							<Badge variant="secondary">finalizing</Badge>
+						{:else}
+							<Badge variant="outline">linked</Badge>
+						{/if}
+					</div>
+					<div class="mt-1 text-xs text-muted-foreground">
+						Claim {typeof bestLinkedClaim.claim_id === 'number' || typeof bestLinkedClaim.claim_id === 'string'
+							? String(bestLinkedClaim.claim_id)
+							: '—'}
+						<span class="opacity-70">·</span>
+						Origin {typeof bestLinkedClaim.claim_origin === 'number' || typeof bestLinkedClaim.claim_origin === 'string'
+							? String(bestLinkedClaim.claim_origin)
+							: '—'}
+						{#if bestLinkedClaim.attributed_amount}
+							<span class="opacity-70">·</span>
+							attributed {String(bestLinkedClaim.attributed_amount)}
+						{/if}
+					</div>
+				</div>
+			{/if}
+
 			<div class="grid gap-3 sm:grid-cols-2">
 				<div class="space-y-1">
 					<div class="text-xs text-muted-foreground">Expected lease id</div>
@@ -236,7 +270,11 @@
 				<div class="space-y-1">
 					<div class="text-xs text-muted-foreground">Linked claims</div>
 					<div class="font-sans tabular-nums">
-						{typeof deposit.linked_claims_total === 'number' ? String(deposit.linked_claims_total) : '—'}
+						{linkedClaims.length
+							? String(linkedClaims.length)
+							: typeof deposit.linked_claims_total === 'number'
+								? String(deposit.linked_claims_total)
+								: '—'}
 					</div>
 				</div>
 			</div>
