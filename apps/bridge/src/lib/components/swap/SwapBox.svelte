@@ -3,7 +3,6 @@
 	import { Button } from '@untron/ui/button';
 	import { m } from '$lib/paraglide/messages.js';
 	import { connection } from '$lib/wagmi/connectionStore';
-	import { connectWallet } from '$lib/wagmi/wallet';
 	import { TOKEN_METADATA, getChainById } from '$lib/config/swapConfig';
 	import { createSwapStore, setSwapStoreContext } from '$lib/stores/swapStore.svelte';
 	import type { EvmStablecoin, SwapValidationError, TokenChainBalance } from '$lib/types/swap';
@@ -239,34 +238,25 @@
 
 	// Button state
 	const buttonLabel = $derived.by(() => {
-		if (!$connection.isConnected) return m.wallet_connect_wallet();
 		if (swapStore.isCreatingOrder) {
 			return m.swap_creating_order();
 		}
 		if (!swapStore.amount) return m.swap_enter_amount();
 		if (!swapStore.recipientAddress) return m.swap_enter_recipient();
 		if (!swapStore.isValid) return m.swap_invalid_input();
-		if (swapStore.isLoadingQuote) return m.swap_getting_quote();
+		if (swapStore.isLoadingQuote || !swapStore.quote) return m.swap_getting_quote();
 		return m.swap_button();
 	});
 
-	const isButtonDisabled = $derived(
-		swapStore.isBusy || (!$connection.isConnected ? false : !swapStore.canSubmit)
-	);
+	const isButtonDisabled = $derived(swapStore.isBusy || !swapStore.canSubmit);
 
 	async function handleSwap() {
-		if (!$connection.isConnected) {
-			try {
-				await connectWallet();
-			} catch (err) {
-				console.error('Connect wallet failed:', err);
-			}
-			return;
-		}
-
 		recipientTouched = true;
 
-		const walletAddress = $connection.address as `0x${string}` | undefined;
+		const walletAddress =
+			$connection.isConnected && $connection.address
+				? ($connection.address as `0x${string}`)
+				: undefined;
 		const orderId = await swapStore.createOrder(walletAddress);
 		if (orderId) {
 			goto(`/order/${orderId}`);
