@@ -152,6 +152,7 @@ export function createSwapStore() {
 
 	let recipientAddress = $state<string>('');
 	let recipientLocked = $state<boolean>(false);
+	let recipientLockSource = $state<'wallet' | 'manual' | null>(null);
 
 	let capabilities = $state<BridgeCapabilities | null>(null);
 	let quote = $state<BridgeQuote | null>(null);
@@ -383,11 +384,13 @@ export function createSwapStore() {
 	function lockRecipient() {
 		if (!recipientAddress) return;
 		recipientLocked = true;
+		recipientLockSource = 'manual';
 	}
 
 	function clearRecipient() {
 		recipientAddress = '';
 		recipientLocked = false;
+		recipientLockSource = null;
 		walletRecipientAutofillDisabled = true;
 		clearQuote();
 	}
@@ -395,6 +398,7 @@ export function createSwapStore() {
 	function setRecipientToWallet(wallet: string) {
 		recipientAddress = wallet;
 		recipientLocked = true;
+		recipientLockSource = 'wallet';
 		walletRecipientAutofillDisabled = false;
 		clearQuote();
 		if (amountAtomic && recipientAddress) scheduleQuoteFetch();
@@ -408,9 +412,10 @@ export function createSwapStore() {
 	}
 
 	function clearRecipientOnWalletDisconnect() {
-		if (recipientLocked) {
+		if (recipientLockSource === 'wallet') {
 			recipientAddress = '';
 			recipientLocked = false;
+			recipientLockSource = null;
 		}
 		walletRecipientAutofillDisabled = false;
 		clearQuote();

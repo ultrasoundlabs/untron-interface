@@ -12,14 +12,18 @@
 	import { WALLETS } from '@untron/connectkit/wallets';
 	import { m } from '$lib/paraglide/messages.js';
 
+	const bridgeUrl = PUBLIC_BRIDGE_URL || '/';
+	const v3Url = PUBLIC_V3_URL || '';
+	const docsUrl = PUBLIC_DOCS_URL || '';
+
 	const navItems = [
-		{ id: 'bridge', label: 'Bridge', href: PUBLIC_BRIDGE_URL ?? '/' },
-		{ id: 'v3', label: 'V3', href: PUBLIC_V3_URL ?? '#', disabled: !PUBLIC_V3_URL },
+		{ id: 'bridge', label: 'Bridge', href: bridgeUrl },
+		{ id: 'v3', label: 'V3', href: v3Url || '#', disabled: !v3Url },
 		{
 			id: 'integrate',
 			label: 'Integrate',
-			href: PUBLIC_DOCS_URL ?? '#',
-			disabled: !PUBLIC_DOCS_URL
+			href: docsUrl || '#',
+			disabled: !docsUrl
 		}
 	] as const;
 </script>
