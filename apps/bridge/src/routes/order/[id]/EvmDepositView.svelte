@@ -65,6 +65,9 @@
 	let isSending = $state(false);
 	let txHash = $state<`0x${string}` | null>(null);
 	let sendError = $state<string | null>(null);
+	let copied = $state(false);
+	let timeRemaining = $state('');
+	let countdownInterval: ReturnType<typeof setInterval> | null = null;
 
 	async function ensureWalletOnChain(targetChainId: number): Promise<void> {
 		const current = await getChainId(wagmiConfig);
@@ -76,6 +79,57 @@
 		if (!chain?.explorerUrl) return null;
 		return `${chain.explorerUrl.replace(/\/$/, '')}/tx/${hash}`;
 	}
+
+	function updateCountdown() {
+		const now = Date.now();
+		const expiresAtMs = deposit ? Date.parse(deposit.expiresAt) : 0;
+		const remaining = expiresAtMs - now;
+
+		if (!deposit || !Number.isFinite(expiresAtMs) || expiresAtMs <= 0) {
+			timeRemaining = '';
+			return;
+		}
+
+		if (remaining <= 0) {
+			timeRemaining = m.order_expired();
+			if (countdownInterval) clearInterval(countdownInterval);
+			return;
+		}
+
+		const minutes = Math.floor(remaining / 60000);
+		const seconds = Math.floor((remaining % 60000) / 1000);
+		timeRemaining = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+	}
+
+	async function copyAddress() {
+		if (!deposit) return;
+		await navigator.clipboard.writeText(deposit.address);
+		copied = true;
+		setTimeout(() => (copied = false), 2000);
+	}
+
+	$effect(() => {
+		// keep countdown synced with whatever deposit requirement we currently have
+		if (countdownInterval) {
+			clearInterval(countdownInterval);
+			countdownInterval = null;
+		}
+
+		if (!deposit) {
+			timeRemaining = '';
+			return;
+		}
+
+		updateCountdown();
+		countdownInterval = setInterval(updateCountdown, 1000);
+
+		return () => {
+			if (countdownInterval) {
+				clearInterval(countdownInterval);
+				countdownInterval = null;
+			}
+		};
+	});
 
 	async function sendNow() {
 		sendError = null;
@@ -146,12 +200,39 @@
 
 		<div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
 			<div class="mb-2 text-sm text-zinc-500 dark:text-zinc-400">{m.order_deposit_address()}</div>
-			<code
-				class="block w-full overflow-hidden rounded-lg bg-zinc-100 px-3 py-2 font-sans text-sm text-ellipsis text-zinc-900 dark:bg-zinc-800 dark:text-white"
-			>
-				{deposit.address}
-			</code>
+			<div class="flex items-center gap-2">
+				<code
+					class="flex-1 overflow-hidden rounded-lg bg-zinc-100 px-3 py-2 font-sans text-sm text-ellipsis text-zinc-900 dark:bg-zinc-800 dark:text-white"
+				>
+					{deposit.address}
+				</code>
+				<button
+					onclick={copyAddress}
+					class="shrink-0 rounded-lg border border-zinc-200 p-2 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+					aria-label={m.order_copy_value()}
+				>
+					{#if copied}
+						<svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+						</svg>
+					{:else}
+						<svg class="h-5 w-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+						</svg>
+					{/if}
+				</button>
+			</div>
 		</div>
+
+		{#if timeRemaining}
+			<div class="flex items-center justify-center gap-2 text-sm">
+				<svg class="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				<span class="text-zinc-500 dark:text-zinc-400">{m.order_time_remaining()}:</span>
+				<span class="font-sans font-medium text-zinc-900 dark:text-white">{timeRemaining}</span>
+			</div>
+		{/if}
 
 		<div class="space-y-3">
 			<Button
