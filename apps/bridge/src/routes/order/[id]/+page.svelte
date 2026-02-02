@@ -207,6 +207,32 @@
 					</div>
 				{/if}
 
+				{#if order.depositRequirement && ['requires_funding', 'funding_incomplete'].includes(order.status) && Date.parse(order.depositRequirement.expiresAt) <= Date.now()}
+					<div class="mb-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
+						<div class="font-medium">Deposit window expired</div>
+						<div class="mt-1 text-amber-800 dark:text-amber-200">
+							If you already sent the transfer, it may still be detected. Contact support with your Order ID:
+							<span class="font-sans">{order.orderId}</span>
+						</div>
+						<div class="mt-2 flex flex-wrap items-center gap-3 text-amber-900 dark:text-amber-100">
+							<a
+								href="mailto:contact@untron.finance"
+								class="underline underline-offset-2"
+							>
+								contact@untron.finance
+							</a>
+							<a
+								href="https://t.me/untronsupport"
+								target="_blank"
+								rel="noreferrer"
+								class="underline underline-offset-2"
+							>
+								@untronsupport
+							</a>
+						</div>
+					</div>
+				{/if}
+
 				{#if lastUpdatedAt}
 					<div class="mb-4 text-center font-sans text-[11px] text-zinc-500 dark:text-zinc-400">
 						Updated {Math.max(0, Math.round((nowTick - lastUpdatedAt) / 1000))}s ago
