@@ -147,6 +147,27 @@
 				return status;
 		}
 	}
+
+	function statusEtaHint(status: string): string | null {
+		// BRG-5: expectation management. We don't have a backend ETA yet, so keep it
+		// honest + conservative.
+		switch (status) {
+			case 'requires_funding':
+				return 'Most swaps complete within ~1–3 minutes after we receive your deposit.';
+			case 'funding_incomplete':
+				return 'Waiting for the full amount. Once received, swaps usually finish in ~1–3 minutes.';
+			case 'funding_detected':
+				return 'Deposit detected. This usually takes ~1–3 minutes to complete.';
+			case 'executing':
+				return 'Processing on-chain. Usually completes in ~1–3 minutes (sometimes longer).';
+			case 'settling':
+				return 'Finalizing. Usually completes in under ~1–2 minutes.';
+			case 'action_required':
+				return 'This swap needs your attention. Follow the instructions below.';
+			default:
+				return null;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -240,10 +261,15 @@
 				{/if}
 				<div class="text-center">
 					<div
-						class="mb-4 inline-flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+						class="mb-2 inline-flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
 					>
 						<span class="text-sm font-medium">{statusLabel(order.status)}</span>
 					</div>
+
+					{#if statusEtaHint(order.status)}
+						<p class="mb-2 text-sm text-zinc-600 dark:text-zinc-300">{statusEtaHint(order.status)}</p>
+					{/if}
+
 					<p class="text-xs text-zinc-500 dark:text-zinc-400">
 						{m.order_id_label({ orderId: order.orderId })}
 					</p>
