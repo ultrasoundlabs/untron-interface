@@ -11,8 +11,17 @@ export function getApiBaseUrl(): string {
 }
 
 export function api(fetchImpl?: typeof fetch) {
+	// Ensure cookies (anon principal + future accounts session) are included when
+	// calling the API from a different subdomain.
+	const fetchWithCreds: typeof fetch = async (input, init) => {
+		return (fetchImpl ?? fetch)(input, {
+			...init,
+			credentials: 'include'
+		});
+	};
+
 	return createClient<paths>({
 		baseUrl: getApiBaseUrl(),
-		fetch: fetchImpl
+		fetch: fetchWithCreds
 	});
 }

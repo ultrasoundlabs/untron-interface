@@ -171,6 +171,10 @@ export async function listOrders(args?: { limit?: number }, fetchImpl?: typeof f
 
 	const res = await (fetchImpl ?? fetch)(url, {
 		method: 'GET',
+		// Important: API is typically on a different subdomain (api.untron.finance)
+		// than the app (bridge.untron.finance). Without credentials: 'include',
+		// the browser will not send the anon cookie used for principal scoping.
+		credentials: 'include',
 		headers: {
 			accept: 'application/json'
 		}
