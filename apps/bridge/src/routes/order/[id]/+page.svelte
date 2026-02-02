@@ -19,6 +19,12 @@
 	let errorMessage = $state<string | null>(null);
 	let pollTimeout: ReturnType<typeof setTimeout> | null = null;
 
+	// "soft" polling errors: keep rendering the last known order state.
+	let pollError = $state<string | null>(null);
+	let lastUpdatedAt = $state<number | null>(null);
+	let nowTick = $state(Date.now());
+	let nowInterval: ReturnType<typeof setInterval> | null = null;
+
 	let isModal = $state(false);
 
 	function shouldPoll(current: BridgeOrder | null): boolean {
@@ -35,7 +41,7 @@
 		if (pollTimeout) clearTimeout(pollTimeout);
 		if (!shouldPoll(order)) return;
 		pollTimeout = setTimeout(async () => {
-			await loadOrder();
+			await loadOrder({ isPoll: true });
 			schedulePoll();
 		}, pollDelayMs(order));
 	}
@@ -45,21 +51,48 @@
 		isModal =
 			document.referrer.includes(window.location.origin) && !document.referrer.includes('/order/');
 
-		await loadOrder();
+		nowInterval = setInterval(() => {
+			nowTick = Date.now();
+		}, 1000);
+
+		await loadOrder({ isPoll: false });
 		schedulePoll();
 	});
 
 	onDestroy(() => {
 		if (pollTimeout) clearTimeout(pollTimeout);
+		if (nowInterval) clearInterval(nowInterval);
 	});
 
-	async function loadOrder() {
+	async function loadOrder(opts: { isPoll: boolean }) {
 		try {
-			order = await swapService.getOrder(orderId);
+			const fresh = await swapService.getOrder(orderId);
+			order = fresh;
+			lastUpdatedAt = Date.now();
+			pollError = null;
+
+			// If this order is terminal, clear the "resume" hint so the home page doesn't
+			// keep suggesting a completed/failed swap.
+			try {
+				if (['completed', 'failed', 'expired', 'canceled'].includes(fresh.status)) {
+					localStorage.removeItem('bridge:lastOrderId');
+					localStorage.removeItem('bridge:lastOrderCreatedAt');
+				}
+			} catch {
+				// ignore
+			}
 			errorTitle = null;
 			errorMessage = null;
 		} catch (err) {
 			console.error('Failed to load order:', err);
+
+			// If this is a background poll and we already have *some* order state,
+			// keep rendering it and show a soft warning instead of a hard error.
+			if (opts.isPoll && order) {
+				pollError = err instanceof Error ? err.message : m.order_error_generic_description();
+				return;
+			}
+
 			if (err instanceof swapService.SwapServiceError && err.statusCode === 404) {
 				errorTitle = m.order_error_title();
 				errorMessage = m.order_error_not_found_description();
@@ -168,6 +201,17 @@
 			<div
 				class="rounded-3xl border border-zinc-200 bg-white p-6 shadow-xl shadow-zinc-200/50 dark:border-zinc-700 dark:bg-zinc-900 dark:shadow-black/20"
 			>
+				{#if pollError}
+					<div class="mb-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+						{pollError}
+					</div>
+				{/if}
+
+				{#if lastUpdatedAt}
+					<div class="mb-4 text-center font-sans text-[11px] text-zinc-500 dark:text-zinc-400">
+						Updated {Math.max(0, Math.round((nowTick - lastUpdatedAt) / 1000))}s ago
+					</div>
+				{/if}
 				<div class="text-center">
 					<div
 						class="mb-4 inline-flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"

@@ -548,6 +548,15 @@ export function createSwapStore() {
 				turnstileToken
 			});
 
+			// UX reliability: persist last successful order so users can easily resume
+			// after refresh/navigation.
+			try {
+				localStorage.setItem('bridge:lastOrderId', order.orderId);
+				localStorage.setItem('bridge:lastOrderCreatedAt', new Date().toISOString());
+			} catch {
+				// ignore (private mode, disabled storage, etc.)
+			}
+
 			return order.orderId;
 		} catch (err) {
 			if (err instanceof swapService.SwapServiceError) {

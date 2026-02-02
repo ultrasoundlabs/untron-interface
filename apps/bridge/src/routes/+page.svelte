@@ -1,8 +1,49 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { m } from '$lib/paraglide/messages.js';
+	import { onMount } from 'svelte';
 	import SwapBox from '$lib/components/swap/SwapBox.svelte';
 	import FAQ from '$lib/components/FAQ.svelte';
+	import { goto } from '$app/navigation';
+	import { Button } from '@untron/ui/button';
+
+	let lastOrderId: string | null = null;
+
+	onMount(() => {
+		try {
+			const id = localStorage.getItem('bridge:lastOrderId');
+			const createdAt = localStorage.getItem('bridge:lastOrderCreatedAt');
+
+			// Don't keep a stale "resume" banner around forever.
+			// We want recovery from accidental refresh/back/close; not long-term nags.
+			const MAX_AGE_MS = 2 * 60 * 60 * 1000; // 2 hours
+			const createdMs = createdAt ? Date.parse(createdAt) : NaN;
+			const isFresh = Number.isFinite(createdMs) ? Date.now() - createdMs <= MAX_AGE_MS : true;
+
+			lastOrderId = id && isFresh ? id : null;
+			if (!lastOrderId) {
+				localStorage.removeItem('bridge:lastOrderId');
+				localStorage.removeItem('bridge:lastOrderCreatedAt');
+			}
+		} catch {
+			lastOrderId = null;
+		}
+	});
+
+	function resumeLastOrder() {
+		if (!lastOrderId) return;
+		goto(`/order/${lastOrderId}`);
+	}
+
+	function clearLastOrder() {
+		try {
+			localStorage.removeItem('bridge:lastOrderId');
+			localStorage.removeItem('bridge:lastOrderCreatedAt');
+		} catch {
+			// ignore
+		}
+		lastOrderId = null;
+	}
 
 	// Get time-appropriate greeting
 	function getGreeting(): string {
@@ -26,6 +67,24 @@
 			{greeting}
 		</h1>
 	</div>
+
+	<!-- Resume last order (UX reliability) -->
+	{#if lastOrderId}
+		<div class="mb-4 w-full max-w-md" in:fly={{ y: 8, duration: 180 }}>
+			<div class="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700 shadow-sm shadow-zinc-200/40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:shadow-black/20">
+				<div class="min-w-0">
+					<div class="font-medium">Resume your last swap</div>
+					<div class="mt-0.5 truncate font-sans text-xs text-zinc-500 dark:text-zinc-400">
+						/order/{lastOrderId}
+					</div>
+				</div>
+				<div class="flex shrink-0 items-center gap-2">
+					<Button onclick={resumeLastOrder} size="sm">Resume</Button>
+					<Button onclick={clearLastOrder} size="sm" variant="outline">Clear</Button>
+				</div>
+			</div>
+		</div>
+	{/if}
 
 	<!-- Swap Box -->
 	<SwapBox />
