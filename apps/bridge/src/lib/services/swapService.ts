@@ -5,7 +5,7 @@
  * Untron Bridge HTTP API described by `openapi.json`.
  */
 
-import { api } from '$lib/api/client';
+import { api, getApiBaseUrl } from '$lib/api/client';
 import type { components } from '$lib/api/schema';
 import type { BridgeCapabilities, BridgeOrder, BridgeQuote } from '$lib/types/swap';
 import type { SwapServiceErrorCode } from '$lib/types/errors';
@@ -160,5 +160,40 @@ export async function getOrder(orderId: string, fetchImpl?: typeof fetch): Promi
 		code: 'INVALID_RESPONSE',
 		statusCode: res.response.status,
 		problem
+	});
+}
+
+export async function listOrders(args?: { limit?: number }, fetchImpl?: typeof fetch): Promise<BridgeOrder[]> {
+	// The OpenAPI client in untron-interface may lag the backend spec. Implement this
+	// using a plain fetch to avoid waiting on schema regeneration.
+	const limit = Math.min(Math.max(args?.limit ?? 20, 1), 100);
+	const url = `${getApiBaseUrl()}/v1/orders?limit=${encodeURIComponent(String(limit))}`;
+
+	const res = await (fetchImpl ?? fetch)(url, {
+		method: 'GET',
+		headers: {
+			accept: 'application/json'
+		}
+	});
+
+	if (res.ok) {
+		const data = (await res.json()) as unknown;
+		if (Array.isArray(data)) return data as BridgeOrder[];
+		throw new SwapServiceError('Invalid response', 'INVALID_RESPONSE', res.status);
+	}
+
+	let problem: Problem | undefined;
+	try {
+		const err = (await res.json()) as { title?: string; detail?: string };
+		problem = err as unknown as Problem;
+	} catch {
+		// ignore
+	}
+
+	throw toSwapServiceError({
+		code: 'INVALID_RESPONSE',
+		statusCode: res.status,
+		problem,
+		fallbackMessage: 'Failed to load orders'
 	});
 }
