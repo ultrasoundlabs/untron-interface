@@ -7,6 +7,7 @@
 	import WalletStatus from '@untron/stylekit/components/WalletStatus.svelte';
 	import { PUBLIC_BRIDGE_URL, PUBLIC_DOCS_URL, PUBLIC_V3_URL } from '$env/static/public';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { connectWallet, disconnectWallet } from '$lib/wagmi/wallet';
 	import { WALLETS } from '@untron/connectkit/wallets';
@@ -15,6 +16,25 @@
 	const bridgeUrl = PUBLIC_BRIDGE_URL || '/';
 	const v3Url = PUBLIC_V3_URL || '';
 	const docsUrl = PUBLIC_DOCS_URL || '';
+
+	type AccountsSession = { userId: string; principalId: string };
+	let accountsSession: AccountsSession | null = null;
+
+	async function loadAccountsSession() {
+		try {
+			const res = await fetch('https://api.untron.finance/accounts/session', {
+				method: 'GET',
+				credentials: 'include',
+				headers: { accept: 'application/json' }
+			});
+			if (!res.ok) return;
+			accountsSession = (await res.json()) as AccountsSession;
+		} catch {
+			// ignore
+		}
+	}
+
+	onMount(loadAccountsSession);
 
 	const navItems = [
 		{ id: 'bridge', label: 'Bridge', href: bridgeUrl },
@@ -50,7 +70,7 @@
 			rel="noopener"
 			class="rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
 		>
-			{m.common_sign_in()}
+			{accountsSession ? m.common_account() : m.common_sign_in()}
 		</a>
 		<WalletStatus
 			connection={$connection}
