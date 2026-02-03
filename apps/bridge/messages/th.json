@@ -1,4 +1,6 @@
 {
+	"common_sign_in": "Sign in",
+	"orders_title": "My Orders",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"app_title": "Untron — โอน Tron USDT บนทุกเชน",
 	"wallet_connected_as": "เชื่อมต่อเป็น",
