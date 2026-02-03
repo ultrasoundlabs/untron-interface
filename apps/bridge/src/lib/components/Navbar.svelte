@@ -43,6 +43,13 @@
 		>
 			My Orders
 		</a>
+		<a
+			href={`https://accounts.untron.finance/login?return_to=${encodeURIComponent($page.url.href)}`}
+			rel="noopener"
+			class="rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+		>
+			Sign in
+		</a>
 		<ThemePicker />
 		<LanguageSwitcher />
 		<WalletStatus
