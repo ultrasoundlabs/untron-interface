@@ -43,6 +43,8 @@
 		>
 			My Orders
 		</a>
+		<ThemePicker />
+		<LanguageSwitcher />
 		<a
 			href={`https://accounts.untron.finance/login?return_to=${encodeURIComponent($page.url.href)}`}
 			rel="noopener"
@@ -50,8 +52,6 @@
 		>
 			Sign in
 		</a>
-		<ThemePicker />
-		<LanguageSwitcher />
 		<WalletStatus
 			connection={$connection}
 			{connectWallet}
