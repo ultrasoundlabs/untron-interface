@@ -1,4 +1,6 @@
 {
+	"common_sign_in": "Sign in",
+	"orders_title": "My Orders",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"app_title": "Untron — pindahan Tron USDT di semua rantaian",
 	"wallet_connected_as": "Disambung sebagai",
