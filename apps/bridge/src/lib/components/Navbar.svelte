@@ -41,7 +41,7 @@
 			href="/orders"
 			class="rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
 		>
-			My Orders
+			{m.orders_title()}
 		</a>
 		<ThemePicker />
 		<LanguageSwitcher />
@@ -50,7 +50,7 @@
 			rel="noopener"
 			class="rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
 		>
-			Sign in
+			{m.common_sign_in()}
 		</a>
 		<WalletStatus
 			connection={$connection}

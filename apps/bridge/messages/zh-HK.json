@@ -1,4 +1,6 @@
 {
+	"common_sign_in": "Sign in",
+	"orders_title": "My Orders",
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"app_title": "Untron — 喺所有鏈上轉帳 Tron USDT",
 	"wallet_connected_as": "已連接：",
