@@ -7,12 +7,9 @@
 	import * as Alert from '@untron/ui/alert';
 	import { Skeleton } from '@untron/ui/skeleton';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
-	import PlusIcon from '@lucide/svelte/icons/plus';
 	import LeasesTable from '$lib/components/leases/LeasesTable.svelte';
-	import NewLeaseDialog from '$lib/components/leases/NewLeaseDialog.svelte';
 	import { getLeasesPage } from '$lib/untron/api';
 	import type { SqlRow } from '$lib/untron/types';
-	import { connection } from '$lib/wagmi/connectionStore';
 	import { startPolling } from '$lib/polling';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 
@@ -33,7 +30,6 @@
 	let refreshedPulse = $state(false);
 	let errorMessage = $state<string | null>(null);
 	let query = $state('');
-	let newLeaseOpen = $state(false);
 	let pageIndex = $state(parsePageIndexFromSearchParams($page.url.searchParams)); // 0-based
 
 	$effect(() => {
@@ -148,10 +144,6 @@
 				/>
 				Refresh
 			</Button>
-			<Button onclick={() => (newLeaseOpen = true)} disabled={!$connection.isConnected}>
-				<PlusIcon />
-				New lease
-			</Button>
 		</div>
 	</div>
 
@@ -261,5 +253,3 @@
 		</Card.Content>
 	</Card.Root>
 </div>
-
-<NewLeaseDialog bind:open={newLeaseOpen} lessee={$connection.address as `0x${string}` | null} />

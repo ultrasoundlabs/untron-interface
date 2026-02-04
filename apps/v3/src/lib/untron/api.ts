@@ -38,10 +38,6 @@ type HubProtocolConfig = components['schemas']['hub_protocol_config'];
 type HubChains = components['schemas']['hub_chains'];
 export type LeaseViewResponse = components['schemas']['LeaseViewResponse'];
 export type LeaseClaimView = components['schemas']['LeaseClaimView'];
-export type CreateLeaseRequest = components['schemas']['CreateLeaseRequest'];
-export type CreateLeaseResponse = components['schemas']['CreateLeaseResponse'];
-export type SetPayoutConfigRequest = components['schemas']['SetPayoutConfigRequest'];
-export type SetPayoutConfigResponse = components['schemas']['SetPayoutConfigResponse'];
 export type UsdtDepositTx = components['schemas']['usdt_deposit_txs'];
 export type UsdtDepositsDaily = components['schemas']['usdt_deposits_daily'];
 export type UsdtDepositsDailyByAction = components['schemas']['usdt_deposits_daily_by_action'];
@@ -472,58 +468,4 @@ export async function getRealtor(): Promise<RealtorInfoResponse> {
 	requireBrowser();
 	const client = createApiClient();
 	return await unwrap<RealtorInfoResponse>(client.GET('/realtor'));
-}
-
-export async function createLease(body: CreateLeaseRequest): Promise<CreateLeaseResponse> {
-	requireBrowser();
-	const client = createApiClient();
-	return await unwrap<CreateLeaseResponse>(
-		client.POST('/realtor', {
-			body
-		})
-	);
-}
-
-export async function updatePayoutConfigWithSig(
-	body: SetPayoutConfigRequest
-): Promise<SetPayoutConfigResponse> {
-	requireBrowser();
-	const client = createApiClient();
-	return await unwrap<SetPayoutConfigResponse>(
-		client.POST('/payout_config', {
-			body
-		})
-	);
-}
-
-export async function findLeaseIdByReceiverSalt(args: {
-	receiverSalt: string;
-	lessee?: `0x${string}` | null;
-}): Promise<string | null> {
-	requireBrowser();
-	const client = createApiClient();
-	const rows = await unwrap<LeaseViewRow[]>(
-		client.GET('/lease_view', {
-			params: {
-				query: {
-					receiver_salt: toEq(args.receiverSalt),
-					...(args.lessee ? { lessee: toEq(checksumEvmAddress(args.lessee)) } : {}),
-					order: 'lease_id.desc',
-					limit: '1'
-				}
-			}
-		})
-	);
-	const leaseId = rows[0]?.lease_id;
-	return leaseId === undefined ? null : String(leaseId);
-}
-
-export async function getLeaseNonce(leaseId: string): Promise<string> {
-	requireBrowser();
-	const client = createApiClient();
-	const rows = await unwrap<Array<components['schemas']['hub_lease_nonces']>>(
-		client.GET('/hub_lease_nonces', { params: { query: { lease_id: toEq(leaseId), limit: '1' } } })
-	);
-	const nonce = rows[0]?.nonce;
-	return nonce === undefined ? '0' : String(nonce);
 }
