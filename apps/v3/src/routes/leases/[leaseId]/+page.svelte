@@ -6,16 +6,13 @@
 	import { Badge } from '@untron/ui/badge';
 	import { Skeleton } from '@untron/ui/skeleton';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
-	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import HourglassIcon from '@lucide/svelte/icons/hourglass';
 	import LeaseCard from '$lib/components/leases/LeaseCard.svelte';
 	import ClaimsTable from '$lib/components/leases/ClaimsTable.svelte';
 	import LeaseDetailsPanel from '$lib/components/leases/LeaseDetailsPanel.svelte';
-	import { connection } from '$lib/wagmi/connectionStore';
 	import { getLeaseById } from '$lib/untron/api';
 	import type { SqlRow } from '$lib/untron/types';
 	import { getLeaseFeePpm } from '$lib/untron/format';
-	import UpdatePayoutConfigDialog from '$lib/components/leases/UpdatePayoutConfigDialog.svelte';
 	import { startPolling } from '$lib/polling';
 
 	let lease = $state<SqlRow | null>(null);
@@ -24,7 +21,6 @@
 	let refreshing = $state(false);
 	let refreshedPulse = $state(false);
 	let errorMessage = $state<string | null>(null);
-	let updateOpen = $state(false);
 
 	const leaseId = $derived($page.params.leaseId ?? '');
 
@@ -72,14 +68,6 @@
 		});
 		return stop;
 	});
-
-	const canUpdatePayoutConfig = $derived.by(() => {
-		if (!lease) return false;
-		if (!$connection.isConnected || !$connection.address) return false;
-		const lessee = lease.lessee;
-		if (typeof lessee !== 'string') return false;
-		return lessee.toLowerCase() === $connection.address.toLowerCase();
-	});
 </script>
 
 <div class="space-y-6">
@@ -100,12 +88,6 @@
 				/>
 				Refresh
 			</Button>
-			{#if canUpdatePayoutConfig}
-				<Button variant="outline" onclick={() => (updateOpen = true)}>
-					<Settings2Icon />
-					Update payout config
-				</Button>
-			{/if}
 		</div>
 	</div>
 
@@ -178,12 +160,3 @@
 		</Card.Root>
 	</div>
 </div>
-
-<UpdatePayoutConfigDialog
-	bind:open={updateOpen}
-	{leaseId}
-	{lease}
-	account={$connection.address as `0x${string}` | null}
-	disabled={!canUpdatePayoutConfig}
-	onUpdated={refresh}
-/>

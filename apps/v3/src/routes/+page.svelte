@@ -4,12 +4,10 @@
 	import { Button } from '@untron/ui/button';
 	import * as Alert from '@untron/ui/alert';
 	import { Skeleton } from '@untron/ui/skeleton';
-	import PlusIcon from '@lucide/svelte/icons/plus';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 	import { getOwnedLeases } from '$lib/untron/api';
 	import type { SqlRow } from '$lib/untron/types';
 	import LeaseCard from '$lib/components/leases/LeaseCard.svelte';
-	import NewLeaseDialog from '$lib/components/leases/NewLeaseDialog.svelte';
 	import KeyRoundIcon from '@lucide/svelte/icons/key-round';
 	import { startPolling } from '$lib/polling';
 	import ProtocolStats from '$lib/components/dashboard/ProtocolStats.svelte';
@@ -19,7 +17,6 @@
 	let loading = $state(false); // initial load only
 	let refreshing = $state(false);
 	let refreshedPulse = $state(false);
-	let newLeaseOpen = $state(false);
 
 	async function refresh(mode: 'initial' | 'background' | 'manual' = 'manual') {
 		if (!$connection.isConnected || !$connection.address) {
@@ -80,10 +77,6 @@
 				/>
 				Refresh
 			</Button>
-			<Button onclick={() => (newLeaseOpen = true)} disabled={!$connection.isConnected}>
-				<PlusIcon />
-				New lease
-			</Button>
 		</div>
 	</div>
 
@@ -110,9 +103,7 @@
 		<Card.Root>
 			<Card.Header>
 				<Card.Title class="text-base">No leases found</Card.Title>
-				<Card.Description>
-					Create a new lease or check `apps/backend` indexing status.
-				</Card.Description>
+				<Card.Description>Check `apps/backend` indexing status.</Card.Description>
 			</Card.Header>
 		</Card.Root>
 	{:else}
@@ -123,5 +114,3 @@
 		</div>
 	{/if}
 </div>
-
-<NewLeaseDialog bind:open={newLeaseOpen} lessee={$connection.address as `0x${string}` | null} />
