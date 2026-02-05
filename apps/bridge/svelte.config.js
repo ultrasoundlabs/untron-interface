@@ -8,6 +8,10 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
+		paths: {
+			// Prevent deep-route reloads from resolving `./_app` under the current path.
+			relative: false
+		},
 		adapter: adapter({
 			fallback: '200.html'
 		}),

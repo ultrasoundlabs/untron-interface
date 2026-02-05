@@ -6,6 +6,10 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
+		paths: {
+			// See apps/bridge.
+			relative: false
+		},
 		adapter: adapter({
 			fallback: '200.html'
 		})
