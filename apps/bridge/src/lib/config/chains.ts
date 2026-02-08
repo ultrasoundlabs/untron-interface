@@ -266,7 +266,7 @@ const CHAIN_DESCRIPTORS = [
 	{
 		id: 130,
 		name: 'Unichain',
-		logoUrl: '/logos/chains/unichain.svg',
+		logoUrl: '/logos/chains/unichain.png',
 		explorer: {
 			name: 'Uniscan',
 			url: 'https://uniscan.xyz'
@@ -302,7 +302,7 @@ const CHAIN_DESCRIPTORS = [
 	{
 		id: 480,
 		name: 'World Chain',
-		logoUrl: '/logos/chains/worldchain.svg',
+		logoUrl: '/logos/chains/worldchain.png',
 		explorer: {
 			name: 'Worldscan',
 			url: 'https://worldscan.org'
@@ -313,6 +313,91 @@ const CHAIN_DESCRIPTORS = [
 		},
 		tokens: {
 			USDC: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1'
+		},
+		rebalanceThresholds: {}
+	},
+	{
+		id: 146,
+		name: 'Sonic',
+		logoUrl: '/logos/chains/sonic.svg',
+		explorer: {
+			name: 'SonicScan',
+			url: 'https://sonicscan.org'
+		},
+		currency: {
+			symbol: 'S',
+			name: 'S'
+		},
+		tokens: {
+			USDC: '0x29219dd400f2Bf60E5a23d13Be72B486D4038894'
+		},
+		rebalanceThresholds: {}
+	},
+	{
+		id: 43114,
+		name: 'Avalanche C-Chain',
+		logoUrl: '/logos/chains/avalanche.svg',
+		explorer: {
+			name: 'Snowtrace',
+			url: 'https://snowtrace.io'
+		},
+		currency: {
+			symbol: 'AVAX',
+			name: 'Avalanche'
+		},
+		tokens: {
+			USDC: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E'
+		},
+		rebalanceThresholds: {}
+	},
+	{
+		id: 57073,
+		name: 'Ink',
+		logoUrl: '/logos/chains/ink.png',
+		explorer: {
+			name: 'Ink Explorer',
+			url: 'https://explorer.inkonchain.com'
+		},
+		currency: {
+			symbol: 'ETH',
+			name: 'Ether'
+		},
+		tokens: {
+			USDC: '0x2D270e6886d130D724215A266106e6832161EAEd'
+		},
+		rebalanceThresholds: {}
+	},
+	{
+		id: 59144,
+		name: 'Linea',
+		logoUrl: '/logos/chains/linea.png',
+		explorer: {
+			name: 'LineaScan',
+			url: 'https://lineascan.build'
+		},
+		currency: {
+			symbol: 'ETH',
+			name: 'Ether'
+		},
+		tokens: {
+			USDC: '0x176211869cA2b568f2A7D4EE941E073a821EE1ff'
+		},
+		rebalanceThresholds: {}
+	},
+	{
+		id: 999,
+		name: 'Codex',
+		logoUrl: '/logos/chains/codex.png',
+		explorer: {
+			name: 'Codex Explorer',
+			url: 'https://explorer.codex.xyz'
+		},
+		currency: {
+			symbol: 'ETH',
+			name: 'Ether'
+		},
+		tokens: {
+			USDC: '0xd996633a415985DBd7D6D12f4A4343E31f5037cf'
 		},
 		rebalanceThresholds: {}
 	}
