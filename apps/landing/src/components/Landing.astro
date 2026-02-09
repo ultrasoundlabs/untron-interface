@@ -177,13 +177,13 @@ const exchangeLogos: readonly BrandLogo[] = [
           </article>
 
           <div class="bridge-flip-wrap">
-            <button
-              type="button"
-              class="bridge-flip-button"
-              data-swap-flip
-              aria-label="Flip direction"
-              title="Flip direction"
-            >
+	            <button
+	              type="button"
+	              class="bridge-flip-button"
+	              data-swap-flip
+	              aria-label={t.hero.swapFlipLabel}
+	              title={t.hero.swapFlipLabel}
+	            >
               <svg viewBox="0 0 24 24" fill="none">
                 <path
                   d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
@@ -269,13 +269,13 @@ const exchangeLogos: readonly BrandLogo[] = [
             >
               <header class="bridge-picker-head">
                 <div class="bridge-picker-head-left">
-                  <button
-                    type="button"
-                    class="bridge-picker-back"
-                    data-swap-picker-back
-                    aria-label="Back"
-                    hidden
-                  >
+	                  <button
+	                    type="button"
+	                    class="bridge-picker-back"
+	                    data-swap-picker-back
+	                    aria-label={t.hero.pickerBackLabel}
+	                    hidden
+	                  >
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path
                         d="M15 18 9 12l6-6"
@@ -287,12 +287,12 @@ const exchangeLogos: readonly BrandLogo[] = [
                   </button>
                   <p id="bridge-picker-title" data-swap-picker-title>{t.hero.routeSourceLabel}</p>
                 </div>
-                <button
-                  type="button"
-                  class="bridge-picker-close"
-                  data-swap-picker-close
-                  aria-label="Close selector"
-                >
+	                <button
+	                  type="button"
+	                  class="bridge-picker-close"
+	                  data-swap-picker-close
+	                  aria-label={t.hero.pickerCloseLabel}
+	                >
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path
                       d="M6 6 18 18M18 6 6 18"
@@ -309,7 +309,7 @@ const exchangeLogos: readonly BrandLogo[] = [
       </aside>
     </div>
 
-    <ul class="focus-grid" aria-label="Highlights">
+	    <ul class="focus-grid" aria-label={t.hero.highlightsLabel}>
       {
         t.stats.map((item, index) => (
           <li class="focus-card">
@@ -695,7 +695,7 @@ const exchangeLogos: readonly BrandLogo[] = [
       </ul>
     </div>
     <div>
-      <p class="footer-title">Social</p>
+	      <p class="footer-title">{t.footer.socialLabel}</p>
       <ul class="footer-links">
         <li><a href={t.links.x} target="_blank" rel="noreferrer noopener">X / Twitter</a></li>
         <li><a href={t.links.telegram} target="_blank" rel="noreferrer noopener">Telegram</a></li>

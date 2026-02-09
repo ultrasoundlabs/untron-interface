@@ -324,6 +324,9 @@ html.dark .language-switcher summary:focus-visible {
   margin: 0.5rem 0 0;
   padding: 0.38rem;
   min-width: 10.5rem;
+  max-height: min(22rem, 70vh);
+  overflow: auto;
+  overscroll-behavior: contain;
   list-style: none;
   border: 1px solid color-mix(in oklab, var(--border) 95%, transparent);
   border-radius: 0.8rem;

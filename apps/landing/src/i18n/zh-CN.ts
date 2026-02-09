@@ -1,0 +1,227 @@
+import type { LandingDictionary } from './types';
+
+export const landing: LandingDictionary = {
+  localeCode: 'zh-CN',
+  localeName: '简体中文',
+  meta: {
+    title: 'Untron | 非托管 Tron <-> EVM 稳定币跨链桥',
+    description:
+      '在 Tron 与主流 EVM 链之间跨链 USDT/USDC，免 Gas 体验、低费用、合约已审计。',
+    keywords:
+      'tron 跨链桥, usdt 跨链, usdc 跨链, tron 到 evm, 非托管 跨链桥, 稳定币 跨链, web3',
+    ogTitle: 'Untron | 非托管 Tron <-> EVM 跨链桥',
+    ogDescription: '无需依赖中心化交易所，在 Tron 与 EVM 链之间转移稳定币。',
+    twitterTitle: 'Untron | Tron <-> EVM 稳定币跨链桥',
+    twitterDescription: '免 Gas 体验、低费用、最小信任设计，用于在链间转移 USDT 与 USDC。',
+  },
+  nav: {
+    brand: 'Untron',
+    skipToContentLabel: '跳到主要内容',
+    productsLabel: '产品',
+    productBridge: 'Bridge',
+    productV3: 'V3',
+    productIntegrate: '集成',
+    sectionsLabel: '章节',
+    sectionHowItWorks: '工作原理',
+    sectionFees: '费用',
+    sectionSecurity: '安全',
+    sectionFaq: 'FAQ',
+    openApp: '打开应用',
+    languageLabel: '语言',
+    toggleThemeLabel: '切换主题',
+  },
+  hero: {
+    eyebrow: '非托管稳定币跨链桥',
+    title: '在 Tron 与 EVM 链之间转移 USDT/USDC，无需承担交易所风险。',
+    description: '几分钟内即可把稳定币从 Tron 发送到 Ethereum、Arbitrum、Base 等 EVM 链。',
+    supportingLine: '无需 CEX 账号。无需交出托管。路线清晰，执行可预期。',
+    routePreviewLabel: '路线预览',
+    routeSourceLabel: '从',
+    routeDestinationLabel: '到',
+    swapSendLabel: '你发送',
+    swapReceiveLabel: '你收到',
+    swapFlipLabel: '切换方向',
+    swapMaxLabel: 'MAX',
+    swapQuoteLoading: '正在获取实时报价...',
+    swapQuoteReady: '报价已更新',
+    swapQuoteError: '无法加载报价',
+    swapRateLabel: '汇率',
+    swapFeeLabel: '桥费',
+    swapOpenBridgeLabel: '在 Bridge 中打开',
+    primaryCta: '开始跨链',
+    secondaryCta: '查看费用对比',
+    pickerBackLabel: '返回',
+    pickerCloseLabel: '关闭选择器',
+    highlightsLabel: '亮点',
+  },
+  stats: [
+    { value: '0 托管', label: '全程由你掌控钱包' },
+    { value: '免 Gas UX', label: '支持路线无需预先准备 TRX 或 ETH' },
+    { value: '已审计', label: '核心合约已审计并形式化验证' },
+  ],
+  audiences: {
+    title: '为真实的稳定币流程而生',
+    subtitle: '零售转账、流动性再平衡与产品集成都走同一套简单流程。',
+    cards: [
+      {
+        label: '用户',
+        title: '从任意交易所或钱包发起',
+        description: '跨链转移稳定币，无需切换多个应用或准备 Gas 代币。',
+        ctaLabel: '打开 Bridge',
+        ctaHref: 'https://bridge.untron.finance',
+      },
+      {
+        label: '企业',
+        title: '按市场速度再平衡流动性',
+        description: '在 Tron 与 EVM 之间搬运资金，依赖更少于 CEX 通道。',
+        ctaLabel: '联系我们',
+        ctaHref: 'mailto:contact@untron.finance',
+      },
+      {
+        label: '开发者',
+        title: '一套 API + 一次合约调用即可集成',
+        description: '可用托管 API 或自托管。面向支付与链上金库产品。',
+        ctaLabel: '阅读文档',
+        ctaHref: 'https://docs.untron.finance',
+      },
+    ],
+  },
+  howItWorks: {
+    title: '工作原理',
+    subtitle: '从源链到目标链，只需三步。',
+    steps: [
+      {
+        title: '1. 选择路线与金额',
+        description: '选择来源、目标与金额。执行前即可看到报价。',
+      },
+      {
+        title: '2. 钱包一次确认',
+        description: '只需确认一次。Untron 验证链上状态并执行结算流程。',
+      },
+      {
+        title: '3. 在目标链到账',
+        description: '资金到达目标钱包，状态清晰，没有隐藏的托管环节。',
+      },
+    ],
+  },
+  fees: {
+    title: '费用概览',
+    subtitle: '以 $100 跨链为例的粗略对比。最终以 Bridge 的实时报价为准。',
+    amountLabel: '$100 示例路线',
+    columns: {
+      service: '服务',
+      received: '到账金额',
+      notes: '备注',
+    },
+    rows: [
+      {
+        service: 'Untron',
+        received: '$99.90',
+        notes: '非托管流程，路由优化',
+        isUntron: true,
+      },
+      {
+        service: 'FixedFloat',
+        received: '$98.50',
+        notes: '中心化交易所模式',
+      },
+      {
+        service: 'ChangeNOW',
+        received: '$98.50',
+        notes: '中心化交易所模式',
+      },
+      {
+        service: 'Symbiosis',
+        received: '$94.00',
+        notes: 'Tron 侧合约 Gas 额外开销',
+      },
+      {
+        service: 'Bridgers',
+        received: '$94.00',
+        notes: 'Tron 侧合约 Gas 额外开销',
+      },
+    ],
+    footnote: '以上为方向性示例，不构成承诺。发送前请在 Bridge 中查看实时报价。',
+    focusTitle: '执行优势',
+    focusBullets: [
+      '天生非托管',
+      '为低摩擦体验优化的 Bridge UX',
+      '跨链结算，状态清晰',
+      '不依赖中心化账号通道',
+    ],
+    focusCta: '打开实时报价',
+  },
+  chains: {
+    title: '支持的资产与网络',
+    subtitle: '覆盖稳定币、链与钱包入口。',
+    stablecoinsLabel: '稳定币',
+    stablecoins: ['USDT', 'USDC'],
+    networksLabel: '网络',
+    networkCountSuffix: '条链已上线',
+    networks: ['Tron', 'Ethereum', 'Arbitrum', 'Optimism', 'Base', 'BNB Chain', '以及更多'],
+    walletsLabel: '任意钱包',
+    exchangesLabel: '任意交易所',
+    moreLabel: '以及更多',
+    walletsNote: '支持 Deep Link 与浏览器钱包，连接流程更顺畅。',
+  },
+  security: {
+    title: '安全性',
+    subtitle: '结算逻辑以链上状态为锚点，而非运营方主观决定。',
+    bullets: [
+      '非托管架构，钱包由用户掌控。',
+      '核心协议路径合约已审计并形式化验证。',
+      '最小信任设计，以 Tron 链数据作为真实来源。',
+    ],
+    ctaLabel: '阅读技术安全说明',
+  },
+  faq: {
+    title: 'FAQ',
+    items: [
+      {
+        question: '需要中心化交易所账号吗？',
+        answer: '不需要。Untron 面向钱包原生的跨链转移，无需通过 CEX 账户。',
+      },
+      {
+        question: '需要 KYC 吗？',
+        answer:
+          '协议本身不需要 KYC，因为它是非托管的。请自行确认所在地区的合规要求。',
+      },
+      {
+        question: '需要准备 TRX 或 ETH 吗？',
+        answer:
+          '支持路线针对免 Gas 体验做了优化，通常无需提前准备网络 Gas 代币。',
+      },
+      {
+        question: '可以转移较大的资金量吗？',
+        answer:
+          '可以。企业会用 Untron 做大额再平衡。执行前请在应用中查看实时报价与限额。',
+      },
+    ],
+  },
+  finalCta: {
+    title: '准备好跨链了吗？',
+    description: '打开应用获取实时报价，立即在 Tron 与 EVM 链之间转移稳定币。',
+    buttonLabel: '打开 Bridge 应用',
+  },
+  footer: {
+    tagline: '跨链稳定币流动性，无需托管交接。',
+    legal: '保留所有权利。',
+    linksLabel: '快速链接',
+    terms: '条款',
+    privacy: '隐私',
+    docs: '文档',
+    contact: '联系',
+    socialLabel: '社交',
+  },
+  links: {
+    bridgeApp: 'https://bridge.untron.finance',
+    v3Dashboard: 'https://v3.untron.finance',
+    docs: 'https://docs.untron.finance',
+    securityDocs: 'https://docs.untron.finance',
+    contactEmail: 'mailto:contact@untron.finance',
+    x: 'https://x.com/untronfi',
+    telegram: 'https://t.me/untronchat',
+    github: 'https://github.com/ultrasoundlabs',
+  },
+};
+

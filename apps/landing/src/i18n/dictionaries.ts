@@ -1,0 +1,39 @@
+import { locales } from './locales.js';
+import { landing as en } from './en';
+import { landing as es } from './es';
+import { landing as pt } from './pt';
+import { landing as ru } from './ru';
+import { landing as uk } from './uk';
+import { landing as zhCN } from './zh-CN';
+import { landing as zhHK } from './zh-HK';
+import { landing as th } from './th';
+import { landing as id } from './id';
+import { landing as vi } from './vi';
+import { landing as ms } from './ms';
+import { landing as fil } from './fil';
+import type { LandingDictionary } from './types';
+
+const dictionaries: Record<string, LandingDictionary> = {
+  en,
+  es,
+  pt,
+  ru,
+  uk,
+  'zh-CN': zhCN,
+  'zh-HK': zhHK,
+  th,
+  id,
+  vi,
+  ms,
+  fil,
+};
+
+export function getLandingDictionary(localeCode: string | undefined): LandingDictionary {
+  const normalized = typeof localeCode === 'string' ? localeCode : 'en';
+  const localeMeta = locales.find((locale) => locale.code === normalized) ?? locales[0];
+  const dictionary = dictionaries[normalized] ?? en;
+
+  if (dictionary.localeCode === localeMeta.code) return dictionary;
+
+  return { ...dictionary, localeCode: localeMeta.code, localeName: localeMeta.label };
+}

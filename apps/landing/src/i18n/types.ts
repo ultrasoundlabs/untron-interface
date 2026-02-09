@@ -23,6 +23,7 @@ export type LandingDictionary = {
   };
   nav: {
     brand: string;
+    skipToContentLabel: string;
     productsLabel: string;
     productBridge: string;
     productV3: string;
@@ -46,6 +47,7 @@ export type LandingDictionary = {
     routeDestinationLabel: string;
     swapSendLabel: string;
     swapReceiveLabel: string;
+    swapFlipLabel: string;
     swapMaxLabel: string;
     swapQuoteLoading: string;
     swapQuoteReady: string;
@@ -55,6 +57,9 @@ export type LandingDictionary = {
     swapOpenBridgeLabel: string;
     primaryCta: string;
     secondaryCta: string;
+    pickerBackLabel: string;
+    pickerCloseLabel: string;
+    highlightsLabel: string;
   };
   stats: ReadonlyArray<{
     value: string;
@@ -138,6 +143,7 @@ export type LandingDictionary = {
     privacy: string;
     docs: string;
     contact: string;
+    socialLabel: string;
   };
   links: LandingLinkSet;
 };

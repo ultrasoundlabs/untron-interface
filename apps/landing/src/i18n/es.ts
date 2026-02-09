@@ -18,6 +18,7 @@ export const landing: LandingDictionary = {
   },
   nav: {
     brand: 'Untron',
+    skipToContentLabel: 'Saltar al contenido principal',
     productsLabel: 'Productos',
     productBridge: 'Bridge',
     productV3: 'V3',
@@ -42,6 +43,7 @@ export const landing: LandingDictionary = {
     routeDestinationLabel: 'Hacia',
     swapSendLabel: 'Envias',
     swapReceiveLabel: 'Recibes',
+    swapFlipLabel: 'Invertir direccion',
     swapMaxLabel: 'MAX',
     swapQuoteLoading: 'Obteniendo cotizacion en vivo...',
     swapQuoteReady: 'Cotizacion actualizada',
@@ -51,6 +53,9 @@ export const landing: LandingDictionary = {
     swapOpenBridgeLabel: 'Abrir en Bridge',
     primaryCta: 'Empezar bridge',
     secondaryCta: 'Ver comparacion de comisiones',
+    pickerBackLabel: 'Atras',
+    pickerCloseLabel: 'Cerrar selector',
+    highlightsLabel: 'Destacados',
   },
   stats: [
     { value: '0 custodia', label: 'Mantienes control de la wallet de principio a fin' },
@@ -216,6 +221,7 @@ export const landing: LandingDictionary = {
     privacy: 'Privacidad',
     docs: 'Docs',
     contact: 'Contacto',
+    socialLabel: 'Social',
   },
   links: {
     bridgeApp: 'https://bridge.untron.finance',

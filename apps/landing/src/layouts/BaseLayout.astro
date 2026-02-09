@@ -16,16 +16,15 @@ const site = Astro.site ?? new URL('https://untron.finance');
 const canonicalUrl = new URL(Astro.url.pathname, site).toString();
 const ogImagePath = t.localeCode === 'es' ? '/og-image-es.svg' : '/og-image-en.svg';
 const ogImageUrl = new URL(ogImagePath, site).toString();
-const ogImageAlt =
-  t.localeCode === 'es'
-    ? 'Untron: puente no custodial de stablecoins entre Tron y EVM'
-    : 'Untron: non-custodial stablecoin bridge between Tron and EVM';
+const ogImageAlt = t.meta.ogTitle;
 const bridgeUrl = import.meta.env.PUBLIC_BRIDGE_URL ?? t.links.bridgeApp;
 
 const hreflangs = locales.map((locale) => ({
   code: locale.code,
   url: normalizeLocaleUrl(getAbsoluteLocaleUrl(locale.code, '')),
 }));
+
+const supportedLocaleCodes = locales.map((locale) => locale.code);
 
 const organizationSchema = {
   '@context': 'https://schema.org',
@@ -74,11 +73,26 @@ const faqSchema = {
 
 const jsonLdBlocks = [organizationSchema, websiteSchema, appSchema, faqSchema];
 
-const ogLocale = t.localeCode === 'es' ? 'es_ES' : 'en_US';
+const ogLocaleByCode: Record<string, string> = {
+  en: 'en_US',
+  es: 'es_ES',
+  pt: 'pt_PT',
+  ru: 'ru_RU',
+  uk: 'uk_UA',
+  'zh-CN': 'zh_CN',
+  'zh-HK': 'zh_HK',
+  th: 'th_TH',
+  id: 'id_ID',
+  vi: 'vi_VN',
+  ms: 'ms_MY',
+  fil: 'tl_PH',
+};
+
+const ogLocale = ogLocaleByCode[t.localeCode] ?? 'en_US';
 const alternateOgLocales = Array.from(
   new Set(
     locales
-      .map((locale) => (locale.code === 'es' ? 'es_ES' : 'en_US'))
+      .map((locale) => ogLocaleByCode[locale.code] ?? 'en_US')
       .filter((locale) => locale !== ogLocale)
   )
 );
@@ -151,11 +165,11 @@ const alternateOgLocales = Array.from(
     }
   </head>
   <body>
-    <a class="skip-link" href="#main-content"> Skip to main content </a>
+    <a class="skip-link" href="#main-content"> {t.nav.skipToContentLabel} </a>
     <Header t={t} />
     <slot />
 
-    <script is:inline>
+    <script is:inline define:vars={{ supportedLocaleCodes }}>
       (() => {
         const navEntry =
           typeof performance !== 'undefined' && typeof performance.getEntriesByType === 'function'
@@ -243,6 +257,43 @@ const alternateOgLocales = Array.from(
         };
 
         window.__untronTrack = trackEvent;
+
+        const localeCookieName = 'PARAGLIDE_LOCALE';
+        const localeCookieMaxAgeSeconds = 34560000; // matches bridge Paraglide default
+        const defaultLocale = 'en';
+        const supportedLocales = supportedLocaleCodes;
+        const isSupportedLocale = (value) =>
+          typeof value === 'string' && supportedLocales.includes(value);
+
+        const setLocaleCookie = (locale) => {
+          if (!isSupportedLocale(locale)) return;
+          const hostname = window.location.hostname;
+          const shareDomain = hostname === 'untron.finance' || hostname.endsWith('.untron.finance');
+          const domain = shareDomain ? '; Domain=.untron.finance' : '';
+          const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+          document.cookie = `${localeCookieName}=${encodeURIComponent(locale)}; Path=/; Max-Age=${localeCookieMaxAgeSeconds}; SameSite=Lax${secure}${domain}`;
+        };
+
+        // Only persist locale selection automatically when the user is on a localized route.
+        // Avoid forcing `en` so bridge can still auto-detect on first visit.
+        const currentLocale = document.documentElement.lang;
+        if (currentLocale && currentLocale !== defaultLocale) {
+          setLocaleCookie(currentLocale);
+        }
+
+        // Persist locale changes from the language switcher before navigation.
+        document.addEventListener(
+          'click',
+          (event) => {
+            if (!(event.target instanceof Element)) return;
+            const target = event.target.closest('[data-locale-code]');
+            if (!(target instanceof HTMLElement)) return;
+            const locale = target.getAttribute('data-locale-code');
+            if (!locale) return;
+            setLocaleCookie(locale);
+          },
+          { capture: true }
+        );
 
         document.addEventListener('click', (event) => {
           if (!(event.target instanceof Element)) return;

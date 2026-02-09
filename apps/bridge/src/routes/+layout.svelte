@@ -3,6 +3,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import { m } from '$lib/paraglide/messages.js';
+	import '$lib/i18n/shared-locale';
 	import InterHead from '@untron/stylekit/head/inter.svelte';
 
 	let { children } = $props();

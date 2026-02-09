@@ -11,11 +11,8 @@ interface Props {
 const { t } = Astro.props as Props;
 
 const currentLocale = Astro.currentLocale ?? t.localeCode;
-const languageFlagByCode: Record<string, string> = {
-  en: '🇺🇸',
-  es: '🇪🇸',
-};
-const currentLanguageFlag = languageFlagByCode[currentLocale] ?? '🌐';
+const currentLocaleMeta = locales.find((locale) => locale.code === currentLocale);
+const currentLanguageFlag = currentLocaleMeta?.flag ?? '🌐';
 const getLocaleHref = (localeCode: string) =>
   normalizeLocaleUrl(getRelativeLocaleUrl(localeCode, ''));
 
@@ -143,9 +140,10 @@ const sectionLinks = [
                     aria-current={currentLocale === lang.code ? 'page' : undefined}
                     data-track-event="language_switch"
                     data-track-label={lang.code}
+                    data-locale-code={lang.code}
                   >
                     <span class="language-option-flag" aria-hidden="true">
-                      {languageFlagByCode[lang.code] ?? '🌐'}
+                      {lang.flag ?? '🌐'}
                     </span>
                     {lang.label}
                   </a>
