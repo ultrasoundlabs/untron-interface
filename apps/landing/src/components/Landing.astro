@@ -1,6 +1,7 @@
 ---
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import type { LandingDictionary } from '../i18n/types';
+import { normalizeLocaleUrl } from '../i18n/url';
 
 interface Props {
   t: LandingDictionary;
@@ -14,7 +15,9 @@ const securityUrl = import.meta.env.PUBLIC_DOCS_URL ?? t.links.securityDocs;
 const quoteApiBase =
   import.meta.env.PUBLIC_UNTRON_BRIDGE_API_URL ?? 'https://api.untron.finance/bridge';
 const year = new Date().getFullYear();
-const localeHome = getRelativeLocaleUrl(Astro.currentLocale ?? t.localeCode, '');
+const localeHome = normalizeLocaleUrl(
+  getRelativeLocaleUrl(Astro.currentLocale ?? t.localeCode, '')
+);
 
 const supportedChainLogos = [
   { name: 'Tron', src: '/logos/chains/tron.svg' },
@@ -1392,11 +1395,22 @@ const exchangeLogos: readonly BrandLogo[] = [
 
     function updateBridgeHref(amount) {
       const href = new URL(bridgeUrl);
+      const normalizedAmount = amount || '0';
+      // Keep in sync with bridge prefill parser (apps/bridge/src/lib/components/swap/SwapBox.svelte).
       href.searchParams.set('direction', direction);
-      href.searchParams.set('chainId', String(chainId));
+      href.searchParams.set('dir', direction);
+
+      const chainValue = String(chainId);
+      href.searchParams.set('chainId', chainValue);
+      href.searchParams.set('chain', chainValue);
+
       href.searchParams.set('token', evmToken);
+      href.searchParams.set('asset', evmToken);
+
       href.searchParams.set('tronToken', tronToken);
-      href.searchParams.set('amount', amount || '0');
+      href.searchParams.set('tron', tronToken);
+
+      href.searchParams.set('amount', normalizedAmount);
       openButton.href = href.toString();
     }
 
@@ -1623,6 +1637,11 @@ const exchangeLogos: readonly BrandLogo[] = [
         closePicker();
       }
     });
+
+    // Render and hydrate deep-link params immediately, then refresh from live capabilities.
+    renderChipsAndSelectors();
+    updateBridgeHref(amountInput.value);
+    void fetchQuote();
 
     void (async () => {
       await fetchCapabilities();

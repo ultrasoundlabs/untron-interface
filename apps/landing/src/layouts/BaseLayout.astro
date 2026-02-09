@@ -3,6 +3,7 @@ import { getAbsoluteLocaleUrl } from 'astro:i18n';
 import Header from '../components/Header.astro';
 import { locales } from '../i18n/locales.js';
 import type { LandingDictionary } from '../i18n/types';
+import { normalizeLocaleUrl } from '../i18n/url';
 import '../styles/site.css';
 
 interface Props {
@@ -23,7 +24,7 @@ const bridgeUrl = import.meta.env.PUBLIC_BRIDGE_URL ?? t.links.bridgeApp;
 
 const hreflangs = locales.map((locale) => ({
   code: locale.code,
-  url: getAbsoluteLocaleUrl(locale.code, ''),
+  url: normalizeLocaleUrl(getAbsoluteLocaleUrl(locale.code, '')),
 }));
 
 const organizationSchema = {

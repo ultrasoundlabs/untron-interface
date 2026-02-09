@@ -2,6 +2,7 @@
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { locales } from '../i18n/locales.js';
 import type { LandingDictionary } from '../i18n/types';
+import { normalizeLocaleUrl } from '../i18n/url';
 
 interface Props {
   t: LandingDictionary;
@@ -15,6 +16,8 @@ const languageFlagByCode: Record<string, string> = {
   es: '🇪🇸',
 };
 const currentLanguageFlag = languageFlagByCode[currentLocale] ?? '🌐';
+const getLocaleHref = (localeCode: string) =>
+  normalizeLocaleUrl(getRelativeLocaleUrl(localeCode, ''));
 
 const bridgeUrl = import.meta.env.PUBLIC_BRIDGE_URL ?? t.links.bridgeApp;
 const v3Url = import.meta.env.PUBLIC_V3_URL ?? t.links.v3Dashboard;
@@ -36,7 +39,7 @@ const sectionLinks = [
 
 <header class="site-header" data-site-header>
   <div class="container header-row">
-    <a class="brand" href={getRelativeLocaleUrl(currentLocale, '')} aria-label={t.nav.brand}>
+    <a class="brand" href={getLocaleHref(currentLocale)} aria-label={t.nav.brand}>
       <img class="brand-full" src="/logos/untron/full.svg" alt="Untron" width="196" height="48" />
       <img
         class="brand-icon"
@@ -136,7 +139,7 @@ const sectionLinks = [
               {locales.map((lang) => (
                 <li>
                   <a
-                    href={getRelativeLocaleUrl(lang.code, '')}
+                    href={getLocaleHref(lang.code)}
                     aria-current={currentLocale === lang.code ? 'page' : undefined}
                     data-track-event="language_switch"
                     data-track-label={lang.code}
