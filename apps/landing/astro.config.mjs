@@ -7,7 +7,7 @@ const siteUrl = 'https://untron.finance';
 export default defineConfig({
   site: siteUrl,
   output: 'static', // full static export
-  trailingSlash: 'never', // or 'always' if you prefer
+  trailingSlash: 'always',
   integrations: [sitemap()],
   i18n: {
     defaultLocale: 'en',

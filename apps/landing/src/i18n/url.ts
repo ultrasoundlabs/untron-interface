@@ -1,7 +1,6 @@
 export function normalizeLocaleUrl(url: string): string {
-  if (url.length > 1 && url.endsWith('/')) {
-    return url.slice(0, -1);
-  }
-
-  return url;
+  if (!url) return '/';
+  if (url.length === 1) return url;
+  if (url.endsWith('/')) return url;
+  return `${url}/`;
 }
