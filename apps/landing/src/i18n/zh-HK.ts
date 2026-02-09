@@ -57,7 +57,7 @@ export const landing: LandingDictionary = {
   stats: [
     { value: '0 託管', label: '全程由你掌控錢包' },
     { value: '免 Gas UX', label: '支援路線毋須預先準備 TRX 或 ETH' },
-    { value: '已審計', label: '核心合約已審計並形式化驗證' },
+    { value: '已審計', label: '核心合約已通過獨立審計與安全評審' },
   ],
   audiences: {
     title: '為真實穩定幣流程而生',
@@ -169,7 +169,7 @@ export const landing: LandingDictionary = {
     subtitle: '結算邏輯以鏈上狀態為錨點，而非營運方主觀決定。',
     bullets: [
       '非託管架構，錢包由用戶掌控。',
-      '核心協議路徑合約已審計並形式化驗證。',
+      '核心協議路徑合約已通過獨立審計。',
       '最小信任設計，以 Tron 鏈數據作為真實來源。',
     ],
     ctaLabel: '閱讀技術安全說明',
@@ -221,4 +221,3 @@ export const landing: LandingDictionary = {
     github: 'https://github.com/ultrasoundlabs',
   },
 };
-

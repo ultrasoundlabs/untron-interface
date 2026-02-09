@@ -61,7 +61,7 @@ export const landing: LandingDictionary = {
   stats: [
     { value: '0 custódia', label: 'Você mantém o controle da carteira do início ao fim' },
     { value: 'UX sem gás', label: 'Sem precisar carregar TRX ou ETH nas rotas compatíveis' },
-    { value: 'Auditado', label: 'Contratos revisados e verificados formalmente' },
+    { value: 'Auditado', label: 'Contratos revisados e auditados por terceiros' },
   ],
   audiences: {
     title: 'Feito para fluxos reais de stablecoins',
@@ -182,7 +182,7 @@ export const landing: LandingDictionary = {
     subtitle: 'A liquidação é ancorada no estado onchain, não na discrição de operadores.',
     bullets: [
       'Arquitetura sem custódia com carteiras controladas pelo usuário.',
-      'Contratos auditados e verificados formalmente para os caminhos centrais do protocolo.',
+      'Contratos auditados por terceiros para os caminhos centrais do protocolo.',
       'Design com confiança minimizada, ancorado em dados da Tron como fonte de verdade.',
     ],
     ctaLabel: 'Ler notas técnicas de segurança',

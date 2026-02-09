@@ -61,7 +61,7 @@ export const landing: LandingDictionary = {
   stats: [
     { value: '0 kustodi', label: 'Anda tetap memegang kendali wallet dari awal sampai akhir' },
     { value: 'UX tanpa gas', label: 'Tidak perlu isi TRX atau ETH di awal untuk rute yang didukung' },
-    { value: 'Diaudit', label: 'Kontrak ditinjau dan diverifikasi secara formal' },
+    { value: 'Diaudit', label: 'Kontrak ditinjau dan diaudit secara independen' },
   ],
   audiences: {
     title: 'Dibuat untuk alur stablecoin nyata',
@@ -179,7 +179,7 @@ export const landing: LandingDictionary = {
     subtitle: 'Logika settlement mengacu pada state onchain, bukan diskresi operator.',
     bullets: [
       'Arsitektur non-kustodial dengan wallet yang dikendalikan pengguna.',
-      'Kontrak diaudit dan diverifikasi formal untuk jalur inti protokol.',
+      'Kontrak diaudit secara independen untuk jalur inti protokol.',
       'Desain minim kepercayaan dengan data Tron sebagai sumber kebenaran.',
     ],
     ctaLabel: 'Baca catatan keamanan teknis',

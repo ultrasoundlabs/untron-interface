@@ -60,7 +60,7 @@ export const landing: LandingDictionary = {
   stats: [
     { value: '0 lưu ký', label: 'Bạn kiểm soát ví từ đầu đến cuối' },
     { value: 'UX không cần gas', label: 'Không cần nạp trước TRX hoặc ETH cho các tuyến được hỗ trợ' },
-    { value: 'Đã kiểm toán', label: 'Hợp đồng được rà soát và xác minh hình thức' },
+    { value: 'Đã kiểm toán', label: 'Hợp đồng được rà soát và kiểm toán độc lập' },
   ],
   audiences: {
     title: 'Xây dựng cho các luồng stablecoin thực tế',
@@ -174,7 +174,7 @@ export const landing: LandingDictionary = {
     subtitle: 'Logic thanh toán bám theo trạng thái onchain thay vì tùy ý vận hành.',
     bullets: [
       'Kiến trúc phi lưu ký với ví do người dùng kiểm soát.',
-      'Hợp đồng được kiểm toán và xác minh hình thức cho các luồng cốt lõi.',
+      'Hợp đồng được kiểm toán độc lập cho các luồng cốt lõi.',
       'Thiết kế tối thiểu tin cậy, neo theo dữ liệu Tron làm nguồn sự thật.',
     ],
     ctaLabel: 'Đọc ghi chú bảo mật kỹ thuật',

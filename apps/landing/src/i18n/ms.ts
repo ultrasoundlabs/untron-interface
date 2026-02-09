@@ -61,7 +61,7 @@ export const landing: LandingDictionary = {
   stats: [
     { value: '0 kustodian', label: 'Anda kekal mengawal wallet dari mula hingga akhir' },
     { value: 'UX tanpa gas', label: 'Tidak perlu pramuat TRX atau ETH untuk laluan yang disokong' },
-    { value: 'Diaudit', label: 'Kontrak disemak dan disahkan secara formal' },
+    { value: 'Diaudit', label: 'Kontrak disemak dan diaudit oleh pihak ketiga' },
   ],
   audiences: {
     title: 'Dibina untuk aliran stablecoin sebenar',
@@ -178,7 +178,7 @@ export const landing: LandingDictionary = {
     subtitle: 'Logik penyelesaian berpandukan keadaan onchain, bukan budi bicara operator.',
     bullets: [
       'Seni bina tanpa kustodian dengan wallet dikawal pengguna.',
-      'Kontrak diaudit dan disahkan secara formal untuk laluan teras protokol.',
+      'Kontrak diaudit oleh pihak ketiga untuk laluan teras protokol.',
       'Reka bentuk kepercayaan minimum berasaskan data Tron sebagai sumber kebenaran.',
     ],
     ctaLabel: 'Baca nota keselamatan teknikal',

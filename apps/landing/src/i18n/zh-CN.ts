@@ -57,7 +57,7 @@ export const landing: LandingDictionary = {
   stats: [
     { value: '0 托管', label: '全程由你掌控钱包' },
     { value: '免 Gas UX', label: '支持路线无需预先准备 TRX 或 ETH' },
-    { value: '已审计', label: '核心合约已审计并形式化验证' },
+    { value: '已审计', label: '核心合约已通过独立审计与安全评审' },
   ],
   audiences: {
     title: '为真实的稳定币流程而生',
@@ -169,7 +169,7 @@ export const landing: LandingDictionary = {
     subtitle: '结算逻辑以链上状态为锚点，而非运营方主观决定。',
     bullets: [
       '非托管架构，钱包由用户掌控。',
-      '核心协议路径合约已审计并形式化验证。',
+      '核心协议路径合约已通过独立审计。',
       '最小信任设计，以 Tron 链数据作为真实来源。',
     ],
     ctaLabel: '阅读技术安全说明',
@@ -224,4 +224,3 @@ export const landing: LandingDictionary = {
     github: 'https://github.com/ultrasoundlabs',
   },
 };
-

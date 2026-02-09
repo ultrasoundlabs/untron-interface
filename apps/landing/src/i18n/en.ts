@@ -60,7 +60,7 @@ export const landing: LandingDictionary = {
   stats: [
     { value: '0 custody', label: 'You keep wallet control end to end' },
     { value: 'Gasless UX', label: 'No pre-funding TRX or ETH for supported routes' },
-    { value: 'Audited', label: 'Contracts reviewed and formally verified' },
+    { value: 'Audited', label: 'Contracts independently audited and reviewed' },
   ],
   audiences: {
     title: 'Built for real stablecoin workflows',
@@ -176,7 +176,7 @@ export const landing: LandingDictionary = {
     subtitle: 'Settlement logic is anchored to chain state rather than operator discretion.',
     bullets: [
       'Non-custodial architecture with user-controlled wallets.',
-      'Audited and formally verified contracts for core protocol paths.',
+      'Independently audited contracts for core protocol paths.',
       'Trust-minimized design anchored to Tron chain data as source of truth.',
     ],
     ctaLabel: 'Read technical security notes',

@@ -61,7 +61,7 @@ export const landing: LandingDictionary = {
   stats: [
     { value: '0 custodia', label: 'Mantienes el control de tu wallet de principio a fin' },
     { value: 'UX sin gas', label: 'Sin precargar TRX o ETH en rutas compatibles' },
-    { value: 'Auditado', label: 'Contratos revisados y verificados formalmente' },
+    { value: 'Auditado', label: 'Contratos revisados y auditados por terceros' },
   ],
   audiences: {
     title: 'Hecho para flujos reales de stablecoins',
@@ -180,7 +180,7 @@ export const landing: LandingDictionary = {
     subtitle: 'La liquidación se ancla al estado onchain, no a la discreción del operador.',
     bullets: [
       'Arquitectura no custodial con wallets controladas por el usuario.',
-      'Contratos auditados y verificados formalmente en rutas centrales del protocolo.',
+      'Contratos auditados por terceros en rutas centrales del protocolo.',
       'Diseño con confianza minimizada anclado a datos de Tron como fuente de verdad.',
     ],
     ctaLabel: 'Leer notas técnicas de seguridad',

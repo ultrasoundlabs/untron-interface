@@ -181,7 +181,7 @@ export const landing: LandingDictionary = {
     subtitle: 'Naka-anchor ang settlement logic sa chain state, hindi sa discretion ng operator.',
     bullets: [
       'Non-custodial na arkitektura: ikaw ang may kontrol sa wallet.',
-      'Audited at formally verified na contracts para sa core protocol paths.',
+      'Independently audited na contracts para sa core protocol paths.',
       'Trust-minimized na design na naka-anchor sa Tron chain data bilang source of truth.',
     ],
     ctaLabel: 'Basahin ang mga teknikal na tala sa seguridad',
