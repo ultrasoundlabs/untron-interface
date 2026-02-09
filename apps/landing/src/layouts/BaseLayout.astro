@@ -13,7 +13,12 @@ const { t } = Astro.props as Props;
 
 const site = Astro.site ?? new URL('https://untron.finance');
 const canonicalUrl = new URL(Astro.url.pathname, site).toString();
-const ogImageUrl = new URL('/og-image.svg', site).toString();
+const ogImagePath = t.localeCode === 'es' ? '/og-image-es.svg' : '/og-image-en.svg';
+const ogImageUrl = new URL(ogImagePath, site).toString();
+const ogImageAlt =
+  t.localeCode === 'es'
+    ? 'Untron: puente no custodial de stablecoins entre Tron y EVM'
+    : 'Untron: non-custodial stablecoin bridge between Tron and EVM';
 const bridgeUrl = import.meta.env.PUBLIC_BRIDGE_URL ?? t.links.bridgeApp;
 
 const hreflangs = locales.map((locale) => ({
@@ -69,6 +74,13 @@ const faqSchema = {
 const jsonLdBlocks = [organizationSchema, websiteSchema, appSchema, faqSchema];
 
 const ogLocale = t.localeCode === 'es' ? 'es_ES' : 'en_US';
+const alternateOgLocales = Array.from(
+  new Set(
+    locales
+      .map((locale) => (locale.code === 'es' ? 'es_ES' : 'en_US'))
+      .filter((locale) => locale !== ogLocale)
+  )
+);
 ---
 
 <!doctype html>
@@ -118,12 +130,15 @@ const ogLocale = t.localeCode === 'es' ? 'es_ES' : 'en_US';
     <meta property="og:description" content={t.meta.ogDescription} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    {alternateOgLocales.map((locale) => <meta property="og:locale:alternate" content={locale} />)}
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@untronfi" />
     <meta name="twitter:title" content={t.meta.twitterTitle} />
     <meta name="twitter:description" content={t.meta.twitterDescription} />
     <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
     {hreflangs.map((entry) => <link rel="alternate" hreflang={entry.code} href={entry.url} />)}
     {hreflangs.length > 0 && <link rel="alternate" hreflang="x-default" href={hreflangs[0].url} />}
@@ -210,6 +225,36 @@ const ogLocale = t.localeCode === 'es' ? 'es_ES' : 'en_US';
         const sunIcon = document.querySelector('[data-theme-icon-sun]');
         const moonIcon = document.querySelector('[data-theme-icon-moon]');
         const storageKey = 'theme';
+        const trackEvent = (eventName, properties = {}) => {
+          if (typeof eventName !== 'string' || !eventName) return;
+
+          const payload = { event: eventName, ...properties };
+          const dataLayer = window.dataLayer;
+          if (Array.isArray(dataLayer)) {
+            dataLayer.push(payload);
+          }
+
+          if (typeof window.gtag === 'function') {
+            window.gtag('event', eventName, properties);
+          }
+
+          window.dispatchEvent(new CustomEvent('untron:track', { detail: payload }));
+        };
+
+        window.__untronTrack = trackEvent;
+
+        document.addEventListener('click', (event) => {
+          if (!(event.target instanceof Element)) return;
+          const target = event.target.closest('[data-track-event]');
+          if (!(target instanceof HTMLElement)) return;
+
+          const eventName = target.dataset.trackEvent;
+          if (!eventName) return;
+
+          const label = target.dataset.trackLabel || target.textContent?.trim() || undefined;
+          const href = target instanceof HTMLAnchorElement ? target.href : undefined;
+          trackEvent(eventName, { label, href });
+        });
 
         const getStoredPreference = () => {
           try {
@@ -254,6 +299,7 @@ const ogLocale = t.localeCode === 'es' ? 'es_ES' : 'en_US';
           button.addEventListener('click', () => {
             const next = root.classList.contains('dark') ? 'light' : 'dark';
             applyTheme(next, true);
+            trackEvent('theme_toggle', { theme: next });
           });
         }
       })();

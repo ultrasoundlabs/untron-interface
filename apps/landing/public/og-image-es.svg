@@ -1,0 +1,33 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f6f6f6" />
+      <stop offset="1" stop-color="#ececec" />
+    </linearGradient>
+    <linearGradient id="accent" x1="120" y1="70" x2="1020" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111111" stop-opacity="0.18" />
+      <stop offset="1" stop-color="#111111" stop-opacity="0.02" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" rx="24" fill="url(#bg)" />
+  <circle cx="1090" cy="70" r="210" fill="url(#accent)" />
+  <circle cx="140" cy="580" r="250" fill="url(#accent)" />
+
+  <rect x="80" y="80" width="1040" height="470" rx="20" fill="white" stroke="#dadada" />
+
+  <text x="130" y="210" fill="#111111" font-family="Inter, Arial, sans-serif" font-size="84" font-weight="700">
+    Untron
+  </text>
+  <text x="130" y="300" fill="#404040" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="600">
+    Puente no custodial de Tron &lt;-&gt; EVM
+  </text>
+  <text x="130" y="365" fill="#555555" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="400">
+    Mueve USDT y USDC con UX sin gas y comisiones bajas.
+  </text>
+
+  <rect x="130" y="426" width="300" height="62" rx="12" fill="#111111" />
+  <text x="167" y="467" fill="#f5f5f5" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="600">
+    bridge.untron.finance
+  </text>
+</svg>

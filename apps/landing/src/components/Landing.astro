@@ -28,9 +28,9 @@ const supportedChainLogos = [
   { name: 'Plasma', src: '/logos/chains/plasma.svg' },
   { name: 'Mantle', src: '/logos/chains/mantle.svg' },
   { name: 'Monad', src: '/logos/chains/monad.svg' },
-  { name: 'Unichain', src: '/logos/chains/unichain.png' },
+  { name: 'Unichain', src: '/logos/chains/unichain.svg' },
   { name: 'Celo', src: '/logos/chains/celo.svg' },
-  { name: 'World Chain', src: '/logos/chains/worldchain.png', logoTone: 'black' },
+  { name: 'World Chain', src: '/logos/chains/worldchain.svg', logoTone: 'black' },
   { name: 'Sonic', src: '/logos/chains/sonic.svg', logoTone: 'white' },
   { name: 'Ink', src: '/logos/chains/ink.png' },
   { name: 'Linea', src: '/logos/chains/linea.png' },
@@ -82,10 +82,16 @@ const exchangeLogos: readonly BrandLogo[] = [
         <p class="hero-supporting">{t.hero.supportingLine}</p>
 
         <div class="hero-actions">
-          <a class="btn btn-primary" href={bridgeUrl} target="_blank" rel="noreferrer noopener">
+          <a
+            class="btn btn-primary"
+            href={bridgeUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            data-track-event="open_app_hero"
+          >
             {t.hero.primaryCta}
           </a>
-          <a class="btn btn-secondary" href="#fees">
+          <a class="btn btn-secondary" href="#fees" data-track-event="view_fees_hero">
             {t.hero.secondaryCta}
           </a>
         </div>
@@ -245,6 +251,7 @@ const exchangeLogos: readonly BrandLogo[] = [
             target="_blank"
             rel="noreferrer noopener"
             data-swap-open
+            data-track-event="open_app_preview"
           >
             {t.hero.swapOpenBridgeLabel}
           </a>
@@ -386,7 +393,14 @@ const exchangeLogos: readonly BrandLogo[] = [
             <p class="card-label">{card.label}</p>
             <h3>{card.title}</h3>
             <p>{card.description}</p>
-            <a class="text-link" href={card.ctaHref} target="_blank" rel="noreferrer noopener">
+            <a
+              class="text-link"
+              href={card.ctaHref}
+              target="_blank"
+              rel="noreferrer noopener"
+              data-track-event={`audience_cta_${index + 1}`}
+              data-track-label={card.label}
+            >
               {card.ctaLabel}
             </a>
           </article>
@@ -611,7 +625,13 @@ const exchangeLogos: readonly BrandLogo[] = [
           ))
         }
       </ul>
-      <a class="text-link" href={securityUrl} target="_blank" rel="noreferrer noopener">
+      <a
+        class="text-link"
+        href={securityUrl}
+        target="_blank"
+        rel="noreferrer noopener"
+        data-track-event="view_security_docs"
+      >
         {t.security.ctaLabel}
       </a>
     </article>
@@ -639,7 +659,13 @@ const exchangeLogos: readonly BrandLogo[] = [
         <h2 id="final-cta-title">{t.finalCta.title}</h2>
         <p>{t.finalCta.description}</p>
       </div>
-      <a class="btn btn-primary" href={bridgeUrl} target="_blank" rel="noreferrer noopener">
+      <a
+        class="btn btn-primary"
+        href={bridgeUrl}
+        target="_blank"
+        rel="noreferrer noopener"
+        data-track-event="open_app_final"
+      >
         {t.finalCta.buttonLabel}
       </a>
     </article>
@@ -759,12 +785,12 @@ const exchangeLogos: readonly BrandLogo[] = [
       30: { name: 'Rootstock Mainnet', logo: '/logos/chains/ethereum.svg' },
       56: { name: 'BNB Chain', logo: '/logos/chains/bnb.svg' },
       100: { name: 'Gnosis', logo: '/logos/chains/ethereum.svg' },
-      130: { name: 'Unichain', logo: '/logos/chains/unichain.png' },
+      130: { name: 'Unichain', logo: '/logos/chains/unichain.svg' },
       137: { name: 'Polygon', logo: '/logos/chains/polygon.svg' },
       143: { name: 'Monad', logo: '/logos/chains/monad.svg' },
       146: { name: 'Sonic', logo: '/logos/chains/sonic.svg', logoTone: 'white' },
       196: { name: 'X Layer Mainnet', logo: '/logos/chains/ethereum.svg' },
-      480: { name: 'World Chain', logo: '/logos/chains/worldchain.png', logoTone: 'black' },
+      480: { name: 'World Chain', logo: '/logos/chains/worldchain.svg', logoTone: 'black' },
       988: { name: 'Stable Mainnet', logo: '/logos/chains/ethereum.svg' },
       999: { name: 'Codex', logo: '/logos/chains/codex.png', logoTone: 'white' },
       1030: { name: 'Conflux eSpace', logo: '/logos/chains/ethereum.svg' },

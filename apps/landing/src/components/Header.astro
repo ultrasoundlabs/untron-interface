@@ -59,6 +59,7 @@ const sectionLinks = [
                 href={item.href}
                 target={item.external ? '_blank' : undefined}
                 rel={item.external ? 'noreferrer noopener' : undefined}
+                data-track-event={`product_nav_${item.id}`}
               >
                 {item.label}
               </a>
@@ -137,6 +138,8 @@ const sectionLinks = [
                   <a
                     href={getRelativeLocaleUrl(lang.code, '')}
                     aria-current={currentLocale === lang.code ? 'page' : undefined}
+                    data-track-event="language_switch"
+                    data-track-label={lang.code}
                   >
                     <span class="language-option-flag" aria-hidden="true">
                       {languageFlagByCode[lang.code] ?? '🌐'}
@@ -150,7 +153,13 @@ const sectionLinks = [
         )
       }
 
-      <a class="btn btn-primary btn-sm" href={bridgeUrl} target="_blank" rel="noreferrer noopener">
+      <a
+        class="btn btn-primary btn-sm"
+        href={bridgeUrl}
+        target="_blank"
+        rel="noreferrer noopener"
+        data-track-event="open_app_header"
+      >
         {t.nav.openApp}
       </a>
     </div>
