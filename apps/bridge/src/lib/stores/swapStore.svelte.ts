@@ -157,6 +157,8 @@ export function createSwapStore() {
 	let capabilities = $state<BridgeCapabilities | null>(null);
 	let quote = $state<BridgeQuote | null>(null);
 	let walletBalanceAtomic = $state<string | null>(null);
+	// Connected EVM wallet address (used for refundTo on EVM→Tron routes)
+	let walletAddress = $state<`0x${string}` | null>(null);
 	let submitErrorCode = $state<SwapServiceErrorCode | null>(null);
 
 	let isLoadingCapabilities = $state<boolean>(false);
@@ -425,6 +427,18 @@ export function createSwapStore() {
 		walletBalanceAtomic = balance;
 	}
 
+	function setWalletAddress(addr: `0x${string}` | null) {
+		if (walletAddress === addr) return;
+		walletAddress = addr;
+
+		// EVM→Tron quotes require refundTo; when the wallet address changes we should
+		// refetch so the backend has the right refund address.
+		if (isToTron) {
+			clearQuote();
+			if (amountAtomic && recipientAddress) scheduleQuoteFetch();
+		}
+	}
+
 	async function refreshCapabilities() {
 		const currentRequestId = ++capabilitiesRequestId;
 		isLoadingCapabilities = true;
@@ -477,17 +491,30 @@ export function createSwapStore() {
 			};
 		}
 
+		// EVM → Tron (one_click / NEAR intents) requires refundTo (origin-chain refund address).
+		const refundTo = walletAddress
+			? toAccountId({ chainId: evmChainCaip2, account: walletAddress })
+			: undefined;
+
 		return {
 			fromAssetId: evmAsset.assetId,
 			toAssetId: tronAsset.assetId,
 			fromAmount: amountAtomic,
-			recipient: toAccountId({ chainId: tronChainId, account: recipientAddress })
+			recipient: toAccountId({ chainId: tronChainId, account: recipientAddress }),
+			...(refundTo ? { refundTo } : {})
 		};
 	}
 
 	async function fetchQuote() {
 		const request = buildQuoteRequest();
-		if (!request) return;
+		if (!request) {
+			// For EVM→Tron routes, the backend requires refundTo (origin-chain refund address).
+			if (isToTron && amountAtomic && recipientAddress && !walletAddress) {
+				quote = null;
+				quoteError = 'Connect your EVM wallet to get a quote (refund address is required).';
+			}
+			return;
+		}
 
 		try {
 			const amt = BigInt(amountAtomic);
@@ -761,6 +788,7 @@ export function createSwapStore() {
 		prefillRecipientFromWallet,
 		clearRecipientOnWalletDisconnect,
 		setWalletBalanceAtomic,
+		setWalletAddress,
 		refreshCapabilities,
 		createOrder,
 

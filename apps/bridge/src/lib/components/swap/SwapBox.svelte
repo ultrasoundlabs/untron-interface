@@ -50,11 +50,13 @@
 	// Track wallet connection changes
 	$effect(() => {
 		if ($connection.isConnected && $connection.address) {
+			swapStore.setWalletAddress($connection.address as `0x${string}`);
 			swapStore.prefillRecipientFromWallet($connection.address);
 			// Fetch balances when wallet connects
 			loadBalances();
 			userPickedPairManually = false;
 		} else {
+			swapStore.setWalletAddress(null);
 			swapStore.clearRecipientOnWalletDisconnect();
 			userBalances = [];
 			userPickedPairManually = false;
