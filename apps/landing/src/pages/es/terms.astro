@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { landing as t } from '../../i18n/es';
+---
+
+<BaseLayout t={t}>
+  <main id="main-content">
+    <section class="section reveal" aria-labelledby="terms-title">
+      <div class="section-heading">
+        <h1 id="terms-title">Términos de uso</h1>
+        <p>Última actualización: 9 de febrero de 2026</p>
+      </div>
+
+      <article class="security-card">
+        <h3>Alcance</h3>
+        <p>
+          Este sitio brinda información sobre Untron y enlaces a la aplicación de bridge. El uso de
+          la aplicación y del protocolo puede estar sujeto a términos adicionales.
+        </p>
+
+        <h3>Servicio no custodial</h3>
+        <p>
+          Untron está diseñado como un sistema no custodial. Eres responsable de tu wallet, claves,
+          direcciones y confirmaciones de transacción.
+        </p>
+
+        <h3>Riesgos</h3>
+        <p>
+          Las transacciones blockchain son irreversibles y pueden implicar riesgos de mercado,
+          técnicos y operativos. Verifica los detalles de ruta y la dirección destino antes de
+          enviar fondos.
+        </p>
+
+        <h3>Cumplimiento</h3>
+        <p>
+          Eres responsable de cumplir las leyes y regulaciones aplicables en tu jurisdicción,
+          incluidas obligaciones fiscales y de sanciones.
+        </p>
+
+        <h3>Cambios</h3>
+        <p>
+          Podemos actualizar estos términos con el tiempo. El uso continuo del sitio después de
+          cambios implica aceptación de la versión actualizada.
+        </p>
+
+        <h3>Contacto</h3>
+        <p>
+          Las consultas sobre estos términos pueden enviarse a
+          <a class="text-link" href={t.links.contactEmail}> contact@untron.finance</a>.
+        </p>
+      </article>
+    </section>
+  </main>
+</BaseLayout>

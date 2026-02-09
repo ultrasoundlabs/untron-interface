@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { landing as t } from '../i18n/en';
+---
+
+<BaseLayout t={t}>
+  <main id="main-content">
+    <section class="section reveal" aria-labelledby="privacy-title">
+      <div class="section-heading">
+        <h1 id="privacy-title">Privacy Notice</h1>
+        <p>Last updated: February 9, 2026</p>
+      </div>
+
+      <article class="security-card">
+        <h3>What this page covers</h3>
+        <p>
+          This notice explains how data is handled on the marketing site at untron.finance. Bridge
+          transactions occur on public blockchains and are not private by default.
+        </p>
+
+        <h3>Data we collect</h3>
+        <p>
+          We may process basic site interaction data (for example page views, language selection,
+          and CTA clicks) to improve product UX and performance.
+        </p>
+
+        <h3>Local storage</h3>
+        <p>
+          This site stores your theme preference in browser localStorage under the key
+          <code>theme</code>.
+        </p>
+
+        <h3>Third-party services</h3>
+        <p>
+          External links (docs, social platforms, wallet/exchange providers) have their own privacy
+          practices. Review their policies separately.
+        </p>
+
+        <h3>Your choices</h3>
+        <p>
+          You can clear localStorage in your browser and avoid connecting wallets if you do not want
+          wallet-linked behavior.
+        </p>
+
+        <h3>Contact</h3>
+        <p>
+          Privacy questions can be sent to
+          <a class="text-link" href={t.links.contactEmail}> contact@untron.finance</a>.
+        </p>
+      </article>
+    </section>
+  </main>
+</BaseLayout>

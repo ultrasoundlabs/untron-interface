@@ -1,0 +1,47 @@
+name: Landing CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/landing/**'
+      - 'bun.lock'
+      - 'package.json'
+      - '.github/workflows/landing-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/landing/**'
+      - 'bun.lock'
+      - 'package.json'
+      - '.github/workflows/landing-ci.yml'
+
+concurrency:
+  group: landing-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  landing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint Landing
+        run: bun run lint:landing
+
+      - name: Build Landing
+        run: bun run build:landing
+
+      - name: Install Playwright Chromium
+        run: cd apps/landing && bun x playwright install --with-deps chromium
+
+      - name: Run Landing Smoke Tests
+        run: cd apps/landing && bun run test:smoke

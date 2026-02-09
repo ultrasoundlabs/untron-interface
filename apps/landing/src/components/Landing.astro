@@ -15,9 +15,10 @@ const securityUrl = import.meta.env.PUBLIC_DOCS_URL ?? t.links.securityDocs;
 const quoteApiBase =
   import.meta.env.PUBLIC_UNTRON_BRIDGE_API_URL ?? 'https://api.untron.finance/bridge';
 const year = new Date().getFullYear();
-const localeHome = normalizeLocaleUrl(
-  getRelativeLocaleUrl(Astro.currentLocale ?? t.localeCode, '')
-);
+const currentLocale = Astro.currentLocale ?? t.localeCode;
+const localeHome = normalizeLocaleUrl(getRelativeLocaleUrl(currentLocale, ''));
+const termsUrl = normalizeLocaleUrl(getRelativeLocaleUrl(currentLocale, 'terms'));
+const privacyUrl = normalizeLocaleUrl(getRelativeLocaleUrl(currentLocale, 'privacy'));
 
 const supportedChainLogos = [
   { name: 'Tron', src: '/logos/chains/tron.svg' },
@@ -687,8 +688,8 @@ const exchangeLogos: readonly BrandLogo[] = [
     <div>
       <p class="footer-title">{t.footer.linksLabel}</p>
       <ul class="footer-links">
-        <li><a href="/terms">{t.footer.terms}</a></li>
-        <li><a href="/privacy">{t.footer.privacy}</a></li>
+        <li><a href={termsUrl}>{t.footer.terms}</a></li>
+        <li><a href={privacyUrl}>{t.footer.privacy}</a></li>
         <li><a href={docsUrl} target="_blank" rel="noreferrer noopener">{t.footer.docs}</a></li>
         <li><a href={t.links.contactEmail}>{t.footer.contact}</a></li>
       </ul>
