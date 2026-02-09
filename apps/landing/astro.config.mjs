@@ -7,7 +7,14 @@ const siteUrl = 'https://untron.finance';
 export default defineConfig({
   site: siteUrl,
   output: 'static', // full static export
-  trailingSlash: 'always',
+  // Cloudflare Pages is currently enforcing a trailing-slash *removal* redirect
+  // (e.g. `/es/` -> `/es`). Directory-style output would then loop because
+  // Cloudflare also canonicalizes `/es` -> `/es/` when a folder exists.
+  // File-style output avoids the loop by serving `/es` directly.
+  trailingSlash: 'never',
+  build: {
+    format: 'file',
+  },
   integrations: [sitemap()],
   i18n: {
     defaultLocale: 'en',

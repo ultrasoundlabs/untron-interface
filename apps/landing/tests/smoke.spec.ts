@@ -7,9 +7,9 @@ test('language switch routes to Spanish locale', async ({ page }) => {
   const switcher = page.locator('.language-switcher');
   await switcher.locator('summary').click();
   await expect(switcher).toHaveAttribute('open', '');
-  await switcher.locator("a[href='/es/']").click();
+  await switcher.locator("a[href='/es']").click();
 
-  await expect(page).toHaveURL(/\/es\/$/);
+  await expect(page).toHaveURL(/\/es$/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'es');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Mueve USDT y USDC');
 });

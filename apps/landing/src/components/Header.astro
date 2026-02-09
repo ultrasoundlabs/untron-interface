@@ -10,7 +10,7 @@ interface Props {
 
 const { t } = Astro.props as Props;
 
-const currentLocale = Astro.currentLocale ?? t.localeCode;
+const currentLocale = t.localeCode;
 const currentLocaleMeta = locales.find((locale) => locale.code === currentLocale);
 const currentLanguageFlag = currentLocaleMeta?.flag ?? '🌐';
 const getLocaleHref = (localeCode: string) =>

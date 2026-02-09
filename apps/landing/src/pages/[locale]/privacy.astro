@@ -6,7 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 export function getStaticPaths() {
   return locales
     .filter((locale) => locale.code !== 'en')
-    .map((locale) => ({ params: { locale: locale.code } }));
+    .map((locale) => ({ params: { locale: locale.code.toLowerCase() } }));
 }
 
 const locale = Astro.params.locale ?? 'en';
@@ -80,4 +80,3 @@ const isEs = locale === 'es';
     </section>
   </main>
 </BaseLayout>
-

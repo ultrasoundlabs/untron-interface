@@ -15,7 +15,7 @@ const securityUrl = import.meta.env.PUBLIC_DOCS_URL ?? t.links.securityDocs;
 const quoteApiBase =
   import.meta.env.PUBLIC_UNTRON_BRIDGE_API_URL ?? 'https://api.untron.finance/bridge';
 const year = new Date().getFullYear();
-const currentLocale = Astro.currentLocale ?? t.localeCode;
+const currentLocale = t.localeCode;
 const localeHome = normalizeLocaleUrl(getRelativeLocaleUrl(currentLocale, ''));
 const termsUrl = normalizeLocaleUrl(getRelativeLocaleUrl(currentLocale, 'terms'));
 const privacyUrl = normalizeLocaleUrl(getRelativeLocaleUrl(currentLocale, 'privacy'));

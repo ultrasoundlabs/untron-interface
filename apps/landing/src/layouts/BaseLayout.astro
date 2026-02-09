@@ -1,9 +1,7 @@
 ---
-import { getAbsoluteLocaleUrl } from 'astro:i18n';
 import Header from '../components/Header.astro';
 import { locales } from '../i18n/locales.js';
 import type { LandingDictionary } from '../i18n/types';
-import { normalizeLocaleUrl } from '../i18n/url';
 import '../styles/site.css';
 
 interface Props {
@@ -13,16 +11,62 @@ interface Props {
 const { t } = Astro.props as Props;
 
 const site = Astro.site ?? new URL('https://untron.finance');
-const canonicalUrl = new URL(Astro.url.pathname, site).toString();
+const defaultLocale = 'en';
+const toPublicPathname = (pathname: string): string => {
+  if (!pathname) return '/';
+  if (pathname === '/') return '/';
+
+  // In `build.format = "file"` mode, Astro exposes `.html` paths during build.
+  // Cloudflare Pages serves those as pretty URLs (e.g. `/es` -> `/es.html`), so
+  // we canonicalize to the pretty path for SEO and consistency.
+  if (pathname.endsWith('/index.html')) {
+    const stripped = pathname.slice(0, -'/index.html'.length);
+    return stripped || '/';
+  }
+
+  if (pathname.endsWith('.html')) {
+    const stripped = pathname.slice(0, -'.html'.length);
+    return stripped || '/';
+  }
+
+  return pathname;
+};
+
+const publicPathname = toPublicPathname(Astro.url.pathname);
+const canonicalUrl = new URL(publicPathname, site).toString();
 const ogImagePath = t.localeCode === 'es' ? '/og-image-es.svg' : '/og-image-en.svg';
 const ogImageUrl = new URL(ogImagePath, site).toString();
 const ogImageAlt = t.meta.ogTitle;
 const bridgeUrl = import.meta.env.PUBLIC_BRIDGE_URL ?? t.links.bridgeApp;
 
-const hreflangs = locales.map((locale) => ({
-  code: locale.code,
-  url: normalizeLocaleUrl(getAbsoluteLocaleUrl(locale.code, '')),
-}));
+const nonDefaultLocaleSegments = locales
+  .filter((locale) => locale.code !== defaultLocale)
+  .map((locale) => locale.code.toLowerCase());
+
+const matchedLocaleSegment =
+  publicPathname === '/'
+    ? null
+    : nonDefaultLocaleSegments.find(
+        (segment) => publicPathname === `/${segment}` || publicPathname.startsWith(`/${segment}/`)
+      ) ?? null;
+
+const pageSuffixRaw =
+  publicPathname === '/'
+    ? ''
+    : matchedLocaleSegment
+      ? publicPathname.slice(`/${matchedLocaleSegment}`.length) || ''
+      : publicPathname;
+
+const pageSuffix = pageSuffixRaw === '/' ? '' : pageSuffixRaw;
+
+const hreflangs = locales.map((locale) => {
+  const segment = locale.code === defaultLocale ? '' : locale.code.toLowerCase();
+  const pathname = segment ? `/${segment}${pageSuffix}` : pageSuffix || '/';
+  return { code: locale.code, url: new URL(pathname, site).toString() };
+});
+
+const xDefaultUrl =
+  hreflangs.find((entry) => entry.code === defaultLocale)?.url ?? new URL('/', site).toString();
 
 const supportedLocaleCodes = locales.map((locale) => locale.code);
 
@@ -156,7 +200,7 @@ const alternateOgLocales = Array.from(
     <meta name="twitter:image:alt" content={ogImageAlt} />
 
     {hreflangs.map((entry) => <link rel="alternate" hreflang={entry.code} href={entry.url} />)}
-    {hreflangs.length > 0 && <link rel="alternate" hreflang="x-default" href={hreflangs[0].url} />}
+    <link rel="alternate" hreflang="x-default" href={xDefaultUrl} />
 
     {
       jsonLdBlocks.map((schema) => (

@@ -28,8 +28,19 @@ const dictionaries: Record<string, LandingDictionary> = {
   fil,
 };
 
+function normalizeLocaleCode(localeCode: string | undefined): string {
+  if (typeof localeCode !== 'string' || !localeCode) return 'en';
+
+  // Exact match first (handles `zh-CN` / `zh-HK`).
+  if (locales.some((locale) => locale.code === localeCode)) return localeCode;
+
+  const normalized = localeCode.replaceAll('_', '-').toLowerCase();
+  const match = locales.find((locale) => locale.code.toLowerCase() === normalized);
+  return match?.code ?? 'en';
+}
+
 export function getLandingDictionary(localeCode: string | undefined): LandingDictionary {
-  const normalized = typeof localeCode === 'string' ? localeCode : 'en';
+  const normalized = normalizeLocaleCode(localeCode);
   const localeMeta = locales.find((locale) => locale.code === normalized) ?? locales[0];
   const dictionary = dictionaries[normalized] ?? en;
 
