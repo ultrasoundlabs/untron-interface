@@ -6,7 +6,7 @@ export const landing: LandingDictionary = {
   meta: {
     title: 'Untron | Ponte de stablecoins Tron <-> EVM sem custódia',
     description:
-      'Faça bridge de USDT e USDC entre Tron e as principais redes EVM com UX sem gas, taxas baixas e contratos auditados.',
+      'Transfira USDT e USDC entre Tron e as principais redes EVM com UX sem gás, taxas baixas e contratos auditados.',
     keywords:
       'ponte tron, bridge usdt, bridge usdc, tron para evm, ponte sem custódia, ponte de stablecoins, web3 bridge',
     ogTitle: 'Untron | Ponte Tron <-> EVM sem custódia',
@@ -14,7 +14,7 @@ export const landing: LandingDictionary = {
       'Movimente stablecoins entre Tron e redes EVM sem depender de exchanges centralizadas.',
     twitterTitle: 'Untron | Ponte de stablecoins Tron <-> EVM',
     twitterDescription:
-      'UX sem gas, taxas baixas e design com confiança minimizada para mover USDT e USDC entre redes.',
+      'UX sem gás, taxas baixas e design com confiança minimizada para mover USDT e USDC entre redes.',
   },
   nav: {
     brand: 'Untron',
@@ -28,15 +28,15 @@ export const landing: LandingDictionary = {
     sectionFees: 'Taxas',
     sectionSecurity: 'Segurança',
     sectionFaq: 'FAQ',
-    openApp: 'Abrir app',
+    openApp: 'Abrir o app',
     languageLabel: 'Idioma',
-    toggleThemeLabel: 'Alternar tema',
+    toggleThemeLabel: 'Alternar tema de cor',
   },
   hero: {
     eyebrow: 'Ponte de stablecoins sem custódia',
-    title: 'Movimente USDT e USDC entre Tron e redes EVM sem risco de exchange.',
+    title: 'Movimente USDT e USDC entre Tron e redes EVM sem risco de corretora.',
     description:
-      'Envie stablecoins da Tron para Ethereum, Arbitrum, Base e outras redes EVM em minutos.',
+      'Envie stablecoins da rede Tron para Ethereum, Arbitrum, Base e outras redes EVM em minutos.',
     supportingLine:
       'Sem conta em CEX. Sem transferência de custódia. Rotas claras e execução previsível.',
     routePreviewLabel: 'Prévia da rota',
@@ -50,9 +50,9 @@ export const landing: LandingDictionary = {
     swapQuoteReady: 'Cotação atualizada',
     swapQuoteError: 'Não foi possível carregar a cotação',
     swapRateLabel: 'Taxa',
-    swapFeeLabel: 'Taxa do bridge',
+    swapFeeLabel: 'Taxa da ponte',
     swapOpenBridgeLabel: 'Abrir no Bridge',
-    primaryCta: 'Começar a fazer bridge',
+    primaryCta: 'Começar a transferir',
     secondaryCta: 'Ver comparação de taxas',
     pickerBackLabel: 'Voltar',
     pickerCloseLabel: 'Fechar seletor',
@@ -60,7 +60,7 @@ export const landing: LandingDictionary = {
   },
   stats: [
     { value: '0 custódia', label: 'Você mantém o controle da carteira do início ao fim' },
-    { value: 'UX sem gas', label: 'Sem precisar carregar TRX ou ETH nas rotas compatíveis' },
+    { value: 'UX sem gás', label: 'Sem precisar carregar TRX ou ETH nas rotas compatíveis' },
     { value: 'Auditado', label: 'Contratos revisados e verificados formalmente' },
   ],
   audiences: {
@@ -71,14 +71,16 @@ export const landing: LandingDictionary = {
       {
         label: 'Usuários',
         title: 'Faça bridge a partir de qualquer exchange ou carteira',
-        description: 'Movimente stablecoins entre redes sem alternar entre apps ou tokens de gas.',
+        description:
+          'Movimente stablecoins entre redes sem alternar entre apps ou tokens de gás.',
         ctaLabel: 'Abrir bridge',
         ctaHref: 'https://bridge.untron.finance',
       },
       {
         label: 'Empresas',
         title: 'Rebalanceie liquidez na velocidade do mercado',
-        description: 'Mova volume entre Tron e EVM com menos dependências do que trilhos de CEX.',
+        description:
+          'Mova volume entre Tron e EVM com menos dependências do que a infraestrutura de CEX.',
         ctaLabel: 'Fale conosco',
         ctaHref: 'mailto:contact@untron.finance',
       },
@@ -86,8 +88,8 @@ export const landing: LandingDictionary = {
         label: 'Desenvolvedores',
         title: 'Integre com uma API + uma chamada de contrato',
         description:
-          'Use APIs hospedadas ou auto-hospede. Feito para pagamentos e produtos de tesouraria onchain.',
-        ctaLabel: 'Ler docs',
+          'Use a API hospedada ou hospede você mesmo. Feito para pagamentos e produtos de tesouraria onchain.',
+        ctaLabel: 'Ler documentação',
         ctaHref: 'https://docs.untron.finance',
       },
     ],
@@ -104,7 +106,7 @@ export const landing: LandingDictionary = {
       {
         title: '2. Envie uma única vez da sua carteira',
         description:
-          'Confirme uma vez. A Untron valida o estado onchain e executa o fluxo de liquidação.',
+          'Confirme uma vez. Untron valida o estado onchain e executa o fluxo de liquidação.',
       },
       {
         title: '3. Receba na rede de destino',
@@ -115,7 +117,8 @@ export const landing: LandingDictionary = {
   },
   fees: {
     title: 'Resumo de taxas',
-    subtitle: 'Comparação aproximada para fazer bridge de $100. Cotações ao vivo têm prioridade.',
+    subtitle:
+      'Comparação aproximada para transferir $100. Cotações ao vivo sempre têm prioridade.',
     amountLabel: 'Exemplo de rota ($100)',
     columns: {
       service: 'Serviço',
@@ -142,12 +145,12 @@ export const landing: LandingDictionary = {
       {
         service: 'Symbiosis',
         received: '$94.00',
-        notes: 'Sobrecusto de gas do contrato no lado Tron',
+        notes: 'Sobrecusto de gás do contrato no lado Tron',
       },
       {
         service: 'Bridgers',
         received: '$94.00',
-        notes: 'Sobrecusto de gas do contrato no lado Tron',
+        notes: 'Sobrecusto de gás do contrato no lado Tron',
       },
     ],
     footnote:
@@ -155,9 +158,9 @@ export const landing: LandingDictionary = {
     focusTitle: 'Vantagens de execução',
     focusBullets: [
       'Sem custódia por design',
-      'UX do bridge otimizada para baixa fricção',
+      'UX da ponte otimizada para baixa fricção',
       'Liquidação cross-chain com status claro',
-      'Sem depender de trilhos de contas centralizadas',
+      'Sem depender de infraestrutura de contas centralizadas',
     ],
     focusCta: 'Abrir cotação ao vivo',
   },
@@ -167,7 +170,7 @@ export const landing: LandingDictionary = {
     stablecoinsLabel: 'Stablecoins',
     stablecoins: ['USDT', 'USDC'],
     networksLabel: 'Redes',
-    networkCountSuffix: 'redes ao vivo',
+    networkCountSuffix: 'redes ativas',
     networks: ['Tron', 'Ethereum', 'Arbitrum', 'Optimism', 'Base', 'BNB Chain', 'e mais'],
     walletsLabel: 'Qualquer carteira',
     exchangesLabel: 'Qualquer exchange',
@@ -190,7 +193,7 @@ export const landing: LandingDictionary = {
       {
         question: 'Preciso de uma conta em exchange centralizada?',
         answer:
-          'Não. A Untron foi feita para bridge nativo de carteira entre redes, sem passar por uma conta de CEX.',
+          'Não. Untron foi feita para transferir entre redes direto da carteira, sem passar por uma conta de CEX.',
       },
       {
         question: 'KYC é necessário?',
@@ -200,17 +203,17 @@ export const landing: LandingDictionary = {
       {
         question: 'Preciso de TRX ou ETH para começar?',
         answer:
-          'Rotas suportadas são otimizadas para UX sem gas, então muitas vezes não é preciso pré-financiar tokens de gas.',
+          'Rotas suportadas são otimizadas para UX sem gás, então muitas vezes não é preciso pré-financiar tokens de gás.',
       },
       {
-        question: 'Posso fazer bridge de valores maiores, tipo tesouraria?',
+        question: 'Posso transferir valores maiores (tipo tesouraria)?',
         answer:
           'Sim. Empresas usam a Untron para rebalanceamentos maiores. Use cotações ao vivo e limites de rota no app antes de executar volume.',
       },
     ],
   },
   finalCta: {
-    title: 'Pronto para fazer bridge?',
+    title: 'Pronto para fazer a ponte?',
     description:
       'Abra o app para obter uma cotação ao vivo e mover stablecoins entre Tron e redes EVM agora.',
     buttonLabel: 'Abrir Bridge App',
@@ -236,4 +239,3 @@ export const landing: LandingDictionary = {
     github: 'https://github.com/ultrasoundlabs',
   },
 };
-

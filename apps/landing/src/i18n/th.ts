@@ -6,7 +6,7 @@ export const landing: LandingDictionary = {
   meta: {
     title: 'Untron | บริดจ์สเตเบิลคอยน์ Tron <-> EVM แบบไม่ฝากทรัพย์',
     description:
-      'บริดจ์ USDT และ USDC ระหว่าง Tron กับเชน EVM หลัก ๆ ด้วย UX แบบไม่ต้องจ่ายแก๊ส ค่าธรรมเนียมต่ำ และสัญญาอัจฉริยะผ่านการออดิท',
+      'บริดจ์ USDT และ USDC ระหว่าง Tron กับเชน EVM หลัก ๆ ด้วย UX แบบไม่ต้องจ่ายแก๊ส ค่าธรรมเนียมต่ำ และสัญญาอัจฉริยะที่ผ่านการออดิท',
     keywords:
       'tron bridge, usdt bridge, usdc bridge, tron ไป evm, non-custodial bridge, stablecoin bridge, web3',
     ogTitle: 'Untron | บริดจ์ Tron <-> EVM แบบไม่ฝากทรัพย์',
@@ -35,7 +35,8 @@ export const landing: LandingDictionary = {
     eyebrow: 'บริดจ์สเตเบิลคอยน์แบบไม่ฝากทรัพย์',
     title: 'ย้าย USDT และ USDC ระหว่าง Tron และเชน EVM ได้โดยไม่ต้องเสี่ยงกับเอ็กซ์เชนจ์',
     description: 'ส่งสเตเบิลคอยน์จาก Tron ไป Ethereum, Arbitrum, Base และเชน EVM อื่น ๆ ได้ภายในไม่กี่นาที',
-    supportingLine: 'ไม่ต้องมีบัญชี CEX ไม่ต้องส่งมอบการถือครอง เส้นทางชัดเจนและการทำงานคาดเดาได้',
+    supportingLine:
+      'ไม่ต้องมีบัญชี CEX. ไม่ต้องส่งมอบการถือครอง. เส้นทางชัดเจนและการทำงานคาดเดาได้.',
     routePreviewLabel: 'พรีวิวเส้นทาง',
     routeSourceLabel: 'จาก',
     routeDestinationLabel: 'ไปยัง',
@@ -43,7 +44,7 @@ export const landing: LandingDictionary = {
     swapReceiveLabel: 'คุณได้รับ',
     swapFlipLabel: 'สลับทิศทาง',
     swapMaxLabel: 'MAX',
-    swapQuoteLoading: 'กำลังดึงราคาแบบเรียลไทม์...',
+    swapQuoteLoading: 'กำลังดึงราคาล่าสุด...',
     swapQuoteReady: 'อัปเดตราคาแล้ว',
     swapQuoteError: 'โหลดราคาไม่ได้',
     swapRateLabel: 'อัตรา',
@@ -68,7 +69,7 @@ export const landing: LandingDictionary = {
         label: 'ผู้ใช้',
         title: 'บริดจ์จากเอ็กซ์เชนจ์หรือวอลเล็ทใดก็ได้',
         description: 'ย้ายสเตเบิลคอยน์ข้ามเชนโดยไม่ต้องสลับหลายแอปหรือเตรียมโทเคนแก๊ส',
-        ctaLabel: 'เปิด bridge',
+        ctaLabel: 'เปิด Bridge',
         ctaHref: 'https://bridge.untron.finance',
       },
       {
@@ -97,7 +98,7 @@ export const landing: LandingDictionary = {
       },
       {
         title: '2. ส่งครั้งเดียวจากวอลเล็ทของคุณ',
-        description: 'ยืนยันครั้งเดียว Untron ตรวจสอบสถานะบนเชนและรันโฟลว์การชำระบัญชี',
+        description: 'ยืนยันครั้งเดียว Untron ตรวจสอบสถานะบนเชนและดำเนินโฟลว์การชำระบัญชี',
       },
       {
         title: '3. รับบนเชนปลายทาง',
@@ -142,7 +143,7 @@ export const landing: LandingDictionary = {
         notes: 'มีค่าแก๊สสัญญาเพิ่มเติมฝั่ง Tron',
       },
     ],
-    footnote: 'ตัวเลขเป็นแนวทาง ไม่ใช่คำรับประกัน ตรวจสอบราคาจริงใน bridge ก่อนส่งเสมอ',
+    footnote: 'ตัวเลขเป็นแนวทาง ไม่ใช่คำรับประกัน ตรวจสอบราคาจริงใน Bridge ก่อนส่งเสมอ',
     focusTitle: 'ข้อได้เปรียบด้านการทำงาน',
     focusBullets: [
       'ไม่ฝากทรัพย์โดยดีไซน์',
@@ -226,4 +227,3 @@ export const landing: LandingDictionary = {
     github: 'https://github.com/ultrasoundlabs',
   },
 };
-

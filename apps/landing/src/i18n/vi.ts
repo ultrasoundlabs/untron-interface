@@ -6,7 +6,7 @@ export const landing: LandingDictionary = {
   meta: {
     title: 'Untron | Cầu nối stablecoin Tron <-> EVM phi lưu ký',
     description:
-      'Bridge USDT và USDC giữa Tron và các chuỗi EVM lớn với UX không cần gas, phí thấp và hợp đồng đã kiểm toán.',
+      'Bridge USDT và USDC giữa Tron và các chuỗi EVM lớn với UX không cần nạp gas, phí thấp và hợp đồng đã kiểm toán.',
     keywords:
       'tron bridge, usdt bridge, usdc bridge, tron sang evm, cầu nối phi lưu ký, stablecoin bridge, web3',
     ogTitle: 'Untron | Cầu nối Tron <-> EVM phi lưu ký',
@@ -14,7 +14,7 @@ export const landing: LandingDictionary = {
       'Chuyển stablecoin giữa Tron và các chuỗi EVM mà không cần phụ thuộc vào sàn giao dịch tập trung.',
     twitterTitle: 'Untron | Cầu nối stablecoin Tron <-> EVM',
     twitterDescription:
-      'UX không cần gas, phí thấp và thiết kế giảm tin cậy để chuyển USDT và USDC giữa các chuỗi.',
+      'UX không cần nạp gas, phí thấp và thiết kế tối thiểu tin cậy để chuyển USDT và USDC giữa các chuỗi.',
   },
   nav: {
     brand: 'Untron',
@@ -49,7 +49,7 @@ export const landing: LandingDictionary = {
     swapQuoteReady: 'Báo giá đã cập nhật',
     swapQuoteError: 'Không thể tải báo giá',
     swapRateLabel: 'Tỷ giá',
-    swapFeeLabel: 'Phí bridge',
+    swapFeeLabel: 'Phí cầu nối',
     swapOpenBridgeLabel: 'Mở trong Bridge',
     primaryCta: 'Bắt đầu bridge',
     secondaryCta: 'Xem so sánh phí',
@@ -99,7 +99,8 @@ export const landing: LandingDictionary = {
       },
       {
         title: '2. Xác nhận một lần trong ví',
-        description: 'Chỉ cần một lần xác nhận. Untron kiểm tra trạng thái onchain và chạy luồng thanh toán.',
+        description:
+          'Chỉ cần một lần xác nhận. Untron kiểm tra trạng thái onchain và chạy quy trình tất toán.',
       },
       {
         title: '3. Nhận ở chuỗi đích',
@@ -157,11 +158,11 @@ export const landing: LandingDictionary = {
   },
   chains: {
     title: 'Tài sản và mạng được hỗ trợ',
-    subtitle: 'Phủ stablecoin, chain và điểm vào từ ví.',
+    subtitle: 'Phủ stablecoin, mạng và điểm vào từ ví.',
     stablecoinsLabel: 'Stablecoin',
     stablecoins: ['USDT', 'USDC'],
     networksLabel: 'Mạng',
-    networkCountSuffix: 'chain đang hoạt động',
+    networkCountSuffix: 'mạng đang hoạt động',
     networks: ['Tron', 'Ethereum', 'Arbitrum', 'Optimism', 'Base', 'BNB Chain', 'và hơn nữa'],
     walletsLabel: 'Bất kỳ ví nào',
     exchangesLabel: 'Bất kỳ sàn nào',
@@ -174,7 +175,7 @@ export const landing: LandingDictionary = {
     bullets: [
       'Kiến trúc phi lưu ký với ví do người dùng kiểm soát.',
       'Hợp đồng được kiểm toán và xác minh hình thức cho các luồng cốt lõi.',
-      'Thiết kế giảm tin cậy, neo theo dữ liệu Tron làm nguồn sự thật.',
+      'Thiết kế tối thiểu tin cậy, neo theo dữ liệu Tron làm nguồn sự thật.',
     ],
     ctaLabel: 'Đọc ghi chú bảo mật kỹ thuật',
   },
@@ -230,4 +231,3 @@ export const landing: LandingDictionary = {
     github: 'https://github.com/ultrasoundlabs',
   },
 };
-

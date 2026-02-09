@@ -4,9 +4,9 @@ export const landing: LandingDictionary = {
   localeCode: 'es',
   localeName: 'Español',
   meta: {
-    title: 'Untron | Puente no custodial de stablecoins Tron <-> EVM',
+    title: 'Untron | Puente de stablecoins sin custodia Tron <-> EVM',
     description:
-      'Mueve USDT y USDC entre Tron y cadenas EVM con experiencia sin gas, comisiones bajas y contratos auditados.',
+      'Mueve USDT y USDC entre Tron y redes EVM con una UX sin gas, comisiones bajas y contratos auditados.',
     keywords:
       'puente tron, puente usdt, puente usdc, tron a evm, puente no custodial, stablecoins, web3',
     ogTitle: 'Untron | Puente no custodial Tron <-> EVM',
@@ -14,7 +14,7 @@ export const landing: LandingDictionary = {
       'Transfiere stablecoins entre Tron y EVM sin depender de exchanges centralizados.',
     twitterTitle: 'Untron | Puente de stablecoins Tron <-> EVM',
     twitterDescription:
-      'UX sin gas, comisiones bajas y contratos minimizados en confianza para USDT y USDC.',
+      'UX sin gas, comisiones bajas y contratos con confianza minimizada para mover USDT y USDC entre redes.',
   },
   nav: {
     brand: 'Untron',
@@ -24,48 +24,49 @@ export const landing: LandingDictionary = {
     productV3: 'V3',
     productIntegrate: 'Integrar',
     sectionsLabel: 'Secciones',
-    sectionHowItWorks: 'Como funciona',
+    sectionHowItWorks: 'Cómo funciona',
     sectionFees: 'Comisiones',
     sectionSecurity: 'Seguridad',
     sectionFaq: 'FAQ',
-    openApp: 'Abrir app',
+    openApp: 'Abrir la app',
     languageLabel: 'Idioma',
-    toggleThemeLabel: 'Cambiar tema',
+    toggleThemeLabel: 'Cambiar tema de color',
   },
   hero: {
     eyebrow: 'Puente no custodial de stablecoins',
-    title: 'Mueve USDT y USDC entre Tron y cadenas EVM sin riesgo de exchange.',
+    title: 'Mueve USDT y USDC entre Tron y redes EVM sin el riesgo de un exchange.',
     description:
-      'Envia stablecoins desde Tron hacia Ethereum, Arbitrum, Base y otras redes EVM en minutos.',
-    supportingLine: 'Sin cuenta en CEX. Sin ceder custodia. Rutas claras y ejecucion predecible.',
+      'Envía stablecoins desde Tron hacia Ethereum, Arbitrum, Base y otras redes EVM en minutos.',
+    supportingLine:
+      'Sin cuenta en un CEX. Sin entregar custodia. Rutas claras y ejecución predecible.',
     routePreviewLabel: 'Vista de ruta',
     routeSourceLabel: 'Desde',
     routeDestinationLabel: 'Hacia',
-    swapSendLabel: 'Envias',
+    swapSendLabel: 'Envías',
     swapReceiveLabel: 'Recibes',
-    swapFlipLabel: 'Invertir direccion',
+    swapFlipLabel: 'Invertir dirección',
     swapMaxLabel: 'MAX',
-    swapQuoteLoading: 'Obteniendo cotizacion en vivo...',
-    swapQuoteReady: 'Cotizacion actualizada',
-    swapQuoteError: 'No se pudo cargar la cotizacion',
+    swapQuoteLoading: 'Obteniendo cotización en vivo...',
+    swapQuoteReady: 'Cotización actualizada',
+    swapQuoteError: 'No se pudo cargar la cotización',
     swapRateLabel: 'Tipo de cambio',
-    swapFeeLabel: 'Comision del bridge',
+    swapFeeLabel: 'Comisión del puente',
     swapOpenBridgeLabel: 'Abrir en Bridge',
-    primaryCta: 'Empezar bridge',
-    secondaryCta: 'Ver comparacion de comisiones',
-    pickerBackLabel: 'Atras',
+    primaryCta: 'Empezar a hacer bridge',
+    secondaryCta: 'Ver comparación de comisiones',
+    pickerBackLabel: 'Atrás',
     pickerCloseLabel: 'Cerrar selector',
     highlightsLabel: 'Destacados',
   },
   stats: [
-    { value: '0 custodia', label: 'Mantienes control de la wallet de principio a fin' },
+    { value: '0 custodia', label: 'Mantienes el control de tu wallet de principio a fin' },
     { value: 'UX sin gas', label: 'Sin precargar TRX o ETH en rutas compatibles' },
     { value: 'Auditado', label: 'Contratos revisados y verificados formalmente' },
   ],
   audiences: {
     title: 'Hecho para flujos reales de stablecoins',
     subtitle:
-      'Pagos minoristas, rebalanceo de liquidez e integraciones usan el mismo flujo simple.',
+      'Transferencias, rebalanceo de liquidez e integraciones usan el mismo flujo simple.',
     cards: [
       {
         label: 'Usuarios',
@@ -77,9 +78,9 @@ export const landing: LandingDictionary = {
       },
       {
         label: 'Empresas',
-        title: 'Rebalancea liquidez a velocidad de mercado',
+        title: 'Rebalancea liquidez a la velocidad del mercado',
         description:
-          'Mueve volumen entre Tron y EVM con menos dependencias operativas que vias CEX.',
+          'Mueve volumen entre Tron y EVM con menos dependencias operativas que la infraestructura de un CEX.',
         ctaLabel: 'Hablar con nosotros',
         ctaHref: 'mailto:contact@untron.finance',
       },
@@ -87,23 +88,24 @@ export const landing: LandingDictionary = {
         label: 'Desarrolladores',
         title: 'Integra con una API y una llamada de contrato',
         description:
-          'Usa APIs alojadas o autoalojadas. Integracion pensada para pagos y tesoreria onchain.',
-        ctaLabel: 'Leer docs',
+          'Usa APIs alojadas o autoalojadas. Integración pensada para pagos y tesorería onchain.',
+        ctaLabel: 'Leer documentación',
         ctaHref: 'https://docs.untron.finance',
       },
     ],
   },
   howItWorks: {
-    title: 'Como funciona',
-    subtitle: 'Tres pasos desde la cadena origen hasta la cadena destino.',
+    title: 'Cómo funciona',
+    subtitle: 'Tres pasos desde la cadena de origen hasta la cadena de destino.',
     steps: [
       {
         title: '1. Elige ruta y monto',
-        description: 'Selecciona origen, destino y monto. Ves cotizacion antes de ejecutar.',
+        description: 'Selecciona origen, destino y monto. Ves la cotización antes de ejecutar.',
       },
       {
         title: '2. Envia una vez desde tu wallet',
-        description: 'Confirma una vez. Untron valida estado onchain y ejecuta el flujo.',
+        description:
+          'Confirma una vez. Untron valida el estado onchain y ejecuta el flujo de liquidación.',
       },
       {
         title: '3. Recibe en la cadena destino',
@@ -113,7 +115,8 @@ export const landing: LandingDictionary = {
   },
   fees: {
     title: 'Resumen de comisiones',
-    subtitle: 'Comparacion aproximada para mover $100. La cotizacion en vivo siempre manda.',
+    subtitle:
+      'Comparación aproximada para mover $100. La cotización en vivo siempre es la referencia.',
     amountLabel: 'Ejemplo de ruta por $100',
     columns: {
       service: 'Servicio',
@@ -149,15 +152,15 @@ export const landing: LandingDictionary = {
       },
     ],
     footnote:
-      'Los valores son orientativos y no una promesa. Revisa la cotizacion en vivo en la app antes de enviar.',
-    focusTitle: 'Ventajas de ejecucion',
+      'Los valores son orientativos, no una promesa. Revisa la cotización en vivo en la app antes de enviar.',
+    focusTitle: 'Ventajas de ejecución',
     focusBullets: [
-      'Diseno no custodial',
-      'UX de bridge optimizada para baja friccion',
-      'Liquidacion cross-chain con estado claro',
-      'Sin depender de cuentas en rieles centralizados',
+      'Diseño sin custodia',
+      'UX del bridge optimizada para baja fricción',
+      'Liquidación cross-chain con estado claro',
+      'Sin depender de cuentas centralizadas',
     ],
-    focusCta: 'Abrir cotizacion en vivo',
+    focusCta: 'Abrir cotización en vivo',
   },
   chains: {
     title: 'Activos y redes compatibles',
@@ -165,63 +168,63 @@ export const landing: LandingDictionary = {
     stablecoinsLabel: 'Stablecoins',
     stablecoins: ['USDT', 'USDC'],
     networksLabel: 'Redes',
-    networkCountSuffix: 'cadenas activas',
-    networks: ['Tron', 'Ethereum', 'Arbitrum', 'Optimism', 'Base', 'BNB Chain', 'y mas'],
+    networkCountSuffix: 'redes activas',
+    networks: ['Tron', 'Ethereum', 'Arbitrum', 'Optimism', 'Base', 'BNB Chain', 'y más'],
     walletsLabel: 'Cualquier wallet',
     exchangesLabel: 'Cualquier exchange',
-    moreLabel: 'y mas',
-    walletsNote: 'Soporte para deep links y wallets de navegador con conexion fluida.',
+    moreLabel: 'y más',
+    walletsNote: 'Admite deep links y wallets del navegador para una conexión fluida.',
   },
   security: {
     title: 'Postura de seguridad',
-    subtitle: 'La liquidacion se ancla al estado onchain, no a la discrecion de operadores.',
+    subtitle: 'La liquidación se ancla al estado onchain, no a la discreción del operador.',
     bullets: [
       'Arquitectura no custodial con wallets controladas por el usuario.',
       'Contratos auditados y verificados formalmente en rutas centrales del protocolo.',
-      'Diseno minimizado en confianza anclado a datos de Tron como fuente de verdad.',
+      'Diseño con confianza minimizada anclado a datos de Tron como fuente de verdad.',
     ],
-    ctaLabel: 'Leer notas tecnicas de seguridad',
+    ctaLabel: 'Leer notas técnicas de seguridad',
   },
   faq: {
     title: 'FAQ',
     items: [
       {
-        question: 'Necesito cuenta en un exchange centralizado?',
+        question: '¿Necesito una cuenta en un exchange centralizado?',
         answer:
-          'No. Untron esta hecho para operar directo desde wallet entre cadenas, sin pasar por una cuenta de CEX.',
+          'No. Untron está hecho para operar directo desde tu wallet entre cadenas, sin pasar por una cuenta de CEX.',
       },
       {
-        question: 'Se requiere KYC?',
+        question: '¿Se requiere KYC?',
         answer:
-          'El protocolo no requiere KYC porque es no custodial. Siempre verifica requisitos regulatorios en tu jurisdiccion.',
+          'El protocolo no requiere KYC porque es no custodial. Verifica los requisitos en tu jurisdicción.',
       },
       {
-        question: 'Necesito TRX o ETH para empezar?',
+        question: '¿Necesito TRX o ETH para empezar?',
         answer:
-          'Las rutas compatibles estan optimizadas para UX sin gas, por lo que normalmente no hace falta precargar tokens de gas.',
+          'Las rutas compatibles están optimizadas para una UX sin gas, por lo que normalmente no hace falta precargar tokens de gas.',
       },
       {
-        question: 'Puedo mover montos grandes de tesoreria?',
+        question: '¿Puedo mover montos grandes de tesorería?',
         answer:
-          'Si. Empresas usan Untron para rebalanceo de mayor volumen. Revisa cotizacion y limites en vivo antes de ejecutar.',
+          'Sí. Empresas usan Untron para rebalanceos de mayor volumen. Revisa cotizaciones y límites en vivo antes de ejecutar.',
       },
     ],
   },
   finalCta: {
-    title: 'Listo para hacer bridge?',
+    title: '¿Listo para hacer bridge?',
     description:
-      'Abre la app para obtener una cotizacion en vivo y mover stablecoins entre Tron y cadenas EVM ahora mismo.',
+      'Abre la app para obtener una cotización en vivo y mover stablecoins entre Tron y redes EVM ahora mismo.',
     buttonLabel: 'Abrir Bridge App',
   },
   footer: {
     tagline: 'Liquidez de stablecoins entre cadenas, sin traspaso de custodia.',
     legal: 'Todos los derechos reservados.',
-    linksLabel: 'Enlaces rapidos',
-    terms: 'Terminos',
+    linksLabel: 'Enlaces rápidos',
+    terms: 'Términos',
     privacy: 'Privacidad',
     docs: 'Docs',
     contact: 'Contacto',
-    socialLabel: 'Social',
+    socialLabel: 'Redes',
   },
   links: {
     bridgeApp: 'https://bridge.untron.finance',

@@ -6,15 +6,15 @@ export const landing: LandingDictionary = {
   meta: {
     title: 'Untron | Non-custodial na stablecoin bridge Tron <-> EVM',
     description:
-      'I-bridge ang USDT at USDC sa pagitan ng Tron at mga pangunahing EVM chain gamit ang gasless UX, mababang fees, at mga audited smart contract.',
+      'I-bridge ang USDT at USDC sa pagitan ng Tron at mga pangunahing EVM chain gamit ang gasless UX, mababang bayarin, at audited na smart contracts.',
     keywords:
       'tron bridge, usdt bridge, usdc bridge, tron to evm, non-custodial bridge, stablecoin bridge, web3 bridge',
     ogTitle: 'Untron | Non-custodial Tron <-> EVM bridge',
     ogDescription:
-      'Ilipat ang mga stablecoin sa pagitan ng Tron at EVM chains nang hindi umaasa sa mga centralized exchange.',
+      'Ilipat ang stablecoins sa pagitan ng Tron at EVM chains nang hindi umaasa sa centralized exchanges.',
     twitterTitle: 'Untron | Tron <-> EVM stablecoin bridge',
     twitterDescription:
-      'Gasless UX, mababang fees, at trust-minimized na kontrata para ilipat ang USDT at USDC sa pagitan ng chains.',
+      'Gasless UX, mababang bayarin, at trust-minimized na kontrata para ilipat ang USDT at USDC sa pagitan ng chains.',
   },
   nav: {
     brand: 'Untron',
@@ -30,7 +30,7 @@ export const landing: LandingDictionary = {
     sectionFaq: 'FAQ',
     openApp: 'Buksan ang app',
     languageLabel: 'Wika',
-    toggleThemeLabel: 'Palitan ang tema',
+    toggleThemeLabel: 'I-toggle ang theme',
   },
   hero: {
     eyebrow: 'Non-custodial na stablecoin bridge',
@@ -38,7 +38,7 @@ export const landing: LandingDictionary = {
     description:
       'Magpadala ng stablecoins mula Tron papuntang Ethereum, Arbitrum, Base, at iba pang EVM chains sa loob ng ilang minuto.',
     supportingLine:
-      'Walang CEX account. Walang custody handoff. Malinaw ang mga ruta at predictable ang execution.',
+      'Walang CEX account. Walang custody handoff. Malinaw ang ruta at predictable ang execution.',
     routePreviewLabel: 'Preview ng ruta',
     routeSourceLabel: 'Mula',
     routeDestinationLabel: 'Papunta',
@@ -60,7 +60,7 @@ export const landing: LandingDictionary = {
   },
   stats: [
     { value: '0 custody', label: 'Ikaw ang may kontrol sa wallet mula simula hanggang dulo' },
-    { value: 'Gasless UX', label: 'Hindi kailangang mag-prefund ng TRX o ETH para sa mga suportadong ruta' },
+    { value: 'Gasless UX', label: 'Hindi kailangang maghanda ng TRX o ETH para sa mga suportadong ruta' },
     { value: 'Audited', label: 'Nairebyu at na-verify nang pormal ang mga kontrata' },
   ],
   audiences: {
@@ -80,7 +80,7 @@ export const landing: LandingDictionary = {
         label: 'Mga negosyo',
         title: 'Mag-rebalance ng liquidity sa bilis ng merkado',
         description:
-          'Ilipat ang halaga sa pagitan ng Tron at EVM na may mas kaunting dependencies kaysa sa CEX rails.',
+          'Ilipat ang halaga sa pagitan ng Tron at EVM na may mas kaunting dependencies kaysa sa pagdaan sa CEX.',
         ctaLabel: 'Makipag-usap',
         ctaHref: 'mailto:contact@untron.finance',
       },
@@ -106,11 +106,12 @@ export const landing: LandingDictionary = {
       {
         title: '2. Magpadala isang beses mula sa wallet',
         description:
-          'Isang confirmation lang. Vina-validate ng Untron ang chain state at nirurun ang settlement.',
+          'Isang confirmation lang. Sinusuri ng Untron ang chain state at pinapatakbo ang settlement flow.',
       },
       {
         title: '3. Tumanggap sa destination chain',
-        description: 'Dumarating ang funds sa destination wallet na may malinaw na status at walang hidden custody step.',
+        description:
+          'Dumarating ang funds sa destination wallet na may malinaw na status at walang hidden custody step.',
       },
     ],
   },
@@ -158,7 +159,7 @@ export const landing: LandingDictionary = {
       'Non-custodial mula sa disenyo',
       'Bridge UX na optimized para mas madaling gamitin',
       'Settlement sa pagitan ng chains na may malinaw na status',
-      'Hindi naka-depende sa centralized na account rails',
+      'Hindi umaasa sa centralized na account infrastructure',
     ],
     focusCta: 'Buksan ang live quote',
   },
@@ -179,7 +180,7 @@ export const landing: LandingDictionary = {
     title: 'Seguridad',
     subtitle: 'Naka-anchor ang settlement logic sa chain state, hindi sa discretion ng operator.',
     bullets: [
-      'Non-custodial na arkitektura na wallet ang kontrol ng user.',
+      'Non-custodial na arkitektura: ikaw ang may kontrol sa wallet.',
       'Audited at formally verified na contracts para sa core protocol paths.',
       'Trust-minimized na design na naka-anchor sa Tron chain data bilang source of truth.',
     ],
@@ -201,7 +202,7 @@ export const landing: LandingDictionary = {
       {
         question: 'Kailangan ko ba ng TRX o ETH para magsimula?',
         answer:
-          'Ang supported routes ay optimized para gasless UX, kaya madalas hindi na kailangan mag-prefund ng gas tokens.',
+          'Ang supported routes ay optimized para gasless UX, kaya madalas hindi na kailangan maghanda ng gas tokens.',
       },
       {
         question: 'Pwede ba akong mag-bridge ng mas malalaking halaga?',
@@ -224,7 +225,7 @@ export const landing: LandingDictionary = {
     privacy: 'Pribasiya',
     docs: 'Docs',
     contact: 'Makipag-ugnayan',
-    socialLabel: 'Social',
+    socialLabel: 'Sosyal',
   },
   links: {
     bridgeApp: 'https://bridge.untron.finance',

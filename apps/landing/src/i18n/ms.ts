@@ -14,7 +14,7 @@ export const landing: LandingDictionary = {
       'Pindahkan stablecoin antara Tron dan rangkaian EVM tanpa bergantung pada bursa berpusat.',
     twitterTitle: 'Untron | Jambatan stablecoin Tron <-> EVM',
     twitterDescription:
-      'UX tanpa gas, yuran rendah, dan reka bentuk trust-minimized untuk memindahkan USDT dan USDC antara rangkaian.',
+      'UX tanpa gas, yuran rendah, dan reka bentuk kepercayaan minimum untuk memindahkan USDT dan USDC antara rangkaian.',
   },
   nav: {
     brand: 'Untron',
@@ -47,7 +47,7 @@ export const landing: LandingDictionary = {
     swapFlipLabel: 'Tukar arah',
     swapMaxLabel: 'MAX',
     swapQuoteLoading: 'Mendapatkan sebut harga langsung...',
-    swapQuoteReady: 'Sebutharga dikemas kini',
+    swapQuoteReady: 'Sebut harga dikemas kini',
     swapQuoteError: 'Tidak dapat memuatkan sebut harga',
     swapRateLabel: 'Kadar',
     swapFeeLabel: 'Yuran bridge',
@@ -78,7 +78,8 @@ export const landing: LandingDictionary = {
       {
         label: 'Perniagaan',
         title: 'Imbang semula kecairan pada kelajuan pasaran',
-        description: 'Pindahkan saiz antara Tron dan EVM dengan kurang kebergantungan berbanding rel CEX.',
+        description:
+          'Pindahkan jumlah besar antara Tron dan EVM dengan kurang kebergantungan berbanding infrastruktur CEX.',
         ctaLabel: 'Hubungi kami',
         ctaHref: 'mailto:contact@untron.finance',
       },
@@ -98,11 +99,12 @@ export const landing: LandingDictionary = {
     steps: [
       {
         title: '1. Pilih laluan dan jumlah',
-        description: 'Pilih sumber, destinasi, dan jumlah. Anda dapat sebut harga sebelum pelaksanaan.',
+        description: 'Pilih sumber, destinasi, dan jumlah. Anda akan lihat sebut harga sebelum pelaksanaan.',
       },
       {
         title: '2. Hantar sekali dari wallet anda',
-        description: 'Sahkan sekali. Untron mengesahkan keadaan onchain dan menjalankan aliran penyelesaian.',
+        description:
+          'Sahkan sekali. Untron mengesahkan keadaan onchain dan menjalankan aliran penyelesaian.',
       },
       {
         title: '3. Terima di rangkaian destinasi',
@@ -154,7 +156,7 @@ export const landing: LandingDictionary = {
       'Tanpa kustodian secara reka bentuk',
       'UX bridge dioptimumkan untuk geseran rendah',
       'Penyelesaian rentas rantai dengan status jelas',
-      'Tiada kebergantungan pada rel akaun berpusat',
+      'Tidak bergantung pada akaun dan infrastruktur berpusat',
     ],
     focusCta: 'Buka sebut harga langsung',
   },
@@ -177,7 +179,7 @@ export const landing: LandingDictionary = {
     bullets: [
       'Seni bina tanpa kustodian dengan wallet dikawal pengguna.',
       'Kontrak diaudit dan disahkan secara formal untuk laluan teras protokol.',
-      'Reka bentuk trust-minimized berasaskan data Tron sebagai sumber kebenaran.',
+      'Reka bentuk kepercayaan minimum berasaskan data Tron sebagai sumber kebenaran.',
     ],
     ctaLabel: 'Baca nota keselamatan teknikal',
   },
@@ -233,4 +235,3 @@ export const landing: LandingDictionary = {
     github: 'https://github.com/ultrasoundlabs',
   },
 };
-

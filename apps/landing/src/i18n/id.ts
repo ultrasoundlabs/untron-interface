@@ -4,17 +4,17 @@ export const landing: LandingDictionary = {
   localeCode: 'id',
   localeName: 'Bahasa Indonesia',
   meta: {
-    title: 'Untron | Bridge Stablecoin Tron <-> EVM Non-kustodial',
+    title: 'Untron | Bridge stablecoin Tron <-> EVM tanpa kustodi',
     description:
-      'Bridge USDT dan USDC antara Tron dan chain EVM utama dengan UX tanpa gas, biaya rendah, dan smart contract yang diaudit.',
+      'Bridge USDT dan USDC antara Tron dan jaringan EVM utama dengan UX tanpa gas, biaya rendah, dan smart contract yang diaudit.',
     keywords:
       'bridge tron, bridge usdt, bridge usdc, tron ke evm, non-kustodial bridge, stablecoin bridge, web3 bridge',
     ogTitle: 'Untron | Bridge Tron <-> EVM Non-kustodial',
     ogDescription:
-      'Pindahkan stablecoin antara Tron dan chain EVM tanpa bergantung pada exchange terpusat.',
+      'Pindahkan stablecoin antara Tron dan jaringan EVM tanpa bergantung pada exchange terpusat.',
     twitterTitle: 'Untron | Bridge stablecoin Tron <-> EVM',
     twitterDescription:
-      'UX tanpa gas, biaya rendah, dan desain trust-minimized untuk memindahkan USDT dan USDC antar chain.',
+      'UX tanpa gas, biaya rendah, dan desain minim kepercayaan untuk memindahkan USDT dan USDC antar jaringan.',
   },
   nav: {
     brand: 'Untron',
@@ -34,9 +34,9 @@ export const landing: LandingDictionary = {
   },
   hero: {
     eyebrow: 'Bridge stablecoin non-kustodial',
-    title: 'Pindahkan USDT dan USDC antara Tron dan chain EVM tanpa risiko exchange.',
+    title: 'Pindahkan USDT dan USDC antara Tron dan jaringan EVM tanpa risiko exchange.',
     description:
-      'Kirim stablecoin dari Tron ke Ethereum, Arbitrum, Base, dan chain EVM lainnya dalam hitungan menit.',
+      'Kirim stablecoin dari Tron ke Ethereum, Arbitrum, Base, dan jaringan EVM lainnya dalam hitungan menit.',
     supportingLine:
       'Tanpa akun CEX. Tanpa penyerahan kustodi. Rute jelas dan eksekusi dapat diprediksi.',
     routePreviewLabel: 'Pratinjau rute',
@@ -46,9 +46,9 @@ export const landing: LandingDictionary = {
     swapReceiveLabel: 'Anda terima',
     swapFlipLabel: 'Balik arah',
     swapMaxLabel: 'MAX',
-    swapQuoteLoading: 'Mengambil quote live...',
-    swapQuoteReady: 'Quote diperbarui',
-    swapQuoteError: 'Gagal memuat quote',
+    swapQuoteLoading: 'Mengambil kuotasi langsung...',
+    swapQuoteReady: 'Kuotasi diperbarui',
+    swapQuoteError: 'Gagal memuat kuotasi',
     swapRateLabel: 'Kurs',
     swapFeeLabel: 'Biaya bridge',
     swapOpenBridgeLabel: 'Buka di Bridge',
@@ -78,41 +78,44 @@ export const landing: LandingDictionary = {
       {
         label: 'Bisnis',
         title: 'Rebalance likuiditas secepat pasar',
-        description: 'Pindahkan volume antara Tron dan EVM dengan lebih sedikit ketergantungan dibanding jalur CEX.',
+        description:
+          'Pindahkan volume antara Tron dan EVM dengan lebih sedikit ketergantungan dibanding infrastruktur CEX.',
         ctaLabel: 'Hubungi kami',
         ctaHref: 'mailto:contact@untron.finance',
       },
       {
-        label: 'Developer',
+        label: 'Pengembang',
         title: 'Integrasi dengan satu API + satu panggilan kontrak',
         description:
           'Gunakan API hosted atau self-host. Dibuat untuk pembayaran dan produk treasury onchain.',
-        ctaLabel: 'Baca docs',
+        ctaLabel: 'Baca dokumentasi',
         ctaHref: 'https://docs.untron.finance',
       },
     ],
   },
   howItWorks: {
     title: 'Cara kerja',
-    subtitle: 'Tiga langkah dari chain sumber ke chain tujuan.',
+    subtitle: 'Tiga langkah dari jaringan sumber ke jaringan tujuan.',
     steps: [
       {
         title: '1. Pilih rute dan jumlah',
-        description: 'Pilih sumber, tujuan, dan jumlah. Anda dapat quote sebelum eksekusi.',
+        description: 'Pilih sumber, tujuan, dan jumlah. Anda mendapat kuotasi sebelum eksekusi.',
       },
       {
         title: '2. Kirim sekali dari wallet Anda',
-        description: 'Konfirmasi sekali. Untron memvalidasi state onchain dan menjalankan alur settlement.',
+        description:
+          'Konfirmasi sekali. Untron memvalidasi status onchain dan menjalankan alur penyelesaian.',
       },
       {
         title: '3. Terima di chain tujuan',
-        description: 'Dana masuk ke wallet tujuan dengan status yang jelas dan tanpa langkah kustodi tersembunyi.',
+        description:
+          'Dana masuk ke wallet tujuan dengan status yang jelas dan tanpa langkah kustodi tersembunyi.',
       },
     ],
   },
   fees: {
     title: 'Ringkasan biaya',
-    subtitle: 'Perbandingan perkiraan untuk bridging $100. Quote live selalu jadi prioritas.',
+    subtitle: 'Perbandingan perkiraan untuk bridging $100. Kuotasi langsung selalu jadi acuan.',
     amountLabel: 'Contoh rute $100',
     columns: {
       service: 'Layanan',
@@ -148,15 +151,15 @@ export const landing: LandingDictionary = {
       },
     ],
     footnote:
-      'Angka ini contoh arah, bukan janji. Periksa quote live di bridge sebelum mengirim.',
+      'Angka ini hanya contoh arah, bukan janji. Periksa kuotasi langsung di Bridge sebelum mengirim.',
     focusTitle: 'Keunggulan eksekusi',
     focusBullets: [
       'Non-kustodial sejak awal',
       'UX bridge dioptimalkan agar minim hambatan',
       'Settlement lintas chain dengan status yang jelas',
-      'Tanpa bergantung pada jalur akun terpusat',
+      'Tanpa bergantung pada akun dan infrastruktur terpusat',
     ],
-    focusCta: 'Buka quote live',
+    focusCta: 'Buka kuotasi langsung',
   },
   chains: {
     title: 'Aset dan jaringan yang didukung',
@@ -164,7 +167,7 @@ export const landing: LandingDictionary = {
     stablecoinsLabel: 'Stablecoin',
     stablecoins: ['USDT', 'USDC'],
     networksLabel: 'Jaringan',
-    networkCountSuffix: 'chain aktif',
+    networkCountSuffix: 'jaringan aktif',
     networks: ['Tron', 'Ethereum', 'Arbitrum', 'Optimism', 'Base', 'BNB Chain', 'dan lainnya'],
     walletsLabel: 'Wallet apa pun',
     exchangesLabel: 'Exchange apa pun',
@@ -177,7 +180,7 @@ export const landing: LandingDictionary = {
     bullets: [
       'Arsitektur non-kustodial dengan wallet yang dikendalikan pengguna.',
       'Kontrak diaudit dan diverifikasi formal untuk jalur inti protokol.',
-      'Desain trust-minimized dengan data Tron sebagai sumber kebenaran.',
+      'Desain minim kepercayaan dengan data Tron sebagai sumber kebenaran.',
     ],
     ctaLabel: 'Baca catatan keamanan teknis',
   },
@@ -202,14 +205,14 @@ export const landing: LandingDictionary = {
       {
         question: 'Bisa bridging jumlah besar seperti treasury?',
         answer:
-          'Bisa. Bisnis memakai Untron untuk rebalance besar. Cek quote live dan limit rute di aplikasi sebelum eksekusi jumlah besar.',
+          'Bisa. Bisnis memakai Untron untuk rebalance besar. Cek kuotasi langsung dan limit rute di aplikasi sebelum eksekusi jumlah besar.',
       },
     ],
   },
   finalCta: {
     title: 'Siap bridging?',
     description:
-      'Buka aplikasi untuk mendapatkan quote live dan memindahkan stablecoin antara Tron dan chain EVM sekarang juga.',
+      'Buka aplikasi untuk mendapatkan kuotasi langsung dan memindahkan stablecoin antara Tron dan jaringan EVM sekarang juga.',
     buttonLabel: 'Buka Bridge App',
   },
   footer: {
@@ -233,4 +236,3 @@ export const landing: LandingDictionary = {
     github: 'https://github.com/ultrasoundlabs',
   },
 };
-
