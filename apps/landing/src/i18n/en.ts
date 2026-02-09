@@ -1,146 +1,229 @@
-// src/i18n/en.ts
-export const landing = {
-  // Meta
-  metaTitle: 'Untron – Non-custodial stablecoin bridge between Tron and EVM chains',
-  metaDescription:
-    'Untron is a non-custodial stablecoin bridge between Tron (TRC-20) and major EVM chains. Bridge USDT and USDC with gasless UX, low fees, and a trust-minimized, audited design.',
-  ogTitle: 'Untron – Tron ↔ EVM stablecoin bridge',
-  ogDescription:
-    'Move stablecoins between Tron and EVM chains with a gasless, non-custodial bridge. Cheaper than centralized and decentralized alternatives.',
+import type { LandingDictionary } from './types';
 
-  // Header / navigation
-  navBrand: 'Untron',
-  navIntegrate: 'Integrate',
-  navFees: 'Fees',
-  navChains: 'Supported chains',
-  navSecurity: 'Security',
-  navFaq: 'FAQ',
-  navBlog: 'Blog',
-  navGoToApp: 'Go to app',
-  languageSwitcherLabel: 'Change language',
-
-  // Hero
-  heroEyebrow: 'Non-custodial stablecoin bridge',
-  heroTitle: 'Non-custodial stablecoin bridge between Tron and EVM chains',
-  heroParagraph1:
-    'Untron is a cross-chain protocol for moving stablecoins between Tron (TRC-20) and major EVM networks. Bridge USDT and USDC from Tron to Ethereum, Arbitrum, Base, and more with gasless UX, low fees, and a trust-minimized design.',
-  heroParagraph2: 'Never touch Tron again — but keep your TRC-20 payments.',
-  heroCta: 'Try it out',
-
-  // For stablecoin users
-  forUsersHeading: 'For stablecoin users: bridge USDT and USDC between Tron and EVM',
-  forUsersParagraph1:
-    'Untron is a web-based platform you can use from any exchange or wallet to send stablecoins between Tron (TRC-20) and dozens of popular EVM chains. It’s gasless for end users — you don’t need ETH, TRX, or BNB to use it — and it’s incredibly cheap.',
-  forUsersParagraph2:
-    'For example, swapping USDT to a Tron address is exactly $2 (just gas fees) without any additional fees — about twice as cheap as sending USDT directly on Tron.',
-  forUsersParagraph3:
-    'In short, Untron connects cheap and convenient EVM chains to Tron’s vast payments ecosystem, letting you benefit from both.',
-  forUsersCta: 'Try Untron',
-
-  // For businesses
-  forBusinessesHeading:
-    'For businesses: rebalance stablecoin liquidity between Tron and EVM at scale',
-  forBusinessesParagraph1:
-    'From payment merchants and rails to OTC desks and Argentinian cuevas, Untron is the way to rebalance stablecoin liquidity across chains worldwide. Move millions of dollars in minutes between Tron and EVM chains, without relying on centralized exchanges.',
-  forBusinessesParagraph2:
-    'Fully audited contracts and a trust-minimized design ensure that funds can be bridged with no arbitrary limits or restrictions.',
-  forBusinessesCtaBridgeNow: 'Bridge now',
-  forBusinessesCtaComparison: 'Comparison with alternatives',
-  forBusinessesCtaTalkToUs: 'Talk to us',
-
-  // Developers / integration
-  forDevelopersHeading: 'For developers: integrate Untron with one API call',
-  forDevelopersParagraph1:
-    'Integrating Untron into your product is as simple as a single API call and a smart contract transaction. Our hosted, free APIs are open-source and can be self-hosted for maximum control.',
-  forDevelopersParagraph2:
-    'Untron V3 and Untron Intents smart contracts have been audited and formally verified by Ultrasound Labs. Both use a ZK-based Tron light client design as the source of truth, making Untron one of the most trust-minimized stablecoin bridges in the ecosystem.',
-  forDevelopersCtaDocs: 'Read the docs',
-  forDevelopersCtaTalkToUs: 'Talk to us',
-
-  // Fees & pricing
-  feesHeading: 'Fees & pricing',
-  feesIntro:
-    'Untron is free to integrate and self-host. The examples below are approximate and may change over time; always check current rates in the app.',
-
-  feesTronToEvmHeading: 'Swapping $100 from Tron to an EVM chain',
-  feesTronToEvmNote: 'Includes TRX gas fees, if applicable.',
-  feesTableService: 'Service',
-  feesTableReceived: 'Received amount (approx.)',
-  feesRowUntronTronToEvm: 'Untron',
-  feesRowUntronTronToEvmValue: '$99.90 (0.10%)',
-  feesRowFixedFloat: 'FixedFloat',
-  feesRowFixedFloatValue: '$98.50 (~1.5%)',
-  feesRowChangeNow: 'ChangeNOW',
-  feesRowChangeNowValue: '$98.50 (~1.5%)',
-  feesRowSymbiosis: 'Symbiosis',
-  feesRowSymbiosisValue: '$94.00 (0.30% + gas fees)*',
-  feesRowBridgers: 'Bridgers',
-  feesRowBridgersValue: '$94.00 (0.30% + gas fees)*',
-  feesFootnote1:
-    '* Most decentralized bridges like Symbiosis and Bridgers require a smart contract call on Tron, which costs around $5 in TRX gas fees. FixedFloat and ChangeNOW are centralized exchanges and do not require that call.',
-  feesFootnote2:
-    'Untron is the only decentralized bridge that doesn’t require Tron smart contract calls, can be used from any exchange or wallet, and is cheaper than both centralized and decentralized alternatives.',
-
-  feesEvmToTronHeading: 'Swapping $100 from an EVM chain to Tron',
-  feesRowUntronEvmToTron: 'Untron',
-  feesRowUntronEvmToTronValue: '$98.00 (fee-free into Tron)*',
-  feesRowSymbiosisEvmToTronValue: '$90.00 (0.30% + gas fees)',
-  feesRowBridgersEvmToTronValue: '$90.00 (0.30% + gas fees)',
-  feesFootnote3:
-    '* Untron does not charge bridging fees for swapping into Tron USDT and optimizes gas usage on Tron, making it twice as cheap as a normal Tron USDT transfer — practical even for daily transfers to Tron users.',
-
-  // Supported assets / chains
-  chainsHeading: 'Supported stablecoins and EVM chains',
-  chainsStablecoinsHeading: 'Stablecoins',
-  chainsStablecoinUsdt: 'USDT (TRC-20, ERC-20, and supported EVM deployments)',
-  chainsStablecoinUsdc: 'USDC (where available)',
-  chainsNetworksHeading: 'EVM networks',
-  chainsNetworkEthereum: 'Ethereum',
-  chainsNetworkArbitrum: 'Arbitrum',
-  chainsNetworkOptimism: 'Optimism',
-  chainsNetworkBase: 'Base',
-  chainsNetworkBnb: 'BNB Chain',
-  chainsNetworkMore: '…and more',
-  chainsParagraph:
-    'Untron’s fee structure is consistent across chains and routes, keeping transactions affordable and easy to reason about, no matter where your crypto is.',
-
-  // Security
-  securityHeading: 'Security',
-  securityParagraph1:
-    'Untron is a non-custodial Tron ↔ EVM stablecoin bridge. Our protocols read the Tron blockchain in real time as the source of truth, so funds only leave your possession if the Tron blockchain has processed the transaction you requested.',
-  securityParagraph2:
-    'Our smart contracts have been audited and formally verified by Ultrasound Labs and are built around a ZK-based Tron light client. This makes Untron the gold standard of trust-minimized bridging solutions not just in Tron, but the entire bridging ecosystem.',
-  securityCtaTechnical: 'Read more (technical)',
-
-  // FAQ
-  faqHeading: 'FAQ',
-  faqIsNonCustodialQuestion: 'Is Untron non-custodial?',
-  faqIsNonCustodialAnswer:
-    'Yes. Untron never holds your private keys. All transfers are executed via your wallet and Untron smart contracts; you remain in control of your funds at all times.',
-  faqGasQuestion: 'Do I need TRX or ETH gas to use Untron?',
-  faqGasAnswer:
-    'End-user experience is gasless. Untron abstracts gas costs on supported routes so you can bridge stablecoins without pre-funding TRX or ETH.',
-  faqIsKycRequiredQuestion: 'Is KYC required to use Untron?',
-  faqIsKycRequiredAnswer:
-    'No. Untron is a non-custodial bridge and does not require KYC. You can bridge stablecoins without any identity verification.',
-  faqAvailableCountriesQuestion: 'Which countries is Untron available in?',
-  faqAvailableCountriesAnswer:
-    'Untron’s decentralized protocols have no idea what country you’re in. Our official interface (website) for using Untron does not impose additional restrictions, so you should be able to use it from anywhere in the world.',
-  faqWhatAmountsAreSafeQuestion: 'What amounts are safe to bridge?',
-  faqWhatAmountsAreSafeAnswer:
-    'Untron is designed to be safe for all amounts. Additionally, our interface automatically limits the maximum amount, so it’s impossible to enter an amount that would exceed the platform’s capacity.',
-
-  // Blog
-  blogHeading: 'From the Untron blog',
-  blogArticle1: 'Article 1',
-  blogArticle2: 'Article 2',
-  blogArticle3: 'Article 3',
-
-  // Footer
-  footerCopyright: '© Untron. All rights reserved.',
-  footerLinkTerms: 'Terms',
-  footerLinkPrivacy: 'Privacy',
-  footerLinkDocs: 'Docs',
-  footerLinkDiscord: 'Discord',
-  footerLinkX: 'X (Twitter)',
+export const landing: LandingDictionary = {
+  localeCode: 'en',
+  localeName: 'English',
+  meta: {
+    title: 'Untron | Non-custodial Tron <-> EVM Stablecoin Bridge',
+    description:
+      'Bridge USDT and USDC between Tron and major EVM chains with gasless UX, low fees, and audited smart contracts.',
+    keywords:
+      'tron bridge, usdt bridge, usdc bridge, tron to evm, non-custodial bridge, stablecoin bridge, web3 bridge',
+    ogTitle: 'Untron | Non-custodial Tron <-> EVM bridge',
+    ogDescription:
+      'Move stablecoins between Tron and EVM chains without relying on centralized exchanges.',
+    twitterTitle: 'Untron | Tron <-> EVM stablecoin bridge',
+    twitterDescription:
+      'Gasless UX, low fees, and trust-minimized contracts for moving USDT and USDC between chains.',
+  },
+  nav: {
+    brand: 'Untron',
+    productsLabel: 'Products',
+    productBridge: 'Bridge',
+    productV3: 'V3',
+    productIntegrate: 'Integrate',
+    sectionsLabel: 'Sections',
+    sectionHowItWorks: 'How it works',
+    sectionFees: 'Fees',
+    sectionSecurity: 'Security',
+    sectionFaq: 'FAQ',
+    openApp: 'Open app',
+    languageLabel: 'Language',
+    toggleThemeLabel: 'Toggle color theme',
+  },
+  hero: {
+    eyebrow: 'Non-custodial stablecoin bridge',
+    title: 'Move USDT and USDC between Tron and EVM chains without exchange risk.',
+    description:
+      'Send stablecoins from Tron to Ethereum, Arbitrum, Base, and other EVM chains in minutes.',
+    supportingLine: 'No CEX account. No custody handoff. Clear routes and predictable execution.',
+    routePreviewLabel: 'Route preview',
+    routeSourceLabel: 'From',
+    routeDestinationLabel: 'To',
+    swapSendLabel: 'You send',
+    swapReceiveLabel: 'You receive',
+    swapMaxLabel: 'MAX',
+    swapQuoteLoading: 'Getting live quote...',
+    swapQuoteReady: 'Live quote updated',
+    swapQuoteError: 'Could not load quote',
+    swapRateLabel: 'Rate',
+    swapFeeLabel: 'Bridge fee',
+    swapOpenBridgeLabel: 'Open in Bridge',
+    primaryCta: 'Start bridging',
+    secondaryCta: 'See fee comparison',
+  },
+  stats: [
+    { value: '0 custody', label: 'You keep wallet control end to end' },
+    { value: 'Gasless UX', label: 'No pre-funding TRX or ETH for supported routes' },
+    { value: 'Audited', label: 'Contracts reviewed and formally verified' },
+  ],
+  audiences: {
+    title: 'Built for real stablecoin workflows',
+    subtitle:
+      'Retail transfers, liquidity rebalancing, and product integrations all use the same simple flow.',
+    cards: [
+      {
+        label: 'Users',
+        title: 'Bridge from any exchange or wallet',
+        description: 'Move stablecoins across chains without juggling apps or gas tokens.',
+        ctaLabel: 'Open bridge',
+        ctaHref: 'https://bridge.untron.finance',
+      },
+      {
+        label: 'Businesses',
+        title: 'Rebalance liquidity at market speed',
+        description: 'Move size between Tron and EVM with fewer dependencies than CEX rails.',
+        ctaLabel: 'Talk to us',
+        ctaHref: 'mailto:contact@untron.finance',
+      },
+      {
+        label: 'Developers',
+        title: 'Integrate with one API + one contract call',
+        description:
+          'Use hosted APIs or self-host. Built for payments and onchain treasury products.',
+        ctaLabel: 'Read docs',
+        ctaHref: 'https://docs.untron.finance',
+      },
+    ],
+  },
+  howItWorks: {
+    title: 'How it works',
+    subtitle: 'Three steps from source chain to destination chain.',
+    steps: [
+      {
+        title: '1. Pick route and amount',
+        description: 'Choose source, destination, and amount. You get a quote before execution.',
+      },
+      {
+        title: '2. Send once from your wallet',
+        description: 'Confirm once. Untron validates chain state and runs the settlement flow.',
+      },
+      {
+        title: '3. Receive on destination chain',
+        description:
+          'Funds arrive to destination wallet with clear status and no hidden custody step.',
+      },
+    ],
+  },
+  fees: {
+    title: 'Fee snapshot',
+    subtitle: 'Approximate comparison for bridging $100. Live quotes always take priority.',
+    amountLabel: '$100 example route',
+    columns: {
+      service: 'Service',
+      received: 'Received amount',
+      notes: 'Notes',
+    },
+    rows: [
+      {
+        service: 'Untron',
+        received: '$99.90',
+        notes: 'Non-custodial flow, optimized routing',
+        isUntron: true,
+      },
+      {
+        service: 'FixedFloat',
+        received: '$98.50',
+        notes: 'Centralized exchange model',
+      },
+      {
+        service: 'ChangeNOW',
+        received: '$98.50',
+        notes: 'Centralized exchange model',
+      },
+      {
+        service: 'Symbiosis',
+        received: '$94.00',
+        notes: 'Additional Tron-side contract gas overhead',
+      },
+      {
+        service: 'Bridgers',
+        received: '$94.00',
+        notes: 'Additional Tron-side contract gas overhead',
+      },
+    ],
+    footnote:
+      'Figures are directional examples, not a promise. Check the live quote in the bridge before sending.',
+    focusTitle: 'Execution advantages',
+    focusBullets: [
+      'Non-custodial by design',
+      'Bridge UX optimized for low friction',
+      'Cross-chain settlement with clear status',
+      'No dependency on centralized account rails',
+    ],
+    focusCta: 'Open live quote',
+  },
+  chains: {
+    title: 'Supported assets and networks',
+    subtitle: 'Coverage for stablecoins, chains, and wallet entry points.',
+    stablecoinsLabel: 'Stablecoins',
+    stablecoins: ['USDT', 'USDC'],
+    networksLabel: 'Networks',
+    networkCountSuffix: 'chains live',
+    networks: ['Tron', 'Ethereum', 'Arbitrum', 'Optimism', 'Base', 'BNB Chain', 'and more'],
+    walletsLabel: 'Any wallet',
+    exchangesLabel: 'Any exchange',
+    moreLabel: 'and more',
+    walletsNote: 'Deep links and browser wallets supported for smooth connect flow.',
+  },
+  security: {
+    title: 'Security posture',
+    subtitle: 'Settlement logic is anchored to chain state rather than operator discretion.',
+    bullets: [
+      'Non-custodial architecture with user-controlled wallets.',
+      'Audited and formally verified contracts for core protocol paths.',
+      'Trust-minimized design anchored to Tron chain data as source of truth.',
+    ],
+    ctaLabel: 'Read technical security notes',
+  },
+  faq: {
+    title: 'FAQ',
+    items: [
+      {
+        question: 'Do I need a centralized exchange account?',
+        answer:
+          'No. Untron is built for wallet-native bridging between chains, so you can transfer without moving through a CEX account.',
+      },
+      {
+        question: 'Is KYC required?',
+        answer:
+          'The protocol itself does not require KYC because it is non-custodial. Always verify your local compliance requirements.',
+      },
+      {
+        question: 'Do I need TRX or ETH to start?',
+        answer:
+          'Supported routes are optimized for gasless user experience, so pre-funding network gas is often unnecessary.',
+      },
+      {
+        question: 'Can I bridge larger treasury-sized amounts?',
+        answer:
+          'Yes. Businesses use Untron for large rebalancing flows. Use live quotes and route limits in the app before executing size.',
+      },
+    ],
+  },
+  finalCta: {
+    title: 'Ready to bridge?',
+    description:
+      'Open the app to get a live quote and move stablecoins between Tron and EVM chains right now.',
+    buttonLabel: 'Open Bridge App',
+  },
+  footer: {
+    tagline: 'Stablecoin liquidity across chains, without custody handoffs.',
+    legal: 'All rights reserved.',
+    linksLabel: 'Quick links',
+    terms: 'Terms',
+    privacy: 'Privacy',
+    docs: 'Docs',
+    contact: 'Contact',
+  },
+  links: {
+    bridgeApp: 'https://bridge.untron.finance',
+    v3Dashboard: 'https://v3.untron.finance',
+    docs: 'https://docs.untron.finance',
+    securityDocs: 'https://docs.untron.finance',
+    contactEmail: 'mailto:contact@untron.finance',
+    x: 'https://x.com/untronfi',
+    telegram: 'https://t.me/untronchat',
+    github: 'https://github.com/ultrasoundlabs',
+  },
 };

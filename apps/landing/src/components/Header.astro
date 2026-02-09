@@ -1,52 +1,146 @@
 ---
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { locales } from '../i18n/locales.js';
+import type { LandingDictionary } from '../i18n/types';
 
 interface Props {
-  t: Record<string, string>;
+  t: LandingDictionary;
 }
 
 const { t } = Astro.props as Props;
-const languages = locales;
+
+const currentLocale = Astro.currentLocale ?? t.localeCode;
+const languageFlagByCode: Record<string, string> = {
+  en: '🇺🇸',
+  es: '🇪🇸',
+};
+const currentLanguageFlag = languageFlagByCode[currentLocale] ?? '🌐';
+
+const bridgeUrl = import.meta.env.PUBLIC_BRIDGE_URL ?? t.links.bridgeApp;
+const v3Url = import.meta.env.PUBLIC_V3_URL ?? t.links.v3Dashboard;
+const docsUrl = import.meta.env.PUBLIC_DOCS_URL ?? t.links.docs;
+
+const productLinks = [
+  { id: 'bridge', label: t.nav.productBridge, href: bridgeUrl, external: true },
+  { id: 'v3', label: t.nav.productV3, href: v3Url, external: true },
+  { id: 'integrate', label: t.nav.productIntegrate, href: docsUrl, external: true },
+];
+
+const sectionLinks = [
+  { id: 'how-it-works', label: t.nav.sectionHowItWorks },
+  { id: 'fees', label: t.nav.sectionFees },
+  { id: 'security', label: t.nav.sectionSecurity },
+  { id: 'faq', label: t.nav.sectionFaq },
+];
 ---
 
-<header>
-  <nav aria-label="Main navigation">
-    <a href={getRelativeLocaleUrl(Astro.currentLocale ?? 'en', '')}>{t.navBrand}</a>
+<header class="site-header" data-site-header>
+  <div class="container header-row">
+    <a class="brand" href={getRelativeLocaleUrl(currentLocale, '')} aria-label={t.nav.brand}>
+      <img class="brand-full" src="/logos/untron/full.svg" alt="Untron" width="196" height="48" />
+      <img
+        class="brand-icon"
+        src="/logos/untron/icon.svg"
+        alt=""
+        aria-hidden="true"
+        width="40"
+        height="40"
+      />
+    </a>
 
-    <ul>
-      <li>
-        <a href="#integrate">{t.navIntegrate}</a>
-      </li>
-      <li>
-        <a href="#fees">{t.navFees}</a>
-      </li>
-      <li>
-        <a href="#chains">{t.navChains}</a>
-      </li>
-      <li>
-        <a href="#security">{t.navSecurity}</a>
-      </li>
-      <li>
-        <a href="#faq">{t.navFaq}</a>
-      </li>
-      <li>
-        <a href="https://blog.untron.finance">{t.navBlog}</a>
-      </li>
-    </ul>
+    <div class="header-center">
+      <nav class="product-nav" aria-label={t.nav.productsLabel}>
+        {
+          productLinks.map((item, index) => (
+            <>
+              {index > 0 && <span class="product-separator">&#183;</span>}
+              <a
+                class="product-link"
+                href={item.href}
+                target={item.external ? '_blank' : undefined}
+                rel={item.external ? 'noreferrer noopener' : undefined}
+              >
+                {item.label}
+              </a>
+            </>
+          ))
+        }
+      </nav>
 
-    <div>
+      <nav class="section-nav" aria-label={t.nav.sectionsLabel}>
+        {
+          sectionLinks.map((item) => (
+            <a class="section-link" href={`#${item.id}`}>
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+
+    <div class="header-actions">
+      <button
+        class="theme-toggle"
+        type="button"
+        data-theme-toggle
+        aria-label={t.nav.toggleThemeLabel}
+        title={t.nav.toggleThemeLabel}
+      >
+        <svg
+          class="theme-icon theme-icon-sun"
+          data-theme-icon-sun
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+          hidden
+        >
+          <path
+            d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </svg>
+        <svg
+          class="theme-icon theme-icon-moon"
+          data-theme-icon-moon
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M21.752 15.002a.75.75 0 0 0-.906-.97 8.218 8.218 0 0 1-2.846.486c-4.694 0-8.5-3.806-8.5-8.5 0-1.021.183-2.003.518-2.913a.75.75 0 0 0-.889-.986A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
+          ></path>
+        </svg>
+      </button>
+
       {
-        languages.length > 1 && (
-          <details>
-            <summary>🌐 {t.languageSwitcherLabel}</summary>
+        locales.length > 1 && (
+          <details class="language-switcher">
+            <summary aria-label={t.nav.languageLabel} title={t.nav.languageLabel}>
+              <span class="language-flag" aria-hidden="true">
+                {currentLanguageFlag}
+              </span>
+              <svg class="language-caret" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M19 9 12 16 5 9"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </summary>
             <ul>
-              {languages.map((lang) => (
+              {locales.map((lang) => (
                 <li>
                   <a
-                    href={getRelativeLocaleUrl(lang.code)}
-                    aria-current={Astro.currentLocale === lang.code ? 'page' : undefined}
+                    href={getRelativeLocaleUrl(lang.code, '')}
+                    aria-current={currentLocale === lang.code ? 'page' : undefined}
                   >
+                    <span class="language-option-flag" aria-hidden="true">
+                      {languageFlagByCode[lang.code] ?? '🌐'}
+                    </span>
                     {lang.label}
                   </a>
                 </li>
@@ -55,9 +149,10 @@ const languages = locales;
           </details>
         )
       }
-      <a href="https://bridge.untron.finance" aria-label={t.navGoToApp}>
-        {t.navGoToApp}
+
+      <a class="btn btn-primary btn-sm" href={bridgeUrl} target="_blank" rel="noreferrer noopener">
+        {t.nav.openApp}
       </a>
     </div>
-  </nav>
+  </div>
 </header>

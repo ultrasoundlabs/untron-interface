@@ -1,43 +1,262 @@
 ---
-import Header from '../components/Header.astro';
 import { getAbsoluteLocaleUrl } from 'astro:i18n';
+import Header from '../components/Header.astro';
 import { locales } from '../i18n/locales.js';
+import type { LandingDictionary } from '../i18n/types';
+import '../styles/site.css';
 
 interface Props {
-  t: Record<string, string>;
+  t: LandingDictionary;
 }
 
 const { t } = Astro.props as Props;
 
-// Build list of { code, url } for hreflang
+const site = Astro.site ?? new URL('https://untron.finance');
+const canonicalUrl = new URL(Astro.url.pathname, site).toString();
+const ogImageUrl = new URL('/og-image.svg', site).toString();
+const bridgeUrl = import.meta.env.PUBLIC_BRIDGE_URL ?? t.links.bridgeApp;
+
 const hreflangs = locales.map((locale) => ({
   code: locale.code,
-  url: getAbsoluteLocaleUrl(locale.code),
+  url: getAbsoluteLocaleUrl(locale.code, ''),
 }));
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Untron',
+  url: site.toString(),
+  logo: new URL('/logos/untron/icon.svg', site).toString(),
+  sameAs: [t.links.x, t.links.telegram, t.links.github],
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Untron',
+  url: site.toString(),
+  inLanguage: t.localeCode,
+};
+
+const appSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Untron Bridge',
+  operatingSystem: 'Web',
+  applicationCategory: 'FinanceApplication',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  url: bridgeUrl,
+  description: t.meta.description,
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: t.faq.items.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+};
+
+const jsonLdBlocks = [organizationSchema, websiteSchema, appSchema, faqSchema];
+
+const ogLocale = t.localeCode === 'es' ? 'es_ES' : 'en_US';
 ---
 
 <!doctype html>
-<html lang={Astro.currentLocale ?? 'en'}>
+<html lang={t.localeCode}>
   <head>
     <meta charset="utf-8" />
-    <title>{t.metaTitle}</title>
-    <meta name="description" content={t.metaDescription} />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Canonical URL -->
-    <link rel="canonical" href={Astro.url.href} />
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('theme');
+          const pref =
+            stored === 'dark' || stored === 'light' || stored === 'system' ? stored : 'light';
+          const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+          const isDark = pref === 'dark' || (pref === 'system' && media && media.matches);
+          document.documentElement.classList.toggle('dark', isDark);
+          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+        } catch {
+          // no-op
+        }
+      })();
+    </script>
 
-    <!-- Open Graph / social preview -->
-    <meta property="og:title" content={t.ogTitle} />
-    <meta property="og:description" content={t.ogDescription} />
-    <meta property="og:image" content="https://untron.finance/og-image.png" />
-    <meta property="og:url" content={Astro.url.href} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+
+    <title>{t.meta.title}</title>
+    <meta name="description" content={t.meta.description} />
+    <meta name="keywords" content={t.meta.keywords} />
+    <meta
+      name="robots"
+      content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
+    />
+
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" href="/logos/untron/icon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Untron" />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:title" content={t.meta.ogTitle} />
+    <meta property="og:description" content={t.meta.ogDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@untronfi" />
+    <meta name="twitter:title" content={t.meta.twitterTitle} />
+    <meta name="twitter:description" content={t.meta.twitterDescription} />
+    <meta name="twitter:image" content={ogImageUrl} />
 
     {hreflangs.map((entry) => <link rel="alternate" hreflang={entry.code} href={entry.url} />)}
     {hreflangs.length > 0 && <link rel="alternate" hreflang="x-default" href={hreflangs[0].url} />}
+
+    {
+      jsonLdBlocks.map((schema) => (
+        <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+      ))
+    }
   </head>
   <body>
+    <a class="skip-link" href="#main-content"> Skip to main content </a>
     <Header t={t} />
     <slot />
+
+    <script is:inline>
+      (() => {
+        const navEntry =
+          typeof performance !== 'undefined' && typeof performance.getEntriesByType === 'function'
+            ? performance.getEntriesByType('navigation')[0]
+            : null;
+        const navType = navEntry && 'type' in navEntry ? navEntry.type : '';
+        const shouldResetScroll =
+          !window.location.hash && (navType === 'navigate' || navType === 'reload');
+
+        if (shouldResetScroll) {
+          try {
+            if ('scrollRestoration' in history) {
+              history.scrollRestoration = 'manual';
+            }
+          } catch {
+            // no-op
+          }
+          window.scrollTo(0, 0);
+        }
+
+        const header = document.querySelector('[data-site-header]');
+        if (header) {
+          header.classList.remove('is-scrolled');
+        }
+
+        const syncHeaderState = () => {
+          if (!header) return;
+          const currentScroll = Math.max(
+            window.scrollY || 0,
+            document.documentElement?.scrollTop || 0,
+            document.body?.scrollTop || 0
+          );
+          header.classList.toggle('is-scrolled', currentScroll > 4);
+        };
+
+        const syncHeaderStateDeferred = () => {
+          syncHeaderState();
+          window.setTimeout(syncHeaderState, 50);
+          window.setTimeout(syncHeaderState, 150);
+          window.setTimeout(syncHeaderState, 350);
+        };
+
+        // Recompute after browser scroll restoration to avoid stale "scrolled" state on reload.
+        syncHeaderStateDeferred();
+        window.requestAnimationFrame(syncHeaderStateDeferred);
+        window.addEventListener('load', syncHeaderStateDeferred, { once: true });
+        window.addEventListener('pageshow', syncHeaderStateDeferred);
+        window.addEventListener('scroll', syncHeaderState, { passive: true });
+        window.addEventListener('resize', syncHeaderState, { passive: true });
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            syncHeaderState();
+          }
+        });
+        window.addEventListener('pagehide', () => {
+          try {
+            if ('scrollRestoration' in history) {
+              history.scrollRestoration = 'auto';
+            }
+          } catch {
+            // no-op
+          }
+        });
+
+        const root = document.documentElement;
+        const button = document.querySelector('[data-theme-toggle]');
+        const icon = document.querySelector('[data-theme-icon]');
+        const sunIcon = document.querySelector('[data-theme-icon-sun]');
+        const moonIcon = document.querySelector('[data-theme-icon-moon]');
+        const storageKey = 'theme';
+
+        const getStoredPreference = () => {
+          try {
+            const stored = localStorage.getItem(storageKey);
+            if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
+          } catch {
+            // no-op
+          }
+          return 'light';
+        };
+
+        const resolveTheme = (preference) => {
+          if (preference === 'system') {
+            return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light';
+          }
+          return preference;
+        };
+
+        const applyTheme = (preference, persist) => {
+          const resolved = resolveTheme(preference);
+          root.classList.toggle('dark', resolved === 'dark');
+          root.style.colorScheme = resolved;
+          if (sunIcon instanceof HTMLElement && moonIcon instanceof HTMLElement) {
+            sunIcon.hidden = resolved !== 'dark';
+            moonIcon.hidden = resolved === 'dark';
+          } else if (icon instanceof HTMLElement) {
+            icon.textContent = resolved === 'dark' ? '\u263C' : '\u25D0';
+          }
+
+          if (persist) {
+            try {
+              localStorage.setItem(storageKey, preference);
+            } catch {
+              // no-op
+            }
+          }
+        };
+
+        applyTheme(getStoredPreference(), false);
+
+        if (button) {
+          button.addEventListener('click', () => {
+            const next = root.classList.contains('dark') ? 'light' : 'dark';
+            applyTheme(next, true);
+          });
+        }
+      })();
+    </script>
   </body>
 </html>

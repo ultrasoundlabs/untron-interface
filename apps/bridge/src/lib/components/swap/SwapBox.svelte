@@ -1,11 +1,17 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { Button } from '@untron/ui/button';
 	import { m } from '$lib/paraglide/messages.js';
 	import { connection } from '$lib/wagmi/connectionStore';
 	import { TOKEN_METADATA, getChainById } from '$lib/config/swapConfig';
 	import { createSwapStore, setSwapStoreContext } from '$lib/stores/swapStore.svelte';
-	import type { EvmStablecoin, SwapValidationError, TokenChainBalance } from '$lib/types/swap';
+	import type {
+		EvmStablecoin,
+		SwapDirection,
+		SwapValidationError,
+		TokenChainBalance
+	} from '$lib/types/swap';
 	import { formatAtomicToDecimal } from '$lib/math/amounts';
 	import type { SwapServiceErrorCode } from '$lib/types/errors';
 	import { config as wagmiConfig } from '$lib/wagmi/config';
@@ -25,6 +31,15 @@
 	let showTokenDialog = $state(false);
 	let recipientTouched = $state(false);
 	let tokenDialogMode = $state<'evm' | 'tron'>('evm');
+	let pendingPrefill = $state<{
+		direction?: SwapDirection;
+		chainId?: number;
+		token?: EvmStablecoin;
+		tronToken?: EvmStablecoin;
+		amount?: string;
+		recipient?: string;
+	} | null>(null);
+	let prefillApplied = $state(false);
 
 	// User balances for EVM→Tron flow
 	let userBalances = $state<TokenChainBalance[]>([]);
@@ -292,6 +307,137 @@
 	function getPlaceholder(): string {
 		return '0.00';
 	}
+
+	function normalizePrefillAmount(raw: string): string | null {
+		const cleaned = raw.replace(/,/g, '');
+		if (!/^\d*\.?\d*$/.test(cleaned) || !/[0-9]/.test(cleaned)) {
+			return null;
+		}
+
+		const [wholePart = '', fractionPart = ''] = cleaned.split('.');
+		const normalizedWhole = wholePart.replace(/^0+(?=\d)/, '');
+		const normalizedFraction = fractionPart.slice(0, 18);
+
+		if (normalizedFraction.length > 0) {
+			return `${normalizedWhole || '0'}.${normalizedFraction}`;
+		}
+
+		return normalizedWhole || '0';
+	}
+
+	function parsePrefillFromSearch(search: string): {
+		direction?: SwapDirection;
+		chainId?: number;
+		token?: EvmStablecoin;
+		tronToken?: EvmStablecoin;
+		amount?: string;
+		recipient?: string;
+	} | null {
+		const params = new URLSearchParams(search);
+		const next: {
+			direction?: SwapDirection;
+			chainId?: number;
+			token?: EvmStablecoin;
+			tronToken?: EvmStablecoin;
+			amount?: string;
+			recipient?: string;
+		} = {};
+
+		const rawDirection = (params.get('direction') ?? params.get('dir') ?? '').toUpperCase();
+		if (rawDirection === 'TRON_TO_EVM' || rawDirection === 'EVM_TO_TRON') {
+			next.direction = rawDirection;
+		}
+
+		const rawChainId = params.get('chainId') ?? params.get('chain');
+		if (rawChainId) {
+			const parsedChainId = Number.parseInt(rawChainId, 10);
+			if (Number.isFinite(parsedChainId) && parsedChainId > 0) {
+				next.chainId = parsedChainId;
+			}
+		}
+
+		const rawToken = (params.get('token') ?? params.get('asset') ?? '').toUpperCase();
+		if (rawToken === 'USDT' || rawToken === 'USDC') {
+			next.token = rawToken;
+		}
+
+		const rawTronToken = (params.get('tronToken') ?? params.get('tron') ?? '').toUpperCase();
+		if (rawTronToken === 'USDT' || rawTronToken === 'USDC') {
+			next.tronToken = rawTronToken;
+		}
+
+		const rawAmount = params.get('amount');
+		if (rawAmount) {
+			const normalizedAmount = normalizePrefillAmount(rawAmount.trim());
+			if (normalizedAmount) {
+				next.amount = normalizedAmount;
+			}
+		}
+
+		const rawRecipient = params.get('recipient')?.trim();
+		if (rawRecipient && rawRecipient.length <= 128) {
+			next.recipient = rawRecipient;
+		}
+
+		return Object.keys(next).length > 0 ? next : null;
+	}
+
+	function applyPrefill(prefill: {
+		direction?: SwapDirection;
+		chainId?: number;
+		token?: EvmStablecoin;
+		tronToken?: EvmStablecoin;
+		amount?: string;
+		recipient?: string;
+	}) {
+		if (prefill.direction && prefill.direction !== swapStore.direction) {
+			swapStore.flipSides();
+			recipientTouched = false;
+		}
+
+		if (prefill.tronToken) {
+			swapStore.setTronTokenSymbol(prefill.tronToken);
+		}
+
+		if (prefill.chainId || prefill.token) {
+			const targetChainId = prefill.chainId ?? swapStore.evmChain.chainId;
+			const primaryToken = prefill.token ?? swapStore.evmToken.symbol;
+			const tokenCandidates: EvmStablecoin[] =
+				primaryToken === 'USDT' ? ['USDT', 'USDC'] : ['USDC', 'USDT'];
+
+			for (const candidate of tokenCandidates) {
+				swapStore.setEvmChainAndToken(targetChainId, candidate);
+				if (
+					swapStore.evmChain.chainId === targetChainId &&
+					swapStore.evmToken.symbol === candidate
+				) {
+					break;
+				}
+			}
+		}
+
+		if (prefill.amount) {
+			swapStore.setAmount(prefill.amount);
+		}
+
+		if (prefill.recipient) {
+			recipientTouched = true;
+			swapStore.setRecipient(prefill.recipient);
+		}
+	}
+
+	onMount(() => {
+		pendingPrefill = parsePrefillFromSearch(window.location.search);
+	});
+
+	$effect(() => {
+		if (prefillApplied) return;
+		if (swapStore.isLoadingCapabilities || !swapStore.capabilities) return;
+
+		prefillApplied = true;
+		if (!pendingPrefill) return;
+		applyPrefill(pendingPrefill);
+	});
 </script>
 
 <div class="mx-auto w-full max-w-md" in:fly={{ y: 20, duration: 300, delay: 100 }}>

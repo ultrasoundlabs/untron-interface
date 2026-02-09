@@ -1,207 +1,1608 @@
 ---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import type { LandingDictionary } from '../i18n/types';
+
 interface Props {
-  t: Record<string, string>;
+  t: LandingDictionary;
 }
 
 const { t } = Astro.props as Props;
+
+const bridgeUrl = import.meta.env.PUBLIC_BRIDGE_URL ?? t.links.bridgeApp;
+const docsUrl = import.meta.env.PUBLIC_DOCS_URL ?? t.links.docs;
+const securityUrl = import.meta.env.PUBLIC_DOCS_URL ?? t.links.securityDocs;
+const quoteApiBase =
+  import.meta.env.PUBLIC_UNTRON_BRIDGE_API_URL ?? 'https://api.untron.finance/bridge';
+const year = new Date().getFullYear();
+const localeHome = getRelativeLocaleUrl(Astro.currentLocale ?? t.localeCode, '');
+
+const supportedChainLogos = [
+  { name: 'Tron', src: '/logos/chains/tron.svg' },
+  { name: 'Ethereum', src: '/logos/chains/ethereum.svg' },
+  { name: 'Arbitrum One', src: '/logos/chains/arbitrum.svg' },
+  { name: 'Base', src: '/logos/chains/base.svg' },
+  { name: 'OP Mainnet', src: '/logos/chains/opmainnet.svg' },
+  { name: 'BNB Chain', src: '/logos/chains/bnb.svg' },
+  { name: 'Polygon', src: '/logos/chains/polygon.svg' },
+  { name: 'Avalanche C-Chain', src: '/logos/chains/avalanche.svg' },
+  { name: 'Plasma', src: '/logos/chains/plasma.svg' },
+  { name: 'Mantle', src: '/logos/chains/mantle.svg' },
+  { name: 'Monad', src: '/logos/chains/monad.svg' },
+  { name: 'Unichain', src: '/logos/chains/unichain.png' },
+  { name: 'Celo', src: '/logos/chains/celo.svg' },
+  { name: 'World Chain', src: '/logos/chains/worldchain.png', logoTone: 'black' },
+  { name: 'Sonic', src: '/logos/chains/sonic.svg', logoTone: 'white' },
+  { name: 'Ink', src: '/logos/chains/ink.png' },
+  { name: 'Linea', src: '/logos/chains/linea.png' },
+  { name: 'Codex', src: '/logos/chains/codex.png', logoTone: 'white' },
+] as const;
+const rollingChainLogos = [...supportedChainLogos, ...supportedChainLogos];
+
+const tokenLogos = [
+  { name: 'USDT', src: '/logos/tokens/usdt.svg' },
+  { name: 'USDC', src: '/logos/tokens/usdc.svg' },
+] as const;
+
+type LogoTone = 'black' | 'white';
+type BrandLogo = {
+  name: string;
+  src: string;
+  darkSrc?: string;
+  logoTone?: LogoTone;
+};
+
+const walletLogos: readonly BrandLogo[] = [
+  { name: 'MetaMask', src: '/logos/wallets/metamask.svg' },
+  { name: 'Trust Wallet', src: '/logos/wallets/trust.svg' },
+  { name: 'Base App', src: '/logos/wallets/baseapp.svg' },
+  { name: 'Rainbow', src: '/logos/wallets/rainbow.svg' },
+  { name: 'Phantom', src: '/logos/wallets/phantom.svg' },
+] as const;
+
+const exchangeLogos: readonly BrandLogo[] = [
+  { name: 'Binance', src: '/logos/exchanges/binance.png' },
+  { name: 'OKX', src: '/logos/exchanges/okx.svg', logoTone: 'black' },
+  {
+    name: 'Bybit',
+    src: '/logos/exchanges/bybit.svg',
+    darkSrc: '/logos/exchanges/bybit-dark.svg',
+  },
+  { name: 'Kraken', src: '/logos/exchanges/kraken.png' },
+  { name: 'Coinbase', src: '/logos/exchanges/coinbase.png' },
+] as const;
 ---
 
-<main>
-  <!-- Hero -->
-  <section aria-labelledby="hero-title">
-    <p>{t.heroEyebrow}</p>
-    <h1 id="hero-title">{t.heroTitle}</h1>
-    <p>{t.heroParagraph1}</p>
-    <p>
-      <strong>{t.heroParagraph2}</strong>
-    </p>
-    <a href="https://bridge.untron.finance">{t.heroCta}</a>
-  </section>
-  <!-- For stablecoin users -->
-  <section aria-labelledby="for-users">
-    <h2 id="for-users">{t.forUsersHeading}</h2>
-    <p>{t.forUsersParagraph1}</p>
-    <p>{t.forUsersParagraph2}</p>
-    <p>{t.forUsersParagraph3}</p>
-    <a href="https://bridge.untron.finance">{t.forUsersCta}</a>
+<main id="main-content">
+  <section class="hero section reveal" aria-labelledby="hero-title">
+    <div class="hero-grid">
+      <div class="hero-copy-panel">
+        <p class="eyebrow">{t.hero.eyebrow}</p>
+        <h1 id="hero-title">{t.hero.title}</h1>
+        <p class="hero-description">{t.hero.description}</p>
+        <p class="hero-supporting">{t.hero.supportingLine}</p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href={bridgeUrl} target="_blank" rel="noreferrer noopener">
+            {t.hero.primaryCta}
+          </a>
+          <a class="btn btn-secondary" href="#fees">
+            {t.hero.secondaryCta}
+          </a>
+        </div>
+      </div>
+
+      <aside class="hero-visual" aria-label={t.hero.routePreviewLabel}>
+        <p class="hero-visual-label">{t.hero.routePreviewLabel}</p>
+        <div
+          class="bridge-preview"
+          data-landing-swap
+          data-bridge-url={bridgeUrl}
+          data-api-base={quoteApiBase}
+          data-source-label={t.hero.routeSourceLabel}
+          data-dest-label={t.hero.routeDestinationLabel}
+          data-loading-label={t.hero.swapQuoteLoading}
+          data-ready-label={t.hero.swapQuoteReady}
+          data-error-label={t.hero.swapQuoteError}
+          data-rate-label={t.hero.swapRateLabel}
+          data-fee-label={t.hero.swapFeeLabel}
+        >
+          <article class="bridge-preview-row bridge-preview-row-source">
+            <div class="bridge-preview-head">
+              <span>{t.hero.swapSendLabel}</span>
+              <button type="button" class="bridge-max-button" data-swap-max>
+                {t.hero.swapMaxLabel}
+              </button>
+            </div>
+            <div class="bridge-preview-main">
+              <div class="bridge-amount-wrap">
+                <input
+                  class="bridge-amount-input"
+                  type="text"
+                  inputmode="decimal"
+                  value="100.00"
+                  autocomplete="off"
+                  spellcheck="false"
+                  data-swap-amount
+                  aria-label={t.hero.swapSendLabel}
+                />
+              </div>
+              <button
+                type="button"
+                class="bridge-asset-chip bridge-asset-trigger"
+                data-swap-source-trigger
+                aria-label={t.hero.routeSourceLabel}
+              >
+                <span class="bridge-token-icon">
+                  <img
+                    src="/logos/tokens/usdt.svg"
+                    alt="USDT"
+                    width="28"
+                    height="28"
+                    data-swap-source-logo
+                  />
+                  <span class="bridge-chain-badge">
+                    <img
+                      src="/logos/chains/tron.svg"
+                      alt="Tron"
+                      width="11"
+                      height="11"
+                      data-swap-source-chain-logo
+                    />
+                  </span>
+                </span>
+                <span class="bridge-asset-meta">
+                  <span data-swap-source-token>USDT</span>
+                  <span data-swap-source-chain>Tron</span>
+                </span>
+                <svg class="bridge-chip-caret" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M19 9 12 16 5 9"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"></path>
+                </svg>
+              </button>
+            </div>
+          </article>
+
+          <div class="bridge-flip-wrap">
+            <button
+              type="button"
+              class="bridge-flip-button"
+              data-swap-flip
+              aria-label="Flip direction"
+              title="Flip direction"
+            >
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </div>
+
+          <article class="bridge-preview-row bridge-preview-row-output">
+            <div class="bridge-preview-head">
+              <span>{t.hero.swapReceiveLabel}</span>
+            </div>
+            <div class="bridge-preview-main">
+              <div class="bridge-amount-wrap bridge-amount-wrap-output">
+                <span class="bridge-output-amount" data-swap-output>99.90</span>
+              </div>
+              <button
+                type="button"
+                class="bridge-asset-chip bridge-asset-trigger"
+                data-swap-dest-trigger
+                aria-label={t.hero.routeDestinationLabel}
+              >
+                <span class="bridge-token-icon">
+                  <img
+                    src="/logos/tokens/usdc.svg"
+                    alt="USDC"
+                    width="28"
+                    height="28"
+                    data-swap-dest-logo
+                  />
+                  <span class="bridge-chain-badge">
+                    <img
+                      src="/logos/chains/base.svg"
+                      alt="Base"
+                      width="11"
+                      height="11"
+                      data-swap-dest-chain-logo
+                    />
+                  </span>
+                </span>
+                <span class="bridge-asset-meta">
+                  <span data-swap-dest-token>USDC</span>
+                  <span data-swap-dest-chain>Base</span>
+                </span>
+                <svg class="bridge-chip-caret" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M19 9 12 16 5 9"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"></path>
+                </svg>
+              </button>
+            </div>
+          </article>
+
+          <div class="bridge-quote-meta" aria-live="polite">
+            <p class="bridge-quote-status" data-swap-status>{t.hero.swapQuoteLoading}</p>
+            <p class="bridge-quote-line" data-swap-rate></p>
+            <p class="bridge-quote-line" data-swap-fee></p>
+          </div>
+
+          <a
+            class="btn btn-primary bridge-open-button"
+            href={bridgeUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            data-swap-open
+          >
+            {t.hero.swapOpenBridgeLabel}
+          </a>
+
+          <div class="bridge-picker-overlay" data-swap-picker-overlay hidden>
+            <section
+              class="bridge-picker-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="bridge-picker-title"
+            >
+              <header class="bridge-picker-head">
+                <div class="bridge-picker-head-left">
+                  <button
+                    type="button"
+                    class="bridge-picker-back"
+                    data-swap-picker-back
+                    aria-label="Back"
+                    hidden
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        d="M15 18 9 12l6-6"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"></path>
+                    </svg>
+                  </button>
+                  <p id="bridge-picker-title" data-swap-picker-title>{t.hero.routeSourceLabel}</p>
+                </div>
+                <button
+                  type="button"
+                  class="bridge-picker-close"
+                  data-swap-picker-close
+                  aria-label="Close selector"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M6 6 18 18M18 6 6 18"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"></path>
+                  </svg>
+                </button>
+              </header>
+              <div class="bridge-picker-list" data-swap-picker-list></div>
+            </section>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <ul class="focus-grid" aria-label="Highlights">
+      {
+        t.stats.map((item, index) => (
+          <li class="focus-card">
+            <span class="focus-icon" aria-hidden="true">
+              {index === 0 ? (
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 3l7 3v6c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V6l7-3z"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              ) : index === 1 ? (
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="currentColor" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 3l2.7 5.5 6.3.9-4.5 4.4 1.1 6.2L12 17l-5.6 3 1-6.2L3 9.4l6.3-.9L12 3z"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              )}
+            </span>
+            <p class="focus-value">{item.value}</p>
+            <p class="focus-label">{item.label}</p>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
-  <!-- For businesses -->
-  <section aria-labelledby="for-businesses">
-    <h2 id="for-businesses">{t.forBusinessesHeading}</h2>
-    <p set:html={t.forBusinessesParagraph1} />
-    <p>{t.forBusinessesParagraph2}</p>
-    <div>
-      <a href="https://bridge.untron.finance">{t.forBusinessesCtaBridgeNow}</a>
-      <a href="#fees">{t.forBusinessesCtaComparison}</a>
-      <a href="mailto:hello@untron.finance">{t.forBusinessesCtaTalkToUs}</a>
+  <section class="section reveal" aria-labelledby="audiences-title">
+    <div class="section-heading">
+      <h2 id="audiences-title">{t.audiences.title}</h2>
+      <p>{t.audiences.subtitle}</p>
+    </div>
+
+    <div class="audience-grid">
+      {
+        t.audiences.cards.map((card, index) => (
+          <article class="audience-card">
+            <span class="audience-icon" aria-hidden="true">
+              {index === 0 ? (
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-7 7c1.2-3 3.8-5 7-5s5.8 2 7 5"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              ) : index === 1 ? (
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M4 19V9h16v10M9 9V5h6v4"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none">
+                  <rect
+                    x="4"
+                    y="4"
+                    width="16"
+                    height="16"
+                    rx="3"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
+                  <path d="M9 9h6v6H9z" fill="currentColor" />
+                </svg>
+              )}
+            </span>
+
+            <p class="card-label">{card.label}</p>
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+            <a class="text-link" href={card.ctaHref} target="_blank" rel="noreferrer noopener">
+              {card.ctaLabel}
+            </a>
+          </article>
+        ))
+      }
     </div>
   </section>
 
-  <!-- For developers -->
-  <section id="integrate" aria-labelledby="for-developers">
-    <h2 id="for-developers">{t.forDevelopersHeading}</h2>
-    <p>{t.forDevelopersParagraph1}</p>
-    <p>{t.forDevelopersParagraph2}</p>
-    <div>
-      <a href="https://docs.untron.finance">{t.forDevelopersCtaDocs}</a>
-      <a href="https://t.me/alexhooketh">{t.forDevelopersCtaTalkToUs}</a>
+  <section class="section reveal" id="how-it-works" aria-labelledby="how-title">
+    <div class="section-heading">
+      <h2 id="how-title">{t.howItWorks.title}</h2>
+      <p>{t.howItWorks.subtitle}</p>
+    </div>
+
+    <ol class="step-flow">
+      {
+        t.howItWorks.steps.map((step, index) => (
+          <li class="step-card">
+            <span class="step-badge">0{index + 1}</span>
+            <h3>{step.title.replace(/^\d+\.\s*/, '')}</h3>
+            <p>{step.description}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="section reveal" id="fees" aria-labelledby="fees-title">
+    <div class="section-heading">
+      <h2 id="fees-title">{t.fees.title}</h2>
+      <p>{t.fees.subtitle}</p>
+    </div>
+
+    <div class="fees-grid">
+      <article class="table-card" aria-labelledby="fees-table-title">
+        <div class="table-card-header">
+          <h3 id="fees-table-title">{t.fees.amountLabel}</h3>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{t.fees.columns.service}</th>
+                <th>{t.fees.columns.received}</th>
+                <th>{t.fees.columns.notes}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                t.fees.rows.map((row) => (
+                  <tr class={row.isUntron ? 'is-highlight' : undefined}>
+                    <td class="service-cell">{row.service}</td>
+                    <td class="amount-cell">{row.received}</td>
+                    <td>{row.notes}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <p class="table-footnote">{t.fees.footnote}</p>
+      </article>
+
+      <aside class="fees-focus-card">
+        <h3>{t.fees.focusTitle}</h3>
+        <ul>
+          {t.fees.focusBullets.map((item) => <li>{item}</li>)}
+        </ul>
+        <a class="btn btn-secondary" href={bridgeUrl} target="_blank" rel="noreferrer noopener">
+          {t.fees.focusCta}
+        </a>
+      </aside>
     </div>
   </section>
 
-  <!-- Fees & pricing -->
-  <section id="fees" aria-labelledby="fees-heading">
-    <h2 id="fees-heading">{t.feesHeading}</h2>
-    <p>{t.feesIntro}</p>
+  <section class="section reveal" aria-labelledby="chains-title">
+    <div class="section-heading">
+      <h2 id="chains-title">{t.chains.title}</h2>
+      <p>{t.chains.subtitle}</p>
+    </div>
 
-    <h3>{t.feesTronToEvmHeading}</h3>
-    <p>{t.feesTronToEvmNote}</p>
-    <table>
-      <thead>
-        <tr>
-          <th>{t.feesTableService}</th>
-          <th>{t.feesTableReceived}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{t.feesRowUntronTronToEvm}</td>
-          <td>{t.feesRowUntronTronToEvmValue}</td>
-        </tr>
-        <tr>
-          <td>{t.feesRowFixedFloat}</td>
-          <td>{t.feesRowFixedFloatValue}</td>
-        </tr>
-        <tr>
-          <td>{t.feesRowChangeNow}</td>
-          <td>{t.feesRowChangeNowValue}</td>
-        </tr>
-        <tr>
-          <td>{t.feesRowSymbiosis}</td>
-          <td>{t.feesRowSymbiosisValue}</td>
-        </tr>
-        <tr>
-          <td>{t.feesRowBridgers}</td>
-          <td>{t.feesRowBridgersValue}</td>
-        </tr>
-      </tbody>
-    </table>
-    <p>{t.feesFootnote1}</p>
-    <p>
-      <strong>{t.feesFootnote2}</strong>
-    </p>
+    <article class="ecosystem-showcase">
+      <div class="ecosystem-marquee-head">
+        <h3>{t.chains.networksLabel}</h3>
+        <span class="ecosystem-count">
+          {supportedChainLogos.length}
+          {t.chains.networkCountSuffix}
+        </span>
+      </div>
 
-    <h3>{t.feesEvmToTronHeading}</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>{t.feesTableService}</th>
-          <th>{t.feesTableReceived}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{t.feesRowUntronEvmToTron}</td>
-          <td>{t.feesRowUntronEvmToTronValue}</td>
-        </tr>
-        <tr>
-          <td>{t.feesRowFixedFloat}</td>
-          <td>{t.feesRowFixedFloatValue}</td>
-        </tr>
-        <tr>
-          <td>{t.feesRowChangeNow}</td>
-          <td>{t.feesRowChangeNowValue}</td>
-        </tr>
-        <tr>
-          <td>{t.feesRowSymbiosis}</td>
-          <td>{t.feesRowSymbiosisEvmToTronValue}</td>
-        </tr>
-        <tr>
-          <td>{t.feesRowBridgers}</td>
-          <td>{t.feesRowBridgersEvmToTronValue}</td>
-        </tr>
-      </tbody>
-    </table>
-    <p>{t.feesFootnote3}</p>
+      <div class="chain-marquee" aria-hidden="true">
+        <ul class="chain-track">
+          {
+            rollingChainLogos.map((network) => (
+              <li class="chain-pill">
+                <img
+                  src={network.src}
+                  alt=""
+                  width="24"
+                  height="24"
+                  loading="lazy"
+                  data-logo-tone={network.logoTone}
+                />
+                <span>{network.name}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="ecosystem-facts">
+        <p class="ecosystem-fact">
+          <span class="ecosystem-fact-label">{t.chains.stablecoinsLabel}:</span>
+          <span class="ecosystem-fact-values ecosystem-fact-values-icons">
+            {
+              tokenLogos.map((token) => (
+                <span class="ecosystem-fact-item">
+                  <img src={token.src} alt={token.name} width="20" height="20" loading="lazy" />
+                  <span>{token.name}</span>
+                </span>
+              ))
+            }
+          </span>
+        </p>
+
+        <div class="ecosystem-access-grid">
+          <div class="ecosystem-access-block">
+            <p class="ecosystem-fact-label">{t.chains.walletsLabel}:</p>
+            <div class="ecosystem-logo-row">
+              {
+                walletLogos.map((wallet) => (
+                  <span class="ecosystem-fact-item ecosystem-fact-item-icon" title={wallet.name}>
+                    <img
+                      src={wallet.src}
+                      alt={wallet.name}
+                      width="24"
+                      height="24"
+                      loading="lazy"
+                      data-logo-tone={wallet.logoTone}
+                    />
+                  </span>
+                ))
+              }
+              <span class="ecosystem-more">{t.chains.moreLabel}</span>
+            </div>
+          </div>
+
+          <div class="ecosystem-access-block">
+            <p class="ecosystem-fact-label">{t.chains.exchangesLabel}:</p>
+            <div class="ecosystem-logo-row">
+              {
+                exchangeLogos.map((exchange) => (
+                  <span class="ecosystem-fact-item ecosystem-fact-item-icon" title={exchange.name}>
+                    {exchange.darkSrc ? (
+                      <>
+                        <img
+                          src={exchange.src}
+                          alt={exchange.name}
+                          width="24"
+                          height="24"
+                          loading="lazy"
+                          class="theme-light-logo"
+                          data-logo-tone={exchange.logoTone}
+                        />
+                        <img
+                          src={exchange.darkSrc}
+                          alt={exchange.name}
+                          width="24"
+                          height="24"
+                          loading="lazy"
+                          class="theme-dark-logo"
+                          data-logo-tone={exchange.logoTone}
+                        />
+                      </>
+                    ) : (
+                      <img
+                        src={exchange.src}
+                        alt={exchange.name}
+                        width="24"
+                        height="24"
+                        loading="lazy"
+                        data-logo-tone={exchange.logoTone}
+                      />
+                    )}
+                  </span>
+                ))
+              }
+              <span class="ecosystem-more">{t.chains.moreLabel}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
   </section>
 
-  <!-- Supported chains -->
-  <section id="chains" aria-labelledby="chains-heading">
-    <h2 id="chains-heading">{t.chainsHeading}</h2>
+  <section class="section reveal" id="security" aria-labelledby="security-title">
+    <div class="section-heading">
+      <h2 id="security-title">{t.security.title}</h2>
+      <p>{t.security.subtitle}</p>
+    </div>
 
-    <h3>{t.chainsStablecoinsHeading}</h3>
-    <ul>
-      <li>{t.chainsStablecoinUsdt}</li>
-      <li>{t.chainsStablecoinUsdc}</li>
-    </ul>
-
-    <h3>{t.chainsNetworksHeading}</h3>
-    <ul>
-      <li>{t.chainsNetworkEthereum}</li>
-      <li>{t.chainsNetworkArbitrum}</li>
-      <li>{t.chainsNetworkOptimism}</li>
-      <li>{t.chainsNetworkBase}</li>
-      <li>{t.chainsNetworkBnb}</li>
-      <li>{t.chainsNetworkMore}</li>
-    </ul>
-
-    <p>{t.chainsParagraph}</p>
+    <article class="security-card">
+      <ul>
+        {
+          t.security.bullets.map((item) => (
+            <li>
+              <span class="security-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M4 10.2 8 14l8-8"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              <span>{item}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="text-link" href={securityUrl} target="_blank" rel="noreferrer noopener">
+        {t.security.ctaLabel}
+      </a>
+    </article>
   </section>
 
-  <!-- Security -->
-  <section id="security" aria-labelledby="security-heading">
-    <h2 id="security-heading">{t.securityHeading}</h2>
-    <p>{t.securityParagraph1}</p>
-    <p>{t.securityParagraph2}</p>
-    <a href="/security">{t.securityCtaTechnical}</a>
+  <section class="section reveal" id="faq" aria-labelledby="faq-title">
+    <div class="section-heading">
+      <h2 id="faq-title">{t.faq.title}</h2>
+    </div>
+    <div class="faq-list">
+      {
+        t.faq.items.map((item, index) => (
+          <details open={index === 0}>
+            <summary>{item.question}</summary>
+            <p>{item.answer}</p>
+          </details>
+        ))
+      }
+    </div>
   </section>
 
-  <!-- FAQ -->
-  <section id="faq" aria-labelledby="faq-heading">
-    <h2 id="faq-heading">{t.faqHeading}</h2>
-
-    <h3>{t.faqIsNonCustodialQuestion}</h3>
-    <p>{t.faqIsNonCustodialAnswer}</p>
-
-    <h3>{t.faqGasQuestion}</h3>
-    <p>{t.faqGasAnswer}</p>
-
-    <h3>{t.faqIsKycRequiredQuestion}</h3>
-    <p>{t.faqIsKycRequiredAnswer}</p>
-
-    <h3>{t.faqAvailableCountriesQuestion}</h3>
-    <p>{t.faqAvailableCountriesAnswer}</p>
-
-    <h3>{t.faqWhatAmountsAreSafeQuestion}</h3>
-    <p>{t.faqWhatAmountsAreSafeAnswer}</p>
-
-    <!-- etc, add more later -->
-  </section>
-
-  <!-- Blog -->
-  <section aria-labelledby="blog-heading">
-    <h2 id="blog-heading">{t.blogHeading}</h2>
-    <ul>
-      <li>
-        <a href="https://blog.untron.finance/article-1">{t.blogArticle1}</a>
-      </li>
-      <li>
-        <a href="https://blog.untron.finance/article-2">{t.blogArticle2}</a>
-      </li>
-      <li>
-        <a href="https://blog.untron.finance/article-3">{t.blogArticle3}</a>
-      </li>
-    </ul>
+  <section class="section reveal" aria-labelledby="final-cta-title">
+    <article class="cta-card">
+      <div>
+        <h2 id="final-cta-title">{t.finalCta.title}</h2>
+        <p>{t.finalCta.description}</p>
+      </div>
+      <a class="btn btn-primary" href={bridgeUrl} target="_blank" rel="noreferrer noopener">
+        {t.finalCta.buttonLabel}
+      </a>
+    </article>
   </section>
 </main>
 
-<footer>
-  <p>{t.footerCopyright}</p>
-  <nav aria-label="Footer navigation">
-    <a href="/terms">{t.footerLinkTerms}</a>
-    <a href="/privacy">{t.footerLinkPrivacy}</a>
-    <a href="https://docs.untron.finance">{t.footerLinkDocs}</a>
-    <a href="https://discord.gg/...">{t.footerLinkDiscord}</a>
-    <a href="https://x.com/...">{t.footerLinkX}</a>
-  </nav>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <a class="brand" href={localeHome} aria-label={t.nav.brand}>
+        <img class="brand-full" src="/logos/untron/full.svg" alt="Untron" width="196" height="48" />
+      </a>
+      <p>{t.footer.tagline}</p>
+      <p class="footer-legal">&copy; {year} Untron. {t.footer.legal}</p>
+    </div>
+    <div>
+      <p class="footer-title">{t.footer.linksLabel}</p>
+      <ul class="footer-links">
+        <li><a href="/terms">{t.footer.terms}</a></li>
+        <li><a href="/privacy">{t.footer.privacy}</a></li>
+        <li><a href={docsUrl} target="_blank" rel="noreferrer noopener">{t.footer.docs}</a></li>
+        <li><a href={t.links.contactEmail}>{t.footer.contact}</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-title">Social</p>
+      <ul class="footer-links">
+        <li><a href={t.links.x} target="_blank" rel="noreferrer noopener">X / Twitter</a></li>
+        <li><a href={t.links.telegram} target="_blank" rel="noreferrer noopener">Telegram</a></li>
+        <li><a href={t.links.github} target="_blank" rel="noreferrer noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </div>
 </footer>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-landing-swap]');
+    if (!(root instanceof HTMLElement)) return;
+
+    const amountInput = root.querySelector('[data-swap-amount]');
+    const maxButton = root.querySelector('[data-swap-max]');
+    const sourceTrigger = root.querySelector('[data-swap-source-trigger]');
+    const destTrigger = root.querySelector('[data-swap-dest-trigger]');
+    const flipButton = root.querySelector('[data-swap-flip]');
+    const outputAmount = root.querySelector('[data-swap-output]');
+    const sourceTokenText = root.querySelector('[data-swap-source-token]');
+    const sourceChainText = root.querySelector('[data-swap-source-chain]');
+    const sourceTokenLogo = root.querySelector('[data-swap-source-logo]');
+    const sourceChainLogo = root.querySelector('[data-swap-source-chain-logo]');
+    const destTokenText = root.querySelector('[data-swap-dest-token]');
+    const destChainText = root.querySelector('[data-swap-dest-chain]');
+    const destTokenLogo = root.querySelector('[data-swap-dest-logo]');
+    const destChainLogo = root.querySelector('[data-swap-dest-chain-logo]');
+    const openButton = root.querySelector('[data-swap-open]');
+    const statusLine = root.querySelector('[data-swap-status]');
+    const rateLine = root.querySelector('[data-swap-rate]');
+    const feeLine = root.querySelector('[data-swap-fee]');
+    const pickerOverlay = root.querySelector('[data-swap-picker-overlay]');
+    const pickerTitle = root.querySelector('[data-swap-picker-title]');
+    const pickerList = root.querySelector('[data-swap-picker-list]');
+    const pickerBack = root.querySelector('[data-swap-picker-back]');
+    const pickerClose = root.querySelector('[data-swap-picker-close]');
+
+    if (
+      !(amountInput instanceof HTMLInputElement) ||
+      !(maxButton instanceof HTMLButtonElement) ||
+      !(sourceTrigger instanceof HTMLButtonElement) ||
+      !(destTrigger instanceof HTMLButtonElement) ||
+      !(flipButton instanceof HTMLButtonElement) ||
+      !(outputAmount instanceof HTMLElement) ||
+      !(sourceTokenText instanceof HTMLElement) ||
+      !(sourceChainText instanceof HTMLElement) ||
+      !(sourceTokenLogo instanceof HTMLImageElement) ||
+      !(sourceChainLogo instanceof HTMLImageElement) ||
+      !(destTokenText instanceof HTMLElement) ||
+      !(destChainText instanceof HTMLElement) ||
+      !(destTokenLogo instanceof HTMLImageElement) ||
+      !(destChainLogo instanceof HTMLImageElement) ||
+      !(openButton instanceof HTMLAnchorElement) ||
+      !(statusLine instanceof HTMLElement) ||
+      !(rateLine instanceof HTMLElement) ||
+      !(feeLine instanceof HTMLElement) ||
+      !(pickerOverlay instanceof HTMLElement) ||
+      !(pickerTitle instanceof HTMLElement) ||
+      !(pickerList instanceof HTMLElement) ||
+      !(pickerBack instanceof HTMLButtonElement) ||
+      !(pickerClose instanceof HTMLButtonElement)
+    ) {
+      return;
+    }
+
+    const TRON_CAIP2 = 'tron:0x2b6653dc';
+    const PREVIEW_EVM_RECIPIENT = '0x1111111111111111111111111111111111111111';
+    const PREVIEW_TRON_RECIPIENT = 'T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb';
+    const TRON_CHAIN_NAME = 'Tron';
+    const TRON_CHAIN_LOGO = '/logos/chains/tron.svg';
+
+    const apiBase = (root.dataset.apiBase || 'https://api.untron.finance/bridge').replace(
+      /\/$/,
+      ''
+    );
+    const bridgeUrl = root.dataset.bridgeUrl || 'https://bridge.untron.finance';
+    const loadingLabel = root.dataset.loadingLabel || 'Getting live quote...';
+    const readyLabel = root.dataset.readyLabel || 'Live quote updated';
+    const errorLabel = root.dataset.errorLabel || 'Could not load quote';
+    const rateLabel = root.dataset.rateLabel || 'Rate';
+    const feeLabel = root.dataset.feeLabel || 'Bridge fee';
+    const sourceLabel = root.dataset.sourceLabel || 'From';
+    const destLabel = root.dataset.destLabel || 'To';
+
+    // Keep names aligned with bridge chain metadata (apps/bridge/src/lib/config/chains.ts).
+    const chainMetaById = {
+      1: { name: 'Ethereum', logo: '/logos/chains/ethereum.svg' },
+      10: { name: 'OP Mainnet', logo: '/logos/chains/opmainnet.svg' },
+      14: { name: 'Flare Mainnet', logo: '/logos/chains/ethereum.svg' },
+      30: { name: 'Rootstock Mainnet', logo: '/logos/chains/ethereum.svg' },
+      56: { name: 'BNB Chain', logo: '/logos/chains/bnb.svg' },
+      100: { name: 'Gnosis', logo: '/logos/chains/ethereum.svg' },
+      130: { name: 'Unichain', logo: '/logos/chains/unichain.png' },
+      137: { name: 'Polygon', logo: '/logos/chains/polygon.svg' },
+      143: { name: 'Monad', logo: '/logos/chains/monad.svg' },
+      146: { name: 'Sonic', logo: '/logos/chains/sonic.svg', logoTone: 'white' },
+      196: { name: 'X Layer Mainnet', logo: '/logos/chains/ethereum.svg' },
+      480: { name: 'World Chain', logo: '/logos/chains/worldchain.png', logoTone: 'black' },
+      988: { name: 'Stable Mainnet', logo: '/logos/chains/ethereum.svg' },
+      999: { name: 'Codex', logo: '/logos/chains/codex.png', logoTone: 'white' },
+      1030: { name: 'Conflux eSpace', logo: '/logos/chains/ethereum.svg' },
+      1329: { name: 'Sei Network', logo: '/logos/chains/ethereum.svg' },
+      42161: { name: 'Arbitrum One', logo: '/logos/chains/arbitrum.svg' },
+      42220: { name: 'Celo', logo: '/logos/chains/celo.svg' },
+      43114: { name: 'Avalanche C-Chain', logo: '/logos/chains/avalanche.svg' },
+      5000: { name: 'Mantle', logo: '/logos/chains/mantle.svg' },
+      8453: { name: 'Base', logo: '/logos/chains/base.svg' },
+      9745: { name: 'Plasma', logo: '/logos/chains/plasma.svg' },
+      57073: { name: 'Ink', logo: '/logos/chains/ink.png' },
+      59144: { name: 'Linea', logo: '/logos/chains/linea.png' },
+      80094: { name: 'Berachain', logo: '/logos/chains/ethereum.svg' },
+      21000000: { name: 'Corn', logo: '/logos/chains/ethereum.svg' },
+    };
+
+    const tokenMeta = {
+      USDT: { logo: '/logos/tokens/usdt.svg' },
+      USDC: { logo: '/logos/tokens/usdc.svg' },
+    };
+
+    let direction = 'TRON_TO_EVM';
+    let chainId = 8453;
+    let evmToken = 'USDC';
+    let tronToken = 'USDT';
+
+    let combos = [];
+    let decimalsByRepresentation = new Map();
+    let activePicker = null;
+    let pickerStep = 'token';
+    let pickerToken = null;
+
+    let requestTimer = null;
+    let inFlightController = null;
+
+    function sanitizeAmount(rawValue, decimals) {
+      const numericOnly = rawValue.replace(/[^0-9.]/g, '');
+      const parts = numericOnly.split('.');
+      const integerPart = (parts.shift() || '').replace(/^0+(?=\d)/, '');
+      const fractionPart = parts.join('').slice(0, decimals);
+
+      if (fractionPart.length > 0) {
+        return `${integerPart || '0'}.${fractionPart}`;
+      }
+
+      return integerPart;
+    }
+
+    function decimalToAtomic(value, decimals) {
+      if (!/^\d+(\.\d+)?$/.test(value)) return null;
+      const [wholePart, fractionPart = ''] = value.split('.');
+      const whole = wholePart.replace(/^0+(?=\d)/, '') || '0';
+      const fraction = `${fractionPart}${'0'.repeat(decimals)}`.slice(0, decimals);
+      const joined = `${whole}${fraction}`.replace(/^0+(?=\d)/, '') || '0';
+      return joined;
+    }
+
+    function atomicToDecimal(value, decimals, maxFractionDigits = 6) {
+      try {
+        const amount = BigInt(value);
+        const divisor = 10n ** BigInt(decimals);
+        const whole = amount / divisor;
+        const fraction = amount % divisor;
+        let fractionText = fraction.toString().padStart(decimals, '0').slice(0, maxFractionDigits);
+        fractionText = fractionText.replace(/0+$/, '');
+        return fractionText ? `${whole.toString()}.${fractionText}` : whole.toString();
+      } catch {
+        return '0';
+      }
+    }
+
+    function fallbackCombos() {
+      return [
+        { direction: 'TRON_TO_EVM', chainId: 8453, evmToken: 'USDC', tronToken: 'USDT' },
+        { direction: 'TRON_TO_EVM', chainId: 42161, evmToken: 'USDC', tronToken: 'USDT' },
+        { direction: 'TRON_TO_EVM', chainId: 1, evmToken: 'USDT', tronToken: 'USDT' },
+        { direction: 'TRON_TO_EVM', chainId: 1, evmToken: 'USDC', tronToken: 'USDT' },
+        { direction: 'TRON_TO_EVM', chainId: 10, evmToken: 'USDC', tronToken: 'USDT' },
+        { direction: 'TRON_TO_EVM', chainId: 137, evmToken: 'USDC', tronToken: 'USDT' },
+        { direction: 'TRON_TO_EVM', chainId: 56, evmToken: 'USDT', tronToken: 'USDT' },
+        { direction: 'TRON_TO_EVM', chainId: 43114, evmToken: 'USDC', tronToken: 'USDT' },
+        { direction: 'EVM_TO_TRON', chainId: 1, evmToken: 'USDT', tronToken: 'USDT' },
+        { direction: 'EVM_TO_TRON', chainId: 10, evmToken: 'USDT', tronToken: 'USDT' },
+        { direction: 'EVM_TO_TRON', chainId: 137, evmToken: 'USDT', tronToken: 'USDT' },
+        { direction: 'EVM_TO_TRON', chainId: 42161, evmToken: 'USDT', tronToken: 'USDT' },
+        { direction: 'EVM_TO_TRON', chainId: 56, evmToken: 'USDT', tronToken: 'USDT' },
+      ];
+    }
+
+    function normalizeTokenSymbol(token) {
+      const upper = String(token || '').toUpperCase();
+      return upper === 'USDT' || upper === 'USDC' ? upper : null;
+    }
+
+    function tokenFromFamily(family) {
+      return normalizeTokenSymbol(String(family || '').toUpperCase());
+    }
+
+    function setLogoTone(image, logoTone) {
+      if (!(image instanceof HTMLImageElement)) return;
+      if (logoTone === 'black' || logoTone === 'white') {
+        image.dataset.logoTone = logoTone;
+        return;
+      }
+      image.removeAttribute('data-logo-tone');
+    }
+
+    function getChainMeta(id) {
+      return chainMetaById[id] || { name: `Chain ${id}`, logo: '/logos/chains/ethereum.svg' };
+    }
+
+    function uniqueBy(items, keyFn) {
+      const out = [];
+      const seen = new Set();
+      items.forEach((item) => {
+        const key = keyFn(item);
+        if (seen.has(key)) return;
+        seen.add(key);
+        out.push(item);
+      });
+      return out;
+    }
+
+    function parseCapabilities(payload) {
+      const parsedCombos = [];
+      decimalsByRepresentation = new Map();
+
+      const assetFamilies = Array.isArray(payload?.assetFamilies) ? payload.assetFamilies : [];
+      assetFamilies.forEach((family) => {
+        const familyId = String(family?.assetFamilyId || '').toLowerCase();
+        if (familyId !== 'usdt' && familyId !== 'usdc') return;
+
+        const representations = Array.isArray(family?.representations)
+          ? family.representations
+          : [];
+        representations.forEach((representation) => {
+          if (typeof representation?.chainId !== 'string') return;
+          if (!Number.isFinite(representation?.decimals)) return;
+          decimalsByRepresentation.set(
+            `${familyId}:${representation.chainId}`,
+            Number(representation.decimals)
+          );
+        });
+      });
+
+      const routes = Array.isArray(payload?.routes) ? payload.routes : [];
+      routes.forEach((route) => {
+        if (!route || !Array.isArray(route?.pairs)) return;
+
+        const fromChainId = typeof route.fromChainId === 'string' ? route.fromChainId : '';
+        const toChainId = typeof route.toChainId === 'string' ? route.toChainId : '';
+
+        if (fromChainId.startsWith('tron:') && toChainId.startsWith('eip155:')) {
+          const targetChain = Number.parseInt(toChainId.split(':')[1] || '', 10);
+          if (!Number.isFinite(targetChain)) return;
+
+          route.pairs.forEach((pair) => {
+            const tron = tokenFromFamily(pair?.fromFamily);
+            const evm = tokenFromFamily(pair?.toFamily);
+            if (!tron || !evm) return;
+            parsedCombos.push({
+              direction: 'TRON_TO_EVM',
+              chainId: targetChain,
+              evmToken: evm,
+              tronToken: tron,
+            });
+          });
+        }
+
+        if (fromChainId.startsWith('eip155:') && toChainId.startsWith('tron:')) {
+          const sourceChain = Number.parseInt(fromChainId.split(':')[1] || '', 10);
+          if (!Number.isFinite(sourceChain)) return;
+
+          route.pairs.forEach((pair) => {
+            const evm = tokenFromFamily(pair?.fromFamily);
+            const tron = tokenFromFamily(pair?.toFamily);
+            if (!tron || !evm) return;
+            parsedCombos.push({
+              direction: 'EVM_TO_TRON',
+              chainId: sourceChain,
+              evmToken: evm,
+              tronToken: tron,
+            });
+          });
+        }
+      });
+
+      combos =
+        uniqueBy(parsedCombos, (item) =>
+          [item.direction, item.chainId, item.evmToken, item.tronToken].join(':')
+        ) || [];
+
+      if (combos.length === 0) {
+        combos = fallbackCombos();
+      }
+    }
+
+    function getDirectionCombos(targetDirection) {
+      return combos.filter((item) => item.direction === targetDirection);
+    }
+
+    function getTronOptions(targetDirection) {
+      return uniqueBy(
+        getDirectionCombos(targetDirection).map((item) => item.tronToken),
+        (token) => token
+      );
+    }
+
+    function getEvmOptions(targetDirection, selectedTronToken) {
+      const directionCombos = getDirectionCombos(targetDirection);
+      const filtered = directionCombos.filter((item) => item.tronToken === selectedTronToken);
+      const usable = filtered.length > 0 ? filtered : directionCombos;
+      return uniqueBy(
+        usable.map((item) => ({
+          chainId: item.chainId,
+          evmToken: item.evmToken,
+        })),
+        (item) => `${item.chainId}:${item.evmToken}`
+      );
+    }
+
+    function getTronOptionsForPair(targetDirection, selectedChainId, selectedEvmToken) {
+      const directionCombos = getDirectionCombos(targetDirection);
+      const filtered = directionCombos.filter(
+        (item) => item.chainId === selectedChainId && item.evmToken === selectedEvmToken
+      );
+      const usable = filtered.length > 0 ? filtered : directionCombos;
+      return uniqueBy(
+        usable.map((item) => item.tronToken),
+        (token) => token
+      );
+    }
+
+    function resolveDecimals(family, caip2Chain) {
+      return decimalsByRepresentation.get(`${family.toLowerCase()}:${caip2Chain}`) ?? 6;
+    }
+
+    function getSourceDecimals() {
+      if (direction === 'TRON_TO_EVM') {
+        return resolveDecimals(tronToken, TRON_CAIP2);
+      }
+      return resolveDecimals(evmToken, `eip155:${chainId}`);
+    }
+
+    function getDestinationDecimals() {
+      if (direction === 'TRON_TO_EVM') {
+        return resolveDecimals(evmToken, `eip155:${chainId}`);
+      }
+      return resolveDecimals(tronToken, TRON_CAIP2);
+    }
+
+    function ensureValidState() {
+      const directionCombos = getDirectionCombos(direction);
+      if (directionCombos.length === 0) {
+        combos = fallbackCombos();
+      }
+
+      const tronOptions = getTronOptions(direction);
+      if (tronOptions.length === 0) return;
+      if (!tronOptions.includes(tronToken)) {
+        tronToken = tronOptions[0];
+      }
+
+      const evmOptions = getEvmOptions(direction, tronToken);
+      const hasCurrentPair = evmOptions.some(
+        (item) => item.chainId === chainId && item.evmToken === evmToken
+      );
+
+      if (!hasCurrentPair && evmOptions.length > 0) {
+        chainId = evmOptions[0].chainId;
+        evmToken = evmOptions[0].evmToken;
+      }
+
+      const compatibleTronOptions = getTronOptionsForPair(direction, chainId, evmToken);
+      if (compatibleTronOptions.length > 0 && !compatibleTronOptions.includes(tronToken)) {
+        tronToken = compatibleTronOptions[0];
+      }
+    }
+
+    function setStatus(text, isError = false) {
+      statusLine.textContent = text;
+      statusLine.classList.toggle('is-error', isError);
+    }
+
+    function setLoading(isLoading) {
+      root.classList.toggle('is-quote-loading', isLoading);
+    }
+
+    function resetQuoteDetails() {
+      rateLine.textContent = '';
+      feeLine.textContent = '';
+    }
+
+    function getTokenLogo(symbol) {
+      return tokenMeta[symbol]?.logo || tokenMeta.USDT.logo;
+    }
+
+    function getPickerLabel(which) {
+      return which === 'source' ? sourceLabel : destLabel;
+    }
+
+    function getPickerKind(which) {
+      if (which === 'source') {
+        return direction === 'TRON_TO_EVM' ? 'tron' : 'evm';
+      }
+      return direction === 'TRON_TO_EVM' ? 'evm' : 'tron';
+    }
+
+    function getTronOptionsForPicker(which) {
+      if (which === 'source') {
+        return direction === 'TRON_TO_EVM' ? getTronOptions(direction) : [];
+      }
+      return direction === 'EVM_TO_TRON' ? getTronOptionsForPair(direction, chainId, evmToken) : [];
+    }
+
+    function getEvmOptionsForPicker(which) {
+      const pickerKind = getPickerKind(which);
+      if (pickerKind !== 'evm') return [];
+      return getEvmOptions(direction, tronToken);
+    }
+
+    function getEvmTokenOptions(which) {
+      return uniqueBy(
+        getEvmOptionsForPicker(which).map((item) => item.evmToken),
+        (token) => token
+      );
+    }
+
+    function getEvmChainOptions(which, selectedToken) {
+      const evmOptions = getEvmOptionsForPicker(which);
+      const filtered = evmOptions.filter((item) => item.evmToken === selectedToken);
+      const usable = filtered.length > 0 ? filtered : evmOptions;
+      return uniqueBy(
+        usable.map((item) => item.chainId),
+        (id) => String(id)
+      );
+    }
+
+    function focusFirstPickerOption() {
+      const firstOption = pickerList.querySelector('.bridge-picker-option');
+      if (!(firstOption instanceof HTMLButtonElement)) return;
+
+      window.requestAnimationFrame(() => {
+        firstOption.focus();
+      });
+    }
+
+    function setPickerHeader() {
+      if (!activePicker) return;
+
+      const showBack = pickerStep === 'chain' && getPickerKind(activePicker) === 'evm';
+      pickerBack.hidden = !showBack;
+
+      if (showBack && pickerToken) {
+        pickerTitle.textContent = `${getPickerLabel(activePicker)} · ${pickerToken}`;
+        return;
+      }
+
+      pickerTitle.textContent = getPickerLabel(activePicker);
+    }
+
+    function createPickerOption({
+      token,
+      subtitle,
+      chainLogo,
+      chainLogoTone,
+      isSelected,
+      onSelect,
+    }) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'bridge-picker-option';
+      if (isSelected) {
+        button.classList.add('is-active');
+      }
+
+      const iconWrap = document.createElement('span');
+      iconWrap.className = 'bridge-picker-option-icon';
+
+      const tokenImage = document.createElement('img');
+      tokenImage.src = getTokenLogo(token);
+      tokenImage.alt = token;
+      tokenImage.width = 28;
+      tokenImage.height = 28;
+      iconWrap.append(tokenImage);
+
+      if (chainLogo) {
+        const chainBadge = document.createElement('span');
+        chainBadge.className = 'bridge-picker-option-badge';
+
+        const chainImage = document.createElement('img');
+        chainImage.src = chainLogo;
+        chainImage.alt = subtitle;
+        chainImage.width = 11;
+        chainImage.height = 11;
+        setLogoTone(chainImage, chainLogoTone);
+        chainBadge.append(chainImage);
+        iconWrap.append(chainBadge);
+      }
+
+      const meta = document.createElement('span');
+      meta.className = 'bridge-picker-option-meta';
+
+      const tokenLabel = document.createElement('span');
+      tokenLabel.textContent = token;
+      meta.append(tokenLabel);
+
+      const subtitleLabel = document.createElement('span');
+      subtitleLabel.textContent = subtitle;
+      meta.append(subtitleLabel);
+
+      const check = document.createElement('span');
+      check.className = 'bridge-picker-option-check';
+      check.setAttribute('aria-hidden', 'true');
+      check.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+
+      button.append(iconWrap, meta, check);
+      button.addEventListener('click', onSelect);
+      pickerList.append(button);
+    }
+
+    function renderTronTokenStep(which) {
+      const options = getTronOptionsForPicker(which);
+      options.forEach((token) => {
+        createPickerOption({
+          token,
+          subtitle: TRON_CHAIN_NAME,
+          chainLogo: TRON_CHAIN_LOGO,
+          chainLogoTone: undefined,
+          isSelected: token === tronToken,
+          onSelect: () => {
+            const nextToken = normalizeTokenSymbol(token);
+            if (!nextToken) return;
+            tronToken = nextToken;
+            onStateChanged();
+            closePicker();
+          },
+        });
+      });
+    }
+
+    function renderEvmTokenStep(which) {
+      const tokenOptions = getEvmTokenOptions(which);
+      tokenOptions.forEach((token) => {
+        const chainOptions = getEvmChainOptions(which, token);
+        const chainCount = chainOptions.length;
+        const subtitle = `${chainCount} chain${chainCount === 1 ? '' : 's'}`;
+        createPickerOption({
+          token,
+          subtitle,
+          chainLogo: null,
+          chainLogoTone: undefined,
+          isSelected: token === evmToken,
+          onSelect: () => {
+            pickerToken = token;
+            if (chainOptions.length <= 1) {
+              const [onlyChainId] = chainOptions;
+              if (!Number.isFinite(onlyChainId)) return;
+              evmToken = token;
+              chainId = onlyChainId;
+              onStateChanged();
+              closePicker();
+              return;
+            }
+
+            pickerStep = 'chain';
+            renderPickerOptions();
+            focusFirstPickerOption();
+          },
+        });
+      });
+    }
+
+    function renderEvmChainStep(which) {
+      if (!pickerToken) return;
+
+      const chainOptions = getEvmChainOptions(which, pickerToken);
+      chainOptions.forEach((nextChainId) => {
+        const chainMeta = getChainMeta(nextChainId);
+        createPickerOption({
+          token: pickerToken,
+          subtitle: chainMeta.name,
+          chainLogo: chainMeta.logo,
+          chainLogoTone: chainMeta.logoTone,
+          isSelected: evmToken === pickerToken && chainId === nextChainId,
+          onSelect: () => {
+            evmToken = pickerToken;
+            chainId = nextChainId;
+            onStateChanged();
+            closePicker();
+          },
+        });
+      });
+    }
+
+    function renderPickerOptions() {
+      if (!activePicker) return;
+
+      setPickerHeader();
+      pickerList.textContent = '';
+
+      const pickerKind = getPickerKind(activePicker);
+      if (pickerKind === 'tron') {
+        renderTronTokenStep(activePicker);
+      } else if (pickerStep === 'chain') {
+        renderEvmChainStep(activePicker);
+      } else {
+        renderEvmTokenStep(activePicker);
+      }
+    }
+
+    function openPicker(which) {
+      activePicker = which;
+      pickerStep = 'token';
+      pickerToken = getPickerKind(which) === 'evm' ? evmToken : tronToken;
+      renderPickerOptions();
+      pickerOverlay.hidden = false;
+      root.classList.add('is-picker-open');
+      focusFirstPickerOption();
+    }
+
+    function closePicker() {
+      if (!activePicker) return;
+
+      const pickerToFocus = activePicker;
+      activePicker = null;
+      pickerStep = 'token';
+      pickerToken = null;
+      pickerOverlay.hidden = true;
+      pickerBack.hidden = true;
+      pickerList.textContent = '';
+      root.classList.remove('is-picker-open');
+      if (pickerToFocus === 'source') {
+        sourceTrigger.focus();
+      } else {
+        destTrigger.focus();
+      }
+    }
+
+    function renderChipsAndSelectors() {
+      ensureValidState();
+
+      if (direction === 'TRON_TO_EVM') {
+        sourceTokenText.textContent = tronToken;
+        sourceChainText.textContent = TRON_CHAIN_NAME;
+        sourceTokenLogo.src = getTokenLogo(tronToken);
+        sourceTokenLogo.alt = tronToken;
+        sourceChainLogo.src = TRON_CHAIN_LOGO;
+        sourceChainLogo.alt = TRON_CHAIN_NAME;
+        setLogoTone(sourceChainLogo, undefined);
+        sourceTrigger.setAttribute(
+          'aria-label',
+          `${sourceLabel}: ${tronToken} on ${TRON_CHAIN_NAME}`
+        );
+
+        const chainMeta = getChainMeta(chainId);
+        destTokenText.textContent = evmToken;
+        destChainText.textContent = chainMeta.name;
+        destTokenLogo.src = getTokenLogo(evmToken);
+        destTokenLogo.alt = evmToken;
+        destChainLogo.src = chainMeta.logo;
+        destChainLogo.alt = chainMeta.name;
+        setLogoTone(destChainLogo, chainMeta.logoTone);
+        destTrigger.setAttribute('aria-label', `${destLabel}: ${evmToken} on ${chainMeta.name}`);
+
+        if (activePicker) {
+          renderPickerOptions();
+        }
+        return;
+      }
+
+      const sourceChainMeta = getChainMeta(chainId);
+      sourceTokenText.textContent = evmToken;
+      sourceChainText.textContent = sourceChainMeta.name;
+      sourceTokenLogo.src = getTokenLogo(evmToken);
+      sourceTokenLogo.alt = evmToken;
+      sourceChainLogo.src = sourceChainMeta.logo;
+      sourceChainLogo.alt = sourceChainMeta.name;
+      setLogoTone(sourceChainLogo, sourceChainMeta.logoTone);
+      sourceTrigger.setAttribute(
+        'aria-label',
+        `${sourceLabel}: ${evmToken} on ${sourceChainMeta.name}`
+      );
+
+      destTokenText.textContent = tronToken;
+      destChainText.textContent = TRON_CHAIN_NAME;
+      destTokenLogo.src = getTokenLogo(tronToken);
+      destTokenLogo.alt = tronToken;
+      destChainLogo.src = TRON_CHAIN_LOGO;
+      destChainLogo.alt = TRON_CHAIN_NAME;
+      setLogoTone(destChainLogo, undefined);
+      destTrigger.setAttribute('aria-label', `${destLabel}: ${tronToken} on ${TRON_CHAIN_NAME}`);
+
+      if (activePicker) {
+        renderPickerOptions();
+      }
+    }
+
+    function updateBridgeHref(amount) {
+      const href = new URL(bridgeUrl);
+      href.searchParams.set('direction', direction);
+      href.searchParams.set('chainId', String(chainId));
+      href.searchParams.set('token', evmToken);
+      href.searchParams.set('tronToken', tronToken);
+      href.searchParams.set('amount', amount || '0');
+      openButton.href = href.toString();
+    }
+
+    function activeSymbols() {
+      if (direction === 'TRON_TO_EVM') {
+        return { source: tronToken, destination: evmToken };
+      }
+      return { source: evmToken, destination: tronToken };
+    }
+
+    function buildQuoteRequest(amountAtomic) {
+      if (direction === 'TRON_TO_EVM') {
+        return {
+          from: {
+            chainId: TRON_CAIP2,
+            assetFamilyId: tronToken.toLowerCase(),
+          },
+          to: {
+            chainId: `eip155:${chainId}`,
+            assetFamilyId: evmToken.toLowerCase(),
+          },
+          fromAmount: amountAtomic,
+          recipient: `eip155:${chainId}:${PREVIEW_EVM_RECIPIENT}`,
+        };
+      }
+
+      return {
+        from: {
+          chainId: `eip155:${chainId}`,
+          assetFamilyId: evmToken.toLowerCase(),
+        },
+        to: {
+          chainId: TRON_CAIP2,
+          assetFamilyId: tronToken.toLowerCase(),
+        },
+        fromAmount: amountAtomic,
+        recipient: `${TRON_CAIP2}:${PREVIEW_TRON_RECIPIENT}`,
+        refundTo: `eip155:${chainId}:${PREVIEW_EVM_RECIPIENT}`,
+      };
+    }
+
+    async function fetchCapabilities() {
+      try {
+        const response = await fetch(`${apiBase}/v1/capabilities`, {
+          method: 'GET',
+          headers: { accept: 'application/json' },
+        });
+
+        if (!response.ok) {
+          combos = fallbackCombos();
+          return;
+        }
+
+        const payload = await response.json();
+        parseCapabilities(payload);
+      } catch {
+        combos = fallbackCombos();
+      }
+    }
+
+    async function fetchQuote() {
+      const sourceDecimals = getSourceDecimals();
+      const destinationDecimals = getDestinationDecimals();
+
+      const sanitizedAmount = sanitizeAmount(amountInput.value, sourceDecimals);
+      amountInput.value = sanitizedAmount;
+      updateBridgeHref(sanitizedAmount);
+
+      const amountAtomic = decimalToAtomic(sanitizedAmount, sourceDecimals);
+      if (!amountAtomic || BigInt(amountAtomic) <= 0n) {
+        outputAmount.textContent = '0.00';
+        setStatus(readyLabel);
+        resetQuoteDetails();
+        return;
+      }
+
+      if (inFlightController) {
+        inFlightController.abort();
+      }
+
+      inFlightController = new AbortController();
+      setLoading(true);
+      setStatus(loadingLabel);
+      resetQuoteDetails();
+
+      const requestBody = buildQuoteRequest(amountAtomic);
+
+      try {
+        const response = await fetch(`${apiBase}/v1/quotes`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            accept: 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+          signal: inFlightController.signal,
+        });
+
+        if (!response.ok) {
+          let responseMessage = '';
+          try {
+            const payload = await response.json();
+            responseMessage = payload?.detail || payload?.title || '';
+          } catch {
+            responseMessage = '';
+          }
+          throw new Error(responseMessage || `${errorLabel} (${response.status})`);
+        }
+
+        const quote = await response.json();
+        const estimatedToAmount = quote?.estimatedToAmount;
+        const fromAmount = quote?.fromAmount || amountAtomic;
+        if (!estimatedToAmount) {
+          throw new Error(errorLabel);
+        }
+
+        outputAmount.textContent = atomicToDecimal(estimatedToAmount, destinationDecimals, 6);
+
+        const sourceDisplay = Number.parseFloat(atomicToDecimal(fromAmount, sourceDecimals, 8));
+        const destinationDisplay = Number.parseFloat(
+          atomicToDecimal(estimatedToAmount, destinationDecimals, 8)
+        );
+        if (
+          Number.isFinite(sourceDisplay) &&
+          Number.isFinite(destinationDisplay) &&
+          sourceDisplay > 0
+        ) {
+          const symbols = activeSymbols();
+          const rate = (destinationDisplay / sourceDisplay)
+            .toFixed(6)
+            .replace(/0+$/, '')
+            .replace(/\.$/, '');
+          rateLine.textContent = `${rateLabel}: 1 ${symbols.source} ≈ ${rate} ${symbols.destination}`;
+        }
+
+        const ppmFee = Array.isArray(quote?.fees)
+          ? quote.fees.find((fee) => fee?.type === 'PpmFee' && Number.isFinite(fee?.ppm))
+          : null;
+
+        if (ppmFee && Number.isFinite(ppmFee.ppm)) {
+          const sourceSymbol = activeSymbols().source;
+          const feeAtomic = (BigInt(fromAmount) * BigInt(ppmFee.ppm)) / 1000000n;
+          const feePercent = (ppmFee.ppm / 10000).toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+          feeLine.textContent = `${feeLabel}: ${atomicToDecimal(feeAtomic.toString(), sourceDecimals, 6)} ${sourceSymbol} (${feePercent}%)`;
+        }
+
+        setStatus(readyLabel);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+
+        outputAmount.textContent = '0.00';
+        resetQuoteDetails();
+        const message = error instanceof Error && error.message ? error.message : errorLabel;
+        setStatus(message, true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function scheduleQuoteFetch() {
+      if (requestTimer) {
+        window.clearTimeout(requestTimer);
+      }
+      requestTimer = window.setTimeout(() => {
+        void fetchQuote();
+      }, 550);
+    }
+
+    function onStateChanged() {
+      renderChipsAndSelectors();
+      updateBridgeHref(amountInput.value);
+      scheduleQuoteFetch();
+    }
+
+    amountInput.addEventListener('input', () => {
+      amountInput.value = sanitizeAmount(amountInput.value, getSourceDecimals());
+      updateBridgeHref(amountInput.value);
+      scheduleQuoteFetch();
+    });
+
+    maxButton.addEventListener('click', () => {
+      amountInput.value = '100.00';
+      updateBridgeHref(amountInput.value);
+      scheduleQuoteFetch();
+    });
+
+    sourceTrigger.addEventListener('click', () => {
+      openPicker('source');
+    });
+
+    destTrigger.addEventListener('click', () => {
+      openPicker('dest');
+    });
+
+    flipButton.addEventListener('click', () => {
+      closePicker();
+      direction = direction === 'TRON_TO_EVM' ? 'EVM_TO_TRON' : 'TRON_TO_EVM';
+      onStateChanged();
+    });
+
+    pickerClose.addEventListener('click', () => {
+      closePicker();
+    });
+
+    pickerBack.addEventListener('click', () => {
+      if (!activePicker) return;
+      if (pickerStep !== 'chain') return;
+      pickerStep = 'token';
+      renderPickerOptions();
+      focusFirstPickerOption();
+    });
+
+    pickerOverlay.addEventListener('click', (event) => {
+      if (event.target === pickerOverlay) {
+        closePicker();
+      }
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && activePicker) {
+        event.preventDefault();
+        closePicker();
+      }
+    });
+
+    void (async () => {
+      await fetchCapabilities();
+      renderChipsAndSelectors();
+      updateBridgeHref(amountInput.value);
+      void fetchQuote();
+    })();
+  })();
+</script>
