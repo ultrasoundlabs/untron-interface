@@ -7,13 +7,12 @@ description: Protocol internals, essays, and deep dives.
 
 This section is for people who want to understand **how Untron V3 works**, not just how to call an endpoint.
 
-What you’ll find here:
+Untron V3 is a two-lane protocol:
 
-- protocol architecture & data flow
-- intents / execution model
-- invariants, failure modes, and safety properties
-- token rails (USDT variants, CCTP, etc.) and how they’re normalized
+- **Tron collection lane:** deposits of (typically) TRC-20 USDT into deterministic receiver addresses.
+- **EVM settlement hub:** routing authority over time (**leases**), accounting/recognition, **claims**, and permissionless settlement (**fill**).
 
 ## Next
 
-- Start here: [How V3 Works](/v3-reference/how-it-works)
+- Start here: [Protocol Reference](/v3-reference/protocol)
+- Quick orientation: [How V3 Works](/v3-reference/how-it-works)

@@ -5,40 +5,29 @@ description: A high-level mental model for Untron V3.
 
 # How V3 Works
 
-This page explains the core ideas behind V3 at a high level: the nouns you’ll see in the API, how they relate, and how to reason about system state.
+Untron V3 converts **provable Tron deposits** into **settleable EVM payouts**.
 
-## Mental model
+## The 30-second picture
 
-Think in terms of:
+1. A depositor sends TRC-20 USDT on Tron to a **deterministic receiver address** (derived from a `receiverSalt`).
+2. On the EVM hub, a **lease** defines *who* controls routing for that salt (beneficiary/target chain/token/fees) at a given time.
+3. The hub recognizes value and creates **claims** (always denominated in hub USDT).
+4. Anyone can settle claims permissionlessly via **`fill`** (optionally swapping/bridging) to the lease’s payout config.
 
-- **intent-like actions** (what the user wants)
-- **deterministic settlement** (what the system guarantees)
-- **observability** (what you can prove from data)
+## Recognition paths
 
-## Core entities
+There are two ways deposits/controller activity become claims:
 
-- **Lease:** a long-lived “session” that groups activity and state over time.
-- **Claim:** a unit of work/value that is created, tracked, and eventually settled (or expires).
-- **Controller / executor:** the system components responsible for progressing state and performing execution.
-- **Deposits / fills:** events and balances that connect external payment rails to on-chain or protocol settlement.
+- **Fast path:** prove an individual Tron deposit directly on the hub (`preEntitle`).
+- **Slow path:** relay + process the Tron controller’s SHA-256 event hash-chain (`relayControllerEventChain`, `processControllerEvents`).
 
-The exact shapes of these objects are defined by the API schema; the goal of this section is to help you understand how they fit together.
+## Key nouns
 
-## Lifecycle (conceptual)
-
-At a high level, flows look like:
-
-- **Create:** a lease (and/or claim) is created.
-- **Attribute:** deposits and other inputs are linked to protocol state.
-- **Execute:** controllers/executors progress state and perform the required actions.
-- **Settle:** outcomes are finalized and made observable via the API.
-- **Expire / recover:** timeouts and recovery paths handle incomplete flows.
-
-## Observability
-
-For integrations and analytics, treat the API as the source of truth for the protocol’s current view of state, and prefer querying views/endpoints designed for aggregation (rather than reconstructing state from raw events).
+- **Receiver salt:** stable identifier; receiver contracts can be deployed “late”.
+- **Lease:** time-indexed routing authority + fee parameters.
+- **Claim:** hub-side obligation enqueued for later settlement.
 
 ## Next
 
-- Read the V3 API overview: [V3 API](/v3-api)
-- Start with the curated endpoint guides: [V3 API Endpoints](/v3-api/endpoints)
+- Read the full deep dive: [Protocol Reference](/v3-reference/protocol)
+- Or jump to the API surface: [V3 API](/v3-api)
