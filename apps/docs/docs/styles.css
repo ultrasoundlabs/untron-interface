@@ -35,6 +35,6 @@
 /* Modal layout overrides live in `docs/components/scalar-overrides.css` (loaded after Scalar CSS). */
 
 /* Ensure the Untron logo is visible in dark theme (logo asset is black). */
-:root[data-theme='dark'] :is(img.vocs_Logo, .vocs_Logo img) {
+:is(:root.dark, :root[data-theme='dark']) :is(img.vocs_Logo, .vocs_Logo img) {
   filter: invert(1);
 }
