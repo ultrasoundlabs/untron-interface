@@ -1,0 +1,56 @@
+---
+title: Untron V3 Protocol Reference
+description: Reference documentation for the Untron V3 protocol (Tron collection lane ↔ EVM settlement hub).
+---
+
+Untron V3 is a two-lane protocol that converts **provable Tron activity**—primarily TRC-20 USDT transfers into deterministic receiver addresses, and subsequent controller pull/rebalance operations—into **settleable payouts on an EVM chain** via an on-chain **claims** system.
+
+## What this reference covers
+
+This reference is contract-mechanics-first:
+
+- **Collection lane (Tron):** deterministic receivers, permissionless sweeping by a controller, and a controller-maintained SHA-256 event hash-chain.
+- **Settlement lane (EVM):** time-indexed routing authority (leases), deposit recognition (fast path proofs + slow path controller hash-chain relay), claim creation, and permissionless claim settlement (“fill”), optionally swapping and/or bridging.
+
+## Core objects
+
+- **Receiver salt (`bytes32`)**: Names a receiver. A Tron receiver address is derived from `(controller, salt)` and can be deployed “late”.
+- **Lease**: Time-indexed routing rights + fee parameters for a receiver salt (who can route payouts, where, and how fees apply).
+- **Claim**: An obligation recorded on the EVM hub, always denominated in hub USDT (`amountUsdt`), settled later to the lease’s configured route.
+
+## Main flows
+
+### Deposit → fast recognition → claim → settlement
+
+1. A receiver address is allocated off-chain (by salt) and shared with a depositor.
+2. Depositor transfers Tron USDT to the receiver address.
+3. Anyone proves the Tron transfer on the EVM hub via `preEntitle(...)`, which recognizes volume and enqueues a claim.
+4. Anyone settles claims via `fill(...)` (swap once per batch if needed; bridge if needed; pay beneficiaries).
+
+See: [Fast-path entitlement](/v3-reference/protocol/entitlement-fast-path) and [Settlement](/v3-reference/protocol/settlement-fill).
+
+### Sweep/rebalance → slow reconciliation → claim → settlement
+
+1. Anyone triggers a Tron controller sweep (`pullFromReceivers`) and/or rebalance (`rebalanceUsdt`).
+2. The Tron controller appends those events into its on-chain SHA-256 event chain.
+3. Anyone proves a Tron tx that asserts a specific event chain tip, and relays matching events to the hub (`relayControllerEventChain`).
+4. Anyone processes relayed events (`processControllerEvents`) to reconcile backing, update protocol PnL, and enqueue any resulting claims.
+5. Anyone fills claims via `fill(...)`.
+
+See: [Slow-path controller relay](/v3-reference/protocol/entitlement-slow-path).
+
+## Start here
+
+- [Terminology](/v3-reference/protocol/terminology)
+- [System architecture](/v3-reference/protocol/architecture)
+- [Deterministic receivers](/v3-reference/protocol/deterministic-receivers)
+- [Leases](/v3-reference/protocol/leases)
+- [Claims](/v3-reference/protocol/claims)
+
+## Implementation pointers
+
+The sketch this reference is based on describes the implementation as:
+- Tron lane: `packages/contracts/src/tron/*`
+- EVM hub lane: `packages/contracts/src/evm/hub/*`
+- Proof reader: `packages/contracts/src/evm/StatefulTronTxReader.sol`
+

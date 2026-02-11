@@ -121,6 +121,56 @@ export default defineConfig({
     '/v3-reference': [
       { text: 'Overview', link: '/v3-reference' },
       { text: 'How V3 Works', link: '/v3-reference/how-it-works' },
+      {
+        text: 'Protocol reference',
+        collapsed: true,
+        items: [
+          { text: 'Overview', link: '/v3-reference/protocol' },
+          { text: 'Terminology', link: '/v3-reference/protocol/terminology' },
+          { text: 'System architecture', link: '/v3-reference/protocol/architecture' },
+          {
+            text: 'Core mechanics',
+            collapsed: true,
+            items: [
+              {
+                text: 'Deterministic receivers',
+                link: '/v3-reference/protocol/deterministic-receivers',
+              },
+              { text: 'Leases', link: '/v3-reference/protocol/leases' },
+              { text: 'Claims', link: '/v3-reference/protocol/claims' },
+            ],
+          },
+          {
+            text: 'Entitlement & settlement',
+            collapsed: true,
+            items: [
+              {
+                text: 'Entitlement (fast path)',
+                link: '/v3-reference/protocol/entitlement-fast-path',
+              },
+              {
+                text: 'Entitlement (subjective)',
+                link: '/v3-reference/protocol/entitlement-subjective',
+              },
+              {
+                text: 'Entitlement (slow path)',
+                link: '/v3-reference/protocol/entitlement-slow-path',
+              },
+              { text: 'Settlement (fill)', link: '/v3-reference/protocol/settlement-fill' },
+            ],
+          },
+          {
+            text: 'Liquidity & contracts',
+            collapsed: true,
+            items: [
+              { text: 'Liquidity (LP vault)', link: '/v3-reference/protocol/liquidity-lp-vault' },
+              { text: 'Tron contracts', link: '/v3-reference/protocol/contracts-tron' },
+              { text: 'EVM hub contracts', link: '/v3-reference/protocol/contracts-evm' },
+            ],
+          },
+          { text: 'Admin & trust model', link: '/v3-reference/protocol/admin-trust-model' },
+        ],
+      },
     ],
   },
 })
