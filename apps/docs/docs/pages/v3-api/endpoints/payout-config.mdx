@@ -32,22 +32,22 @@ import { EndpointAside } from '../../../components/EndpointAside'
   curl -sS -X POST 'https://api.untron.finance/v3/payout_config' \
     -H 'content-type: application/json' \
     -d '{
-      "lease_id": "123",
-      "beneficiary": "T…",
-      "target_chain_id": "eip155:42161",
-      "target_token": "usdc",
-      "deadline": "2026-01-29T00:00:00.000Z",
+      "lease_id": 123,
+      "beneficiary": "0xFA17B7b6984Cf40627De67E7545E4f073b7DA76E",
+      "target_chain_id": 42161,
+      "target_token": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+      "deadline": 1801141139,
       "signature": "0x…"
     }'
   ```
 
   ```json [Body]
   {
-    "lease_id": "123",
-    "beneficiary": "T…",
-    "target_chain_id": "eip155:42161",
-    "target_token": "usdc",
-    "deadline": "2026-01-29T00:00:00.000Z",
+    "lease_id": 123,
+    "beneficiary": "0xFA17B7b6984Cf40627De67E7545E4f073b7DA76E",
+    "target_chain_id": 42161,
+    "target_token": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+    "deadline": 1801141139,
     "signature": "0x…"
   }
   ```

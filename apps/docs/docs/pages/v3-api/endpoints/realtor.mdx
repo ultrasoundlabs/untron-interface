@@ -38,22 +38,27 @@ import { EndpointAside } from '../../../components/EndpointAside'
 
   ```json
   {
+    "realtor_address": "0x94cE6f1ff4ab4E71bE5B1a3bF39c6597D3148461",
+    "untron_v3": "0xc6Ba8adBF3579607E23129a2D935de4E5bAEeCad",
     "allowed": true,
-    "realtor_address": "T…",
-    "user": "…",
-    "supported_pairs": [],
-    "default_fee_ppm": 1500,
-    "default_flat_fee": "0",
+    "min_fee_ppm": 0,
+    "min_flat_fee": 0,
+    "max_duration_seconds": 2592000,
+    "lease_rate_max_leases": 10,
+    "lease_rate_window_seconds": 60,
+    "lease_rate_remaining": 10,
+    "default_fee_ppm": 1000,
+    "default_flat_fee": 0,
     "default_duration_seconds": 86400,
     "effective_duration_seconds": 86400,
-    "lease_rate_window_seconds": 60,
-    "lease_rate_max_leases": 10,
-    "lease_rate_remaining": 10,
-    "min_fee_ppm": 0,
-    "min_flat_fee": "0",
-    "max_duration_seconds": 2592000,
-    "arbitrary_lessee_flat_fee": false,
-    "untron_v3": "…"
+    "supported_pairs": [
+      {
+        "target_chain_id": 42161,
+        "target_token": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        "effective_fee_ppm": 1000,
+        "effective_flat_fee": 0
+      }
+    ]
   }
   ```
 

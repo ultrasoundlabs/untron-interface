@@ -35,22 +35,40 @@ import { EndpointAside } from '../../../components/EndpointAside'
   ```json
   {
     "lease_id": "123",
-    "lease_nonce": "0",
-    "lessee": "T…",
-    "realtor": "T…",
-    "receiver_salt": "0x…",
-    "receiver_address_tron": "T…",
-    "receiver_address_evm": "0x…",
-    "start_time": "2026-01-29T00:00:00.000Z",
-    "nukeable_after": "2026-01-29T00:00:00.000Z",
-    "lease_fee_ppm": "1500",
+    "receiver_salt": "0x000000000000000000000000000000000000000000000000000000000000006b",
+    "receiver_address_tron": "TSpHivw5AFWp3jZeEZ8BhJragNMUqmYKo6",
+    "receiver_address_evm": "0xb8Ca5619eCFa0a1cC5A3FBCf6B80e308ae37452f",
+    "realtor": "0x94cE6f1ff4ab4E71bE5B1a3bF39c6597D3148461",
+    "is_owned_by_this_realtor": true,
+    "lessee": "0x0000000000000000000000000000000000000000",
+    "start_time": 1769605144,
+    "nukeable_after": 1801141139,
+    "lease_fee_ppm": 0,
     "flat_fee": "0",
-    "claims_total": "0",
-    "claims_filled": "0",
-    "claims": "0",
-    "pending_usdt_deposits_total": "0",
+    "lease_nonce": "0",
+    "payout_config_current": {
+      "target_chain_id": 42161,
+      "target_token": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+      "beneficiary": "0xFA17B7b6984Cf40627De67E7545E4f073b7DA76E"
+    },
+    "payout_config_history": [
+      {
+        "config": {
+          "target_chain_id": 42161,
+          "target_token": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+          "beneficiary": "0xFA17B7b6984Cf40627De67E7545E4f073b7DA76E"
+        },
+        "valid_from_seq": 465,
+        "valid_to_seq": null
+      }
+    ],
+    "claims": [],
+    "claims_total": 0,
+    "claims_filled": 0,
+    "pending_usdt_deposits": [],
+    "pending_usdt_deposits_total": 0,
     "pending_usdt_deposits_amount": "0",
-    "pending_usdt_deposits": "0"
+    "pending_usdt_deposits_latest_block_timestamp": 0
   }
   ```
 
