@@ -32,23 +32,23 @@ import { EndpointAside } from '../../../components/EndpointAside'
   curl -sS -X POST 'https://api.untron.finance/v3/realtor' \
     -H 'content-type: application/json' \
     -d '{
-      "lessee": "T…",
-      "beneficiary": "T…",
-      "target_chain_id": "eip155:42161",
-      "target_token": "usdc",
+      "lessee": "0x0000000000000000000000000000000000000000",
+      "beneficiary": "0xFA17B7b6984Cf40627De67E7545E4f073b7DA76E",
+      "target_chain_id": 42161,
+      "target_token": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
       "duration_seconds": 86400,
-      "receiver_salt": "0x…"
+      "receiver_salt": "0x0000000000000000000000000000000000000000000000000000000000000000"
     }'
   ```
 
   ```json [Body]
   {
-    "lessee": "T…",
-    "beneficiary": "T…",
-    "target_chain_id": "eip155:42161",
-    "target_token": "usdc",
+    "lessee": "0x0000000000000000000000000000000000000000",
+    "beneficiary": "0xFA17B7b6984Cf40627De67E7545E4f073b7DA76E",
+    "target_chain_id": 42161,
+    "target_token": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
     "duration_seconds": 86400,
-    "receiver_salt": "0x…"
+    "receiver_salt": "0x0000000000000000000000000000000000000000000000000000000000000000"
   }
   ```
 
@@ -58,11 +58,12 @@ import { EndpointAside } from '../../../components/EndpointAside'
 
   ```json
   {
-    "receiver_salt": "0x…",
-    "receiver_address_tron": "T…",
-    "receiver_address_evm": "0x…",
-    "nukeable_after": "2026-01-29T00:00:00.000Z",
-    "userop_hash": "0x…"
+    "lease_id": 123,
+    "receiver_salt": "0x000000000000000000000000000000000000000000000000000000000000006b",
+    "receiver_address_tron": "TSpHivw5AFWp3jZeEZ8BhJragNMUqmYKo6",
+    "receiver_address_evm": "0xb8Ca5619eCFa0a1cC5A3FBCf6B80e308ae37452f",
+    "nukeable_after": 1801141139,
+    "userop_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
   }
   ```
 
